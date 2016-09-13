@@ -1,0 +1,30 @@
+((defun base.class() {
+    [@name ::= "base"]
+    [@sayhi ::= [() => (+ "hello " [~this : @name])]]
+}) ())
+
+[d1.class = clone base.class]
+(var [d1.class : @name] "d1")
+
+[d2.class = clone base.class]
+(var [d2.class : @name] "d2")
+(var [d2.class : @sayhi] [() => {
+    (var name "dummy")
+    (+ "hello override " [~this : @name])
+}])
+
+(var [d2.class : @sayhi2] [() => (+ "hello " [~proto : @name])])
+
+[d3.class = clone d2.class]
+(var [d3.class : @name] "d3")
+(var [d3.class : @sayhi] [() => (+ "hello over-override " [~this : @name])])
+(var [d2.class : @sayhi2] [() => (+ "hello " [~proto : @name])])
+
+(var #results (list))
+(loop (list d1.class d2.class d3.class) [(c) => [#results += ([c : @sayhi] ())]])
+
+(assert (deep-compare-list #results ("hello d1" "hello override d2" "hello over-override d3"))
+    "Simple encapsulation")
+
+(assert (deep-compare-list (list ([d2.class : @sayhi2] ()) ([d3.class : @sayhi2] ()))
+    ("hello base" "hello d2")) "Simple encapsulation 2")

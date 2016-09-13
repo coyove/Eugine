@@ -1,0 +1,40 @@
+; if you tend to use a var without assign a value to it, its value = null
+; if you use a var with a "@" before its name (no space between), like @var-name, its value = "var-name" (string)
+
+(println "Begin tests")
+(println "Working under " ~path "\n")
+
+; (set ~strict)
+
+(var start)
+[start = (time 1)]
+
+(~include "util.eugine")
+
+(println "== Mathematics ==")
+(~include "math.lisp")
+
+(println "\n== Lambda / Recursion ==")
+(~include "lambda.lisp")
+(~include "recursion.lisp")
+
+(println "\n== Others ==")
+(~include "others.eugine")
+
+(~include "interop.eugine")
+(~include "encap.eugine")
+
+(println "\nFinish " assertions.total " tests in " (floor [(time 1) - start])
+ 	"ms, passed: " assertions.passed ", failed: " assertions.failed)
+
+(defun Stack () "this is a stack" {})
+[[Stack : @_list] := (list)]
+[[Stack : @push] := [(elem) => [[~this : @_list] += elem]]]
+[[Stack : @pop] := [() => {
+	(var lst [~this : @_list])
+
+	(if [(len lst) == 0] (exit "empty to pop") (del lst (- (len lst) 1)))
+}]]
+
+[[Stack : @top] := [() => (last [~this : @_list])]]
+[[Stack : @size] := [() => (len [~this : @_list])]]

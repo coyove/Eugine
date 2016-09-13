@@ -1,0 +1,51 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: Eugine
+file_extensions:
+  - lisp
+  - eugine
+scope: source.lisp
+contexts:
+  main:
+    - match: (;).*$\n?
+      scope: comment.line.semicolon.lisp
+      captures:
+        1: punctuation.definition.comment.lisp
+    - match: (\b(?i:(defun))\b)(\s+)((\w|\-|\!|\?)*)
+      scope: meta.function.lisp
+      captures:
+        2: storage.type.function-type.lisp
+        4: entity.name.function.lisp
+    - match: '(#)(\w|[\\+-=<>''"&#])+'
+      scope: constant.character.lisp
+      captures:
+        1: punctuation.definition.constant.lisp
+    - match: (\*)(\S*)(\*)
+      scope: variable.other.global.lisp
+      captures:
+        1: punctuation.definition.variable.lisp
+        3: punctuation.definition.variable.lisp
+    - match: \b(?i:loop|if|cond)\b
+      scope: keyword.control.lisp
+    - match: \b(?i:eq|neq|and|or|not)\b
+      scope: keyword.operator.lisp
+    - match: \b(?i:null|nil|true|false)\b
+      scope: constant.language.lisp
+    - match: (?:\b|\~)(?i:set|var|const|lambda|del|range|head|tail|init|last|sub|len|eval|dict|list|chain|exit|split|num|str|keys|print|println|(?<=\~)include|(?<=\~)path|(?<=\~)source|(?<=\~)atom|(?<=\~)parent|(?<=\~)strict)\b
+      scope: support.function.lisp
+    - match: '\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\.?[0-9]*)|(\.[0-9]+))((e|E)(\+|-)?[0-9]+)?)(L|l|UL|ul|u|U|F|f|ll|LL|ull|ULL)?\b'
+      scope: constant.numeric.lisp
+    - match: '(\@[^\s\n\r\)\(\]\[]+)'
+      scope: string.quoted.double.lisp
+    - match: '"'
+      captures:
+        0: punctuation.definition.string.begin.lisp
+      push:
+        - meta_scope: string.quoted.double.lisp
+        - match: '"'
+          captures:
+            0: punctuation.definition.string.end.lisp
+          pop: true
+        - match: \\.
+          scope: constant.character.escape.lisp

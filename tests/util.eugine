@@ -1,0 +1,108 @@
+(~define (::= ~field ~body) [(: ~this ~field) := ~body])
+(~define (for ~i ~= ~start to ~end do ~body...) (loop (range ~start ~end) [(~i) => { ~body... }]))
+(~define (assert-timing ~ops...) {
+    (var assert.start (time 1))
+    (assert ~ops... " -- takes " [(time 1) - assert.start] "ms")
+})
+
+(defun join-list (l d) (
+	(if [(len l) == 0]
+		""
+		[[(head l) + d] + (join-list (tail l) d)]
+	)
+))
+
+(defun join (l d) (->
+	[ret = ""]
+	(loop (range 0 (len l)) [(i) => (
+		[ret += (+ [l : i] d)]
+	)])
+	(ret)
+))
+
+(var assertions.total 0)
+(var assertions.passed 0)
+(var assertions.failed 0)
+
+(defun assert (result msg...) (->
+	(++ assertions.total)
+	(if result 
+		{(println "  [Passed] " (explode msg)) (++ assertions.passed)}
+		(-> 
+			(var token [~atom : @token])
+			(println "  [------] " (explode msg) " failed, File: " [token : @source] ", Line: " 
+				(+ [token : @line] 1) ":" [token : @lineIndex])
+			(++ assertions.failed)
+		)
+	)
+))
+
+(defun read-from-console ()
+    [[(cls @java.lang.System) . @console ()] . @readLine ()]
+)
+
+(defun deep-compare-list (list-1 list-2) 
+	"this function tests if two lists are equal"
+	(->
+	(if [[(type list-1) != "List"] or [(type list-2) != "List"]] 
+		[list-1 == list-2] 
+		(->
+			[llen = (len list-1)]
+			(if [llen != (len list-2)] (#f) (
+				(if [llen == 0] (#t) (->
+					[ret = #t]
+					(loop (range 0 llen) [(i) => 
+						[ret = (deep-compare-list [list-1 : i] [list-2 : i])]
+					])
+					ret ; return ret
+				)) ; end if
+			)) ; end if
+		)
+	) ; end if
+))
+
+[map := [(f lst) => (->
+	(loop (range 0 (len lst)) [(i) => (
+		[[lst : i] = (f [lst : i])]
+	)])
+	lst
+)]]
+
+[filter = [(op lst) => (->
+	[ret = (list)]
+	(loop lst [(e) => (if (op e) [ret += e])])
+	ret ; return
+)]]
+
+[random-list = [(n) => (->
+	[nums = (range 0 n)]
+	[ret = (list)]
+
+	(loop [(len nums) > 0] [() => (->
+		[idx = (floor [(random 0) * (len nums)])]
+		[ret += [nums : idx]]
+		(del nums idx)
+	)])
+
+	ret
+)]]
+
+;; never use this, it's experimental and fxxking slow, its existence only prove that ~parent is working
+[pop := [(lst) => (if [(len lst) == 0] null
+	(->
+		[t := ""]
+		(loop (keys ~parent) [(k) => (if [[~parent : k] == lst] (-> [t = k] #f))])
+		(println t)
+
+		[ret = (head lst)]
+		[[~parent : t] = (tail lst)] ;; (del lst 0)
+		;(.net-static-method (unsafe lst) "RemoveAt" ("System.Int32" 0))
+		ret
+	)
+)]]
+
+(defun timing (fn) {
+    (var start (time 1))
+    (fn ())
+    (println " -- takes " [(time 1) - start] "ms")
+})
