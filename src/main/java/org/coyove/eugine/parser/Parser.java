@@ -33,7 +33,7 @@ public class Parser {
         );
 
         if (text.length() < 2)
-            throw new VMException("Invalid code");
+            throw new VMException(1000, "Invalid code");
 
         basePath = path;
 
@@ -98,7 +98,7 @@ public class Parser {
         if (token.type == Token.TokenType.RPAREN ||
                 token.type == Token.TokenType.RBRACK ||
                 token.type == Token.TokenType.RBRACE)
-            throw new VMException("unexpected character", token);
+            throw new VMException(1000, "unexpected character", token);
 
         if (token.type == Token.TokenType.LPAREN ||
                 token.type == Token.TokenType.LBRACK ||
@@ -122,7 +122,7 @@ public class Parser {
                 comp.atoms.add(parseNext(tokens));
 
             if (tokens.size() == 0 || tokens.head().type != ending)
-                throw new VMException("unexpected character", token);
+                throw new VMException(1000, "unexpected character", token);
 
             tokens.pop();
 
@@ -155,11 +155,12 @@ public class Parser {
                         comp.atoms = new List<Base>();
                         comp.atoms.add(inc);
                     } catch (Exception ex) {
-                        throw new VMException("error when reading '" + codePath + "', " + ex,
+                        throw new VMException(1100, "failed to include '" + codePath + "', " + ex.getMessage(),
                                 (Atom) comp.atoms.get(0));
                     }
-                } else
-                    throw new VMException("path must be a static string", (Atom) comp.atoms.head());
+                } else {
+                    throw new VMException(1101, "path must be a static string", (Atom) comp.atoms.head());
+                }
             }
 
             if (comp.atoms.size() == 3 && comp.atoms.head() instanceof Atom &&

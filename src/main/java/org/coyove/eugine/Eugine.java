@@ -44,7 +44,7 @@ public class Eugine {
     public SExpression loadString(String code) throws Exception {
         Parser p = new Parser();
         environment.put("~source", new SString("<vm>"));
-        return SExpression.cast(p.parse(code, "<vm>", "<vm>"));
+        return SExpression.cast(p.parse(code, "", "<vm>"));
     }
 
     public SExpression loadBinary(String filePath) throws Exception {
