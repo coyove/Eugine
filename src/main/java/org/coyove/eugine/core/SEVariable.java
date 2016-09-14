@@ -25,7 +25,7 @@ public class SEVariable extends SExpression {
                 return tmp;
             } else {
                 if (env.strict)
-                    throw  new VMException("strict mode", headAtom);
+                    throw new VMException("strict mode", headAtom);
 
                 SValue tmp = new SNull(true);
                 env.put(varName, tmp);
