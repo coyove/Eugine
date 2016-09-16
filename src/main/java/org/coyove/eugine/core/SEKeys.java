@@ -15,8 +15,8 @@ public class SEKeys extends SExpression {
 
     public SEKeys(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument");
+        if (c.atoms.size() < 1)
+            throw new VMException(2055, "needs a dict");
 
         dict = SExpression.cast(c.atoms.pop());
     }
@@ -33,7 +33,7 @@ public class SEKeys extends SExpression {
             return new SList(ret);
         }
         else{
-            throw new VMException("you can only get keys of a dict", headAtom);
+            throw new VMException(2054, "mismatch types", headAtom);
         }
     }
 }

@@ -15,7 +15,7 @@ public class SEFor extends SExpression {
     public SEFor(Atom ha, Compound c) throws VMException {
         super(ha, c);
         if (c.atoms.size() < 2)
-            throw new VMException("it takes 2 arguments", ha);
+            throw new VMException(2028, "needs the loop header and the body", ha);
 
         list = SExpression.cast(c.atoms.pop());
         body = SExpression.cast(c.atoms.pop());
@@ -36,7 +36,7 @@ public class SEFor extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SClosure body = Utils.cast(this.body.evaluate(env), SClosure.class,
-                new VMException("the loop body must be a lambda or a named function", headAtom));
+                new VMException(2026, "the loop body must be a lambda or a function", headAtom));
 
         SValue list_ = this.list.evaluate(env);
         List<SValue> values = new List<SValue>();
@@ -54,8 +54,9 @@ public class SEFor extends SExpression {
         } else if (list_ instanceof SBool) {
             whileLoop = true;
             condAlwaysTrue = false;
-        } else
-            throw new VMException("the first argument must be a list or a bool", headAtom);
+        } else {
+            throw new VMException(2027, "the loop header must return a list or a bool", headAtom);
+        }
 
         if (whileLoop) {
             while (condAlwaysTrue || this.list.evaluate(env).<Boolean>get()) {

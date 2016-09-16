@@ -20,7 +20,7 @@ public class SEPrint extends SExpression {
         super(ha, c);
         delim = d;
         if (c.atoms.size() == 0)
-            throw new VMException("it takes at least 1 argument", ha);
+            throw new VMException(2085, "needs at least 1 argument to print", ha);
 
         arguments = SExpression.castPlain(c);
     }

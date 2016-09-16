@@ -15,30 +15,25 @@ public class SEDict extends SExpression {
 
     public SEDict(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        values = new List<SExpression>();
-
-        for (Base a : c.atoms) {
-            if (a instanceof Atom || ((Compound) a).atoms.size() != 2)
-                throw new VMException("each element of the dict must be a list with 2 elements", ha);
-
-            values.add(SExpression.cast(a));
-        }
+        values = SExpression.castPlain(c);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         HashMap<String, SValue> ret = new HashMap<String, SValue>();
 
-        for (SExpression v : values)
-        {
-            List<SValue> c = v.evaluate(env).get();
+        for (SValue e : SExpression.eval(values, env)) {
+            SList l = Utils.cast(e, SList.class);
+            if (l == null)
+                throw new VMException(2016,
+                        "each element of the dict must be a list with 2 elements (key and value)", headAtom);
 
+            List<SValue> c = l.get();
             SString key = Utils.cast(c.head(), SString.class,
-                    new VMException("key must be string", headAtom));
+                    new VMException(2015, "key must be string", headAtom));
 
             ret.put(key.<String>get(), c.get(1));
         }
-
         return new SDict(ret);
     }
 }

@@ -16,11 +16,11 @@ public class SELogic extends SExpression {
 
     public SELogic(Atom ha, Compound c, LOGIC a) throws VMException {
         super(ha, c);
-        if (c.atoms.size() < 2 && a != LOGIC.NOT)
-            throw new VMException("it takes at least 2 arguments", ha);
+        if (a != LOGIC.NOT && c.atoms.size() < 2)
+            throw new VMException(2062, "needs at least 2 booleans to perform", ha);
 
         if (a == LOGIC.NOT && c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument", ha);
+            throw new VMException(2063, "needs a boolean", ha);
 
         log = a;
         values = SExpression.castPlain(c);
@@ -29,7 +29,7 @@ public class SELogic extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         List<SValue> results = SExpression.eval(values, env);
-        VMException ex = new VMException("non-boolean found in comparison", headAtom);
+        VMException ex = new VMException(2061, "non-boolean found in the comparison", headAtom);
 
         SBool lead = Utils.cast(results.head(), SBool.class, ex);
         boolean ret = lead.get();

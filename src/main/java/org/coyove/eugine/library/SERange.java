@@ -17,6 +17,12 @@ public class SERange extends SExpression {
         super(ha, c);
         List<SExpression> args = SExpression.castPlain(c);
 
+        if (args.size() < 1)
+            throw new VMException(2087, "needs the start", ha);
+
+        if (args.size() < 2)
+            throw new VMException(2087, "needs the end", ha);
+
         if (args.size() == 2) {
             start = args.get(0);
             end = args.get(1);
@@ -25,8 +31,6 @@ public class SERange extends SExpression {
             start = args.get(0);
             interval = args.get(1);
             end = args.get(2);
-        } else {
-            throw new VMException("it takes 2 or 3 arguments", ha);
         }
     }
 
@@ -44,7 +48,7 @@ public class SERange extends SExpression {
             for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get())
                 ret.add(new SDouble(i));
         } else {
-            throw new VMException("it only accept integers or doubles as arguments", headAtom);
+            throw new VMException(2086, "needs integers or doubles", headAtom);
         }
 
         return new SList(ret);

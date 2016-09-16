@@ -16,8 +16,8 @@ public class SEEval extends SExpression {
 
     public SEEval(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        if (c.atoms.size() != 1 && c.atoms.size() != 2)
-            throw new VMException("it takes 1 or 2 arguments");
+        if (c.atoms.size() < 1)
+            throw new VMException(2022, "needs the expression to eval", headAtom);
 
         text = SExpression.cast(c.atoms.pop());
         if (c.atoms.size() > 0)
@@ -28,11 +28,11 @@ public class SEEval extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
 
         SString text = Utils.cast(this.text.evaluate(env), SString.class,
-                new VMException("must eval a string", headAtom));
+                new VMException(2020, "must eval a string", headAtom));
 
         if (this.env != null) {
             SDict e = Utils.cast(this.env.evaluate(env), SDict.class,
-                    new VMException("the second argument must be a dict if provided", headAtom));
+                    new VMException(2021, "the environment must be a dict", headAtom));
 
             env = new ExecEnvironment();
             HashMap<String, SValue> custom = e.get();

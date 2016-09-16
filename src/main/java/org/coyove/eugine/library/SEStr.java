@@ -15,7 +15,7 @@ public class SEStr extends SExpression {
     {
         super(ha, c);
         if (c.atoms.size() == 0)
-            throw new VMException("it takes 1 argument");
+            throw new VMException(2091, "needs a value");
 
         argument = SExpression.cast(c.atoms.pop());
     }

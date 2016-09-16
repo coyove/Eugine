@@ -13,8 +13,8 @@ public class SEExit extends SExpression {
 
     public SEExit(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument");
+        if (c.atoms.size() < 1)
+            throw new VMException(2024, "needs 1 argument: the message body", headAtom);
 
         argument = SExpression.cast(c.atoms.pop());
     }
@@ -22,7 +22,7 @@ public class SEExit extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SString msg = Utils.cast(argument.evaluate(env), SString.class,
-                new VMException("message must be a string", headAtom));
+                new VMException(2023, "message must be a string", headAtom));
 
         throw new VMException(msg.<String>get(), headAtom);
     }

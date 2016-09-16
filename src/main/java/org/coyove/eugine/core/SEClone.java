@@ -18,7 +18,7 @@ public class SEClone extends SExpression {
     public SEClone(Atom ha, Compound c) throws VMException {
         super(ha, c);
         if (c.atoms.size() < 1)
-            throw new VMException("it takes 1 at least argument", ha);
+            throw new VMException(2002, "missing object to clone", ha);
 
         varName = SExpression.cast(c.atoms.pop());
         arguments = SExpression.castPlain(c);
@@ -39,7 +39,7 @@ public class SEClone extends SExpression {
                 List<SValue> arguments = SExpression.eval(this.arguments, env);
 
                 if (!SECall.checkArgumentsCount(init.arguments, arguments))
-                    throw new VMException("not enough arguments to init", headAtom);
+                    throw new VMException(2001, "not enough arguments to init", headAtom);
 
                 ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
 

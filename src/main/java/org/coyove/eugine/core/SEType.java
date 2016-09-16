@@ -14,7 +14,7 @@ public class SEType extends SExpression {
     public SEType(Atom ha, Compound c) throws VMException {
         super(ha, c);
         if (c.atoms.size() == 0)
-            throw new VMException("it takes 1 argument", ha);
+            throw new VMException(2071, "needs a value", ha);
 
         name = SExpression.cast(c.atoms.pop());
     }

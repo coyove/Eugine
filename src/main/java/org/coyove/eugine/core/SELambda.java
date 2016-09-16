@@ -19,11 +19,11 @@ public class SELambda extends SExpression {
             Base a = c.atoms.get(i);
 
             if (a instanceof Compound || ((Atom) a).token.type != Token.TokenType.ATOMIC)
-                throw new VMException("argument name must be an atom", pos);
+                throw new VMException(2056, "each argument name must be an atom", pos);
 
             String name = ((Atom) a).token.value.toString();
             if (i != c.atoms.size() - 1 && name.length() > 3 && name.substring(name.length() - 3).equals("..."))
-                throw new VMException("argument list must be at the end of the declaration", pos);
+                throw new VMException(2057, "vararg must be at the end of the declaration", pos);
 
             ret.add(name);
         }
@@ -35,10 +35,10 @@ public class SELambda extends SExpression {
         super(ha, c);
 
         if (c.atoms.size() < 2)
-            throw new VMException("missing lambda body", ha);
+            throw new VMException(2058, "missing lambda body", ha);
 
         if (c.atoms.head() instanceof Atom)
-            throw new VMException("the first argument must be the declaration", ha);
+            throw new VMException(2059, "invalid lambda declaration", ha);
 
         arguments = SELambda.CompoundToArguments((Compound)c.atoms.pop(), ha);
         body = SExpression.cast(c.atoms.pop());

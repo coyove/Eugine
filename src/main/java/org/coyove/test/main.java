@@ -30,13 +30,19 @@ public class main {
 
                     multiLine += "\n" + System.console().readLine();
                     line = multiLine;
+
+                    if (line.endsWith("~c")) {
+                        multi = false;
+                        multiLine = "";
+                        continue;
+                    }
                 } else {
                     indicator = (++linec).toString() + " > ";
                     System.out.print(indicator);
                     line = System.console().readLine();
                 }
 
-                if (line.equals("~quit"))
+                if (line.equals("~q"))
                     return;
 
                 try {

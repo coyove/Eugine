@@ -16,7 +16,7 @@ public class SEAdd extends SExpression {
     public SEAdd(Atom ha, Compound c) throws VMException {
         super(ha, c);
         if (c.atoms.size() < 1)
-            throw new VMException("it takes at least 1 argument", ha);
+            throw new VMException(2000, "needs at least 1 argument to add", ha);
 
         values = SExpression.castPlain(c);
     }

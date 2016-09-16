@@ -15,7 +15,7 @@ public class SENum extends SExpression {
     {
         super(ha, c);
         if (c.atoms.size() == 0)
-            throw new VMException("it takes 1 argument");
+            throw new VMException(2084, "needs an integer, a double or a string");
 
         argument = SExpression.cast(c.atoms.pop());
     }
@@ -30,7 +30,7 @@ public class SENum extends SExpression {
                     return new SInteger(Long.parseLong(str));
                 }
             } catch (Exception e) {
-                throw new VMException("invalid content to convert", headAtom);
+                throw new VMException(2083, "invalid content to convert", headAtom);
             }
         } else if (arg instanceof SBool) {
             return new SInteger(arg.<Boolean>get() ? 1 : 0);
@@ -47,7 +47,7 @@ public class SENum extends SExpression {
         } else if (arg instanceof SDouble) {
             return new SInteger(arg.<Double>get().longValue());
         } else {
-            throw new VMException("invalid content to convert", headAtom);
+            throw new VMException(2083, "invalid content to convert", headAtom);
         }
     }
 

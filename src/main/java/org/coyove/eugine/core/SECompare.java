@@ -17,7 +17,7 @@ public class SECompare extends SExpression {
     public SECompare(Atom ha, Compound c, String a) throws VMException {
         super(ha, c);
         if (c.atoms.size() < 2)
-            throw new VMException("it takes at least 2 arguments", ha);
+            throw new VMException(2003, "needs at least 2 arguments to compare", ha);
 
         action = a;
         values = SExpression.castPlain(c);

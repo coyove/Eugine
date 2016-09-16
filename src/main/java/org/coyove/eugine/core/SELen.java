@@ -13,8 +13,8 @@ public class SELen extends SExpression {
 
     public SELen(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument");
+        if (c.atoms.size() < 1)
+            throw new VMException(2060, "needs a list");
 
         argument = SExpression.cast(c.atoms.pop());
     }
