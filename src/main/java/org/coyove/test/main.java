@@ -11,53 +11,62 @@ import org.coyove.eugine.util.VMException;
 
 public class main {
     public static void main(String[] args) {
-        Integer linec = 0;
-        Eugine e = new Eugine();
-        boolean multi = false;
-        String multiLine = "";
-        String indicator = "";
+        if (args.length == 0)
+            return;
 
-        while (true) {
-            Parser p = new Parser();
-            String line;
+        if (args[0].equals("--repl")) {
+            Integer linec = 0;
+            Eugine e = new Eugine();
+            boolean multi = false;
+            String multiLine = "";
+            String indicator = "";
 
-            if (multi) {
-                System.out.printf("%" + (indicator.length() - 2) + "s| ", " ");
+            while (true) {
+                Parser p = new Parser();
+                String line;
 
-                multiLine += "\n" + System.console().readLine();
-                line = multiLine;
-            } else {
-                indicator = (++linec).toString() + " > ";
-                System.out.print(indicator);
-                line = System.console().readLine();
-            }
+                if (multi) {
+                    System.out.printf("%" + (indicator.length() - 2) + "s| ", " ");
 
-            try {
-                Compound c = p.parse(line, "", "<vm>");
-                SValue ret = SExpression.cast(c).evaluate(e.environment);
-                String[] rets = ret.toString().split("\\.");
-
-                System.out.printf("%" + (indicator.length() - 2) + "s= %s\n", " ",
-                        rets[rets.length - 1].substring(1));
-
-                multi = false;
-                multiLine = "";
-            } catch (VMException ex) {
-                if (ex.errorCode == 1000) {
-                    multi = true;
-                    multiLine = line;
+                    multiLine += "\n" + System.console().readLine();
+                    line = multiLine;
                 } else {
-                    System.out.println("ERROR: " + ex.getMessage());
+                    indicator = (++linec).toString() + " > ";
+                    System.out.print(indicator);
+                    line = System.console().readLine();
                 }
-            }
 
+                if (line.equals("~quit"))
+                    return;
+
+                try {
+                    Compound c = p.parse(line, "", "<vm>");
+
+                    System.out.printf("res%d: %s\n", linec, SExpression.cast(c).evaluate(e.environment));
+
+                    multi = false;
+                    multiLine = "";
+                } catch (VMException ex) {
+                    if (ex.errorCode == 1000) {
+                        multi = true;
+                        multiLine = line;
+                    } else {
+                        System.out.println("ERROR: " + ex.getMessage());
+                    }
+                }
+
+            }
         }
 
-//
-//        try {
-//            e.loadFile(args[0]).execute(e.environment);
-//        } catch (Exception ex) {
-//            System.out.println("ERROR: " + ex.getMessage());
-//        }
+        Eugine e = new Eugine();
+        try {
+            System.out.printf("%s", e.loadFile(args[0]).execute(e.environment));
+        } catch (Exception ex) {
+            if (ex instanceof VMException) {
+                System.out.println("VM ERROR: " + ex.getMessage());
+            } else {
+                System.out.println("JVM ERROR: " + ex);
+            }
+        }
     }
 }

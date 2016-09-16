@@ -24,17 +24,9 @@
 (~include "interop.eugine")
 (~include "encap.eugine")
 
+
+(defun Point(){})
+
+
 (println "\nFinish " assertions.total " tests in " (floor [(time 1) - start])
  	"ms, passed: " assertions.passed ", failed: " assertions.failed)
-
-(defun Stack () "this is a stack" {})
-[[Stack : @_list] := (list)]
-[[Stack : @push] := [(elem) => [[~this : @_list] += elem]]]
-[[Stack : @pop] := [() => {
-	(var lst [~this : @_list])
-
-	(if [(len lst) == 0] (exit "empty to pop") (del lst (- (len lst) 1)))
-}]]
-
-[[Stack : @top] := [() => (last [~this : @_list])]]
-[[Stack : @size] := [() => (len [~this : @_list])]]

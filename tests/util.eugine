@@ -101,8 +101,15 @@
 	)
 )]]
 
-(defun timing (fn) {
-    (var start (time 1))
-    (fn ())
-    (println " -- takes " [(time 1) - start] "ms")
-})
+
+; (defun Stack () "this is a stack" {})
+; [[Stack : @_list] := (list)]
+; [[Stack : @push] := [(elem) => [[~this : @_list] += elem]]]
+; [[Stack : @pop] := [() => {
+; 	(var lst [~this : @_list])
+
+; 	(if [(len lst) == 0] (exit "empty to pop") (del lst (- (len lst) 1)))
+; }]]
+
+; [[Stack : @top] := [() => (last [~this : @_list])]]
+; [[Stack : @size] := [() => (len [~this : @_list])]]

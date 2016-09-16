@@ -25,9 +25,33 @@ public class SECall extends SExpression {
         arguments = args;
     }
 
+    public static boolean checkArgumentsCount(List<String> argNames, List<SValue> arguments) {
+        int s = arguments.size();
+        return !(
+                argNames.size() > s && !(argNames.size() == s + 1 && argNames.get(s).endsWith("..."))
+        );
+    }
+
+    public static ExecEnvironment prepareExecEnvironment(List<String> argNames, List<SValue> arguments) {
+        ExecEnvironment newEnv = new ExecEnvironment();
+
+        for (int i = 0; i < argNames.size(); i++) {
+            String argName = argNames.get(i);
+
+            if (argName.length() > 3 && argName.endsWith("...")) {
+                argName = argName.substring(0, argName.length() - 3);
+                newEnv.put(argName, new SList(arguments.skip(i)));
+                break;
+            } else {
+                newEnv.put(argName, arguments.get(i));
+            }
+        }
+
+        return newEnv;
+    }
+
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        ExecEnvironment newEnv = new ExecEnvironment();
         SValue closure_;
         SClosure closure;
 
@@ -56,9 +80,7 @@ public class SECall extends SExpression {
             return new SList(ret);
         }
 
-        if (closure.arguments.size() > arguments.size() &&
-            !(closure.arguments.size() == arguments.size() + 1 &&
-                    closure.arguments.get(arguments.size()).endsWith("..."))) {
+        if (!checkArgumentsCount(closure.arguments, arguments)) {
 
             List<String> argNames = closure.arguments.skip(arguments.size());
             List<SExpression> newArgs = new List<SExpression>();
@@ -74,20 +96,7 @@ public class SECall extends SExpression {
             return new SClosure(env, argNames, newBody);
         }
 
-        // prepare the executing environment
-        for (int i = 0; i < closure.arguments.size(); i++) {
-            String argName = closure.arguments.get(i);
-
-            if (argName.length() > 3 && argName.endsWith("...")) {
-                argName = argName.substring(0, argName.length() - 3);
-                newEnv.put(argName, new SList(arguments.skip(i)));
-                break;
-            } else {
-                newEnv.put(argName, arguments.get(i));
-
-            }
-        }
-
+        ExecEnvironment newEnv = prepareExecEnvironment(closure.arguments, arguments);
         newEnv.put("~parent", new SDict(closure.innerEnv));
         newEnv.put("~atom", new SObject(headAtom));
 

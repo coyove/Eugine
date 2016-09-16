@@ -33,6 +33,12 @@ public abstract class SValue extends SExpression {
         return this;
     }
 
+    @Override
+    public String toString() {
+        String valType = this.getClass().getSimpleName().substring(1);
+        return valType + " = " + (underlying == null ? "null" : underlying.toString());
+    }
+
     // It clones the SValue, but not includes the object underlaying
     public abstract SValue clone();
 
