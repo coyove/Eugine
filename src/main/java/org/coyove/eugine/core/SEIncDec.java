@@ -9,7 +9,7 @@ import org.coyove.eugine.util.*;
 public class SEIncDec extends SESet {
     private static Compound wrap(Atom ha, final Compound c, boolean inc) throws VMException {
         if (c.atoms.size() < 1)
-            throw new VMException(2040, "needs a number to perform", ha);
+            throw new VMException(2000, "not enough arguments", ha);
 
         Compound ret = new Compound();
         Compound op = new Compound();

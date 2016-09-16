@@ -18,9 +18,7 @@ public class SEElemArith extends SExpression {
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
 
     public SEElemArith(Atom ha, Compound c, ACTION a) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException(2019, "needs at least 2 numbers to perform", ha);
+        super(ha, c, 2);
 
         action = a;
         values = SExpression.castPlain(c);
@@ -51,13 +49,13 @@ public class SEElemArith extends SExpression {
                     break;
                 case DIVIDE:
                     if (next.abs().doubleValue() < 0.000001)
-                        throw new VMException(2017, "divided by zero", headAtom);
+                        throw new VMException(2012, "divided by zero", headAtom);
 
                     ret = ret.divide(next, MathContext.DECIMAL64);
                     break;
                 case MODULAR:
                     if (next.abs().doubleValue() < 0.000001)
-                        throw new VMException(2018, "moded by zero", headAtom);
+                        throw new VMException(2013, "moded by zero", headAtom);
 
                     Long rem = ret.divide(next, MathContext.DECIMAL64).longValue();
                     ret = ret.subtract(next.multiply(BigDecimal.valueOf(rem)));

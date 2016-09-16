@@ -21,9 +21,7 @@ public class SESet extends SExpression {
     public enum DECLARE { DECLARE, SET }
 
     public SESet(Atom ha, Compound c, DECLARE d, ACTION a) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException(2070, "needs the variable name to set", ha);
+        super(ha, c, 1);
 
         Base n = c.atoms.pop();
         if (n instanceof Atom && ((Atom) n).token.type == Token.TokenType.ATOMIC) {
@@ -73,10 +71,10 @@ public class SESet extends SExpression {
 
             if (declare == DECLARE.SET) {
                 if (!env.containsKey(sn) && env.strict)
-                    throw new VMException(2065, "strict mode", headAtom);
+                    throw new VMException(2042, "strict mode", headAtom);
 
                 if (env.containsKey(sn) && env.get(sn).immutable)
-                    throw new VMException(2066, "variable '" + sn + "' is immutable", headAtom);
+                    throw new VMException(2043, "variable '" + sn + "' is immutable", headAtom);
 
                 env.put(sn, ret);
             } else if (declare == DECLARE.DECLARE) {
@@ -85,7 +83,7 @@ public class SESet extends SExpression {
             }
         } else {
             if (n.refer != null && n.refer instanceof SValue && ((SValue) n.refer).immutable)
-                throw new VMException(2067, "referred variable is immutable", headAtom);
+                throw new VMException(2044, "referred variable is immutable", headAtom);
 
             if (n.refer instanceof SDict) {
                 ((SDict) n.refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
@@ -103,10 +101,10 @@ public class SESet extends SExpression {
                             ((SClosure) n.refer).extra.put(n.refKey, ret);
                         }
                     } else {
-                        throw new VMException(2068, "failed to set field", headAtom);
+                        throw new VMException(2045, "failed to set field", headAtom);
                     }
                 } catch (Exception e) {
-                    throw new VMException(2069, e.getMessage(), headAtom);
+                    throw new VMException(2046, e.getMessage(), headAtom);
                 }
             }
         }

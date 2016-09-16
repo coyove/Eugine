@@ -24,9 +24,5 @@
 (~include "interop.eugine")
 (~include "encap.eugine")
 
-
-(defun Point(){})
-
-
 (println "\nFinish " assertions.total " tests in " (floor [(time 1) - start])
  	"ms, passed: " assertions.passed ", failed: " assertions.failed)

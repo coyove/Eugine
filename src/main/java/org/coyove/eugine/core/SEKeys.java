@@ -14,10 +14,7 @@ public class SEKeys extends SExpression {
     private SExpression dict;
 
     public SEKeys(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException(2055, "needs a dict");
-
+        super(ha, c, 1);
         dict = SExpression.cast(c.atoms.pop());
     }
 
@@ -33,7 +30,7 @@ public class SEKeys extends SExpression {
             return new SList(ret);
         }
         else{
-            throw new VMException(2054, "mismatch types", headAtom);
+            throw new VMException(2037, "mismatch types", headAtom);
         }
     }
 }

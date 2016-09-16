@@ -12,9 +12,7 @@ public class SEType extends SExpression {
     private SExpression name;
 
     public SEType(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException(2071, "needs a value", ha);
+        super(ha, c, 1);
 
         name = SExpression.cast(c.atoms.pop());
     }

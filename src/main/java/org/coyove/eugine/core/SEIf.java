@@ -14,12 +14,7 @@ public class SEIf extends SExpression {
     private SExpression falseBranch;
 
     public SEIf(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException(2038, "missing the condition", ha);
-
-        if (c.atoms.size() == 1)
-            throw new VMException(2039, "missing true branch", ha);
+        super(ha, c, 2);
 
         condition = SExpression.cast(c.atoms.pop());
         trueBranch = SExpression.cast(c.atoms.pop());
@@ -29,7 +24,7 @@ public class SEIf extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SBool res = Utils.cast(condition.evaluate(env), SBool.class,
-                new VMException(2037, "condition must return a bool", headAtom));
+                new VMException(2026, "invalid if condition", headAtom));
 
         if (res.get()) {
             return trueBranch.evaluate(env);

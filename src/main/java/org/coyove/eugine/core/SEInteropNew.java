@@ -17,12 +17,7 @@ public class SEInteropNew extends SExpression {
     private List<SExpression> arguments;
 
     public SEInteropNew(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException(2053, "needs the subject to create", ha);
-
-        if (c.atoms.size() < 2)
-            throw new VMException(2053, "needs the definition of the constructor", ha);
+        super(ha, c, 2);
 
         subject = SExpression.cast(c.atoms.pop());
         definition = SExpression.cast(c.atoms.pop());
@@ -34,17 +29,17 @@ public class SEInteropNew extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue sub = subject.evaluate(env);
         if (sub instanceof SNull)
-            throw new VMException(2049, "null object found", headAtom);
+            throw new VMException(2033, "null object found", headAtom);
 
         List<SValue> args = SExpression.eval(arguments, env);
         Object[] ret;
         SList definition = Utils.cast(this.definition.evaluate(env), SList.class,
-                new VMException(2050, "needs constructor's definition", headAtom));
+                new VMException(2034, "needs constructor's definition", headAtom));
 
         try {
             ret = InteropHelper.formatDefinition(definition, args);
         } catch (VMException ex) {
-            throw new VMException(ex.getMessage(), headAtom);
+            throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
 
         List<Class> classes = (List<Class>)ret[0];
@@ -59,9 +54,9 @@ public class SEInteropNew extends SExpression {
             return InteropHelper.castJavaType(ctor.newInstance(passArgs.toArray()));
 
         } catch (InvocationTargetException ie) {
-            throw new VMException(2051, "error caused by the constructor: " + ie.getCause(), headAtom);
+            throw new VMException(2035, "error caused by the constructor: " + ie.getCause(), headAtom);
         } catch (Exception e) {
-            throw new VMException(2052, "invoking '" + cls.getSimpleName() + "' failed, " +
+            throw new VMException(2036, "invoking '" + cls.getSimpleName() + "' failed, " +
                     e.getMessage(), headAtom);
         }
     }

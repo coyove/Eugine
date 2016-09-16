@@ -16,10 +16,7 @@ public class SEListOp extends SExpression {
 
     public SEListOp(Atom ha, Compound c, OPERATION o) throws VMException
     {
-        super(ha, c);
-
-        if (c.atoms.size() == 0)
-            throw new VMException(2080, "needs a list to perform", ha);
+        super(ha, c, 1);
 
         list = SExpression.cast(c.atoms.pop());
         op = o;
@@ -29,7 +26,7 @@ public class SEListOp extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException
     {
         SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
-                new VMException(2078, "needs a list", headAtom));
+                new VMException(3005, "invalid subject", headAtom));
 
         List<SValue> list = listObj.get();
         switch (op) {
@@ -42,7 +39,7 @@ public class SEListOp extends SExpression {
             case LAST:
                 return list.size() > 0 ? list.get(list.size() - 1) : new SNull();
             default:
-                throw new VMException(2079, "unknown list operation", headAtom);
+                throw new VMException(3006, "unknown list operation", headAtom);
         }
     }
 }

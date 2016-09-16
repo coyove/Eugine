@@ -12,26 +12,33 @@ import java.math.BigDecimal;
  */
 public class SEAdd extends SExpression {
     private List<SExpression> values;
+    private boolean self = false;
 
-    public SEAdd(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException(2000, "needs at least 1 argument to add", ha);
-
+    public SEAdd(Atom ha, Compound c, boolean s) throws VMException {
+        super(ha, c, 1);
         values = SExpression.castPlain(c);
+        self = s;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws VMException {
         List<SValue> results = SExpression.eval(values, env);
         SValue lead = results.head();
 
         if (lead instanceof SString) {
             String ret = lead.get();
-            for (int i = 1; i < results.size(); i++)
-                ret += results.get(i).get().toString();
 
-            return new SString(ret);
+            if (self) {
+                StringBuilder sb = new StringBuilder(ret);
+                for (int i = 1; i < results.size(); i++)
+                    sb.append(results.get(i).get().toString());
+                return new SString(sb.toString());
+            } else {
+                for (int i = 1; i < results.size(); i++)
+                    ret += results.get(i).get().toString();
+                return new SString(ret);
+            }
         }
 
         if (lead instanceof SDouble || lead instanceof SInteger) {
@@ -52,7 +59,15 @@ public class SEAdd extends SExpression {
         }
 
         if (lead instanceof SList) {
-            List<SValue> list = (List<SValue>)lead.<List<SValue>>get().clone();
+            List<SValue> list;
+            if (self) {
+                list = lead.get();
+                if (lead.immutable)
+                    throw new VMException(2101, "list is immutable", headAtom);
+            } else {
+                list = (List<SValue>) lead.<List<SValue>>get().clone();
+            }
+
             list.addAll(results.skip(1));
 
             return new SList(list);

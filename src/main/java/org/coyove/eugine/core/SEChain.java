@@ -9,7 +9,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class SEChain extends SExpression {
-    protected List<SExpression> expressions;
+    public List<SExpression> expressions;
 
     public SEChain(Atom ha, Compound c) throws VMException {
         super(ha, c);

@@ -8,11 +8,8 @@ import org.coyove.eugine.util.*;
  */
 public class SESelfOp extends SESet {
     private static Compound wrap(Atom ha, final Compound c, String o) throws VMException {
-        if (c.atoms.size() < 1)
-            throw new VMException(2064, "needs the operator", ha);
-
         if (c.atoms.size() < 2)
-            throw new VMException(2064, "needs the subject to perform", ha);
+            throw new VMException(2000, "not enough arguments", ha);
 
         Compound ret = new Compound();
         Compound op = new Compound();

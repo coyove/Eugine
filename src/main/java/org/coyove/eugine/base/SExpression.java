@@ -17,6 +17,12 @@ public abstract class SExpression implements java.io.Serializable {
         tailCompound = c;
     }
 
+    public SExpression(Atom ha, Compound c, int count) throws VMException {
+        this(ha, c);
+        if (c.atoms.size() < count)
+            throw new VMException(2000, "not enough arguments", ha);
+    }
+
     public SExpression() {
     }
 

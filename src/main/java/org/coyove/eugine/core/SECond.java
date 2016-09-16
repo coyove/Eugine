@@ -19,10 +19,7 @@ public class SECond extends SExpression {
     private SExpression defaultBranch = null;
 
     public SECond(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-
-        if (c.atoms.size() < 2)
-            throw new VMException(2004, "must define at least 1 branch", ha);
+        super(ha, c, 2);
 
         condition = SExpression.cast(c.atoms.pop());
         branches = new List<Branch>();
@@ -30,7 +27,7 @@ public class SECond extends SExpression {
         for (Base a : c.atoms) {
             final Compound b = (Compound)a;
             if (b == null || b.atoms.size() < 2)
-                throw new VMException(2005, "each branch must be a compound with 2 atoms", ha);
+                throw new VMException(2002, "invalid branch definition", ha);
 
             final Base cond = b.atoms.pop();
 

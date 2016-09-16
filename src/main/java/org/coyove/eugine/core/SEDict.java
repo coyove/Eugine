@@ -25,12 +25,11 @@ public class SEDict extends SExpression {
         for (SValue e : SExpression.eval(values, env)) {
             SList l = Utils.cast(e, SList.class);
             if (l == null)
-                throw new VMException(2016,
-                        "each element of the dict must be a list with 2 elements (key and value)", headAtom);
+                throw new VMException(2010, "invalid dict entry definition", headAtom);
 
             List<SValue> c = l.get();
             SString key = Utils.cast(c.head(), SString.class,
-                    new VMException(2015, "key must be string", headAtom));
+                    new VMException(2011, "key must be a string", headAtom));
 
             ret.put(key.<String>get(), c.get(1));
         }

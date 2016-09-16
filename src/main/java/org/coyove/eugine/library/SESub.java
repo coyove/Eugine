@@ -12,13 +12,7 @@ public class SESub extends SExpression {
     private List<SExpression> arguments;
 
     public SESub(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-
-        if (c.atoms.size() < 1)
-            throw new VMException(2095, "needs a subject to get the sub range", ha);
-
-        if (c.atoms.size() < 2)
-            throw new VMException(2095, "needs a start index", ha);
+        super(ha, c, 2);
 
         arguments = SExpression.castPlain(c);
     }
@@ -28,7 +22,7 @@ public class SESub extends SExpression {
         List<SValue> arguments = SExpression.eval(this.arguments, env);
         SValue subObj = arguments.head();
 
-        VMException ex = new VMException(2092, "the start and the end index must be integers", headAtom);
+        VMException ex = new VMException(3012, "start and end index must be integers", headAtom);
         int arg1 = Utils.cast(arguments.get(1), SInteger.class, ex).<Long>get().intValue();
         SInteger arg2 = null;
 
@@ -44,7 +38,7 @@ public class SESub extends SExpression {
                 try {
                     return new SString(subStr.<String>get().substring(arg1, arg1 + arg2.<Long>get().intValue()));
                 } catch (StringIndexOutOfBoundsException se) {
-                    throw new VMException(2093, "string index out of range", headAtom);
+                    throw new VMException(3013, "string index out of range", headAtom);
                 }
             }
 
@@ -56,7 +50,7 @@ public class SESub extends SExpression {
                 return new SList(subList.<List<SValue>>get().sub(arg1, arg1 + arg2.<Long>get().intValue()));
             }
         } else {
-            throw new VMException(2094, "the subject must be a string or a list", headAtom);
+            throw new VMException(3014, "subject must be string or list", headAtom);
         }
 
     }

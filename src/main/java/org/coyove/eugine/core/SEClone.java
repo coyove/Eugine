@@ -16,9 +16,7 @@ public class SEClone extends SExpression {
     private List<SExpression> arguments;
 
     public SEClone(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException(2002, "missing object to clone", ha);
+        super(ha, c, 1);
 
         varName = SExpression.cast(c.atoms.pop());
         arguments = SExpression.castPlain(c);
@@ -45,7 +43,7 @@ public class SEClone extends SExpression {
 
                 newEnv.put("~parent", new SDict(init.innerEnv));
                 newEnv.put("~atom", new SObject(headAtom));
-                newEnv.put("~this", n);
+                newEnv.put("~this", ret);
 
                 newEnv.parentEnv = init.innerEnv;
                 init.body.evaluate(newEnv);

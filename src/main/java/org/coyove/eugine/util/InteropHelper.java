@@ -89,11 +89,11 @@ public class InteropHelper {
         int i = 0;
         for (SValue def : definition.<List<SValue>>get()) {
             if (vararg)
-                throw new VMException("vararg must be at the tail of the definition");
+                throw new VMException(4001, "vararg must be at the tail of the definition");
 
             SString cls = Utils.cast(def, SString.class);
             if (cls == null)
-                throw new VMException("must specify the type using a string");
+                throw new VMException(4002, "must specify the type using string");
 
             String clsName = cls.get();
 
@@ -103,7 +103,7 @@ public class InteropHelper {
             }
 
             if (i >= args.size())
-                throw new VMException("not enough arguments");
+                throw new VMException(4003, "not enough arguments");
 
             try {
                 Class c = ClassUtils.getClass(clsName);
@@ -118,7 +118,7 @@ public class InteropHelper {
                     passArgs.add(ret);
                 }
             } catch (ClassNotFoundException ex) {
-                throw new VMException("cannot find type '" + clsName + "'");
+                throw new VMException(4004, "cannot find type '" + clsName + "'");
             }
         }
 
@@ -133,7 +133,7 @@ public class InteropHelper {
             f.setAccessible(true);
             return InteropHelper.castJavaType(f.get(obj));
         } catch (Exception e) {
-            throw new VMException("failed to get '" + field + "', " + e);
+            throw new VMException(4005, "failed to get '" + field + "', " + e);
         }
     }
 
@@ -144,7 +144,7 @@ public class InteropHelper {
             f.set(obj, castSValue(value, f.getType()));
             return value;
         } catch (Exception e) {
-            throw new VMException("failed to set '" + field + "', " + e);
+            throw new VMException(4006, "failed to set '" + field + "', " + e);
         }
     }
 }

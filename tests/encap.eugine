@@ -28,3 +28,28 @@
 
 (assert (deep-compare-list (list ([d2.class : @sayhi2] ()) ([d3.class : @sayhi2] ()))
     ("hello base" "hello d2")) "Simple encapsulation 2")
+
+
+(defun Point(){})
+
+(set [Point : ~init] lambda (n...) {
+    (if [(len n) == 2] {
+        (set [~this : @x] [n : 0])
+        (set [~this : @y] [n : 1])
+    } {
+        (set [~this : @x] 0)
+        (set [~this : @y] 0)
+    })
+})
+
+((defun Rect () {
+    (var [~this :: ~init] lambda (p1 p2) {
+        (set [~this :: width] (- [p2 :: x] [p1 :: x]))
+        (set [~this :: height] (- [p2 :: y] [p1 :: y]))
+    })
+
+    (var [~this :: calc] lambda () (* [~this :: width] [~this :: height]))
+}) ())
+
+(set rect clone Rect (clone Point) (clone Point 3 4))
+(assert (eq ([rect :: calc] ()) 12) "Point & Rect")

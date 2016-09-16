@@ -15,17 +15,14 @@ public class SEDefun extends SExpression {
     private String description;
 
     public SEDefun(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-
-        if (c.atoms.size() < 3)
-            throw new VMException(2006, "missing function body", ha);
+        super(ha, c, 3);
 
         if (c.atoms.get(1) instanceof Atom)
-            throw new VMException(2007, "the 2nd argument must be a compound", ha);
+            throw new VMException(2003, "invalid function arguments list", ha);
 
         Base n = c.atoms.pop();
         if (n instanceof Compound || ((Atom) n).token.type != Token.TokenType.ATOMIC)
-            throw new VMException(2008, "invalid function name", ha);
+            throw new VMException(2004, "invalid function name", ha);
 
         func = ((Atom) n).token.value.toString();
         arguments = SELambda.CompoundToArguments((Compound) c.atoms.pop(), ha);
@@ -34,7 +31,7 @@ public class SEDefun extends SExpression {
         if (tmp instanceof Atom && ((Atom) tmp).token.type == Token.TokenType.STRING) {
             description = ((Atom) tmp).token.value.toString();
             if (c.atoms.size() == 0)
-                throw new VMException(2009, "missing function body", ha);
+                throw new VMException(2005, "missing function body", ha);
 
             body = SExpression.cast(c.atoms.pop());
         } else

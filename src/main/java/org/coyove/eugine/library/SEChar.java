@@ -16,10 +16,7 @@ public class SEChar extends SExpression {
 
     public SEChar(Atom ha, Compound c, CONVERT a) throws VMException
     {
-        super(ha, c);
-
-        if (c.atoms.size() == 0)
-            throw new VMException(2077, "needs the subject to perform");
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
         action = a;
@@ -33,19 +30,19 @@ public class SEChar extends SExpression {
             case ASC:
                 try {
                     SString str = Utils.cast(arg, SString.class,
-                            new VMException(2073, "needs a string with 1 char", headAtom));
+                            new VMException(3001, "invalid argument", headAtom));
 
                     return new SInteger(Long.valueOf((int) str.<String>get().charAt(0)));
                 } catch (StringIndexOutOfBoundsException e) {
-                    throw new VMException(2074, "string index out of range", headAtom);
+                    throw new VMException(3002, "string index out of range", headAtom);
                 }
             case CHR:
                 SInteger i = Utils.cast(arg, SInteger.class,
-                        new VMException(2075, "needs an integer", headAtom));
+                        new VMException(3003, "invalid argument", headAtom));
 
                 return new SString(String.valueOf((char)(i.<Long>get().intValue())));
             default:
-                throw new VMException(2076, "unknown operation", headAtom);
+                throw new VMException(3004, "unknown operation", headAtom);
         }
     }
 }

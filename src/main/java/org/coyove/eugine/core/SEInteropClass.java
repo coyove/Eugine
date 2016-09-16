@@ -13,9 +13,7 @@ public class SEInteropClass extends SExpression {
     private SExpression subject;
 
     public SEInteropClass(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException(2043, "needs the class name to get", ha);
+        super(ha, c, 1);
 
         subject = SExpression.cast(c.atoms.pop());
     }
@@ -23,14 +21,14 @@ public class SEInteropClass extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SString cls = Utils.cast(subject.evaluate(env), SString.class,
-                new VMException(2041, "class name must be a string", headAtom));
+                new VMException(2027, "class name must be string", headAtom));
 
         String className = cls.get();
 
         try {
             return new SObject(ClassUtils.getClass(className));
         } catch (ClassNotFoundException e) {
-            throw new VMException(2042, "getting class '" + className + "' failed", headAtom);
+            throw new VMException(2028, "getting class '" + className + "' failed", headAtom);
         }
     }
 }

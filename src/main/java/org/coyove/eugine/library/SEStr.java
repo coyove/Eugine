@@ -13,9 +13,7 @@ public class SEStr extends SExpression {
 
     public SEStr(Atom ha, Compound c) throws VMException
     {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException(2091, "needs a value");
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
     }

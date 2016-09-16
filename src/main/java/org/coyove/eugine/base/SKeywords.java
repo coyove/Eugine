@@ -86,12 +86,17 @@ public class SKeywords {
                 });
                 put("get", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c);
+                        return new SEGet(ha, c, false);
                     }
                 });
                 put(":", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c);
+                        return new SEGet(ha, c, false);
+                    }
+                });
+                put("::", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEGet(ha, c, true);
                     }
                 });
                 put("list", new CallableKeyword() {
@@ -183,7 +188,12 @@ public class SKeywords {
 
                 put("+", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEAdd(ha, c);
+                        return new SEAdd(ha, c, false);
+                    }
+                });
+                put("+.", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEAdd(ha, c, true);
                     }
                 });
                 put("-", new CallableKeyword() {

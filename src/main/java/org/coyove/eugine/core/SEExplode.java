@@ -12,10 +12,7 @@ public class SEExplode extends SExpression {
     private SExpression list;
 
     public SEExplode(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException(2025, "needs a list to explode", ha);
-
+        super(ha, c, 1);
         list = SExpression.cast(c.atoms.pop());
     }
 

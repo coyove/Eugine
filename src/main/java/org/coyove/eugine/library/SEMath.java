@@ -20,9 +20,7 @@ public class SEMath extends SExpression {
     public enum OPERATION { SIN, COS, TAN, ASIN, ACOS, ATAN, ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, POW }
 
     public SEMath(Atom ha, Compound c, OPERATION f) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException(2082, "needs a number to perform", ha);
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
         if (c.atoms.size() > 0)
@@ -72,7 +70,7 @@ public class SEMath extends SExpression {
             case TIME:
                 return new SDouble((new Date()).getTime() / n);
             default:
-                throw new VMException(2081, "not implemented", headAtom);
+                throw new VMException(3007, "not implemented", headAtom);
         }
     }
 

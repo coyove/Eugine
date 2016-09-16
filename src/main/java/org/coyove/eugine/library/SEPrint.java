@@ -17,10 +17,8 @@ public class SEPrint extends SExpression {
     private String delim;
 
     public SEPrint(Atom ha, Compound c, String d) throws VMException {
-        super(ha, c);
+        super(ha, c, 1);
         delim = d;
-        if (c.atoms.size() == 0)
-            throw new VMException(2085, "needs at least 1 argument to print", ha);
 
         arguments = SExpression.castPlain(c);
     }

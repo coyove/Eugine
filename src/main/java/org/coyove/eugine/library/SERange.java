@@ -14,14 +14,8 @@ public class SERange extends SExpression {
     private SExpression end;
 
     public SERange(Atom ha, Compound c) throws VMException {
-        super(ha, c);
+        super(ha, c, 2);
         List<SExpression> args = SExpression.castPlain(c);
-
-        if (args.size() < 1)
-            throw new VMException(2087, "needs the start", ha);
-
-        if (args.size() < 2)
-            throw new VMException(2087, "needs the end", ha);
 
         if (args.size() == 2) {
             start = args.get(0);
@@ -48,7 +42,7 @@ public class SERange extends SExpression {
             for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get())
                 ret.add(new SDouble(i));
         } else {
-            throw new VMException(2086, "needs integers or doubles", headAtom);
+            throw new VMException(3009, "needs integers or doubles", headAtom);
         }
 
         return new SList(ret);
