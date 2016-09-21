@@ -392,6 +392,11 @@ public class SKeywords {
                         return new SEListOp(ha, c, SEListOp.OPERATION.LAST);
                     }
                 });
+                put("reverse", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEReverse(ha, c);
+                    }
+                });
                 put("sub", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SESub(ha, c);

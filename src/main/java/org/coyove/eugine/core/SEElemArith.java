@@ -18,7 +18,7 @@ public class SEElemArith extends SExpression {
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
 
     public SEElemArith(Atom ha, Compound c, ACTION a) throws VMException {
-        super(ha, c, 2);
+        super(ha, c, 1);
 
         action = a;
         values = SExpression.castPlain(c);

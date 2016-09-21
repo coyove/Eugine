@@ -1,11 +1,17 @@
 package org.coyove.eugine.util;
 
+import java.util.Collection;
+
 /**
  * Created by coyove on 2016/9/9.
  */
 public class List<T> extends java.util.ArrayList<T> {
     public List(int cap) {
         super(cap < 0 ? 0 : cap);
+    }
+
+    public List(Collection<? extends T> list) {
+        super(list);
     }
 
     public List() {

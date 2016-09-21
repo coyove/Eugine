@@ -26,3 +26,27 @@
 
 (println "\nFinish " assertions.total " tests in " (floor [(time 1) - start])
  	"ms, passed: " assertions.passed ", failed: " assertions.failed)
+
+(defun cps (f)
+    (lambda (args...)
+        ((last args) (f (explode (init args))))))
+
+(defun -. (args...) (- (explode args)))
+(defun +. (args...) (+ (explode args)))
+(defun ==. (args...) (== (explode args)))
+(defun println. (args...) (println (explode args)))
+
+(var -& (cps -.))
+(var +& (cps +.))
+(var ==& (cps ==.))
+
+(defun add& (n k)
+    (==& n 0 (lambda (b)
+          (if b                    ; growing continuation
+              (k 0)                ; in the recursive call
+              (-& n 1 (lambda (nm1)
+                       (add& nm1 (lambda (f)
+                                        (+& n f k)))))))))
+
+
+(add& 100 println.)

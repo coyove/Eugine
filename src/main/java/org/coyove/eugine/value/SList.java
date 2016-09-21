@@ -17,7 +17,9 @@ public class SList extends SValue {
 
     @Override
     public SValue clone() {
-        SList ret = new SList((List<SValue>) underlying);
+        List<SValue> n = (List<SValue>)((List<SValue>) underlying).clone();
+        SList ret = new SList(n);
+
         SValue.copyAttributes(ret, this);
         return ret;
     }

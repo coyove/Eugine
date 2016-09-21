@@ -15,7 +15,7 @@ public class SECompare extends SExpression {
     private List<SExpression> values;
 
     public SECompare(Atom ha, Compound c, String a) throws VMException {
-        super(ha, c, 2);
+        super(ha, c, 1);
 
         action = a;
         values = SExpression.castPlain(c);
