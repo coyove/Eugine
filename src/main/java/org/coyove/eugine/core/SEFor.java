@@ -28,7 +28,13 @@ public class SEFor extends SExpression {
             newEnv.put(body.arguments.get(1), new SInteger((long) idx));
 
         newEnv.parentEnv = body.innerEnv;
-        return body.body.evaluate(newEnv);
+        SValue ret = new SNull();
+
+        for (SExpression se : body.body) {
+            ret = se.evaluate(newEnv);
+        }
+
+        return ret;
     }
 
     @Override

@@ -3,10 +3,7 @@ package org.coyove.eugine.core;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
-import org.coyove.eugine.value.SClosure;
-import org.coyove.eugine.value.SDict;
-import org.coyove.eugine.value.SList;
-import org.coyove.eugine.value.SObject;
+import org.coyove.eugine.value.*;
 
 /**
  * Created by zezhong on 2016/9/9.
@@ -36,7 +33,7 @@ public class SEClone extends SExpression {
 
                 List<SValue> arguments = SExpression.eval(this.arguments, env);
 
-                if (!SECall.checkArgumentsCount(init.arguments, arguments))
+                if (!SECall.checkArgumentsCount(init, arguments))
                     throw new VMException(2001, "not enough arguments to init", headAtom);
 
                 ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
@@ -46,7 +43,8 @@ public class SEClone extends SExpression {
                 newEnv.put("~this", ret);
 
                 newEnv.parentEnv = init.innerEnv;
-                init.body.evaluate(newEnv);
+                for (SExpression se : init.body)
+                    se.evaluate(newEnv);
             }
         }
 

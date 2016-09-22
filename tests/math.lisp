@@ -2,13 +2,13 @@
 
 (assert [~integer.min == -9223372036854775808] "Integer max")
 
-(defun calc-pi (n) (->
+(def calc-pi (n) (->
 	(set p16 1.0)
 	(set pi 0.0)
 
     (loop (range 0 n)
 		(lambda (i) (->
-			(defun pp (a b) [a / [[8 * i] + b]])
+			(def pp (a b) [a / [[8 * i] + b]])
 			; +--------------------+
 			; |            a       |
 			; | pp = ------------- |
@@ -34,7 +34,7 @@
 (set #pi-2 [[16.0 * (atan [1. / 5.])] - [4.0 * (atan [1. / 239.])]])
 (assert [(sub #pi 0 10) == (sub (str #pi-2) 0 10)] "PI2 check: " #pi-2)
 
-(defun calc-e (nsteps) (->
+(def calc-e (nsteps) (->
 	[res = 2.0]
 	[fact = 1.0]
 
@@ -49,7 +49,7 @@
 (assert [(or #t #f #t) == #t] "True or False or True")
 (assert [(not #t) == #f] "Not True")
 
-(defun is-prime (n) 
+(def is-prime (n) 
     (if [[n == 2] || [n == 3]] #t
     	(if [[n % 2] == 0] #f
     		(->

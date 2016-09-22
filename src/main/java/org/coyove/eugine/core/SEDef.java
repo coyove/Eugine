@@ -8,13 +8,13 @@ import org.coyove.eugine.util.*;
 /**
  * Created by coyove on 2016/9/10.
  */
-public class SEDefun extends SExpression {
+public class SEDef extends SExpression {
     private String func;
-    private SExpression body;
+    private List<SExpression> body;
     private List<String> arguments;
     private String description;
 
-    public SEDefun(Atom ha, Compound c) throws VMException {
+    public SEDef(Atom ha, Compound c) throws VMException {
         super(ha, c, 3);
 
         if (c.atoms.get(1) instanceof Atom)
@@ -27,15 +27,16 @@ public class SEDefun extends SExpression {
         func = ((Atom) n).token.value.toString();
         arguments = SELambda.CompoundToArguments((Compound) c.atoms.pop(), ha);
 
-        Base tmp = c.atoms.pop();
+        Base tmp = c.atoms.head();
         if (tmp instanceof Atom && ((Atom) tmp).token.type == Token.TokenType.STRING) {
             description = ((Atom) tmp).token.value.toString();
             if (c.atoms.size() == 0)
                 throw new VMException(2005, "missing function body", ha);
 
-            body = SExpression.cast(c.atoms.pop());
-        } else
-            body = SExpression.cast(tmp);
+            c.atoms.pop();
+        }
+
+        body = SExpression.castPlain(c);
     }
 
     @Override

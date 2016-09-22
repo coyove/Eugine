@@ -15,7 +15,7 @@ public class SELogic extends SExpression {
     public enum LOGIC {AND, OR, NOT}
 
     public SELogic(Atom ha, Compound c, LOGIC a) throws VMException {
-        super(ha, c, a != LOGIC.NOT ? 2 : 1);
+        super(ha, c, 1);
 
         log = a;
         values = SExpression.castPlain(c);

@@ -124,9 +124,9 @@ public class SKeywords {
                         return new SELambda(ha, c);
                     }
                 });
-                put("defun", new CallableKeyword() {
+                put("def", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEDefun(ha, c);
+                        return new SEDef(ha, c);
                     }
                 });
                 put("if", new CallableKeyword() {

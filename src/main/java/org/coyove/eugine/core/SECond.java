@@ -9,14 +9,14 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SECond extends SExpression {
-    private class Branch implements java.io.Serializable {
-        public SExpression bcond;
-        public SExpression bbody;
+    public class Branch implements java.io.Serializable {
+        public SExpression recv;
+        public SExpression body;
     }
 
-    private SExpression condition;
-    private List<Branch> branches;
-    private SExpression defaultBranch = null;
+    public SExpression condition;
+    public List<Branch> branches;
+    public SExpression defaultBranch = null;
 
     public SECond(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
@@ -25,7 +25,7 @@ public class SECond extends SExpression {
         branches = new List<Branch>();
 
         for (Base a : c.atoms) {
-            final Compound b = (Compound)a;
+            final Compound b = (Compound) a;
             if (b == null || b.atoms.size() < 2)
                 throw new VMException(2002, "invalid branch definition", ha);
 
@@ -36,8 +36,8 @@ public class SECond extends SExpression {
                 defaultBranch = SExpression.cast(b.atoms.pop());
             } else {
                 branches.add(new Branch() {{
-                    bcond = SExpression.cast(cond);
-                    bbody = SExpression.cast(b.atoms.pop());
+                    recv = SExpression.cast(cond);
+                    body = SExpression.cast(b.atoms.pop());
                 }});
             }
         }
@@ -47,10 +47,9 @@ public class SECond extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
         Object cond = condition.evaluate(env).get();
 
-        for (Branch b : branches)
-        {
-            if (b.bcond.evaluate(env).get().equals(cond))
-                return b.bbody.evaluate(env);
+        for (Branch b : branches) {
+            if (b.recv.evaluate(env).get().equals(cond))
+                return b.body.evaluate(env);
         }
 
         if (defaultBranch != null)

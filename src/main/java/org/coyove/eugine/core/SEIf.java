@@ -9,9 +9,9 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SEIf extends SExpression {
-    private SExpression condition;
-    private SExpression trueBranch;
-    private SExpression falseBranch;
+    public SExpression condition;
+    public SExpression trueBranch;
+    public SExpression falseBranch;
 
     public SEIf(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
@@ -23,10 +23,7 @@ public class SEIf extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        SBool res = Utils.cast(condition.evaluate(env), SBool.class,
-                new VMException(2026, "invalid if condition", headAtom));
-
-        if (res.get()) {
+        if (evaluateCondition(env)) {
             return trueBranch.evaluate(env);
         } else {
             if (falseBranch != null) {
@@ -35,5 +32,12 @@ public class SEIf extends SExpression {
                 return new SNull();
             }
         }
+    }
+
+    public boolean evaluateCondition(ExecEnvironment env) throws VMException {
+        SBool res = Utils.cast(condition.evaluate(env), SBool.class,
+                new VMException(2026, "invalid condition", headAtom));
+
+        return res.get();
     }
 }

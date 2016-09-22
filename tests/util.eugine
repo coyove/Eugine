@@ -5,14 +5,14 @@
     (assert ~ops... " -- takes " [(time 1) - assert.start] "ms")
 })
 
-(defun join-list (l d) (
+(def join-list (l d) (
 	(if [(len l) == 0]
 		""
 		[[(head l) + d] + (join-list (tail l) d)]
 	)
 ))
 
-(defun join (l d) (->
+(def join (l d) (->
 	[ret = ""]
 	(loop (range 0 (len l)) [(i) => (
 		[ret += (+ [l : i] d)]
@@ -24,7 +24,7 @@
 (var assertions.passed 0)
 (var assertions.failed 0)
 
-(defun assert (result msg...) (->
+(def assert (result msg...) (->
 	(++ assertions.total)
 	(if result 
 		{(println "  [Passed] " (explode msg)) (++ assertions.passed)}
@@ -37,11 +37,11 @@
 	)
 ))
 
-(defun read-from-console ()
+(def read-from-console ()
     [[(cls @java.lang.System) . @console ()] . @readLine ()]
 )
 
-(defun deep-compare-list (list-1 list-2) 
+(def deep-compare-list (list-1 list-2) 
 	"this function tests if two lists are equal"
 	(->
 	(if [[(type list-1) != "List"] or [(type list-2) != "List"]] 
@@ -102,7 +102,7 @@
 )]]
 
 
-; (defun Stack () "this is a stack" {})
+; (def Stack () "this is a stack" {})
 ; [[Stack : @_list] := (list)]
 ; [[Stack : @push] := [(elem) => [[~this : @_list] += elem]]]
 ; [[Stack : @pop] := [() => {

@@ -9,7 +9,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SELambda extends SExpression {
-    private SExpression body;
+    private List<SExpression> body;
     private List<String> arguments;
 
     public static List<String> CompoundToArguments(Compound c, Atom pos) throws VMException {
@@ -38,7 +38,7 @@ public class SELambda extends SExpression {
             throw new VMException(2038, "invalid lambda declaration", ha);
 
         arguments = SELambda.CompoundToArguments((Compound)c.atoms.pop(), ha);
-        body = SExpression.cast(c.atoms.pop());
+        body = SExpression.castPlain(c);
     }
 
     @Override

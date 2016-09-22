@@ -19,9 +19,10 @@ public class SEChain extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue ret = new SNull();
-        for (SExpression se : expressions)
+        for (int i = 0; i < expressions.size(); i++) {
+            SExpression se = expressions.get(i);
             ret = se.evaluate(env);
-
+        }
         return ret;
     }
 }

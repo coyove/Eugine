@@ -1,4 +1,4 @@
-((defun base.class() {
+((def base.class() {
     [@name ::= "base"]
     [@sayhi ::= [() => (+ "hello " [~this : @name])]]
 }) ())
@@ -30,7 +30,7 @@
     ("hello base" "hello d2")) "Simple encapsulation 2")
 
 
-(defun Point(){})
+(def Point(){})
 
 (set [Point : ~init] lambda (n...) {
     (if [(len n) == 2] {
@@ -42,7 +42,7 @@
     })
 })
 
-((defun Rect () {
+((def Rect () {
     (var [~this :: ~init] lambda (p1 p2) {
         (set [~this :: width] (- [p2 :: x] [p1 :: x]))
         (set [~this :: height] (- [p2 :: y] [p1 :: y]))
