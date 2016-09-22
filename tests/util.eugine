@@ -1,4 +1,4 @@
-(~define (::= ~field ~body) [(: ~this ~field) := ~body])
+; (~define (:== ~field ~body) [(: ~this ~field) := ~body])
 (~define (for ~i ~= ~start to ~end do ~body...) (loop (range ~start ~end) [(~i) => { ~body... }]))
 (~define (assert-timing ~ops...) {
     (var assert.start (time 1))

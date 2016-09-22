@@ -1,8 +1,11 @@
 package org.coyove.eugine.parser;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.coyove.eugine.util.*;
 
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.*;
 
@@ -46,40 +49,60 @@ public class Parser {
             if (getGroup(m, "comment") != null)
                 continue;
 
+            Pair<Integer, Integer> n = finder.find(m.start());
             Token tok = new Token();
+            tok.line = n.getLeft();
+            tok.lineIndex = n.getRight();
             tok.source = source;
 
             if (getGroup(m, "str") != null) {
                 tok.type = Token.TokenType.STRING;
                 tok.value = finder.unescapeString(getGroup(m, "str"));
+                tokens.add(tok);
             } else if (getGroup(m, "rawstr") != null) {
                 tok.type = Token.TokenType.STRING;
                 tok.value = getGroup(m, "rawstr").replaceAll("\"\"", "\"");
+                tokens.add(tok);
             } else if (getGroup(m, "paren") != null) {
                 tok.value = getGroup(m, "paren");
                 tok.type = Base.bracketLookup.get(tok.value);
+                tokens.add(tok);
             } else if (getGroup(m, "atom") != null) {
                 String v = getGroup(m, "atom");
 
-                try {
-                    if (v.contains(".")) {
-                        tok.value = Double.parseDouble(v);
-                        tok.type = Token.TokenType.DOUBLE;
-                    } else {
-                        tok.value = Long.parseLong(v);
-                        tok.type = Token.TokenType.INTEGER;
+                if (v.contains("::") && !v.equals("::")) {
+                    String[] parts = v.split("::");
+                    Token[] toks = new Token[parts.length + 3];
+
+                    toks[0] = new Token(Token.TokenType.LPAREN, "(");
+                    toks[toks.length - 1] = new Token(Token.TokenType.RPAREN, ")");
+                    toks[1] = new Token(Token.TokenType.ATOMIC, "::");
+                    toks[2] = new Token(Token.TokenType.ATOMIC, parts[0].isEmpty() ? "~this" : parts[0]);
+
+                    for (int i = 1; i < parts.length; i++) {
+                        toks[2 + i] = new Token(Token.TokenType.ATOMIC, parts[i]);
                     }
-                } catch (Exception e) {
-                    tok.type = Token.TokenType.ATOMIC;
-                    tok.value = v;
+
+                    tokens.addAll(Arrays.asList(toks));
+
+                } else {
+                    try {
+                        if (v.contains(".")) {
+                            tok.value = Double.parseDouble(v);
+                            tok.type = Token.TokenType.DOUBLE;
+                            tokens.add(tok);
+                        } else {
+                            tok.value = Long.parseLong(v);
+                            tok.type = Token.TokenType.INTEGER;
+                            tokens.add(tok);
+                        }
+                    } catch (Exception e) {
+                        tok.type = Token.TokenType.ATOMIC;
+                        tok.value = v;
+                        tokens.add(tok);
+                    }
                 }
             }
-
-            int[] n = finder.find(m.start());
-            tok.line = n[0];
-            tok.lineIndex = n[1];
-
-            tokens.add(tok);
         }
 
         Compound chain = new Compound();
