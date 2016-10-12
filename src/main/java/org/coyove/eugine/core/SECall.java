@@ -16,10 +16,10 @@ public class SECall extends SExpression {
 
     private enum continueState { CONTINUE, TAIL_CALL, FALSE_NULL }
 
-    public SECall(String cls, List<SExpression> args, Atom ha, Compound c) {
+    public SECall(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        closureName = cls;
-        arguments = args;
+        closureName = ha.token.value.toString();
+        arguments = SExpression.castPlain(c);
     }
 
     public SECall(SExpression cls, List<SExpression> args, Atom ha, Compound c) {

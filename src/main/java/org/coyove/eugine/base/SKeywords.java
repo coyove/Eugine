@@ -34,6 +34,11 @@ public class SKeywords {
                         return new SEChain(ha, c);
                     }
                 });
+                put("sync", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SESync(ha, c);
+                    }
+                });
                 put("->", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEChain(ha, c);
@@ -442,6 +447,12 @@ public class SKeywords {
                 put("new", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEInteropNew(ha, c);
+                    }
+                });
+
+                put("go", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEThread(ha, c);
                     }
                 });
             }};

@@ -19,6 +19,11 @@ public class SEType extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        return new SString(name.evaluate(env).getClass().getSimpleName().substring(1));
+        SValue v = name.evaluate(env);
+        if (v instanceof SObject) {
+            return new SString(v.underlying.getClass().getSimpleName());
+        } else {
+            return new SString(v.getClass().getSimpleName().substring(1));
+        }
     }
 }

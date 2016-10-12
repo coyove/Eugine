@@ -3,6 +3,10 @@ package org.coyove.test;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.System;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketAddress;
 
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SExpression;
@@ -110,7 +114,13 @@ public class main {
                 System.out.println("VM ERROR: " + ex.getMessage());
             } else {
                 System.out.println("JVM ERROR: " + ex);
+                ex.printStackTrace();
             }
         }
+
+//        ServerSocket ss = new ServerSocket(80);
+//        Socket s = ss.accept();
+//        s.getOutputStream().write("zzz".getBytes());
+//        s.close();
     }
 }

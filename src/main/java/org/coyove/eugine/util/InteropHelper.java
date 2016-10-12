@@ -1,5 +1,6 @@
 package org.coyove.eugine.util;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.value.*;
@@ -73,7 +74,6 @@ public class InteropHelper {
             for (SValue value : list) {
                 ret.add(castSValue(value, c.getComponentType()));
             }
-
             return ret.toArray();
         } else {
             return obj.get();
@@ -113,7 +113,26 @@ public class InteropHelper {
 
                 if (c.isArray()) {
                     Object[] tmp = (Object[]) ret;
-                    passArgs.add(Arrays.copyOf(tmp, tmp.length, c));
+                    int len = tmp.length;
+
+                    Class p = c.getComponentType();
+                    if (p == int.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Integer[].class)));
+                    } else if (p == double.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Double[].class)));
+                    } else if (p == float.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Float[].class)));
+                    } else if (p == long.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Long[].class)));
+                    } else if (p == byte.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Byte[].class)));
+                    } else if (p == short.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Short[].class)));
+                    } else if (p == char.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Character[].class)));
+                    } else {
+                        passArgs.add(Arrays.copyOf(tmp, len, c));
+                    }
                 } else {
                     passArgs.add(ret);
                 }

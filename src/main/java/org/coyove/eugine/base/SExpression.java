@@ -107,7 +107,7 @@ public abstract class SExpression implements java.io.Serializable {
                 // TODO
                 return new SEVariable(tvalue, head, c);
             } else {
-                return new SECall(tvalue, castPlain(c), head, c);
+                return new SECall(head, c);
             }
 
         } else {
