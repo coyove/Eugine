@@ -16,6 +16,8 @@ public class SEPrint extends SExpression {
     private List<SExpression> arguments;
     private String delim;
 
+    public SEPrint() {};
+
     public SEPrint(Atom ha, Compound c, String d) throws VMException {
         super(ha, c, 1);
         delim = d;
@@ -57,6 +59,18 @@ public class SEPrint extends SExpression {
             System.out.print(printSValue(v, env, 2));
         }
         System.out.print(delim);
+
+        return ret;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEPrint ret = new SEPrint();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.delim = this.delim;
+        ret.arguments = List.clone(this.arguments);
 
         return ret;
     }

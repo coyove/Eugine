@@ -77,4 +77,12 @@ public class SECompare extends SExpression {
 
         return new SNull();
     }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SECompare ret = new SECompare(headAtom, new Compound(), action);
+        ret.action = this.action;
+
+        return ret;
+    }
 }

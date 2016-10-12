@@ -42,6 +42,11 @@ public abstract class SValue extends SExpression {
     // It clones the SValue, but not includes the object underlaying
     public abstract SValue clone();
 
+    @Override
+    public SExpression deepClone() throws VMException {
+        return this.clone();
+    }
+
     @SuppressWarnings("unchecked")
     public static void copyAttributes(SValue to, SValue from) {
         to.immutable = from.immutable;

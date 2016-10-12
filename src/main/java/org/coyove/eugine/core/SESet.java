@@ -20,6 +20,8 @@ public class SESet extends SExpression {
     public enum ACTION { IMMUTABLE, MUTABLE }
     public enum DECLARE { DECLARE, SET }
 
+    public SESet() {}
+
     public SESet(Atom ha, Compound c, DECLARE d, ACTION a) throws VMException {
         super(ha, c, 1);
 
@@ -108,6 +110,22 @@ public class SESet extends SExpression {
                 }
             }
         }
+
+        return ret;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SESet ret = new SESet();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.varName = this.varName.deepClone();
+        ret.varValue = this.varValue.deepClone();
+
+        ret.directName = this.directName;
+        ret.action  =this.action;
+        ret.declare = this.declare;
 
         return ret;
     }

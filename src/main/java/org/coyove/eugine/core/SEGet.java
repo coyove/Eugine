@@ -14,6 +14,8 @@ public class SEGet extends SExpression {
     private SExpression dict;
     private List<SExpression> keys;
 
+    public SEGet() {}
+
     public SEGet(Atom ha, Compound c, boolean plain) throws VMException {
         super(ha, c, 2);
 
@@ -111,5 +113,16 @@ public class SEGet extends SExpression {
         }
 
         return dict;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEGet ret = new SEGet();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.dict = this.dict.deepClone();
+        ret.keys = List.clone(this.keys);
+
+        return ret;
     }
 }

@@ -1,5 +1,6 @@
 package org.coyove.eugine.value;
 
+import com.rits.cloning.Cloner;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.*;
@@ -42,7 +43,7 @@ public class SClosure extends SValue {
 
     @Override
     public SValue clone() {
-        SClosure ret = new SClosure(outterEnv, arguments, body);
+        SClosure ret = new SClosure(outterEnv, arguments, List.clone(body));
 
         ret.extra.parentEnv = this.extra;
         ret.proto = this;
@@ -52,7 +53,7 @@ public class SClosure extends SValue {
     }
 
     public SValue clone_() {
-        SClosure ret = new SClosure(outterEnv, arguments, body);
+        SClosure ret = new SClosure(outterEnv, arguments, List.clone(body));
 
         ret.extra = this.extra.clone();
         ret.transparent = this.transparent;

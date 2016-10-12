@@ -1,5 +1,6 @@
 package org.coyove.eugine.util;
 
+import com.rits.cloning.Cloner;
 import org.coyove.eugine.base.SExpression;
 
 import java.util.Collection;
@@ -59,8 +60,10 @@ public class List<T> extends java.util.ArrayList<T> {
 
     public static List<SExpression> clone(List<SExpression> src) {
         List<SExpression> ret = new List<SExpression>(src.size());
+        com.rits.cloning.Cloner c = new Cloner();
+
         for (SExpression t : src) {
-            ret.add(t.clone());
+            ret.add(c.deepClone(t));
         }
         return ret;
     }

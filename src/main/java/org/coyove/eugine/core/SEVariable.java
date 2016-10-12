@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SEVariable extends SExpression {
     private String varName;
 
+    public SEVariable() {}
+
     public SEVariable(String n, Atom ha, Compound c) {
         super(ha, c);
         varName = n;
@@ -34,5 +36,15 @@ public class SEVariable extends SExpression {
         }
 
         return env.get(varName);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEVariable ret = new SEVariable();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.varName = this.varName;
+
+        return ret;
     }
 }

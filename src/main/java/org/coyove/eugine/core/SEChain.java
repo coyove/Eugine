@@ -25,4 +25,11 @@ public class SEChain extends SExpression {
         }
         return ret;
     }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEChain ret = new SEChain(headAtom, new Compound());
+        ret.expressions = List.clone(this.expressions);
+        return ret;
+    }
 }

@@ -13,14 +13,14 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SEClone extends SExpression {
     private SExpression varName;
     private List<SExpression> arguments;
-    private ReentrantLock lock;
+
+    public SEClone() {}
 
     public SEClone(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
         varName = SExpression.cast(c.atoms.pop());
         arguments = SExpression.castPlain(c);
-        lock = new ReentrantLock();
     }
 
     @Override
@@ -57,6 +57,16 @@ public class SEClone extends SExpression {
             }
         }
 
+        return ret;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEClone ret = new SEClone();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.varName = this.varName.deepClone();
+        ret.arguments = List.clone(this.arguments);
         return ret;
     }
 }

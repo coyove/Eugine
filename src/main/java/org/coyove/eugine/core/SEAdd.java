@@ -78,10 +78,10 @@ public class SEAdd extends SExpression {
         return new SNull();
     }
 
-//    @Override
-//    public SExpression clone() throws VMException {
-//        SEAdd ret = new SEAdd(headAtom, null, self);
-//        ret.values = List.clone(values);
-//        return ret;
-//    }
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEAdd ret = new SEAdd(headAtom, new Compound(), self);
+        ret.values = List.clone(values);
+        return ret;
+    }
 }

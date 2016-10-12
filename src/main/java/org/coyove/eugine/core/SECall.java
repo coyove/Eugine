@@ -220,4 +220,20 @@ public class SECall extends SExpression {
             return ret;
         }
     }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SECall ret = new SECall(headAtom, new Compound());
+
+        ret.closureName = this.closureName;
+        ret.arguments = List.clone(this.arguments);
+
+        if (this.closureObject != null) {
+            ret.closureObject = this.closureObject.deepClone();
+        } else {
+            ret.closureObject = null;
+        }
+
+        return ret;
+    }
 }
