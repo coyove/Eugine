@@ -121,7 +121,7 @@ public class SEGet extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.dict = this.dict.deepClone();
-        ret.keys = List.clone(this.keys);
+        ret.keys = List.deepClone(this.keys);
 
         return ret;
     }

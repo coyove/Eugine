@@ -11,8 +11,9 @@ import org.coyove.eugine.util.*;
 public class SEStr extends SExpression {
     private SExpression argument;
 
-    public SEStr(Atom ha, Compound c) throws VMException
-    {
+    public SEStr() {}
+
+    public SEStr(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
@@ -35,8 +36,17 @@ public class SEStr extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         return convert(argument.evaluate(env));
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEStr ret = new SEStr();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+
+        return ret;
     }
 }

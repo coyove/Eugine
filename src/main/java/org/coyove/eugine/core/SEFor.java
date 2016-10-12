@@ -12,6 +12,8 @@ public class SEFor extends SExpression {
     private SExpression list;
     private SExpression body;
 
+    public SEFor() {}
+
     public SEFor(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -27,7 +29,7 @@ public class SEFor extends SExpression {
         if (body.arguments.size() == 2)
             newEnv.put(body.arguments.get(1), new SInteger((long) idx));
 
-        newEnv.parentEnv = body.outterEnv;
+        newEnv.parentEnv = body.outerEnv;
         SValue ret = new SNull();
 
         for (SExpression se : body.body) {
@@ -77,5 +79,15 @@ public class SEFor extends SExpression {
         }
 
         return new SNull();
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEFor ret = new SEFor();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.list = this.list.deepClone();
+        ret.body = this.body.deepClone();
+        return ret;
     }
 }

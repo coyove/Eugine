@@ -12,6 +12,8 @@ import org.coyove.eugine.util.*;
 public class SEInteropClass extends SExpression {
     private SExpression subject;
 
+    public SEInteropClass() {}
+
     public SEInteropClass(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
@@ -30,5 +32,14 @@ public class SEInteropClass extends SExpression {
         } catch (ClassNotFoundException e) {
             throw new VMException(2028, "getting class '" + className + "' failed", headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEInteropClass ret = new SEInteropClass();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.subject = this.subject.deepClone();
+        return ret;
     }
 }

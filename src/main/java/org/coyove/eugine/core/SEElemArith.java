@@ -17,6 +17,8 @@ public class SEElemArith extends SExpression {
 
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
 
+    public SEElemArith() {}
+
     public SEElemArith(Atom ha, Compound c, ACTION a) throws VMException {
         super(ha, c, 1);
 
@@ -69,5 +71,16 @@ public class SEElemArith extends SExpression {
             return new SInteger(ret.longValue());
         }
 
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEElemArith ret = new SEElemArith();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.action = this.action;
+        ret.values = List.deepClone(this.values);
+
+        return ret;
     }
 }

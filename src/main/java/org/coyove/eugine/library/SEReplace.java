@@ -13,6 +13,8 @@ public class SEReplace extends SExpression {
     private SExpression oldText;
     private SExpression newText;
 
+    public SEReplace() {}
+
     public SEReplace(Atom ha, Compound c) throws VMException {
         super(ha, c, 3);
 
@@ -33,5 +35,17 @@ public class SEReplace extends SExpression {
                 new VMException(3011, "new must be string", headAtom)).get();
 
         return new SString(text.replace(oldText, newText));
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEReplace ret = new SEReplace();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.text = this.text.deepClone();
+        ret.oldText = this.oldText.deepClone();
+        ret.newText = this.newText.deepClone();
+
+        return ret;
     }
 }

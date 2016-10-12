@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SELen extends SExpression {
     private SExpression argument;
 
+    public SELen() {}
+
     public SELen(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
@@ -28,5 +30,14 @@ public class SELen extends SExpression {
         } else {
             return new SInteger((long) 0);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SELen ret = new SELen();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+        return ret;
     }
 }

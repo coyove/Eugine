@@ -11,8 +11,9 @@ import org.coyove.eugine.util.*;
 public class SENum extends SExpression {
     private SExpression argument;
 
-    public SENum(Atom ha, Compound c) throws VMException
-    {
+    public SENum() {}
+
+    public SENum(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
@@ -50,8 +51,17 @@ public class SENum extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         return convert(argument.evaluate(env));
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SENum ret = new SENum();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+
+        return ret;
     }
 }

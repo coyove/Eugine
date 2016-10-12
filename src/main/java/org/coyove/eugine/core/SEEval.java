@@ -12,7 +12,9 @@ import java.util.HashMap;
  */
 public class SEEval extends SExpression {
     private SExpression text;
-    private SExpression env;
+    private SExpression env = null;
+
+    public SEEval() {}
 
     public SEEval(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
@@ -43,5 +45,17 @@ public class SEEval extends SExpression {
         Compound s = p.parse(text.<String>get(), "", "<eval>");
 
         return SExpression.cast(s).evaluate(env);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEEval ret = new SEEval();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.text = this.text.deepClone();
+        if (this.env != null) {
+            ret.env = this.env.deepClone();
+        }
+        return ret;
     }
 }

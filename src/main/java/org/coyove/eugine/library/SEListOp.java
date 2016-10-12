@@ -12,10 +12,11 @@ public class SEListOp extends SExpression {
     private SExpression list;
     private OPERATION op;
 
-    public enum OPERATION { HEAD, TAIL, INIT, LAST }
+    public enum OPERATION {HEAD, TAIL, INIT, LAST}
 
-    public SEListOp(Atom ha, Compound c, OPERATION o) throws VMException
-    {
+    public SEListOp() {}
+
+    public SEListOp(Atom ha, Compound c, OPERATION o) throws VMException {
         super(ha, c, 1);
 
         list = SExpression.cast(c.atoms.pop());
@@ -23,8 +24,7 @@ public class SEListOp extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
                 new VMException(3005, "invalid subject", headAtom));
 
@@ -41,5 +41,16 @@ public class SEListOp extends SExpression {
             default:
                 throw new VMException(3006, "unknown list operation", headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEListOp ret = new SEListOp();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.op = this.op;
+        ret.list = this.list.deepClone();
+
+        return ret;
     }
 }

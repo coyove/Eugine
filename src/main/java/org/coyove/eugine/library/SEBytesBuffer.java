@@ -13,6 +13,8 @@ import java.nio.charset.Charset;
 public class SEBytesBuffer extends SExpression {
     private SExpression src;
 
+    public SEBytesBuffer() {}
+
     public SEBytesBuffer(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
         src = SExpression.cast(c.atoms.pop());
@@ -28,5 +30,14 @@ public class SEBytesBuffer extends SExpression {
         } else {
             throw new VMException(3031, "failed to convert to bytes buffer", headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEBytesBuffer ret = new SEBytesBuffer();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.src = this.src.deepClone();
+        return ret;
     }
 }

@@ -10,9 +10,11 @@ import org.coyove.eugine.util.*;
  */
 public class SEDef extends SExpression {
     private String func;
+    private String description;
     private List<SExpression> body;
     private List<String> arguments;
-    private String description;
+
+    public SEDef() {}
 
     public SEDef(Atom ha, Compound c) throws VMException {
         super(ha, c, 3);
@@ -44,5 +46,18 @@ public class SEDef extends SExpression {
         SValue cls = new SClosure(env, arguments, body, description);
         env.putVar(func, cls);
         return cls;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEDef ret = new SEDef();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.func = this.func;
+        ret.description = this.description;
+        ret.body = List.deepClone(this.body);
+        ret.arguments = this.arguments; // no need to clone this
+        return ret;
     }
 }

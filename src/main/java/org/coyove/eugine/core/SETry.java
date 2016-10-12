@@ -14,8 +14,9 @@ public class SETry extends SExpression {
     private SExpression catchBody = null;
     private SExpression finallyBody = null;
 
-    public SETry(Atom ha, Compound c) throws VMException
-    {
+    public SETry() {}
+
+    public SETry(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
         mainBody = SExpression.cast(c.atoms.pop());
@@ -26,8 +27,7 @@ public class SETry extends SExpression {
     }
 
     @Override
-    public SValue evaluate(final ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(final ExecEnvironment env) throws VMException {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
@@ -40,5 +40,23 @@ public class SETry extends SExpression {
                 return new SNull();
             }
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SETry ret = new SETry();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.mainBody = this.mainBody.deepClone();
+
+        if (this.catchBody != null) {
+            ret.catchBody = this.catchBody.deepClone();
+        }
+
+        if (this.finallyBody != null) {
+            ret.finallyBody = this.finallyBody.deepClone();
+        }
+
+        return ret;
     }
 }

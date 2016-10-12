@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SESub extends SExpression {
     private List<SExpression> arguments;
 
+    public SESub() {}
+
     public SESub(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -53,5 +55,15 @@ public class SESub extends SExpression {
             throw new VMException(3014, "subject must be string or list", headAtom);
         }
 
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SESub ret = new SESub();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.arguments = List.deepClone(ret.arguments);
+
+        return ret;
     }
 }

@@ -13,6 +13,8 @@ public class SERange extends SExpression {
     private SExpression interval;
     private SExpression end;
 
+    public SERange() {}
+
     public SERange(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
         List<SExpression> args = SExpression.castPlain(c);
@@ -46,5 +48,17 @@ public class SERange extends SExpression {
         }
 
         return new SList(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SERange ret = new SERange();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.start = this.start.deepClone();
+        ret.interval = this.interval.deepClone();
+        ret.end = this.end.deepClone();
+
+        return ret;
     }
 }

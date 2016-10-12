@@ -58,12 +58,12 @@ public class List<T> extends java.util.ArrayList<T> {
         return ret;
     }
 
-    public static List<SExpression> clone(List<SExpression> src) {
+    public static List<SExpression> deepClone(List<SExpression> src) throws VMException {
         List<SExpression> ret = new List<SExpression>(src.size());
         com.rits.cloning.Cloner c = new Cloner();
 
         for (SExpression t : src) {
-            ret.add(c.deepClone(t));
+            ret.add(t.deepClone());
         }
         return ret;
     }

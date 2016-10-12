@@ -18,6 +18,8 @@ public class SECond extends SExpression {
     public List<Branch> branches;
     public List<SExpression> defaultBranch = null;
 
+    public SECond() {}
+
     public SECond(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -62,6 +64,28 @@ public class SECond extends SExpression {
                 ret = e.evaluate(env);
             }
             return ret;
+        }
+
+        return ret;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SECond ret = new SECond();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.condition = this.condition.deepClone();
+
+        if (this.defaultBranch != null) {
+            ret.defaultBranch = List.deepClone(this.defaultBranch);
+        }
+
+        ret.branches = new List<Branch>(this.branches.size());
+        for (final Branch branch : this.branches) {
+            ret.branches.add(new Branch() {{
+                this.recv = branch.recv.deepClone();
+                this.body = List.deepClone(branch.body);
+            }});
         }
 
         return ret;

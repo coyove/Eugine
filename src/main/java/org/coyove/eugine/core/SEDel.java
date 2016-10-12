@@ -14,6 +14,8 @@ public class SEDel extends SExpression {
     private SExpression host;
     private SExpression index;
 
+    public SEDel() {}
+
     public SEDel(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -47,5 +49,15 @@ public class SEDel extends SExpression {
         } else {
             throw new VMException(2009, "mismatch types", headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEDel ret = new SEDel();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.host = this.host.deepClone();
+        ret.index = this.index.deepClone();
+        return ret;
     }
 }

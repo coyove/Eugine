@@ -70,7 +70,7 @@ public class SEPrint extends SExpression {
         ret.tailCompound = this.tailCompound;
 
         ret.delim = this.delim;
-        ret.arguments = List.clone(this.arguments);
+        ret.arguments = List.deepClone(this.arguments);
 
         return ret;
     }

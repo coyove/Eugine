@@ -5,8 +5,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * Created by zezhong on 2016/9/9.
  */
@@ -46,11 +44,11 @@ public class SEClone extends SExpression {
 
                 ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
 
-                newEnv.put("~parent", new SDict(init.outterEnv));
+                newEnv.put("~parent", new SDict(init.outerEnv));
                 newEnv.put("~atom", new SObject(headAtom));
                 newEnv.put("~this", ret);
 
-                newEnv.parentEnv = init.outterEnv;
+                newEnv.parentEnv = init.outerEnv;
                 for (SExpression se : init.body)
                     se.evaluate(newEnv);
 
@@ -66,7 +64,7 @@ public class SEClone extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.varName = this.varName.deepClone();
-        ret.arguments = List.clone(this.arguments);
+        ret.arguments = List.deepClone(this.arguments);
         return ret;
     }
 }

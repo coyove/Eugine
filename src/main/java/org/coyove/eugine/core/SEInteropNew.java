@@ -16,6 +16,8 @@ public class SEInteropNew extends SExpression {
     private SExpression definition;
     private List<SExpression> arguments;
 
+    public SEInteropNew() {}
+
     public SEInteropNew(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -59,5 +61,16 @@ public class SEInteropNew extends SExpression {
             throw new VMException(2036, "invoking '" + cls.getSimpleName() + "' failed, " +
                     e.getMessage(), headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEInteropNew ret = new SEInteropNew();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.subject = this.subject.deepClone();
+        ret.definition = this.definition.deepClone();
+        ret.arguments = List.deepClone(this.arguments);
+        return ret;
     }
 }

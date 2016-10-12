@@ -12,6 +12,8 @@ public class SESplit extends SExpression {
     private SExpression text;
     private SExpression delim;
 
+    public SESplit() {}
+
     public SESplit(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -33,5 +35,16 @@ public class SESplit extends SExpression {
         }
 
         return new SList(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SESplit ret = new SESplit();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.text = this.text.deepClone();
+        ret.delim = this.delim.deepClone();
+
+        return ret;
     }
 }

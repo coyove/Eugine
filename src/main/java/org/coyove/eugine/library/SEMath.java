@@ -14,10 +14,12 @@ import java.util.Random;
 public class SEMath extends SExpression {
     private SExpression argument;
     private SExpression argument2;
-    private OPERATION func;
     private static Random defaultRandom = new Random(new Date().getTime());
 
+    private OPERATION func;
     public enum OPERATION { SIN, COS, TAN, ASIN, ACOS, ATAN, ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, POW }
+
+    public SEMath() {}
 
     public SEMath(Atom ha, Compound c, OPERATION f) throws VMException {
         super(ha, c, 1);
@@ -74,4 +76,15 @@ public class SEMath extends SExpression {
         }
     }
 
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEMath ret = new SEMath();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+        ret.argument2 = this.argument2.deepClone();
+        ret.func = this.func;
+
+        return ret;
+    }
 }

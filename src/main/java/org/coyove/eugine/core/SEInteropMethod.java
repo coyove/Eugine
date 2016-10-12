@@ -16,9 +16,11 @@ public class SEInteropMethod extends SExpression {
     private SExpression methodName;
     private SExpression definition;
     private List<SExpression> arguments;
-    private RETURN_TYPE type;
 
+    private RETURN_TYPE type;
     public enum RETURN_TYPE { DIRECT_RETURN, CAST_TO_SVALUE }
+
+    public SEInteropMethod() {}
 
     public SEInteropMethod(Atom ha, Compound c, RETURN_TYPE t) throws VMException {
         super(ha, c, 3);
@@ -75,5 +77,19 @@ public class SEInteropMethod extends SExpression {
         } catch (Exception e) {
             throw new VMException(2032, "invoking '" + method + "' failed, " + e.getMessage(), headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEInteropMethod ret = new SEInteropMethod();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.subject = this.subject.deepClone();
+        ret.methodName = this.methodName.deepClone();
+        ret.definition = this.definition.deepClone();
+        ret.arguments = List.deepClone(this.arguments);
+        ret.type = this.type;
+        return ret;
     }
 }

@@ -6,8 +6,6 @@ import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 import org.apache.commons.lang3.tuple.*;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * Created by coyove on 2016/9/9.
  */
@@ -17,6 +15,8 @@ public class SECall extends SExpression {
 
     private List<SExpression> arguments;
     private enum continueState { CONTINUE, TAIL_CALL, FALSE_NULL }
+
+    public SECall() {}
 
     public SECall(Atom ha, Compound c) throws VMException {
         super(ha, c);
@@ -178,7 +178,7 @@ public class SECall extends SExpression {
             }
 
             ExecEnvironment newEnv = prepareExecEnvironment(closure.arguments, arguments);
-            newEnv.put("~parent", new SDict(closure.outterEnv));
+            newEnv.put("~parent", new SDict(closure.outerEnv));
             newEnv.put("~atom", new SObject(headAtom));
 
             if (closure.refer instanceof SClosure) {
@@ -190,9 +190,9 @@ public class SECall extends SExpression {
             }
 
             if (closure.transparent) {
-                newEnv = closure.outterEnv;
+                newEnv = closure.outerEnv;
             } else {
-                newEnv.parentEnv = closure.outterEnv;
+                newEnv.parentEnv = closure.outerEnv;
             }
             SValue ret = new SNull();
 
@@ -223,10 +223,12 @@ public class SECall extends SExpression {
 
     @Override
     public SExpression deepClone() throws VMException {
-        SECall ret = new SECall(headAtom, new Compound());
+        SECall ret = new SECall();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
 
         ret.closureName = this.closureName;
-        ret.arguments = List.clone(this.arguments);
+        ret.arguments = List.deepClone(this.arguments);
 
         if (this.closureObject != null) {
             ret.closureObject = this.closureObject.deepClone();

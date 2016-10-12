@@ -9,10 +9,12 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SELogic extends SExpression {
-    private LOGIC log;
     private List<SExpression> values;
 
+    private LOGIC log;
     public enum LOGIC {AND, OR, NOT}
+
+    public SELogic() {}
 
     public SELogic(Atom ha, Compound c, LOGIC a) throws VMException {
         super(ha, c, 1);
@@ -52,5 +54,16 @@ public class SELogic extends SExpression {
 
         return new SBool(ret);
 
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SELogic ret = new SELogic();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.log = this.log;
+        ret.values = List.deepClone(this.values);
+
+        return ret;
     }
 }

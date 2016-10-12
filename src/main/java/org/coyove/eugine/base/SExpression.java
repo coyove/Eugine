@@ -121,8 +121,5 @@ public abstract class SExpression implements java.io.Serializable {
         return this.evaluate(env);
     }
 
-    public SExpression deepClone() throws VMException {
-        System.out.println(this.getClass().getSimpleName());
-        return this;
-    }
+    public abstract SExpression deepClone() throws VMException;
 }

@@ -13,6 +13,8 @@ public class SEIf extends SExpression {
     public SExpression trueBranch;
     public SExpression falseBranch;
 
+    public SEIf() {}
+
     public SEIf(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
@@ -39,5 +41,19 @@ public class SEIf extends SExpression {
                 new VMException(2026, "invalid condition", headAtom));
 
         return res.get();
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEIf ret = new SEIf();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.condition = this.condition.deepClone();
+        ret.trueBranch = this.trueBranch.deepClone();
+
+        if (this.falseBranch != null) {
+            ret.falseBranch = this.falseBranch.deepClone();
+        }
+        return ret;
     }
 }

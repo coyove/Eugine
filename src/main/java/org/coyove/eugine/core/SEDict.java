@@ -13,6 +13,8 @@ import java.util.HashMap;
 public class SEDict extends SExpression {
     private List<SExpression> values;
 
+    public SEDict() {}
+
     public SEDict(Atom ha, Compound c) throws VMException {
         super(ha, c);
         values = SExpression.castPlain(c);
@@ -34,5 +36,14 @@ public class SEDict extends SExpression {
             ret.put(key.<String>get(), c.get(1));
         }
         return new SDict(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEDict ret = new SEDict();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.values = List.deepClone(this.values);
+        return ret;
     }
 }

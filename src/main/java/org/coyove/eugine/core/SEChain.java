@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SEChain extends SExpression {
     public List<SExpression> expressions;
 
+    public SEChain() {}
+
     public SEChain(Atom ha, Compound c) throws VMException {
         super(ha, c);
         expressions = SExpression.castPlain(c);
@@ -28,8 +30,10 @@ public class SEChain extends SExpression {
 
     @Override
     public SExpression deepClone() throws VMException {
-        SEChain ret = new SEChain(headAtom, new Compound());
-        ret.expressions = List.clone(this.expressions);
+        SEChain ret = new SEChain();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.expressions = List.deepClone(this.expressions);
         return ret;
     }
 }

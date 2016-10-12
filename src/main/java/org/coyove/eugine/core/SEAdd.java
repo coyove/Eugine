@@ -14,6 +14,8 @@ public class SEAdd extends SExpression {
     private List<SExpression> values;
     private boolean self = false;
 
+    public SEAdd() {}
+
     public SEAdd(Atom ha, Compound c, boolean s) throws VMException {
         super(ha, c, 1);
         values = SExpression.castPlain(c);
@@ -80,8 +82,10 @@ public class SEAdd extends SExpression {
 
     @Override
     public SExpression deepClone() throws VMException {
-        SEAdd ret = new SEAdd(headAtom, new Compound(), self);
-        ret.values = List.clone(values);
+        SEAdd ret = new SEAdd();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.values = List.deepClone(values);
         return ret;
     }
 }

@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SEExit extends SExpression {
     private SExpression argument;
 
+    public SEExit() {}
+
     public SEExit(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
@@ -30,5 +32,14 @@ public class SEExit extends SExpression {
         }
 
         throw new VMException(7000, msg.<String>get(), headAtom);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEExit ret = new SEExit();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+        return ret;
     }
 }

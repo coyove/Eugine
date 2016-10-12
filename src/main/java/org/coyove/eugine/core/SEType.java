@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SEType extends SExpression {
     private SExpression name;
 
+    public SEType() {}
+
     public SEType(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
@@ -25,5 +27,14 @@ public class SEType extends SExpression {
         } else {
             return new SString(v.getClass().getSimpleName().substring(1));
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEType ret = new SEType();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.name = this.name.deepClone();
+        return ret;
     }
 }

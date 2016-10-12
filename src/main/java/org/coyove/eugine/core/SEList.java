@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SEList extends SExpression {
     private List<SExpression> values;
 
+    public SEList() {}
+
     public SEList(Atom ha, Compound c) throws VMException {
         super(ha, c);
 
@@ -22,5 +24,14 @@ public class SEList extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         return new SList(SExpression.eval(values, env));
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEList ret = new SEList();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.values = List.deepClone(this.values);
+        return ret;
     }
 }

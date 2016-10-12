@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class SESync extends SExpression {
     public List<SExpression> expressions;
 
+    public SESync() {}
+
     public SESync(Atom ha, Compound c) throws VMException {
         super(ha, c);
         expressions = SExpression.castPlain(c);
@@ -21,10 +23,15 @@ public class SESync extends SExpression {
         synchronized (this) {
             SValue ret = new SNull();
             for (int i = 0; i < expressions.size(); i++) {
-                SExpression se = expressions.get(i);
-                ret = se.evaluate(env);
+                ret = expressions.get(i).evaluate(env);
             }
             return ret;
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        // Sync cannot be cloned
+        return this;
     }
 }

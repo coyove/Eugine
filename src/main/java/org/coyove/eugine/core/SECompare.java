@@ -14,6 +14,8 @@ public class SECompare extends SExpression {
     private String action;
     private List<SExpression> values;
 
+    public SECompare() {}
+
     public SECompare(Atom ha, Compound c, String a) throws VMException {
         super(ha, c, 1);
 
@@ -80,8 +82,11 @@ public class SECompare extends SExpression {
 
     @Override
     public SExpression deepClone() throws VMException {
-        SECompare ret = new SECompare(headAtom, new Compound(), action);
+        SECompare ret = new SECompare();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
         ret.action = this.action;
+        ret.values = List.deepClone(this.values);
 
         return ret;
     }

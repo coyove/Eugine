@@ -1,6 +1,5 @@
 package org.coyove.eugine.value;
 
-import com.rits.cloning.Cloner;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.*;
@@ -9,7 +8,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class SClosure extends SValue {
-    public ExecEnvironment outterEnv;
+    public ExecEnvironment outerEnv;
     public List<String> arguments;
     public int argCount;
     public List<SExpression> body;
@@ -19,7 +18,7 @@ public class SClosure extends SValue {
 
     public SClosure(ExecEnvironment env, List<String> args, List<SExpression> b) {
         super(b);
-        outterEnv = env;
+        outerEnv = env;
         arguments = args;
         argCount = args.size();
         body = b;
@@ -41,9 +40,10 @@ public class SClosure extends SValue {
         transparent = true;
     }
 
+    // This clone() is invoked by "(clone ...)"
     @Override
     public SValue clone() {
-        SClosure ret = new SClosure(outterEnv, arguments, List.clone(body));
+        SClosure ret = new SClosure(outerEnv, arguments, body);
 
         ret.extra.parentEnv = this.extra;
         ret.proto = this;
@@ -52,10 +52,11 @@ public class SClosure extends SValue {
         return ret;
     }
 
-    public SValue clone_() {
-        SClosure ret = new SClosure(outterEnv, arguments, List.clone(body));
+    // This is the true "deep" clone, don't invoke deepClone() because SValue's deepClone() calls clone()
+    public SValue getCopy() throws VMException {
+        SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
-        ret.extra = this.extra.clone();
+        ret.extra = this.extra; //.clone();
         ret.transparent = this.transparent;
 
         SValue.copyAttributes(ret, this);

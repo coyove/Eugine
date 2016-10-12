@@ -10,12 +10,13 @@ import org.coyove.eugine.util.*;
  */
 public class SEChar extends SExpression {
     private SExpression argument;
+
     private CONVERT action;
+    public enum CONVERT {ASC, CHR}
 
-    public enum CONVERT { ASC, CHR }
+    public SEChar() {}
 
-    public SEChar(Atom ha, Compound c, CONVERT a) throws VMException
-    {
+    public SEChar(Atom ha, Compound c, CONVERT a) throws VMException {
         super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
@@ -23,8 +24,7 @@ public class SEChar extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue arg = argument.evaluate(env);
         switch (action) {
             case ASC:
@@ -40,9 +40,19 @@ public class SEChar extends SExpression {
                 SInteger i = Utils.cast(arg, SInteger.class,
                         new VMException(3003, "invalid argument", headAtom));
 
-                return new SString(String.valueOf((char)(i.<Long>get().intValue())));
+                return new SString(String.valueOf((char) (i.<Long>get().intValue())));
             default:
                 throw new VMException(3004, "unknown operation", headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEChar ret = new SEChar();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.action = this.action;
+        ret.argument = this.argument.deepClone();
+        return ret;
     }
 }

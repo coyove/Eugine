@@ -1,7 +1,6 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.SECall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -13,8 +12,9 @@ public class SEThread extends SExpression {
     private SExpression closure;
     private List<SExpression> arguments;
 
-    public SEThread(Atom ha, Compound c) throws VMException
-    {
+    public SEThread() {}
+
+    public SEThread(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 
         closure = SExpression.cast(c.atoms.pop());
@@ -22,8 +22,7 @@ public class SEThread extends SExpression {
     }
 
     @Override
-    public SValue evaluate(final ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(final ExecEnvironment env) throws VMException {
         final SClosure closure = Utils.cast(this.closure.evaluate(env), SClosure.class);
         if (closure == null)
             throw new VMException(3020, "invalid function to go", headAtom);
@@ -31,7 +30,7 @@ public class SEThread extends SExpression {
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
-                    (new SECall(closure.clone_(), arguments, headAtom, tailCompound)).evaluate(env);
+                    (new SECall(closure.getCopy(), arguments, headAtom, tailCompound)).evaluate(env);
                 } catch (VMException ex) {
                     System.out.println("THREAD: " + ex.getMessage());
                 }
@@ -40,5 +39,18 @@ public class SEThread extends SExpression {
 
         t.start();
         return new SNull();
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEThread ret = new SEThread();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        // note here closure is not SClosure
+        ret.closure = this.closure.deepClone();
+        ret.arguments = List.deepClone(this.arguments);
+
+        return ret;
     }
 }

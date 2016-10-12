@@ -31,18 +31,32 @@ public class SELambda extends SExpression {
         return ret;
     }
 
+    public SELambda() {
+    }
+
     public SELambda(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 
         if (c.atoms.head() instanceof Atom)
             throw new VMException(2038, "invalid lambda declaration", ha);
 
-        arguments = SELambda.CompoundToArguments((Compound)c.atoms.pop(), ha);
+        arguments = SELambda.CompoundToArguments((Compound) c.atoms.pop(), ha);
         body = SExpression.castPlain(c);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) {
         return new SClosure(env, arguments, body);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SELambda ret = new SELambda();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.body = List.deepClone(this.body);
+        ret.arguments = this.arguments;
+
+        return ret;
     }
 }

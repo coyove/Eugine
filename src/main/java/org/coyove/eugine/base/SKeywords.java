@@ -84,7 +84,7 @@ public class SKeywords {
                         return new SESet(ha, c, SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
                     }
                 });
-                put("clone", new CallableKeyword() {
+                put("deepClone", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEClone(ha, c);
                     }
