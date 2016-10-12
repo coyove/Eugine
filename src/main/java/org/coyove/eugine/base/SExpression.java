@@ -120,4 +120,9 @@ public abstract class SExpression implements java.io.Serializable {
     public SValue execute(ExecEnvironment env) throws VMException {
         return this.evaluate(env);
     }
+
+    // public abstract SExpression clone() throws VMException;
+    public SExpression clone() {
+        return null;
+    }
 }

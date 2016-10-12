@@ -120,7 +120,7 @@ public class main {
 
 //        ServerSocket ss = new ServerSocket(80);
 //        Socket s = ss.accept();
-//        s.getOutputStream().write("zzz".getBytes());
+//        s.getOutputStream().close();
 //        s.close();
     }
 }

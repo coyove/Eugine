@@ -33,7 +33,9 @@ public class SEAdd extends SExpression {
                 StringBuilder sb = new StringBuilder(ret);
                 for (int i = 1; i < results.size(); i++)
                     sb.append(results.get(i).get().toString());
-                return new SString(sb.toString());
+
+                lead.underlying = sb.toString();
+                return new SNull();
             } else {
                 for (int i = 1; i < results.size(); i++)
                     ret += results.get(i).get().toString();
@@ -64,15 +66,22 @@ public class SEAdd extends SExpression {
                 list = lead.get();
                 if (lead.immutable)
                     throw new VMException(2101, "list is immutable", headAtom);
+                list.addAll(results.skip(1));
+                return new SNull();
             } else {
                 list = (List<SValue>) lead.<List<SValue>>get().clone();
+                list.addAll(results.skip(1));
+                return new SList(list);
             }
-
-            list.addAll(results.skip(1));
-
-            return new SList(list);
         }
 
         return new SNull();
     }
+
+//    @Override
+//    public SExpression clone() throws VMException {
+//        SEAdd ret = new SEAdd(headAtom, null, self);
+//        ret.values = List.clone(values);
+//        return ret;
+//    }
 }

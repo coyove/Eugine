@@ -6,14 +6,16 @@ import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 import org.apache.commons.lang3.tuple.*;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Created by coyove on 2016/9/9.
  */
 public class SECall extends SExpression {
     private String closureName;
     private SExpression closureObject = null;
-    private List<SExpression> arguments;
 
+    private List<SExpression> arguments;
     private enum continueState { CONTINUE, TAIL_CALL, FALSE_NULL }
 
     public SECall(Atom ha, Compound c) throws VMException {
@@ -154,6 +156,7 @@ public class SECall extends SExpression {
             return new SList(ret);
         }
 
+
         while (true) {
 
             if (!checkArgumentsCount(closure, arguments)) {
@@ -175,7 +178,7 @@ public class SECall extends SExpression {
             }
 
             ExecEnvironment newEnv = prepareExecEnvironment(closure.arguments, arguments);
-            newEnv.put("~parent", new SDict(closure.innerEnv));
+            newEnv.put("~parent", new SDict(closure.outterEnv));
             newEnv.put("~atom", new SObject(headAtom));
 
             if (closure.refer instanceof SClosure) {
@@ -187,9 +190,9 @@ public class SECall extends SExpression {
             }
 
             if (closure.transparent) {
-                newEnv = closure.innerEnv;
+                newEnv = closure.outterEnv;
             } else {
-                newEnv.parentEnv = closure.innerEnv;
+                newEnv.parentEnv = closure.outterEnv;
             }
             SValue ret = new SNull();
 

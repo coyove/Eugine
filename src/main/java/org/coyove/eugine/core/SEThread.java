@@ -31,9 +31,9 @@ public class SEThread extends SExpression {
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
-                    (new SECall(closure, arguments, headAtom, tailCompound)).evaluate(env);
+                    (new SECall(closure.clone_(), arguments, headAtom, tailCompound)).evaluate(env);
                 } catch (VMException ex) {
-
+                    System.out.println("THREAD: " + ex.getMessage());
                 }
             }
         });

@@ -11,12 +11,12 @@ import org.coyove.eugine.util.*;
 public class SECond extends SExpression {
     public class Branch implements java.io.Serializable {
         public SExpression recv;
-        public SExpression body;
+        public List<SExpression> body;
     }
 
     public SExpression condition;
     public List<Branch> branches;
-    public SExpression defaultBranch = null;
+    public List<SExpression> defaultBranch = null;
 
     public SECond(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
@@ -33,11 +33,11 @@ public class SECond extends SExpression {
 
             if (cond instanceof Atom && ((Atom) cond).token.type == Token.TokenType.ATOMIC &&
                     ((Atom) cond).token.value.toString().equals("_")) {
-                defaultBranch = SExpression.cast(b.atoms.pop());
+                defaultBranch = SExpression.castPlain(b);
             } else {
                 branches.add(new Branch() {{
                     recv = SExpression.cast(cond);
-                    body = SExpression.cast(b.atoms.pop());
+                    body = SExpression.castPlain(b);
                 }});
             }
         }
@@ -46,15 +46,24 @@ public class SECond extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         Object cond = condition.evaluate(env).get();
+        SValue ret = new SNull();
 
         for (Branch b : branches) {
-            if (b.recv.evaluate(env).get().equals(cond))
-                return b.body.evaluate(env);
+            if (b.recv.evaluate(env).get().equals(cond)) {
+                for (SExpression e : b.body) {
+                    ret = e.evaluate(env);
+                }
+                return ret;
+            }
         }
 
-        if (defaultBranch != null)
-            return defaultBranch.evaluate(env);
+        if (defaultBranch != null) {
+            for (SExpression e : defaultBranch) {
+                ret = e.evaluate(env);
+            }
+            return ret;
+        }
 
-        return new SNull();
+        return ret;
     }
 }

@@ -27,7 +27,7 @@ public class SEFor extends SExpression {
         if (body.arguments.size() == 2)
             newEnv.put(body.arguments.get(1), new SInteger((long) idx));
 
-        newEnv.parentEnv = body.innerEnv;
+        newEnv.parentEnv = body.outterEnv;
         SValue ret = new SNull();
 
         for (SExpression se : body.body) {

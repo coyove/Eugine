@@ -55,4 +55,15 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     public void putVar(String key, SValue value) {
         super.put(key, value);
     }
+
+    @Override
+    public ExecEnvironment clone() {
+        ExecEnvironment ret = (ExecEnvironment) super.clone();
+
+        if (this.parentEnv != null)
+            ret.parentEnv = this.parentEnv;
+        ret.strict = this.strict;
+
+        return ret;
+    }
 }

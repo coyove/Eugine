@@ -29,12 +29,17 @@ public class SELogic extends SExpression {
         SBool lead = Utils.cast(results.head(), SBool.class, ex);
         boolean ret = lead.get();
 
+        if (ret && log == LOGIC.OR)
+            return new SBool(true);
+
         if (log != LOGIC.NOT) {
             for (int i = 1; i < results.size(); i++) {
                 SBool next = Utils.cast(results.get(i), SBool.class, ex);
                 switch (log) {
                     case AND:
                         ret = ret && next.<Boolean>get();
+                        if (!ret)
+                            return new SBool(false);
                         break;
                     case OR:
                         ret = ret || next.<Boolean>get();

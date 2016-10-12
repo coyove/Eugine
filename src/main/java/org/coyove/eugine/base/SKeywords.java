@@ -413,6 +413,11 @@ public class SKeywords {
                         return new SESplit(ha, c);
                     }
                 });
+                put("replace", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEReplace(ha, c);
+                    }
+                });
                 put("asc", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEChar(ha, c, SEChar.CONVERT.ASC);
@@ -436,7 +441,12 @@ public class SKeywords {
 
                 put(".", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropMethod(ha, c);
+                        return new SEInteropMethod(ha, c, SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE);
+                    }
+                });
+                put("call", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEInteropMethod(ha, c, SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
                     }
                 });
                 put("cls", new CallableKeyword() {
@@ -453,6 +463,17 @@ public class SKeywords {
                 put("go", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEThread(ha, c);
+                    }
+                });
+                put("try", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SETry(ha, c);
+                    }
+                });
+
+                put("buffer", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEBytesBuffer(ha, c);
                     }
                 });
             }};

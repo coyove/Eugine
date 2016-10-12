@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 /**
  * Created by coyove on 2016/9/9.
  */
-public class Eugine {
+public class Eugine implements Serializable {
     public ExecEnvironment environment = new ExecEnvironment() {{
         put("null", new SNull(true));
         put("#nil", new SNull(true));

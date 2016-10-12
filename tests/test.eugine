@@ -1,66 +1,50 @@
-;;; if you tend to use a var without assign a value to it, its value = null
-;;; if you use a var with a "@" before its name (no space between), like @var-name, its value = "var-name" (string)
-;
-;(println "Begin tests")
-;(println "Working under " ~path "\n")
-;
-;; (set ~strict)
-;
-;(var start)
-;[start = (time 1)]
-;
-;(~include "util.eugine")
-;
-;(println "== Mathematics ==")
-;(~include "math.lisp")
-;
-;(println "\n== Lambda / Recursion ==")
-;(~include "lambda.lisp")
-;(~include "recursion.lisp")
-;
-;(println "\n== Others ==")
-;(~include "others.eugine")
-;
-;(~include "interop.eugine")
-;(~include "encap.eugine")
-;
-;(def cps (f)
-;    (lambda (args...)
-;        ((last args) (f (explode (init args))))))
-;
-;(def -. (args...) (- (explode args)))
-;(def +. (args...) (+ (explode args)))
-;(def ==. (args...) (== (explode args)))
-;(def println. (args...) (println (explode args)))
-;
-;(def add& (n k)
-;    ((cps ==.) n 0 (lambda (b)
-;        (if b                   	; growing continuation
-;            (k 0)                	; in the recursive call
-;            ((cps -.) n 1 (lambda (nm1)
-;               	(add& nm1 (lambda (f)
-;                    ((cps +.) n f k)))))))))
-;
-;(def add (n) (if [n == 0] 0 {(println n) [n + (add [n - 1])]}))
-;(def #add (n c) (if [n == 0] c {[z := [n - 1]] (#add z [n + c])}))
-;
-;(add& 10000 [(sum) => (assert [sum == (#add 10000 0)] "CPS transform")])
-;
-;(println "\nFinish " assertions.total " tests in " (floor [(time 1) - start])
-; 	"ms, passed: " assertions.passed ", failed: " assertions.failed)
+;; if you tend to use a var without assign a value to it, its value = null
+;; if you use a var with a "@" before its name (no space between), like @var-name, its value = "var-name" (string)
 
+(println "Begin tests")
+(println "Working under " ~path "\n")
 
-(~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
+; (set ~strict)
 
-(def handle (client)
-    (set os [client . @getOutputStream ()])
-    (set text "HTTP/1.0 404 Not Found\r\nConnection: Closed\r\n\r\n")
-    [os . @write (list "byte[]") [text . @getBytes ()]]
-    [os . @close ()]
-)
+(var start)
+[start = (time 1)]
 
-[ss := (new (cls @java.net.ServerSocket) (list @int) 80)]
-(loop (true) [() =>
-    (var client [ss . @accept ()])
-    (go handle client)
-])
+(~include "util.eugine")
+
+(println "== Mathematics ==")
+(~include "math.lisp")
+
+(println "\n== Lambda / Recursion ==")
+(~include "lambda.lisp")
+(~include "recursion.lisp")
+
+(println "\n== Others ==")
+(~include "others.eugine")
+
+(~include "interop.eugine")
+(~include "encap.eugine")
+
+(def cps (f)
+   (lambda (args...)
+       ((last args) (f (explode (init args))))))
+
+(def -. (args...) (- (explode args)))
+(def +. (args...) (+ (explode args)))
+(def ==. (args...) (== (explode args)))
+(def println. (args...) (println (explode args)))
+
+(def add& (n k)
+   ((cps ==.) n 0 (lambda (b)
+       (if b                   	; growing continuation
+           (k 0)                	; in the recursive call
+           ((cps -.) n 1 (lambda (nm1)
+              	(add& nm1 (lambda (f)
+                   ((cps +.) n f k)))))))))
+
+(def add (n) (if [n == 0] 0 {(println n) [n + (add [n - 1])]}))
+(def #add (n c) (if [n == 0] c {[z := [n - 1]] (#add z [n + c])}))
+
+(add& 10000 [(sum) => (assert [sum == (#add 10000 0)] "CPS transform")])
+
+(println "\nFinish " assertions.total " tests in " (floor [(time 1) - start])
+	"ms, passed: " assertions.passed ", failed: " assertions.failed)

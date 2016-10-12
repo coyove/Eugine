@@ -16,14 +16,18 @@ public class SEInteropMethod extends SExpression {
     private SExpression methodName;
     private SExpression definition;
     private List<SExpression> arguments;
+    private RETURN_TYPE type;
 
-    public SEInteropMethod(Atom ha, Compound c) throws VMException {
+    public enum RETURN_TYPE { DIRECT_RETURN, CAST_TO_SVALUE }
+
+    public SEInteropMethod(Atom ha, Compound c, RETURN_TYPE t) throws VMException {
         super(ha, c, 3);
 
         subject = SExpression.cast(c.atoms.pop());
         methodName = SExpression.cast(c.atoms.pop());
         definition = SExpression.cast(c.atoms.pop());
         arguments = SExpression.castPlain(c);
+        type = t;
     }
 
     @Override
@@ -58,7 +62,13 @@ public class SEInteropMethod extends SExpression {
                     .getDeclaredMethod(method, classes.toArray(new Class[classes.size()]));
             m.setAccessible(true);
 
-            return InteropHelper.castJavaType(m.invoke((obj instanceof Class) ? null : obj, passArgs.toArray()));
+            Object result = m.invoke((obj instanceof Class) ? null : obj, passArgs.toArray());
+
+            if (this.type == RETURN_TYPE.DIRECT_RETURN) {
+                return new SObject(result);
+            } else {
+                return InteropHelper.castJavaType(result);
+            }
 
         } catch (InvocationTargetException ie) {
             throw new VMException(2031, "error caused by '" + method + "': " + ie.getCause(), headAtom);

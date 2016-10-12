@@ -109,9 +109,12 @@ public class InteropHelper {
                 Class c = ClassUtils.getClass(clsName);
                 classes.add(c);
 
-                Object ret = InteropHelper.castSValue(args.get(i++), c);
+                SValue value = args.get(i++);
+                Object ret = InteropHelper.castSValue(value, c);
 
-                if (c.isArray()) {
+                if (value instanceof SObject) {
+                    passArgs.add(value.get());
+                } else if (c.isArray()) {
                     Object[] tmp = (Object[]) ret;
                     int len = tmp.length;
 
