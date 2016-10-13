@@ -1,7 +1,7 @@
 package org.coyove.eugine.util;
 
-import com.rits.cloning.Cloner;
 import org.coyove.eugine.base.SExpression;
+import org.coyove.eugine.base.SValue;
 
 import java.util.Collection;
 
@@ -60,7 +60,6 @@ public class List<T> extends java.util.ArrayList<T> {
 
     public static List<SExpression> deepClone(List<SExpression> src) throws VMException {
         List<SExpression> ret = new List<SExpression>(src.size());
-        com.rits.cloning.Cloner c = new Cloner();
 
         for (SExpression t : src) {
             ret.add(t.deepClone());

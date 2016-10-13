@@ -62,11 +62,9 @@ public class SESet extends SExpression {
             ret.immutable = false;
         }
 
-        if (action == ACTION.IMMUTABLE)
+        if (action == ACTION.IMMUTABLE) {
             ret.immutable = true;
-//
-//        ret.refDict = null;
-//        ret.refList = null;
+        }
 
         if (directName) {
             String sn = n.get();

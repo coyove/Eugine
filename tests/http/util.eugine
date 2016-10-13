@@ -1,0 +1,65 @@
+(~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
+(~define (struct ~name ~desc ~body...) ((def ~name () ~body...) ()))
+(var jString (cls @java.lang.String))
+
+(struct HTTP-Request "HTTP Request Body Struct"
+	[::data := ""]
+	[::post := (dict)]
+	[::route := ""]
+	[::action := ""]
+
+	[::parse-post-body := (lambda ()
+		(var pairs (split ::data "&"))
+		(loop pairs [(pair) =>
+			(var kv (split pair "="))
+			(if [(len kv) == 2] [[::post : [kv : 0]] := [kv : 1]])
+		])
+		(println (addressof ::post))
+	)]
+
+	;; response functions
+	[::response-socket := null]
+	[::response-stream := null]
+	[::write-header := (lambda (key value) 
+		(if (not [::response-socket . @isClosed ()])
+	    	[::response-stream call @write (list "byte[]") (buffer (+ key ": " value "\r\n"))])
+	)]
+	[::write := (lambda (text...) 
+		(var tmp "")
+		(loop text [(t) => (+= tmp t)])
+		(if (not [::response-socket . @isClosed ()])
+	    	[::response-stream call @write (list "byte[]") (buffer tmp)])
+	)]
+	[::close := (lambda () 
+		[::response-stream call @close ()]
+		[::response-socket call @close ()]
+	)]
+
+	;; ctor
+	[::~init := (lambda (client)
+		[::headers := (dict)]
+		[::post := (dict)]
+		(var ::response-socket client)
+		(var ::response-stream [client . @getOutputStream ()])
+	)]
+)
+
+(def starts-with (text prefix)
+	(if [(len text) < (var pl (len prefix))]
+		(false)
+		[(sub text 0 pl) == prefix]
+	)
+)
+
+(def join-string (texts delim)
+	(var ret "")
+	(loop texts [(text) => (+= ret (+ text delim))])
+	(ret)
+)
+
+(def socket-eos (text)
+	(var length len text)
+	(and 
+    	(eq [text : (- length 1)] [text : (- length 3)] "\n")
+    	(eq [text : (- length 2)] [text : (- length 4)] "\r"))
+)

@@ -25,7 +25,12 @@ public class SKeywords {
                 });
                 put("type", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEType(ha, c);
+                        return new SEType(ha, c, SEType.TYPE.TYPE);
+                    }
+                });
+                put("addressof", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEType(ha, c, SEType.TYPE.ADDR);
                     }
                 });
 
@@ -84,7 +89,7 @@ public class SKeywords {
                         return new SESet(ha, c, SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
                     }
                 });
-                put("deepClone", new CallableKeyword() {
+                put("clone", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEClone(ha, c);
                     }
@@ -416,6 +421,11 @@ public class SKeywords {
                 put("replace", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEReplace(ha, c);
+                    }
+                });
+                put("match", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SERegexMatch(ha, c);
                     }
                 });
                 put("asc", new CallableKeyword() {

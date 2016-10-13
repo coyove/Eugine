@@ -43,13 +43,19 @@ public class SClosure extends SValue {
     // This clone() is invoked by "(clone ...)"
     @Override
     public SValue clone() {
-        SClosure ret = new SClosure(outerEnv, arguments, body);
+        try {
+            SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
-        ret.extra.parentEnv = this.extra;
-        ret.proto = this;
+            ret.extra.parentEnv = this.extra;
+            ret.proto = this;
 
-        SValue.copyAttributes(ret, this);
-        return ret;
+            SValue.copyAttributes(ret, this);
+            return ret;
+        } catch (VMException ex) {
+            // this shouldn't happen
+            ex.printStackTrace();
+            return this;
+        }
     }
 
     // This is the true "deep" clone, don't invoke deepClone() because SValue's deepClone() calls clone()

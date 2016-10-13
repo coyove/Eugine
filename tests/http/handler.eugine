@@ -1,0 +1,47 @@
+(struct HTTP-Handler "handler"
+	[::write-common := (lambda (context status type)
+		(cond status
+			(404 (context::write "HTTP/1.1 404 Not Found\r\n"))
+			(403 (context::write "HTTP/1.1 403 Forbidden\r\n"))
+			(302 (context::write "HTTP/1.1 302 Found\r\n"))
+			(301 (context::write "HTTP/1.1 301 Moved Permanently\r\n"))
+			(_ (context::write "HTTP/1.1 200\r\n"))
+		)
+		(cond type
+			(@css (context::write-header "content-type" "text/css; charset=utf-8"))
+			(@js (context::write-header "content-type" "application/x-javascript; charset=utf-8"))
+			(@plain (context::write-header "content-type" "text/plain; charset=utf-8"))
+			(_ (context::write-header "content-type" "text/html; charset=utf-8"))
+		)
+	)]
+
+	[::index := (lambda (context)
+		(::write-common context 200 @html)
+		(context::write "\r\n")
+		(context::write "index page")
+		(context::close ())
+	)]
+
+	[::post := (lambda (context)
+		(::write-common context 200 @plain)
+		(context::write "\r\n")
+
+		(context::write "post" [context::post : @name])
+
+		(context::close ())
+	)]
+
+	[::not-found := (lambda (context)
+		(::write-common context 404 @html)
+		(context::write "\r\n")
+		(context::write "404 Page Not Found")
+		(context::close ())
+	)]
+
+	[::forbidden := (lambda (context)
+		(::write-common context 403 @html)
+		(context::write "\r\n")
+		(context::write "403 Forbidden")
+		(context::close ())
+	)]
+)

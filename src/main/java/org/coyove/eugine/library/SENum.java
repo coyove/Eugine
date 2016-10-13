@@ -22,6 +22,7 @@ public class SENum extends SExpression {
     private SValue convert(SValue arg) throws VMException {
         if (arg instanceof SString) {
             String str = arg.get();
+            str = str.trim();
             try {
                 if (str.contains(".")) {
                     return new SDouble(Double.parseDouble(str));

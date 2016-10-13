@@ -33,14 +33,22 @@ public class SEAdd extends SExpression {
 
             if (self) {
                 StringBuilder sb = new StringBuilder(ret);
-                for (int i = 1; i < results.size(); i++)
-                    sb.append(results.get(i).get().toString());
+                for (int i = 1; i < results.size(); i++) {
+                    Object obj = results.get(i).get();
+                    if (obj != null) {
+                        sb.append(obj.toString());
+                    }
+                }
 
                 lead.underlying = sb.toString();
                 return new SNull();
             } else {
-                for (int i = 1; i < results.size(); i++)
-                    ret += results.get(i).get().toString();
+                for (int i = 1; i < results.size(); i++) {
+                    Object obj = results.get(i).get();
+                    if (obj != null) {
+                        ret += obj.toString();
+                    }
+                }
                 return new SString(ret);
             }
         }
@@ -57,7 +65,7 @@ public class SEAdd extends SExpression {
 
             if (lead instanceof SDouble) {
                 return new SDouble(ret.doubleValue());
-            }else {
+            } else {
                 return new SInteger(ret.longValue());
             }
         }
@@ -66,8 +74,10 @@ public class SEAdd extends SExpression {
             List<SValue> list;
             if (self) {
                 list = lead.get();
-                if (lead.immutable)
+                if (lead.immutable) {
                     throw new VMException(2101, "list is immutable", headAtom);
+                }
+
                 list.addAll(results.skip(1));
                 return new SNull();
             } else {
@@ -86,6 +96,7 @@ public class SEAdd extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.values = List.deepClone(values);
+        ret.self = this.self;
         return ret;
     }
 }

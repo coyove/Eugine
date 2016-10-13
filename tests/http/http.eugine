@@ -1,0 +1,100 @@
+(~include "util.eugine")
+(~include "handler.eugine")
+
+(def dispatcher (context)
+	(var test-path (starts-with context::route))
+	(cond true
+		((eq context::route "/") 
+			(HTTP-Handler::index context))
+		((eq context::route "/post") 
+			(HTTP-Handler::post context))
+		(_ 
+			(HTTP-Handler::not-found context))
+	)
+)
+
+(def handle (client)
+	[client call @setSoTimeout (list @int) 5000]
+	(var is [client . @getInputStream ()])
+	(var buf (buffer 1024))
+    (var read 0)
+    (var total-read 0)
+    (var raw-request "")
+    (var body-length 0)
+    (var header-length 0)
+    (var total-length 0)
+    
+    (try 
+		(loop [read != -1] [() => 
+			(+= total-read (set read [is . @read (list "byte[]") buf]))
+			(var output (new jString ("byte[]" "int" "int") buf 0 read))
+			(+. raw-request output)
+
+			(var m match raw-request %"(?i)content-length:\s?(\d+)")
+			(if [(len m) > 0] (set body-length num [(split [m : 0 @text] ":") : 1]))
+
+			(set m (match raw-request %"(\r\n\r\n)"))
+			(if [(len m) > 0] (set total-length + (set header-length [m : 0 @end]) body-length))
+
+	        (not (or (socket-eos output) (eq total-length total-read)))
+		])
+	(println "timeout"))
+
+	(var requests (split [raw-request . @toLowerCase ()] "\r\n"))
+	(var http-context clone HTTP-Request client)
+
+	(loop requests [(request) =>
+		(var parts (split request " "))
+		(if [(len parts) > 1]
+			(cond [parts : 0]
+				("get" 
+					(var http-context::route [parts : 1])
+					(var http-context::action "get")
+				)
+				("post" 
+					(var http-context::route [parts : 1])
+					(var http-context::action "post")
+				)
+				(_ (var [http-context::headers : (replace [parts : 0] ":" "")] [parts : 1]))
+			)
+		)
+	])
+
+	(var http-context::data (sub raw-request header-length))
+	(http-context::parse-post-body ())
+
+	(var p-ct [[http-context::headers : "content-type"] != "application/x-www-form-urlencoded"])
+
+	(if (and [http-context::action == "post"] p-ct)
+		(HTTP-Handler::forbidden http-context)
+		(dispatcher http-context)
+	)
+
+	[is call @close ()]
+)
+
+[ss := (new (cls @java.net.ServerSocket) (list @int) 8080)]
+(println "listen on port 8080")
+(loop (true) [() =>
+    (var client [ss . @accept ()])
+    (go handle client)
+])
+
+; (struct dummy "struct"
+; 	[::zzz := ""]
+; 	[::~init := (lambda (i)
+; 		[::zzz := i]
+; 	)]
+
+; 	[::sss := (lambda ()
+; 		(sleep (floor (* 1000.0 (random 0))))
+; 		(str ::zzz)
+; 	)]
+; )
+
+; (loop (range 0 100) [(i) => 
+; 	(go (lambda (i)
+; 		(var a clone dummy i)
+; 		(println ( + (a::sss()) " "))
+; 	) (i))
+; ])

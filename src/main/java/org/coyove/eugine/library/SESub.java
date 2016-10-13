@@ -62,7 +62,7 @@ public class SESub extends SExpression {
         SESub ret = new SESub();
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
-        ret.arguments = List.deepClone(ret.arguments);
+        ret.arguments = List.deepClone(this.arguments);
 
         return ret;
     }

@@ -82,7 +82,9 @@ public class SEMath extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.argument = this.argument.deepClone();
-        ret.argument2 = this.argument2.deepClone();
+        if (this.argument2 != null) {
+            ret.argument2 = this.argument2.deepClone();
+        }
         ret.func = this.func;
 
         return ret;

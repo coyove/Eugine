@@ -62,10 +62,6 @@ public class SECall extends SExpression {
         if (closureObject == null) {
             if (env.containsKey(closureName)) {
                 closure = env.get(closureName);
-//            } else if (SKeywords.KeywordsLookup.containsKey(closureName)) {
-//                closure = new SClosure(SKeywords.KeywordsLookup.get(closureName)
-//                        .call(headAtom, tailCompound));
-//            } else {
             } else {
                 closure = (new SEVariable(closureName, headAtom, tailCompound)).evaluate(env);
                 env.put(closureName, closure);

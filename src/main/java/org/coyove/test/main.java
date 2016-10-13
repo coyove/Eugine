@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 
+import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
@@ -55,8 +56,9 @@ final class REPLTask implements Runnable {
 public class main {
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
-        if (args.length == 0)
+        if (args.length == 0) {
             return;
+        }
 
         if (args[0].equals("--repl")) {
             Integer linec = 0;
@@ -122,5 +124,6 @@ public class main {
 //        Socket s = ss.accept();
 //        s.getOutputStream().close();
 //        s.close();
+//        s.isClosed()
     }
 }

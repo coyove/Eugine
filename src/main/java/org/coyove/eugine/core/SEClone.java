@@ -24,38 +24,40 @@ public class SEClone extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue n = varName.evaluate(env);
-//        lock.lock();
-        SValue ret = n.clone();
-//        lock.unlock();
 
-        if (ret instanceof SClosure) {
-            ExecEnvironment extra = ((SClosure) ret).extra;
+        if (n instanceof SClosure) {
+            synchronized (n) {
+                SValue ret = n.clone();
+                ExecEnvironment extra = ((SClosure) ret).extra;
 
-            if (extra.containsKey("~init")) {
+                if (extra.containsKey("~init")) {
 
-                SClosure init = Utils.cast(extra.get("~init"), SClosure.class);
-                if (init == null)
-                    return ret;
+                    SClosure init = Utils.cast(extra.get("~init"), SClosure.class);
+                    if (init == null)
+                        return ret;
 
-                List<SValue> arguments = SExpression.eval(this.arguments, env);
+                    List<SValue> arguments = SExpression.eval(this.arguments, env);
 
-                if (!SECall.checkArgumentsCount(init, arguments))
-                    throw new VMException(2001, "not enough arguments to init", headAtom);
+                    if (!SECall.checkArgumentsCount(init, arguments))
+                        throw new VMException(2001, "not enough arguments to init", headAtom);
 
-                ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
+                    ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
 
-                newEnv.put("~parent", new SDict(init.outerEnv));
-                newEnv.put("~atom", new SObject(headAtom));
-                newEnv.put("~this", ret);
+                    newEnv.put("~parent", new SDict(init.outerEnv));
+                    newEnv.put("~atom", new SObject(headAtom));
+                    newEnv.put("~this", ret);
 
-                newEnv.parentEnv = init.outerEnv;
-                for (SExpression se : init.body)
-                    se.evaluate(newEnv);
+                    newEnv.parentEnv = init.outerEnv;
+                    for (SExpression se : init.body)
+                        se.evaluate(newEnv);
 
+                }
+
+                return ret;
             }
+        } else {
+            return n.clone();
         }
-
-        return ret;
     }
 
     @Override
