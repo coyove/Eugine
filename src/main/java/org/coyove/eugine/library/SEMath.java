@@ -1,11 +1,13 @@
 package org.coyove.eugine.library;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -17,9 +19,11 @@ public class SEMath extends SExpression {
     private static Random defaultRandom = new Random(new Date().getTime());
 
     private OPERATION func;
-    public enum OPERATION { SIN, COS, TAN, ASIN, ACOS, ATAN, ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, POW }
 
-    public SEMath() {}
+    public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN, ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, FORMAT_TIME, POW}
+
+    public SEMath() {
+    }
 
     public SEMath(Atom ha, Compound c, OPERATION f) throws VMException {
         super(ha, c, 1);
@@ -52,11 +56,11 @@ public class SEMath extends SExpression {
             case ROUND:
                 return new SInteger(Math.round(n));
             case FLOOR:
-                return new SInteger((long)Math.floor(n));
+                return new SInteger((long) Math.floor(n));
             case ABS:
                 return new SDouble(Math.abs(n));
             case SGN:
-                return new SInteger((long)Math.signum(n));
+                return new SInteger((long) Math.signum(n));
             case SQRT:
                 return new SDouble(Math.sqrt(n));
             case POW:
@@ -64,13 +68,16 @@ public class SEMath extends SExpression {
                 return new SDouble(Math.pow(n, p));
             case RANDOM:
                 if (n != 0) {
-                    Random rand = new Random((long)n);
+                    Random rand = new Random((long) n);
                     return new SDouble(rand.nextDouble());
                 } else {
                     return new SDouble(defaultRandom.nextDouble());
                 }
             case TIME:
-                return new SDouble((new Date()).getTime() / n);
+                return new SDouble(new Date().getTime() / n);
+            case FORMAT_TIME:
+                return new SString(DateFormatUtils.formatUTC((long) n,
+                        "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
             default:
                 throw new VMException(3007, "not implemented", headAtom);
         }

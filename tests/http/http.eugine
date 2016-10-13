@@ -17,12 +17,12 @@
 	[client call @setSoTimeout (list @int) 5000]
 	(var is [client . @getInputStream ()])
 	(var buf (buffer 1024))
-    (var read 0)
-    (var total-read 0)
-    (var raw-request "")
-    (var body-length 0)
-    (var header-length 0)
-    (var total-length 0)
+    (var read           0)
+    (var total-read     0)
+    (var raw-request    "")
+    (var body-length    0)
+    (var header-length  0)
+    (var total-length   0)
     
     (try 
 		(loop [read != -1] [() => 
@@ -45,6 +45,7 @@
 
 	(loop requests [(request) =>
 		(var parts (split request " "))
+
 		(if [(len parts) > 1]
 			(cond [parts : 0]
 				("get" 
@@ -55,13 +56,19 @@
 					(var http-context::route [parts : 1])
 					(var http-context::action "post")
 				)
-				(_ (var [http-context::headers : (replace [parts : 0] ":" "")] [parts : 1]))
+				("cookie:"
+				    (var http-context::cookie [parts : 1])
+				)
+				(_
+				    (var [http-context::headers : (replace [parts : 0] ":" "")] [parts : 1])
+				)
 			)
 		)
 	])
 
 	(var http-context::data (sub raw-request header-length))
 	(http-context::parse-post-body ())
+	(http-context::parse-cookie ())
 
 	(var p-ct [[http-context::headers : "content-type"] != "application/x-www-form-urlencoded"])
 
@@ -72,6 +79,8 @@
 
 	[is call @close ()]
 )
+
+(~include "templates/main.eugine")
 
 [ss := (new (cls @java.net.ServerSocket) (list @int) 8080)]
 (println "listen on port 8080")

@@ -1,0 +1,5 @@
+(~define (<< html ~~ ~elems...) (+ (list "html") ~elems...))
+
+(println (<html> "zzz" "b"))
+
+(~undef <html>)

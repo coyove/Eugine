@@ -3,26 +3,74 @@
 (var jString (cls @java.lang.String))
 
 (struct HTTP-Request "HTTP Request Body Struct"
-	[::data := ""]
-	[::post := (dict)]
+   	[::data := ""]
 	[::route := ""]
 	[::action := ""]
+	[::cookie := ""]
 
 	[::parse-post-body := (lambda ()
-		(var pairs (split ::data "&"))
-		(loop pairs [(pair) =>
-			(var kv (split pair "="))
-			(if [(len kv) == 2] [[::post : [kv : 0]] := [kv : 1]])
-		])
-		(println (addressof ::post))
+		[::post := parse-pairs ::data]
+		;(println (addressof ::post))
 	)]
+
+	[::parse-cookie := (lambda ()
+	    [::cookies := parse-pairs ::cookie]
+	)]
+
+	(def parse-pairs (text)
+	    (var pairs (split text "&"))
+	    (var ret (dict))
+        (loop pairs [(pair) =>
+            (var kv (split pair "="))
+            (if [(len kv) == 2] [[ret : [kv : 0]] := [kv : 1]])
+        ])
+        (ret)
+	)
 
 	;; response functions
 	[::response-socket := null]
 	[::response-stream := null]
+	[::write-common := (lambda (status ctype)
+        (cond status
+            (404 (::write "HTTP/1.1 404 Not Found\r\n"))
+            (403 (::write "HTTP/1.1 403 Forbidden\r\n"))
+            (302 (::write "HTTP/1.1 302 Found\r\n"))
+            (301 (::write "HTTP/1.1 301 Moved Permanently\r\n"))
+            (_   (::write "HTTP/1.1 200\r\n"))
+        )
+        (cond ctype
+            (@css   (::write-header "Content-Type" "text/css; charset=utf-8"))
+            (@js    (::write-header "Content-Type" "application/x-javascript; charset=utf-8"))
+            (@plain (::write-header "Content-Type" "text/plain; charset=utf-8"))
+            (@html  (::write-header "Content-Type" "text/html; charset=utf-8"))
+            (_      (::write-header "Content-Type" "application/octet-stream"))
+        )
+    )]
 	[::write-header := (lambda (key value) 
 		(if (not [::response-socket . @isClosed ()])
 	    	[::response-stream call @write (list "byte[]") (buffer (+ key ": " value "\r\n"))])
+	)]
+	[::write-cookie := (lambda (key value options)
+	    (var payload (+ key "=" value))
+
+	    (loop (keys options) [(k) => (
+	        (cond k
+                ("Expires"
+                    (var seconds [options : k])
+                    (var millis * seconds 1000)
+                    (+= payload ["; Expires=" + (time-format [(time 1) + millis])])
+                    (+= payload ["; Max-Age=" + (str seconds)])
+                )
+                ("HttpOnly"
+                    (+= payload "; HttpOnly")
+                )
+                (_
+                    (+= payload (+ "; " k "=" [options : k]))
+                )
+            )
+	    )])
+
+	    (::write-header "Set-Cookie" payload)
 	)]
 	[::write := (lambda (text...) 
 		(var tmp "")
@@ -39,6 +87,7 @@
 	[::~init := (lambda (client)
 		[::headers := (dict)]
 		[::post := (dict)]
+		[::cookies := (dict)]
 		(var ::response-socket client)
 		(var ::response-stream [client . @getOutputStream ()])
 	)]

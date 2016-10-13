@@ -193,6 +193,14 @@ public class Parser {
                 return new Compound();
             }
 
+            if (comp.atoms.size() == 2 && comp.atoms.head() instanceof Atom &&
+                    ((Atom) comp.atoms.head()).token.value.toString().equals("~undef")) {
+                Atom name = Utils.cast(comp.atoms.get(1), Atom.class,
+                        new VMException(1102, "invalid subject to undef", (Atom) comp.atoms.head()));
+                macros.remove(name.token.value.toString());
+                return new Compound();
+            }
+
             if (comp.atoms.head() instanceof Atom) {
                 String lead = ((Atom) comp.atoms.head()).token.value.toString();
                 if (macros.containsKey(lead)) {

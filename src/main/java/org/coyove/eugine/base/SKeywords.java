@@ -361,6 +361,11 @@ public class SKeywords {
                         return new SEMath(ha, c, SEMath.OPERATION.TIME);
                     }
                 });
+                put("time-format", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEMath(ha, c, SEMath.OPERATION.FORMAT_TIME);
+                    }
+                });
                 put("round", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEMath(ha, c, SEMath.OPERATION.ROUND);
