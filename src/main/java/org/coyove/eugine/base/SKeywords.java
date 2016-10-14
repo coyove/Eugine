@@ -366,6 +366,11 @@ public class SKeywords {
                         return new SEMath(ha, c, SEMath.OPERATION.FORMAT_TIME);
                     }
                 });
+                put("sha", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEMath(ha, c, SEMath.OPERATION.SHA);
+                    }
+                });
                 put("round", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEMath(ha, c, SEMath.OPERATION.ROUND);
@@ -426,6 +431,11 @@ public class SKeywords {
                 put("replace", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEReplace(ha, c);
+                    }
+                });
+                put("trim", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SETrim(ha, c);
                     }
                 });
                 put("match", new CallableKeyword() {

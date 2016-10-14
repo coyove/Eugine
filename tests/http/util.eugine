@@ -1,29 +1,42 @@
+(var jString (cls @java.lang.String))
+(var jString. "java.lang.String")
+(var jFiles (cls "java.nio.file.Files"))
+(var jPaths (cls "java.nio.file.Paths"))
+(var jURLDecoder (cls "java.net.URLDecoder"))
+(var jMessageDigest (cls "java.security.MessageDigest"))
+
 (~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
 (~define (struct ~name ~desc ~body...) ((def ~name () ~body...) ()))
-(var jString (cls @java.lang.String))
+(~define (sprintf ~format ~args...) 
+	[jString . @format (list jString. "java.lang.Object...") ~format (list ~args...)])
 
 (struct HTTP-Request "HTTP Request Body Struct"
    	[::data := ""]
 	[::route := ""]
 	[::action := ""]
 	[::cookie := ""]
+	[::is-logged-in := false]
 
 	[::parse-post-body := (lambda ()
-		[::post := parse-pairs ::data]
+		[::post := parse-pairs ::data "&"]
 		;(println (addressof ::post))
 	)]
 
 	[::parse-cookie := (lambda ()
-	    [::cookies := parse-pairs ::cookie]
+	    [::cookies := parse-pairs ::cookie ";"]
 	)]
 
-	(def parse-pairs (text)
-	    (var pairs (split text "&"))
+	(def parse-pairs (text delim)
+	    (var pairs (split text delim))
 	    (var ret (dict))
         (loop pairs [(pair) =>
             (var kv (split pair "="))
-            (if [(len kv) == 2] [[ret : [kv : 0]] := [kv : 1]])
+            (if [(len kv) == 2] {
+            	(var value [jURLDecoder . @decode (list jString. jString.) (trim [kv : 1]) "utf-8"])
+            	[[ret : (trim [kv : 0])] := value]
+        	})
         ])
+        (println text)
         (ret)
 	)
 
@@ -34,6 +47,7 @@
         (cond status
             (404 (::write "HTTP/1.1 404 Not Found\r\n"))
             (403 (::write "HTTP/1.1 403 Forbidden\r\n"))
+            (400 (::write "HTTP/1.1 400 Bad Request\r\n"))
             (302 (::write "HTTP/1.1 302 Found\r\n"))
             (301 (::write "HTTP/1.1 301 Moved Permanently\r\n"))
             (_   (::write "HTTP/1.1 200\r\n"))
@@ -47,8 +61,7 @@
         )
     )]
 	[::write-header := (lambda (key value) 
-		(if (not [::response-socket . @isClosed ()])
-	    	[::response-stream call @write (list "byte[]") (buffer (+ key ": " value "\r\n"))])
+		(::write-bytes (buffer (+ key ": " value "\r\n")))
 	)]
 	[::write-cookie := (lambda (key value options)
 	    (var payload (+ key "=" value))
@@ -75,8 +88,11 @@
 	[::write := (lambda (text...) 
 		(var tmp "")
 		(loop text [(t) => (+= tmp t)])
+		(::write-bytes (buffer tmp))
+	)]
+	[::write-bytes := (lambda (bytes) 
 		(if (not [::response-socket . @isClosed ()])
-	    	[::response-stream call @write (list "byte[]") (buffer tmp)])
+	    	[::response-stream call @write (list "byte[]") bytes])
 	)]
 	[::close := (lambda () 
 		[::response-stream call @close ()]
@@ -100,6 +116,13 @@
 	)
 )
 
+(def ends-with (text suffix)
+	(if [(var tl (len text)) < (var sl (len suffix))]
+		(false)
+		[(sub text [tl - sl]) == suffix]
+	)
+)
+
 (def join-string (texts delim)
 	(var ret "")
 	(loop texts [(text) => (+= ret (+ text delim))])
@@ -111,4 +134,43 @@
 	(and 
     	(eq [text : (- length 1)] [text : (- length 3)] "\n")
     	(eq [text : (- length 2)] [text : (- length 4)] "\r"))
+)
+
+(def read-file (path)
+	[jFiles call @readAllBytes (list "java.nio.file.Path") 
+		[jPaths call @get (list jString. "java.lang.String...") path ()]]
+)
+
+(def write-file (path text)
+	[jFiles call @write (list "java.nio.file.Path" "byte[]" "java.nio.file.OpenOption...") 
+		[jPaths call @get (list jString. "java.lang.String...") path ()] (buffer text) ()]
+)
+
+(def make-dir (path)
+	(var p [jPaths call @get (list jString. "java.lang.String...") path ()])
+	
+	(if (not (file-exists p)) (
+		[jFiles . @createDirectories (list "java.nio.file.Path" "java.nio.file.attribute.FileAttribute...") p ()]
+	))
+)
+
+(def file-exists (path)
+	(var p path)
+	(if (eq (type path) "String") (set p [jPaths call @get (list jString. "java.lang.String...") path ()]))
+
+	[jFiles . @exists (list "java.nio.file.Path" "java.nio.file.LinkOption...") p ()]
+)
+
+(def extract-domain (url)
+	(var m (match url %"(https?:\/\/[a-z0-9\.\-]+)"))
+	(if [(len m) > 0]
+		[m : 0 @text] null)
+)
+
+(def hash-string (s)
+	(sha 1 (sha 1 (+ s Config::salt)))
+)
+
+(def bytes-to-string (bytes)
+	(new jString (list "byte[]") bytes)
 )

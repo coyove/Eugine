@@ -1,5 +1,12 @@
-(~define (<< html ~~ ~elems...) (+ (list "html") ~elems...))
+(struct Template "HTML Templates"
+	[::site-name := Config::site-name]
+	[::make-header := (lambda (title)
+		(var header (join-string (~include "header.html") ""))
+		(sprintf header (+ title " | " ::site-name))
+	)]
 
-(println (<html> "zzz" "b"))
-
-(~undef <html>)
+	[::index := (~include "index.eugine")]
+	[::submit := (~include "submit.eugine")]
+	[::login := (~include "login.eugine")]
+	[::welcome := (~include "welcome.eugine")]
+)

@@ -6,8 +6,10 @@ import org.coyove.eugine.parser.Compound;
 import org.coyove.eugine.value.SDouble;
 import org.coyove.eugine.value.SInteger;
 import org.coyove.eugine.value.SNull;
+import org.coyove.eugine.value.SString;
 
 import java.math.BigDecimal;
+import java.util.Formatter;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -58,5 +60,14 @@ public final class Utils {
         }
 
         return ret;
+    }
+
+    public static String bytesToHexString(byte[] buf) {
+        Formatter formatter = new Formatter();
+        for (byte b : buf) {
+            formatter.format("%02x", b);
+        }
+
+        return formatter.toString();
     }
 }

@@ -28,6 +28,11 @@ public class SELen extends SExpression {
         } else if (obj instanceof SList) {
             return new SInteger((long) obj.<List<SValue>>get().size());
         } else {
+            if (obj.get() instanceof byte[]) {
+                byte[] buf = obj.get();
+                return new SInteger(buf.length);
+            }
+
             return new SInteger((long) 0);
         }
     }

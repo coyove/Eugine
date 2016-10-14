@@ -66,8 +66,8 @@ public class Eugine implements Serializable {
     }
 
     public SExpression loadFile(String filePath) throws Exception {
-        String code = new String(Files.readAllBytes(Paths.get(filePath)));
         Path p_ = Paths.get(filePath);
+        String code = new String(Files.readAllBytes(p_));
 
         String codeSource = p_.getFileName().toString();
         String codeFolder = filePath.substring(0, filePath.length() - codeSource.length());

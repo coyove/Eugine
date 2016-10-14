@@ -1,20 +1,36 @@
 (~include "util.eugine")
+(~include "config.eugine")
+(~include "user.eugine")
 (~include "handler.eugine")
 
 (def dispatcher (context)
 	(var test-path (starts-with context::route))
+	(var context::is-logged-in (UserOp::valid-token [context::cookies : @uid]))
+
 	(cond true
 		((eq context::route "/") 
 			(HTTP-Handler::index context))
 		((eq context::route "/post") 
 			(HTTP-Handler::post context))
+		((eq context::route "/submit") 
+			(HTTP-Handler::submit context))
+		((eq context::route "/user") 
+			(HTTP-Handler::user context))
+		((eq context::route "/login") 
+			(HTTP-Handler::login context))
+		((eq context::route "/signup") 
+			(HTTP-Handler::signup context))
+		((test-path "/welcome/") 
+			(HTTP-Handler::welcome context))
+		((test-path "/assets/")
+			(HTTP-Handler::serve-file context))
 		(_ 
 			(HTTP-Handler::not-found context))
 	)
 )
 
 (def handle (client)
-	[client call @setSoTimeout (list @int) 5000]
+	[client call @setSoTimeout (list @int) Config::socket-read-timeout]
 	(var is [client . @getInputStream ()])
 	(var buf (buffer 1024))
     (var read           0)
@@ -31,15 +47,19 @@
 			(+. raw-request output)
 
 			(var m match raw-request %"(?i)content-length:\s?(\d+)")
-			(if [(len m) > 0] (set body-length num [(split [m : 0 @text] ":") : 1]))
+			(if [(len m) > 0] 
+				(set body-length num [(split [m : 0 @text] ":") : 1])) ; we found Content-Length header
 
 			(set m (match raw-request %"(\r\n\r\n)"))
-			(if [(len m) > 0] (set total-length + (set header-length [m : 0 @end]) body-length))
+			(if [(len m) > 0] 
+				(set total-length + (set header-length [m : 0 @end]) body-length)) ; we reach the end of HTTP request headers
 
 	        (not (or (socket-eos output) (eq total-length total-read)))
 		])
-	(println "timeout"))
-
+	; catch
+		(if [raw-request != ""] (println "timeout:\n" raw-request))
+	)
+(println raw-request)
 	(var requests (split [raw-request . @toLowerCase ()] "\r\n"))
 	(var http-context clone HTTP-Request client)
 
@@ -57,10 +77,11 @@
 					(var http-context::action "post")
 				)
 				("cookie:"
-				    (var http-context::cookie [parts : 1])
+				    (var http-context::cookie (sub request 7))
 				)
 				(_
-				    (var [http-context::headers : (replace [parts : 0] ":" "")] [parts : 1])
+				    (var [http-context::headers : (replace [parts : 0] ":" "")] 
+				    	(sub request (len [parts : 1])))
 				)
 			)
 		)
@@ -77,19 +98,22 @@
 		(dispatcher http-context)
 	)
 
+	(http-context::close ())
 	[is call @close ()]
 )
 
-(~include "templates/main.eugine")
+(make-dir (+ ~path "data/posts"))
+(make-dir (+ ~path "data/users"))
 
-[ss := (new (cls @java.net.ServerSocket) (list @int) 8080)]
-(println "listen on port 8080")
+[ss := (new (cls @java.net.ServerSocket) (list @int) Config::port)]
+(println "listening on port " Config::port)
 (loop (true) [() =>
     (var client [ss . @accept ()])
     (go handle client)
 ])
 
 ; (struct dummy "struct"
+; 	[::base := 0]
 ; 	[::zzz := ""]
 ; 	[::~init := (lambda (i)
 ; 		[::zzz := i]
@@ -97,7 +121,7 @@
 
 ; 	[::sss := (lambda ()
 ; 		(sleep (floor (* 1000.0 (random 0))))
-; 		(str ::zzz)
+; 		(str (+ ::zzz ::base))
 ; 	)]
 ; )
 
@@ -107,3 +131,6 @@
 ; 		(println ( + (a::sss()) " "))
 ; 	) (i))
 ; ])
+
+; (sleep 500)
+; (set dummy::base 10000)

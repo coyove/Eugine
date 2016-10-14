@@ -1,0 +1,6 @@
+(struct Config "Configurations"
+	[::port := 8080]
+	[::socket-read-timeout := 5000]
+	[::site-name := "Test Site"]
+	[::salt := "test salt"]
+)

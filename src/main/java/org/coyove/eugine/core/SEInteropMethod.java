@@ -75,7 +75,7 @@ public class SEInteropMethod extends SExpression {
         } catch (InvocationTargetException ie) {
             throw new VMException(2031, "error caused by '" + method + "': " + ie.getCause(), headAtom);
         } catch (Exception e) {
-            throw new VMException(2032, "invoking '" + method + "' failed, " + e.getMessage(), headAtom);
+            throw new VMException(2032, "invoking '" + method + "' failed, " + e, headAtom);
         }
     }
 

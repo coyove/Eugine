@@ -1,0 +1,6 @@
+(lambda ()
+	(var login (join-string (~include "login.html") ""))
+	(var footer (join-string (~include "footer.html") ""))
+
+	(+ (::make-header "Log in") login footer)
+)

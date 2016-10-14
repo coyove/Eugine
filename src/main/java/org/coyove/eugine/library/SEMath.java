@@ -1,11 +1,13 @@
 package org.coyove.eugine.library;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
@@ -20,7 +22,8 @@ public class SEMath extends SExpression {
 
     private OPERATION func;
 
-    public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN, ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, FORMAT_TIME, POW}
+    public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN,
+        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, FORMAT_TIME, SHA, POW}
 
     public SEMath() {
     }
@@ -78,6 +81,19 @@ public class SEMath extends SExpression {
             case FORMAT_TIME:
                 return new SString(DateFormatUtils.formatUTC((long) n,
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
+            case SHA:
+                try {
+                    MessageDigest md = MessageDigest.getInstance(
+                            String.format("SHA-%d", ((int) n)));
+                    String text = Utils.cast(argument2.evaluate(env), SString.class).get();
+                    if (text != null) {
+                        return new SString(Utils.bytesToHexString(md.digest(text.getBytes("UTF-8"))));
+                    } else {
+                        return new SNull();
+                    }
+                } catch (Exception ex) {
+                    return new SNull();
+                }
             default:
                 throw new VMException(3007, "not implemented", headAtom);
         }

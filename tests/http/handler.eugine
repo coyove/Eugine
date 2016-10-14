@@ -1,33 +1,166 @@
+(~include "templates/main.eugine")
+
 (struct HTTP-Handler "handler"
 	[::index := (lambda (context)
 		(context::write-common 200 @html)
 		(context::write "\r\n")
-		(context::write "index page")
-		(context::close ())
+		(context::write (Template::index context))
 	)]
+
+		[::error := (lambda (context text...)
+			(context::write-common 400 @plain)
+			(context::write "\r\n")
+			(context::write (explode text))
+		)]
 
 	[::post := (lambda (context)
-	    (println context::cookies)
-		(context::write-common 200 @plain)
-		(context::write-cookie "name" "zzz" (dict ("Expires" 86400)))
+		(try {			
+			(var title [context::post : @title])
+			(if [(len title) > 128] (exit 30))
 
+			(var url [context::post : @url])
+			(if [(len url) > 256] (exit 31))
+
+			(var text [context::post : @text])
+			(if [(len text) > 1024] (exit 32))
+		}
+		; catch 
+		(cond ~e 
+			(30 (::error context "Title too long (128 chars max.)\n" title))
+			(31 (::error context "URL too long (256 chars max.)\n" url))
+			(32 (::error context "Text too long (1024 chars max.)\n" text))
+			(_ 
+				(context::write-common 302 @plain)
+				; (context::write-cookie "name" "zzz" (dict ("Expires" 86400)))
+				(context::write-header "Location" "/")
+				(context::write "\r\n")
+			)
+		))
+	)]
+
+	[::submit := (lambda (context)
+		(context::write-common 200 @html)
 		(context::write "\r\n")
 
-		(context::write "post" [context::post : @name])
-		(context::close ())
+		(context::write (Template::submit ()))
 	)]
+
+	[::user := (lambda (context)
+		(if (UserOp::valid-token [context::cookies : @uid]) 
+			() 
+			(::user-login context))
+	)]
+
+		[::user-login := (lambda (context)
+			(context::write-common 200 @html)
+			(context::write "\r\n")
+
+			(context::write (Template::login ()))
+		)]
+
+		[::signup := (lambda (context)
+			(try {
+				(var username [context::post : @username])
+				(if [(len username) > 32] (exit 30))
+				(if [(len username) < 4] (exit 31))
+				(if (not (UserOp::valid-username username)) (exit 40))
+
+				(var password [context::post : @password])
+				(if [(len password) > 32] (exit 32))
+				(if [(len password) < 8] (exit 33))
+
+				(var dir (+ ~path "data/users/" [username : 0] "/" username))
+				(if (file-exists dir) (exit 34))
+
+				(make-dir dir)
+				(write-file (+ dir "/password") (hash-string password))
+				(write-file (+ dir "/sigup-ts") (str (floor (time 1))))
+				(write-file (+ dir "/last-login-ts") (str (floor (time 1))))
+
+				(context::write-common 302 @plain)
+				(context::write-header "Location" (+ "/welcome/" username))
+				(context::write "\r\n")
+			}
+
+			(cond ~e 
+				(30 (::error context "Username too long (32 chars max.)\n" username))
+				(31 (::error context "Username too short (4 chars min.)\n" username))
+				(40 (::error context "Username contains non-alphanumeric chars\n" username))
+				(32 (::error context "Password too long (32 chars max.)\n" password))
+				(33 (::error context "Password too short (8 chars min.)\n" password))
+				(34 (::error context "User already existed\n" username))
+				(_ ())
+			))
+		)]
+
+		[::login := (lambda (context)
+			(try {
+				(var username [context::post : @username])
+				(if (or (eq username null) [(len username) < 4]) (exit 30))
+
+				(var password [context::post : @password])
+				(if (eq password null) (exit 31))
+				
+				(var dir (+ ~path "data/users/" [username : 0] "/" username))
+				(if (not (file-exists dir)) (exit 32))
+
+				(if [(bytes-to-string (read-file (+ dir "/password"))) != (hash-string password)] (exit 33))
+
+				(var session (UserOp::generate-token username))
+				(write-file (+ dir "/session") session)
+
+				(context::write-common 302 @plain)
+				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
+				(context::write-header "Location" (+ "/welcome/" username))
+				(context::write "\r\n")
+			}
+
+			(cond ~e 
+				(30 (::error context "Invalid username"))
+				(31 (::error context "Invalid password"))
+				(32 (::error context "Wrong username"))
+				(33 (::error context "Wrong password"))
+				(_ ())
+			))
+		)]
+
+		[::welcome := (lambda (context)
+			(var name (sub context::route 9))
+			(context::write-common 200 @html)
+			(context::write "\r\n")
+
+			(context::write (Template::welcome name))
+		)]	
 
 	[::not-found := (lambda (context)
 		(context::write-common 404 @html)
 		(context::write "\r\n")
 		(context::write "404 Page Not Found")
-		(context::close ())
 	)]
 
 	[::forbidden := (lambda (context)
 		(context::write-common 403 @html)
 		(context::write "\r\n")
 		(context::write "403 Forbidden")
-		(context::close ())
+	)]
+
+	[::serve-file := (lambda (context)
+		(var uri-ends ends-with context::route)
+		(var path (sub context::route 1))
+		(cond true
+			((uri-ends ".js") 
+				(context::write-common 200 @js)
+				(context::write "\r\n")
+				(context::write-bytes (read-file (+ ~path path)))
+			)
+			((uri-ends ".css") 
+				(context::write-common 200 @css)
+				(context::write "\r\n")
+				(context::write-bytes (read-file (+ ~path path)))
+			)
+			(_
+				(::not-found context)
+			)
+		)
 	)]
 )

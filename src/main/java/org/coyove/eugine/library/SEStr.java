@@ -5,6 +5,8 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.Formatter;
+
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -31,6 +33,11 @@ public class SEStr extends SExpression {
 
             return new SList(ret);
         } else {
+            if (arg instanceof SObject && arg.get() instanceof byte[]) {
+                byte[] buf = arg.get();
+                return new SString(Utils.bytesToHexString(buf));
+            }
+
             return new SString(arg.get().toString());
         }
     }

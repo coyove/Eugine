@@ -27,12 +27,13 @@ public class SETry extends SExpression {
     }
 
     @Override
-    public SValue evaluate(final ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
-            if (this.catchBody != null)
+            if (this.catchBody != null) {
                 this.catchBody.evaluate(env);
+            }
         } finally {
             if (this.finallyBody != null) {
                 return this.finallyBody.evaluate(env);

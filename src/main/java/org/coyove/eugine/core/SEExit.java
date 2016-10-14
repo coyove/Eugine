@@ -25,13 +25,16 @@ public class SEExit extends SExpression {
 
         if (msg == null) {
             SInteger num = Utils.cast(argument.evaluate(env), SInteger.class);
-            if (num == null)
+            if (num == null) {
                 throw new VMException(2016, "message must be string or integer", headAtom);
+            }
 
+            env.putVar("~e", num);
             throw new VMException(7001, num.<Long>get().toString(), headAtom);
+        } else {
+            env.putVar("~e", msg);
+            throw new VMException(7000, msg.<String>get(), headAtom);
         }
-
-        throw new VMException(7000, msg.<String>get(), headAtom);
     }
 
     @Override

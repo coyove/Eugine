@@ -1,0 +1,28 @@
+(struct UserOp "User related operations"
+	[::generate-token := (lambda (username)
+		(var payload + username "&")
+		(+ payload (hash-string [username + (str [(random 0) * 1000000])] ))
+	)]
+
+	[::valid-token := (lambda (token)
+		(try {
+			(if (eq token null) (exit 30))
+			
+			(var pair (split token "&"))
+			(if [(len pair) != 2] (exit 30))
+			(if [(len [pair : 0]) < 4] (exit 30))
+						
+			(var dir (+ ~path "data/users/" [pair : 0 0] "/" [pair : 0]))
+			(if (not (file-exists dir)) (exit 30))
+
+			(if [(bytes-to-string (read-file (+ dir "/session"))) != token] (exit 30))
+
+			(exit 31)
+		} () (eq ~e 31))
+	)]
+
+	[::valid-username := (lambda (username)
+		(var m (match username %"[a-zA-Z0-9\-\_\~\#\(\)\[\]]"))
+		[(len m) == (len username)]
+	)]
+)
