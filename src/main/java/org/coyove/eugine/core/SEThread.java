@@ -30,7 +30,7 @@ public class SEThread extends SExpression {
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
-                    (new SECall(closure.getCopy(), arguments, headAtom, tailCompound)).evaluate(env);
+                    (new SECall(closure.clone(), arguments, headAtom, tailCompound)).evaluate(env);
                 } catch (VMException ex) {
                     System.out.println("THREAD: " + ex.getMessage());
                 }

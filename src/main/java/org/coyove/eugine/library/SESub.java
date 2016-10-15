@@ -26,6 +26,10 @@ public class SESub extends SExpression {
 
         VMException ex = new VMException(3012, "start and end index must be integers", headAtom);
         int arg1 = Utils.cast(arguments.get(1), SInteger.class, ex).<Long>get().intValue();
+        if (arg1 < 0) {
+            throw new VMException(3015, "start cannot be negative", headAtom);
+        }
+
         SInteger arg2 = null;
 
         if (arguments.size() == 3)

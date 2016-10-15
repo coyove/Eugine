@@ -5,7 +5,8 @@
 
 (def dispatcher (context)
 	(var test-path (starts-with context::route))
-	(var context::is-logged-in (UserOp::valid-token [context::cookies : @uid]))
+	(var context::username (UserOp::valid-token [context::cookies : @uid]))
+	(var context::is-logged-in neq context::username null)
 
 	(cond true
 		((eq context::route "/") 
@@ -18,9 +19,11 @@
 			(HTTP-Handler::user context))
 		((eq context::route "/login") 
 			(HTTP-Handler::login context))
+		((eq context::route "/logout")
+            (HTTP-Handler::logout context))
 		((eq context::route "/signup") 
 			(HTTP-Handler::signup context))
-		((test-path "/welcome/") 
+		((eq context::route "/welcome")
 			(HTTP-Handler::welcome context))
 		((test-path "/assets/")
 			(HTTP-Handler::serve-file context))
@@ -59,7 +62,7 @@
 	; catch
 		(if [raw-request != ""] (println "timeout:\n" raw-request))
 	)
-(println raw-request)
+
 	(var requests (split [raw-request . @toLowerCase ()] "\r\n"))
 	(var http-context clone HTTP-Request client)
 
@@ -81,7 +84,7 @@
 				)
 				(_
 				    (var [http-context::headers : (replace [parts : 0] ":" "")] 
-				    	(sub request (len [parts : 1])))
+				    	(trim (sub request (len [parts : 0]))))
 				)
 			)
 		)

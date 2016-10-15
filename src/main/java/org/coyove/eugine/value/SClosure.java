@@ -46,8 +46,8 @@ public class SClosure extends SValue {
         try {
             SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
-            ret.extra.parentEnv = this.extra;
-            ret.proto = this;
+            ret.extra = this.extra; //.clone();
+            ret.transparent = this.transparent;
 
             SValue.copyAttributes(ret, this);
             return ret;
@@ -58,12 +58,11 @@ public class SClosure extends SValue {
         }
     }
 
-    // This is the true "deep" clone, don't invoke deepClone() because SValue's deepClone() calls clone()
     public SValue getCopy() throws VMException {
         SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
-        ret.extra = this.extra; //.clone();
-        ret.transparent = this.transparent;
+        ret.extra.parentEnv = this.extra;
+        ret.proto = this;
 
         SValue.copyAttributes(ret, this);
         return ret;

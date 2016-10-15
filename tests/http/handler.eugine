@@ -1,18 +1,21 @@
 (~include "templates/main.eugine")
 
 (struct HTTP-Handler "handler"
+    ;; GET
 	[::index := (lambda (context)
 		(context::write-common 200 @html)
 		(context::write "\r\n")
 		(context::write (Template::index context))
 	)]
 
+        ;; GET
 		[::error := (lambda (context text...)
 			(context::write-common 400 @plain)
 			(context::write "\r\n")
 			(context::write (explode text))
 		)]
 
+    ;; POST
 	[::post := (lambda (context)
 		(try {			
 			(var title [context::post : @title])
@@ -38,26 +41,30 @@
 		))
 	)]
 
+    ;; GET
 	[::submit := (lambda (context)
 		(context::write-common 200 @html)
 		(context::write "\r\n")
 
-		(context::write (Template::submit ()))
+		(context::write (Template::submit context))
 	)]
 
+    ;; GET
 	[::user := (lambda (context)
-		(if (UserOp::valid-token [context::cookies : @uid]) 
+		(if [(UserOp::valid-token [context::cookies : @uid]) != null]
 			() 
 			(::user-login context))
 	)]
 
+        ;; GET
 		[::user-login := (lambda (context)
 			(context::write-common 200 @html)
 			(context::write "\r\n")
 
-			(context::write (Template::login ()))
+			(context::write (Template::login context))
 		)]
 
+        ;; POST
 		[::signup := (lambda (context)
 			(try {
 				(var username [context::post : @username])
@@ -76,9 +83,13 @@
 				(write-file (+ dir "/password") (hash-string password))
 				(write-file (+ dir "/sigup-ts") (str (floor (time 1))))
 				(write-file (+ dir "/last-login-ts") (str (floor (time 1))))
+                (var session (UserOp::generate-token username))
+                (write-file (+ dir "/session") session)
 
 				(context::write-common 302 @plain)
-				(context::write-header "Location" (+ "/welcome/" username))
+				(context::write-header "Location" "/welcome")
+				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
+
 				(context::write "\r\n")
 			}
 
@@ -93,6 +104,7 @@
 			))
 		)]
 
+        ;; POST
 		[::login := (lambda (context)
 			(try {
 				(var username [context::post : @username])
@@ -101,7 +113,7 @@
 				(var password [context::post : @password])
 				(if (eq password null) (exit 31))
 				
-				(var dir (+ ~path "data/users/" [username : 0] "/" username))
+				(var dir UserOp::get-dir username)
 				(if (not (file-exists dir)) (exit 32))
 
 				(if [(bytes-to-string (read-file (+ dir "/password"))) != (hash-string password)] (exit 33))
@@ -111,7 +123,7 @@
 
 				(context::write-common 302 @plain)
 				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
-				(context::write-header "Location" (+ "/welcome/" username))
+				(context::write-header "Location" "/welcome")
 				(context::write "\r\n")
 			}
 
@@ -124,12 +136,32 @@
 			))
 		)]
 
+        ;; POST
+        [::logout := (lambda (context)
+            (try {
+                (if [context::username == null] (exit 30))
+
+                (var session (UserOp::generate-token context::username))
+                (var dir UserOp::get-dir context::username)
+                (write-file (+ dir "/session") session)
+
+                (context::write-common 302 @plain)
+                (context::write-header "Location" "/")
+                (context::write "\r\n")
+            }
+
+            (cond ~e
+                (30 (::forbidden context))
+                (_ ())
+            ))
+        )]
+
+        ;; GET
 		[::welcome := (lambda (context)
-			(var name (sub context::route 9))
 			(context::write-common 200 @html)
 			(context::write "\r\n")
 
-			(context::write (Template::welcome name))
+			(context::write (Template::welcome context))
 		)]	
 
 	[::not-found := (lambda (context)

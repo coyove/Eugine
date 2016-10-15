@@ -16,6 +16,7 @@
 	[::action := ""]
 	[::cookie := ""]
 	[::is-logged-in := false]
+	[::username := ""]
 
 	[::parse-post-body := (lambda ()
 		[::post := parse-pairs ::data "&"]
@@ -36,7 +37,7 @@
             	[[ret : (trim [kv : 0])] := value]
         	})
         ])
-        (println text)
+
         (ret)
 	)
 
@@ -50,7 +51,7 @@
             (400 (::write "HTTP/1.1 400 Bad Request\r\n"))
             (302 (::write "HTTP/1.1 302 Found\r\n"))
             (301 (::write "HTTP/1.1 301 Moved Permanently\r\n"))
-            (_   (::write "HTTP/1.1 200\r\n"))
+            (_   (::write "HTTP/1.1 200 OK\r\n"))
         )
         (cond ctype
             (@css   (::write-header "Content-Type" "text/css; charset=utf-8"))

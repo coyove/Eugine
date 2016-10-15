@@ -1,12 +1,31 @@
 (struct Template "HTML Templates"
 	[::site-name := Config::site-name]
-	[::make-header := (lambda (title)
-		(var header (join-string (~include "header.html") ""))
-		(sprintf header (+ title " | " ::site-name))
+	[::make-header := (lambda (context title)
+		(join-string (~include "header.html") "")
 	)]
 
-	[::index := (~include "index.eugine")]
-	[::submit := (~include "submit.eugine")]
-	[::login := (~include "login.eugine")]
-	[::welcome := (~include "welcome.eugine")]
+	[::index := (lambda (context)
+        (var index (join-string (~include "index.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Index") index footer)
+    )]
+	[::submit := (lambda (context)
+        (var submit (join-string (~include "submit.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Submit") submit footer)
+     )]
+	[::login := (lambda (context)
+        (var login (join-string (~include "login.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Log in") login footer)
+    )]
+	[::welcome := (lambda (context)
+        (var welcome (join-string (~include "welcome.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Welcome") (sprintf welcome context::username) footer)
+    )]
 )

@@ -4,7 +4,10 @@
 	<meta charset='utf-8'>
 	<meta name='referrer' content='origin'>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-	<title>%s</title>
+	<title>" title " | " Config::site-name "</title>
 	<script type='text/javascript' src='/assets/main.js'></script>
 </head>
-<body>")
+<body>"
+"<div>" (if context::is-logged-in
+	(+ context::username " <a href='/logout'>Log out</a> <a href='/submit'>Submit</a>")
+	"<a href='/user'>Log in</a>") "</div>")

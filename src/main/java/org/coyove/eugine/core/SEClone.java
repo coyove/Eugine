@@ -27,7 +27,7 @@ public class SEClone extends SExpression {
 
         if (n instanceof SClosure) {
             synchronized (n) {
-                SValue ret = n.clone();
+                SValue ret = ((SClosure) n).getCopy();
                 ExecEnvironment extra = ((SClosure) ret).extra;
 
                 if (extra.containsKey("~init")) {

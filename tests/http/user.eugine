@@ -18,11 +18,18 @@
 			(if [(bytes-to-string (read-file (+ dir "/session"))) != token] (exit 30))
 
 			(exit 31)
-		} () (eq ~e 31))
+		} () (if (eq ~e 31)
+		    [pair : 0]
+		    null
+		))
 	)]
 
 	[::valid-username := (lambda (username)
 		(var m (match username %"[a-zA-Z0-9\-\_\~\#\(\)\[\]]"))
 		[(len m) == (len username)]
 	)]
+
+	[[::get-dir := (lambda (username)
+	    (+ ~path "data/users/" [username : 0] "/" username)
+	)]]
 )
