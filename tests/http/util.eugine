@@ -73,7 +73,7 @@
                 ("Expires"
                     (var seconds [options : k])
                     (var millis * seconds 1000)
-                    (+= payload ["; Expires=" + (time-format [(time 1) + millis])])
+                    (+= payload ["; Expires=" + (utc-time [(time 1) + millis])])
                     (+= payload ["; Max-Age=" + (str seconds)])
                 )
                 ("HttpOnly"
@@ -138,36 +138,12 @@
     	(eq [text : (- length 2)] [text : (- length 4)] "\r"))
 )
 
-(def read-file (path)
-	[jFiles call @readAllBytes (list "java.nio.file.Path") 
-		[jPaths call @get (list jString. "java.lang.String...") path ()]]
-)
-
-(def read-file-lines (path)
-	;Files.readAllLines(Paths.get("")).toArray();
-	(var listString [jFiles call @readAllLines (list "java.nio.file.Path") 
-		[jPaths call @get (list jString. "java.lang.String...") path ()]])
-	[listString . @toArray ()]
-)
-
-(def write-file (path text)
-	[jFiles call @write (list "java.nio.file.Path" "byte[]" "java.nio.file.OpenOption...") 
-		[jPaths call @get (list jString. "java.lang.String...") path ()] (buffer text) ()]
-)
-
 (def make-dir (path)
 	(var p [jPaths call @get (list jString. "java.lang.String...") path ()])
 	
-	(if (not (file-exists p)) (
+	(if (not (file-exists path)) (
 		[jFiles . @createDirectories (list "java.nio.file.Path" "java.nio.file.attribute.FileAttribute...") p ()]
 	))
-)
-
-(def file-exists (path)
-	(var p path)
-	(if (eq (type path) "String") (set p [jPaths call @get (list jString. "java.lang.String...") path ()]))
-
-	[jFiles . @exists (list "java.nio.file.Path" "java.nio.file.LinkOption...") p ()]
 )
 
 (def extract-domain (url)

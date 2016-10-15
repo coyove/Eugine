@@ -23,7 +23,7 @@ public class SEMath extends SExpression {
     private OPERATION func;
 
     public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN,
-        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, FORMAT_TIME, SHA, POW}
+        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, UTC_TIME, SHA, POW}
 
     public SEMath() {
     }
@@ -77,8 +77,8 @@ public class SEMath extends SExpression {
                     return new SDouble(defaultRandom.nextDouble());
                 }
             case TIME:
-                return new SDouble(new Date().getTime() / n);
-            case FORMAT_TIME:
+                return new SInteger((long) (new Date().getTime() / n));
+            case UTC_TIME:
                 return new SString(DateFormatUtils.formatUTC((long) n,
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
             case SHA:

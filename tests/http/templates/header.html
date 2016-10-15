@@ -9,5 +9,7 @@
 </head>
 <body>"
 "<div><a href='/'>Home</a> " (if context::is-logged-in
-	(+ context::username " <a href='/logout'>Log out</a> <a href='/submit'>Submit</a>")
-	"<a href='/user'>Log in</a>") "</div>")
+	(+ "<a href='/user'>" context::username "</a> <a href='/logout'>Log out</a> <a href='/submit'>Submit</a>")
+	"<a href='/user'>Log in</a>") "</div>
+<hr>"
+)

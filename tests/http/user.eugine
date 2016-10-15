@@ -1,4 +1,16 @@
 (struct UserOp "User related operations"
+    [::ID               := 0]
+    [::PASSWORD         := 1]
+    [::SIGN_UP_TS       := 2]
+    [::LAST_LOGIN_TS    := 3]
+    [::SIGN_UP_IP       := 4]
+    [::LAST_LOGIN_IP    := 5]
+    [::TOTAL_POSTS      := 6]
+    [::KARMA            := 7]
+    [::ABOUT            := 8]
+    [::EMAIL            := 9]
+    [::GROUP            := 10]
+
 	[::generate-token := (lambda (username)
 		(var payload + username "&")
 		(+ payload (hash-string [username + (str [(random 0) * 1000000])] ))
@@ -15,7 +27,7 @@
 			(var dir (+ ~path "data/users/" [pair : 0 0] "/" [pair : 0]))
 			(if (not (file-exists dir)) (exit 30))
 
-			(if [(bytes-to-string (read-file (+ dir "/session"))) != token] (exit 30))
+			(if [(read-file (+ dir "/session")) != token] (exit 30))
 
 			(exit 31)
 		} () (if (eq ~e 31)

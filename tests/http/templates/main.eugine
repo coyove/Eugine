@@ -10,23 +10,36 @@
 
         (+ (::make-header context "Index") index footer)
     )]
+
 	[::submit := (lambda (context)
         (var submit (join-string (~include "submit.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context "Submit") submit footer)
      )]
+
 	[::login := (lambda (context)
         (var login (join-string (~include "login.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context "Log in") login footer)
     )]
+
 	[::welcome := (lambda (context)
         (var welcome (join-string (~include "welcome.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context "Welcome") (sprintf welcome context::username) footer)
+    )]
+
+    [::member-info := (lambda (context user-data)
+        (var sign-up (num [user-data : UserOp::SIGN_UP_TS]))
+        (var age [(time 1) - sign-up])
+        (set age / age 86400000)
+        (var member-info (join-string (~include "member.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Member") member-info footer)
     )]
 
     [::error := (lambda (context text)

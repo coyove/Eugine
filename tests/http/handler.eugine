@@ -58,7 +58,6 @@
 			(37 (::error context "Invalid URL\n" url))
 			(_ 
 				(context::write-common 302 @plain)
-				; (context::write-cookie "name" "zzz" (dict ("Expires" 86400)))
 				(context::write-header "Location" "/")
 				(context::write "\r\n")
 			)
@@ -75,9 +74,15 @@
 
     ;; GET
 	[::user := (lambda (context)
-		(if [(UserOp::valid-token [context::cookies : @uid]) != null]
-			() 
-			(::user-login context))
+		(if [context::username == null]
+			(::user-login context)
+			{
+			    (var dir UserOp::get-dir context::username)
+                (var user-data read-file-lines (+ dir "/data"))
+                (context::write-common 200 @html)
+                (context::write "\r\n")
+                (context::write (Template::member-info context user-data))
+			})
 	)]
 
         ;; GET
@@ -103,19 +108,34 @@
 				(var dir (+ ~path "data/users/" [username : 0] "/" username))
 				(if (file-exists dir) (exit 34))
 
+				(sync
+				    (var next-id + 1 (num (read-file (+ ~path "data/users/index"))))
+				    (write-file (+ ~path "data/users/index") (str next-id))
+				)
+
 				(make-dir dir)
-				(write-file (+ dir "/password") (hash-string password))
-				(write-file (+ dir "/sigup-ts") (str (floor (time 1))))
-				(write-file (+ dir "/last-login-ts") (str (floor (time 1))))
+				(write-file (+ dir "/data") (list
+				    (str next-id)           ; member id
+				    (hash-string password)  ; password
+				    (str (floor (time 1)))  ; sign up ts
+				    (str (floor (time 1)))  ; last login ts
+				    context::ip             ; ip when signed up
+				    context::ip             ; last login ip
+				    "0"                     ; total posts
+				    (str Config::new-member-karma) ; karma
+				    ""                      ; about
+				    ""                      ; email
+				    Config::new-member-group; member group
+				    " "                     ; add trail
+				))
+
                 (var session (UserOp::generate-token username))
                 (write-file (+ dir "/session") session)
 
 				(context::write-common 302 @plain)
 				(context::write-header "Location" "/welcome")
 				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
-
 				(context::write "\r\n")
-				(println session)
 			}
 
 			(cond ~e 
@@ -141,7 +161,12 @@
 				(var dir UserOp::get-dir username)
 				(if (not (file-exists dir)) (exit 32))
 
-				(if [(bytes-to-string (read-file (+ dir "/password"))) != (hash-string password)] (exit 33))
+                (var user-data (read-file-lines (+ dir "/data")))
+				(if [[user-data : UserOp::PASSWORD] != (hash-string password)] (exit 33))
+
+				(set [user-data : UserOp::LAST_LOGIN_TS] (str (time 1)))
+				(set [user-data : UserOp::LAST_LOGIN_IP] context::ip)
+				(write-file (+ dir "/data") user-data)
 
 				(var session (UserOp::generate-token username))
 				(write-file (+ dir "/session") session)
@@ -208,12 +233,12 @@
 			((uri-ends ".js") 
 				(context::write-common 200 @js)
 				(context::write "\r\n")
-				(context::write-bytes (read-file (+ ~path path)))
+				(context::write-bytes (read-file-binary (+ ~path path)))
 			)
 			((uri-ends ".css") 
 				(context::write-common 200 @css)
 				(context::write "\r\n")
-				(context::write-bytes (read-file (+ ~path path)))
+				(context::write-bytes (read-file-binary (+ ~path path)))
 			)
 			(_
 				(::not-found context)

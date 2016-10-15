@@ -3,4 +3,7 @@
 	[::socket-read-timeout := 5000]
 	[::site-name := "Test Site"]
 	[::salt := "test salt"]
+
+	[::new-member-karma := 10]
+	[::new-member-group := "user"]
 )

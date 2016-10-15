@@ -361,9 +361,9 @@ public class SKeywords {
                         return new SEMath(ha, c, SEMath.OPERATION.TIME);
                     }
                 });
-                put("time-format", new CallableKeyword() {
+                put("utc-time", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.FORMAT_TIME);
+                        return new SEMath(ha, c, SEMath.OPERATION.UTC_TIME);
                     }
                 });
                 put("sha", new CallableKeyword() {
@@ -461,6 +461,31 @@ public class SKeywords {
                 put("num", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SENum(ha, c);
+                    }
+                });
+                put("read-file", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_TEXT);
+                    }
+                });
+                put("read-file-binary", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_BINARY);
+                    }
+                });
+                put("read-file-lines", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_LINES);
+                    }
+                });
+                put("write-file", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.WRITE);
+                    }
+                });
+                put("file-exists", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.EXISTS);
                     }
                 });
 
