@@ -1,8 +1,0 @@
-(lambda (context)
-	(println context::is-logged-in)
-	(var is-logged-in context::is-logged-in)
-	(var index (join-string (~include "index.html") ""))
-	(var footer (join-string (~include "footer.html") ""))
-
-	(+ (::make-header "Index") index footer)
-)

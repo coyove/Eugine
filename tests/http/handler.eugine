@@ -8,37 +8,61 @@
 		(context::write (Template::index context))
 	)]
 
-        ;; GET
-		[::error := (lambda (context text...)
-			(context::write-common 400 @plain)
-			(context::write "\r\n")
-			(context::write (explode text))
-		)]
+    ;; GET
+	[::error := (lambda (context text...)
+		(context::write-common 400 @html)
+		(context::write "\r\n")
+		(context::write (Template::error context (+ (explode text))))
+	)]
 
     ;; POST
 	[::post := (lambda (context)
-		(try {			
+		(sync (try {
+			(if [context::username == null] (exit 99))
+
 			(var title [context::post : @title])
 			(if [(len title) > 128] (exit 30))
+			(if [(len title) < 8] (exit 33))
 
 			(var url [context::post : @url])
-			(if [(len url) > 256] (exit 31))
-
+			(var submit-url (and [url != null] [url != ""]))
 			(var text [context::post : @text])
-			(if [(len text) > 1024] (exit 32))
-		}
-		; catch 
+			(var submit-text (and [text != null] [text != ""]))
+
+			(if [(len url) > 256] 							(exit 31))
+			(if [(len text) > 1024] 						(exit 32))
+			(if [submit-url and [(len url) < 10]] 			(exit 34))
+			(if [submit-text and [(len text) < 10]] 		(exit 35))
+			(if (and (not submit-url) (not submit-text)) 	(exit 36))
+
+			(if submit-url {
+				(var domain extract-domain url)
+				(if [domain == null] (exit 37))
+				(set domain replace domain "://" "#")
+				(make-dir (var site-path (+ ~path "data/sites/" domain)))
+			})
+
+			(if submit-text {
+				(make-dir (var site-path (+ ~path "data/sites/common")))
+			})
+		} ()
 		(cond ~e 
+			(99 (::error context "Please login first"))
 			(30 (::error context "Title too long (128 chars max.)\n" title))
+			(33 (::error context "Title too short (8 chars min.)\n" title))
 			(31 (::error context "URL too long (256 chars max.)\n" url))
+			(34 (::error context "URL too short (10 chars min.)\n" url))
 			(32 (::error context "Text too long (1024 chars max.)\n" text))
+			(35 (::error context "Text too short (10 chars min.)\n" text))
+			(36 (::error context "You should submit either an URL or some text"))
+			(37 (::error context "Invalid URL\n" url))
 			(_ 
 				(context::write-common 302 @plain)
 				; (context::write-cookie "name" "zzz" (dict ("Expires" 86400)))
 				(context::write-header "Location" "/")
 				(context::write "\r\n")
 			)
-		))
+		)))
 	)]
 
     ;; GET
@@ -91,6 +115,7 @@
 				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
 
 				(context::write "\r\n")
+				(println session)
 			}
 
 			(cond ~e 
@@ -136,7 +161,7 @@
 			))
 		)]
 
-        ;; POST
+        ;; GET
         [::logout := (lambda (context)
             (try {
                 (if [context::username == null] (exit 30))

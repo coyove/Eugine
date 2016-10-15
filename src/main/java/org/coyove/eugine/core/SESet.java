@@ -82,8 +82,11 @@ public class SESet extends SExpression {
                 env.putVar(sn, ret);
             }
         } else {
-            if (n.refer != null && n.refer instanceof SValue && ((SValue) n.refer).immutable)
-                throw new VMException(2044, "referred variable is immutable", headAtom);
+            if (n.refer != null && n.refer instanceof SValue && ((SValue) n.refer).immutable) {
+                if (!(n.refer instanceof SClosure)) {
+                    throw new VMException(2044, "referred variable is immutable", headAtom);
+                }
+            }
 
             if (n.refer instanceof SDict) {
                 ((SDict) n.refer).<HashMap<String, SValue>>get().put(n.refKey, ret);

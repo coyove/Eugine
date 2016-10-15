@@ -1,6 +1,7 @@
 (var jString (cls @java.lang.String))
 (var jString. "java.lang.String")
 (var jFiles (cls "java.nio.file.Files"))
+(var jFile (cls "java.io.File"))
 (var jPaths (cls "java.nio.file.Paths"))
 (var jURLDecoder (cls "java.net.URLDecoder"))
 (var jMessageDigest (cls "java.security.MessageDigest"))
@@ -142,6 +143,13 @@
 		[jPaths call @get (list jString. "java.lang.String...") path ()]]
 )
 
+(def read-file-lines (path)
+	;Files.readAllLines(Paths.get("")).toArray();
+	(var listString [jFiles call @readAllLines (list "java.nio.file.Path") 
+		[jPaths call @get (list jString. "java.lang.String...") path ()]])
+	[listString . @toArray ()]
+)
+
 (def write-file (path text)
 	[jFiles call @write (list "java.nio.file.Path" "byte[]" "java.nio.file.OpenOption...") 
 		[jPaths call @get (list jString. "java.lang.String...") path ()] (buffer text) ()]
@@ -163,9 +171,8 @@
 )
 
 (def extract-domain (url)
-	(var m (match url %"(https?:\/\/[a-z0-9\.\-]+)"))
-	(if [(len m) > 0]
-		[m : 0 @text] null)
+	(var m (match url %"(https?:\/\/[a-z0-9\.\-\:]+)"))
+	(if [(len m) > 0] [m : 0 @text] null)
 )
 
 (def hash-string (s)
@@ -174,4 +181,24 @@
 
 (def bytes-to-string (bytes)
 	(new jString (list "byte[]") bytes)
+)
+
+(def read-dir (path)
+	(var f (new jFile (list jString.) path))
+	(var ret [f . @listFiles ()])
+	(loop ret [(f i) => (set [ret : i] [f . @toString ()])])
+	(ret)
+)
+
+(def read-dir-files (path)
+	(var f (new jFile (list jString.) path))
+	(var ret [f . @listFiles ()])
+	(var i [(len ret) - 1])
+	(if [i == -1] () {
+		(loop [i >= 0] [() => 
+			(if [[ret : i] . @isDirectory ()] 
+				{ (del ret i) [i -= 2]}
+				[i --])
+		])
+		(ret) })
 )

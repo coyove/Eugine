@@ -1,6 +1,7 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.value.SClosure;
 
 import java.util.HashMap;
 
@@ -10,6 +11,7 @@ import java.util.HashMap;
 public class ExecEnvironment extends HashMap<String, SValue> {
     public ExecEnvironment parentEnv = null;
     public boolean strict = false;
+    public boolean overlay = false;
 
     @Override
     public boolean containsKey(Object key) {
@@ -30,8 +32,10 @@ public class ExecEnvironment extends HashMap<String, SValue> {
                 return super.get(key);
             else
                 return parentEnv.get(key);
-        } else
-            return super.get(key);
+        } else {
+            SValue ret = super.get(key);
+            return ret;
+        }
     }
 
     @Override
@@ -44,8 +48,13 @@ public class ExecEnvironment extends HashMap<String, SValue> {
         } else {
             super.put(key, value);
 
-            if (key.equalsIgnoreCase("~strict"))
+            if (key.equalsIgnoreCase("~strict")) {
                 strict = true;
+            }
+
+            if (key.equalsIgnoreCase("~mt")) {
+                overlay = true;
+            }
             // TODO
         }
 
@@ -59,12 +68,35 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     public ExecEnvironment clone() {
         ExecEnvironment ret = new ExecEnvironment();// (ExecEnvironment) super.clone();
         for (String s : super.keySet()) {
-            ret.putVar(s, super.get(s));
+            ret.putVar(s, super.get(s).clone());
         }
 
-        ret.parentEnv = this.parentEnv;
+        if (this.parentEnv != null) {
+            ret.parentEnv = this.parentEnv.clone();
+        }
         ret.strict = this.strict;
+        ret.overlay = this.overlay;
+        return ret;
+    }
 
+    public ExecEnvironment cloneClosureAndConstOnly() {
+        if (!overlay) {
+            return this;
+        }
+
+        ExecEnvironment ret = new ExecEnvironment();
+        for (String s : super.keySet()) {
+            SValue v = super.get(s);
+            if (v != null) {
+                if (v instanceof SClosure || v.immutable) {
+                    ret.putVar(s, v.clone());
+                }
+            }
+        }
+
+        ret.parentEnv = this;
+        ret.strict = this.strict;
+        ret.overlay = this.overlay;
         return ret;
     }
 }

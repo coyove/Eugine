@@ -3,6 +3,17 @@
 (~include "user.eugine")
 (~include "handler.eugine")
 
+(var ~mt) ; enable multi-threading
+
+; (var start (time 1))
+; (loop (range 0 1000) [() =>
+
+; (write-file (+ ~path "tmp") "zzz")
+; ])
+; (println [(time 1) - start])
+(println (read-dir ~path))
+(println (read-dir-files ~path))
+
 (def dispatcher (context)
 	(var test-path (starts-with context::route))
 	(var context::username (UserOp::valid-token [context::cookies : @uid]))
@@ -107,6 +118,7 @@
 
 (make-dir (+ ~path "data/posts"))
 (make-dir (+ ~path "data/users"))
+(make-dir (+ ~path "data/sites"))
 
 [ss := (new (cls @java.net.ServerSocket) (list @int) Config::port)]
 (println "listening on port " Config::port)

@@ -184,12 +184,15 @@ public class SECall extends SExpression {
             } else {
                 newEnv.put("~this", closure);
             }
-
-            if (closure.transparent) {
-                newEnv = closure.outerEnv;
-            } else {
-                newEnv.parentEnv = closure.outerEnv;
+            if (closure.outerEnv != null) {
+                if (closure.transparent) {
+                    newEnv = closure.outerEnv; //.cloneClosureAndConstOnly();
+                } else {
+                    // closure.outerEnv.cloneClosureAndConstInto(newEnv);
+                    newEnv.parentEnv = closure.outerEnv.cloneClosureAndConstOnly();
+                }
             }
+
             SValue ret = new SNull();
 
             boolean flag = false;

@@ -8,6 +8,6 @@
 	<script type='text/javascript' src='/assets/main.js'></script>
 </head>
 <body>"
-"<div>" (if context::is-logged-in
+"<div><a href='/'>Home</a> " (if context::is-logged-in
 	(+ context::username " <a href='/logout'>Log out</a> <a href='/submit'>Submit</a>")
 	"<a href='/user'>Log in</a>") "</div>")

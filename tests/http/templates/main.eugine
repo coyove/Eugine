@@ -28,4 +28,10 @@
 
         (+ (::make-header context "Welcome") (sprintf welcome context::username) footer)
     )]
+
+    [::error := (lambda (context text)
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Error") "<div class='error'>" text "</div>" footer)
+    )]
 )

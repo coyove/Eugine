@@ -22,12 +22,11 @@ public class SEVariable extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
         if (!env.containsKey(varName)) {
             if (varName.charAt(0) == '@') {
-                SValue tmp = new SString(varName.substring(1), true);
-                env.put(varName, tmp);
-                return tmp;
+                return new SString(varName.substring(1), true);
             } else {
-                if (env.strict)
+                if (env.strict) {
                     throw new VMException(2047, "strict mode", headAtom);
+                }
 
                 SValue tmp = new SNull(true);
                 env.put(varName, tmp);

@@ -46,7 +46,8 @@ public class SClosure extends SValue {
         try {
             SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
-            ret.extra = this.extra; //.clone();
+            ret.extra = this.extra.clone();
+            ret.proto = this.proto;
             ret.transparent = this.transparent;
 
             SValue.copyAttributes(ret, this);
@@ -62,6 +63,7 @@ public class SClosure extends SValue {
         SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
+        ret.transparent = this.transparent;
         ret.proto = this;
 
         SValue.copyAttributes(ret, this);

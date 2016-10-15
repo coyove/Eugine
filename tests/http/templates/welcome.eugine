@@ -1,6 +1,0 @@
-(lambda (username)
-	(var welcome (join-string (~include "welcome.html") ""))
-	(var footer (join-string (~include "footer.html") ""))
-
-	(+ (::make-header "Welcome") (sprintf welcome username) footer)
-)

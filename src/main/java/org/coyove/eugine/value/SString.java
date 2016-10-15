@@ -19,7 +19,7 @@ public class SString extends SValue {
     @Override
     public SValue clone()
     {
-        SString ret = new SString((String)underlying);
+        SString ret = new SString((String) underlying);
         SValue.copyAttributes(ret, this);
         return ret;
     }
