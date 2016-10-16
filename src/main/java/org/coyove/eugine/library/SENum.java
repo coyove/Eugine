@@ -47,7 +47,7 @@ public class SENum extends SExpression {
         } else if (arg instanceof SDouble) {
             return new SInteger(arg.<Double>get().longValue());
         } else {
-            throw new VMException(3008, "invalid content to convert", headAtom);
+            return new SNull();
         }
     }
 

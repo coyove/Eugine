@@ -4,6 +4,7 @@
 (var jFile (cls "java.io.File"))
 (var jPaths (cls "java.nio.file.Paths"))
 (var jURLDecoder (cls "java.net.URLDecoder"))
+(var jURLEncoder (cls "java.net.URLEncoder"))
 (var jMessageDigest (cls "java.security.MessageDigest"))
 
 (~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
@@ -34,7 +35,7 @@
         (loop pairs [(pair) =>
             (var kv (split pair "="))
             (if [(len kv) == 2] {
-            	(var value [jURLDecoder . @decode (list jString. jString.) (trim [kv : 1]) "utf-8"])
+            	(var value decodeURI (trim [kv : 1]))
             	[[ret : (trim [kv : 0])] := value]
         	})
         ])
@@ -111,6 +112,15 @@
 	)]
 )
 
+(struct Post "Post"
+	[::Id := 0]
+	[::Id := 0]
+	[::Id := 0]
+	[::Id := 0]
+	[::Id := 0]
+	[::Id := 0]
+)
+
 (def starts-with (text prefix)
 	(if [(len text) < (var pl (len prefix))]
 		(false)
@@ -177,4 +187,31 @@
 				[i --])
 		])
 		(ret) })
+)
+
+(def create-if-not-exist (path text)
+	(if (not (file-exists path)) (write-file path text))
+)
+
+(def get-next-id (file)
+	(var next-id + 1 (num (read-file file)))
+	(write-file file (str next-id))
+	(next-id)
+)
+
+(def random-string (length)
+	(var table "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+	(var ret "")
+	(loop (range 0 length) 
+		[() => (+= ret [table : (floor [(random 0) * 58])])])
+
+	(ret)
+)
+
+(def encodeURI (text) [jURLEncoder . @encode (list jString. jString.) text "utf-8"])
+
+(def decodeURI (text) [jURLDecoder . @decode (list jString. jString.) text "utf-8"])
+
+(def take-last-n (l n)
+	(if [(len l) < n] l (sub l [(len l) - n]))
 )

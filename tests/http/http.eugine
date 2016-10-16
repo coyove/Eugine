@@ -22,8 +22,8 @@
 	(cond true
 		((eq context::route "/") 
 			(HTTP-Handler::index context))
-		((eq context::route "/post") 
-			(HTTP-Handler::post context))
+		((test-path "/post/") 
+			(HTTP-Handler::post context (sub context::route 6)))
 		((eq context::route "/submit") 
 			(HTTP-Handler::submit context))
 		((eq context::route "/user") 
@@ -74,14 +74,14 @@
 		(if [raw-request != ""] (println "timeout:\n" raw-request))
 	)
 
-	(var requests (split [raw-request . @toLowerCase ()] "\r\n"))
+	(var requests (split raw-request "\r\n"))
 	(var http-context clone HTTP-Request client)
 
 	(loop requests [(request) =>
 		(var parts (split request " "))
 
 		(if [(len parts) > 1]
-			(cond [parts : 0]
+			(cond (var p [[parts : 0] . @toLowerCase ()])
 				("get" 
 					(var http-context::route [parts : 1])
 					(var http-context::action "get")
@@ -94,7 +94,7 @@
 				    (var http-context::cookie (sub request 7))
 				)
 				(_
-				    (var [http-context::headers : (replace [parts : 0] ":" "")] 
+				    (var [http-context::headers : (replace p ":" "")] 
 				    	(trim (sub request (len [parts : 0]))))
 				)
 			)
@@ -118,9 +118,9 @@
 
 (make-dir (+ ~path "data/posts"))
 (make-dir (+ ~path "data/users"))
-(make-dir (+ ~path "data/sites"))
-(if (not (file-exists (+ ~path "data/users/index")))
-    (write-file (+ ~path "data/users/index") "0"))
+(create-if-not-exist (+ ~path "data/users/index") "0")
+(create-if-not-exist (+ ~path "data/posts/index") "0")
+(create-if-not-exist (+ ~path "data/posts/main-index") "0")
 
 [ss := (new (cls @java.net.ServerSocket) (list @int) Config::port)]
 (println "listening on port " Config::port)

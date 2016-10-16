@@ -4,7 +4,7 @@
 		(join-string (~include "header.html") "")
 	)]
 
-	[::index := (lambda (context)
+	[::index := (lambda (context posts)
         (var index (join-string (~include "index.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
@@ -46,5 +46,11 @@
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context "Error") "<div class='error'>" text "</div>" footer)
+    )]
+
+    [::warning := (lambda (context text)
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "Warning") "<div class='warning'>" text "</div>" footer)
     )]
 )

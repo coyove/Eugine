@@ -10,10 +10,15 @@
     [::ABOUT            := 8]
     [::EMAIL            := 9]
     [::GROUP            := 10]
+    [::SESSION 			:= 11]
 
 	[::generate-token := (lambda (username)
 		(var payload + username "&")
 		(+ payload (hash-string [username + (str [(random 0) * 1000000])] ))
+	)]
+
+	[::generate-token2 := (lambda (username)
+		(+ username "&" (hash-string username))
 	)]
 
 	[::valid-token := (lambda (token)
@@ -23,15 +28,20 @@
 			(var pair (split token "&"))
 			(if [(len pair) != 2] (exit 30))
 			(if [(len [pair : 0]) < 4] (exit 30))
-						
-			(var dir (+ ~path "data/users/" [pair : 0 0] "/" [pair : 0]))
-			(if (not (file-exists dir)) (exit 30))
+			(var username [pair : 0])
 
-			(if [(read-file (+ dir "/session")) != token] (exit 30))
-
+			(if [[username : 0] == "!"]
+				{ ; anonymous user with an anonymous token
+					(if [(hash-string username) != [pair : 1]] (exit 30))
+				}
+				{ ; registered user
+					(var f ::get-data-path username)
+					(if (not (file-exists f)) (exit 30))
+					(if [[(read-file-lines f) : UserOp::SESSION] != token] (exit 30))
+				})
 			(exit 31)
 		} () (if (eq ~e 31)
-		    [pair : 0]
+		    username
 		    null
 		))
 	)]
@@ -41,7 +51,7 @@
 		[(len m) == (len username)]
 	)]
 
-	[[::get-dir := (lambda (username)
+	[::get-data-path := (lambda (username)
 	    (+ ~path "data/users/" [username : 0] "/" username)
-	)]]
+	)]
 )

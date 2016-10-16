@@ -1,0 +1,17 @@
+(var post-dir (+ ~path "data/posts/" (str [next-id / 1000]) "/" (str next-id)))
+(make-dir post-dir)
+
+(var ts (time 1))
+
+(write-file (+ post-dir "/data") (list
+	author
+	title
+	(str ts)
+))
+
+(write-file (+ post-dir "/raw") text)
+
+(var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
+(create-if-not-exist (+ posts-dir "/list") "")
+(append-file (+ posts-dir "/list") 
+	(+ (str next-id) " 0 0 open " author " " (str ts) " " (str ts) " " (encodeURI title) "\n"))

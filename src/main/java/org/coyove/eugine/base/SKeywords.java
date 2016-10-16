@@ -412,6 +412,11 @@ public class SKeywords {
                         return new SEListOp(ha, c, SEListOp.OPERATION.LAST);
                     }
                 });
+                put("insert", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEListOp(ha, c, SEListOp.OPERATION.INSERT);
+                    }
+                });
                 put("reverse", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEReverse(ha, c);
@@ -481,6 +486,11 @@ public class SKeywords {
                 put("write-file", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEFile(ha, c, SEFile.OPERATION.WRITE);
+                    }
+                });
+                put("append-file", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.APPEND);
                     }
                 });
                 put("file-exists", new CallableKeyword() {

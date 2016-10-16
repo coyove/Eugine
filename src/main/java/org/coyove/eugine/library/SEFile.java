@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Formatter;
 
 /**
@@ -22,7 +23,7 @@ public class SEFile extends SExpression {
     private OPERATION fileOp;
 
     public enum OPERATION {
-        OPEN_TEXT, OPEN_BINARY, OPEN_LINES, WRITE, EXISTS
+        OPEN_TEXT, OPEN_BINARY, OPEN_LINES, WRITE, APPEND, EXISTS
     }
 
     public SEFile() {
@@ -72,10 +73,13 @@ public class SEFile extends SExpression {
                 case EXISTS:
                     return new SBool(Files.exists(path));
                 default:
+                    StandardOpenOption oo = fileOp == OPERATION.APPEND ?
+                        StandardOpenOption.APPEND : StandardOpenOption.CREATE;
+
                     if (data instanceof SString) {
-                        Files.write(path, data.<String>get().getBytes("utf-8"));
+                        Files.write(path, data.<String>get().getBytes("utf-8"), oo);
                     } else if (data instanceof SObject && data.get() instanceof byte[]) {
-                        Files.write(path, ((byte[]) data.get()));
+                        Files.write(path, ((byte[]) data.get()), oo);
                     } else if (data instanceof SList) {
                         StringBuilder sb = new StringBuilder();
                         for (SValue v : data.<List<SValue>>get()) {
@@ -83,12 +87,12 @@ public class SEFile extends SExpression {
                                 sb.append(v.<String>get() + "\n");
                             }
                         }
-                        Files.write(path, sb.toString().getBytes("utf-8"));
+                        Files.write(path, sb.toString().getBytes("utf-8"), oo);
                     } else {
                         throw new IOException();
                     }
 
-                    return new SBool(true);
+                    return filename;
             }
         } catch (Exception ex) {
             return new SNull();

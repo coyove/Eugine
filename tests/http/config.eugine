@@ -4,6 +4,10 @@
 	[::site-name := "Test Site"]
 	[::salt := "test salt"]
 
+	[::posts-per-page := 20]
+
 	[::new-member-karma := 10]
 	[::new-member-group := "user"]
+
+	[::cookie-options := (dict ("Expires" 31536000) ("Path" "/"))]
 )

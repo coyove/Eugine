@@ -5,7 +5,39 @@
 	[::index := (lambda (context)
 		(context::write-common 200 @html)
 		(context::write "\r\n")
-		(context::write (Template::index context))
+
+		(try {
+			(var newest (num (read-file (+ ~path "data/posts/main-index"))))
+			(var gap1 / newest 1000)
+			(var gap2 / (- newest Config::posts-per-page) 1000)
+
+			(var on-this-page - newest [gap1 * 1000])
+			(var on-previous-page - Config::posts-per-page on-this-page)
+
+			(if [gap1 == gap2] {
+				(var list1 (read-file-lines (+ ~path "data/posts/" (str gap1) "/list")))
+				(if [list1 == null] (exit 30))
+
+				(var posts take-last-n list1 Config::posts-per-page)
+			} {
+				(var list1 (read-file-lines (+ ~path "data/posts/" (str gap1) "/list")))
+				(var list2 (read-file-lines (+ ~path "data/posts/" (str gap2) "/list")))
+				(if [[list1 == null] or [list2 == null]] (exit 30))
+
+				(var posts (+ take-last-n list1 on-this-page (explode (take-last-n list2 on-previous-page))))
+			})
+
+			(loop posts [(post i) =>
+				(var parts (split post " "))
+				(if [(len parts) != 8] (exit 32))
+			])
+		} ()
+		(cond ~e
+			(30 (Template::error context "No posts yet"))
+			(31 (Template::error context "Wrong post id"))
+			(32 (Template::error context "Corrupted files"))
+			(_ (context::write (Template::index context posts)))
+		))
 	)]
 
     ;; GET
@@ -16,51 +48,43 @@
 	)]
 
     ;; POST
-	[::post := (lambda (context)
+	[::post := (lambda (context id)
 		(sync (try {
-			(if [context::username == null] (exit 99))
+			(var id num id)
+			(if [id == null] (exit 31))
+
+			(if [context::username == null] {
+					(var is-anonymous true)
+					(var author + "!" (random-string 8))
+					(var anonymous-token (UserOp::generate-token2 author))
+				} 
+				(var author context::username))
 
 			(var title [context::post : @title])
 			(if [(len title) > 128] (exit 30))
-			(if [(len title) < 8] (exit 33))
+			(if [[title == null] or [title == ""]] (set title "Untitled"))
 
-			(var url [context::post : @url])
-			(var submit-url (and [url != null] [url != ""]))
 			(var text [context::post : @text])
-			(var submit-text (and [text != null] [text != ""]))
+			(if [(len text) > 4096]	(exit 32))
+			(if [(len text) < 10] 	(exit 35))
 
-			(if [(len url) > 256] 							(exit 31))
-			(if [(len text) > 1024] 						(exit 32))
-			(if [submit-url and [(len url) < 10]] 			(exit 34))
-			(if [submit-text and [(len text) < 10]] 		(exit 35))
-			(if (and (not submit-url) (not submit-text)) 	(exit 36))
+			(var next-id get-next-id (+ ~path "data/posts/index"))
+			(if [id == 0] (write-file (+ ~path "data/posts/main-index") (str id)))
 
-			(if submit-url {
-				(var domain extract-domain url)
-				(if [domain == null] (exit 37))
-				(set domain replace domain "://" "#")
-				(make-dir (var site-path (+ ~path "data/sites/" domain)))
-			})
+			(~include "post.eugine")
 
-			(if submit-text {
-				(make-dir (var site-path (+ ~path "data/sites/common")))
-			})
+			(context::write-common 302 @plain)
+			(context::write-header "Location" "/")
+			(if (eq is-anonymous true) 
+				(context::write-cookie "uid" anonymous-token Config::cookie-options))
+			(context::write "\r\n")
 		} ()
 		(cond ~e 
-			(99 (::error context "Please login first"))
 			(30 (::error context "Title too long (128 chars max.)\n" title))
-			(33 (::error context "Title too short (8 chars min.)\n" title))
-			(31 (::error context "URL too long (256 chars max.)\n" url))
-			(34 (::error context "URL too short (10 chars min.)\n" url))
-			(32 (::error context "Text too long (1024 chars max.)\n" text))
+			(31 (::error context "Invalid ID"))
+			(32 (::error context "Text too long (4096 chars max.)\n" text))
 			(35 (::error context "Text too short (10 chars min.)\n" text))
-			(36 (::error context "You should submit either an URL or some text"))
-			(37 (::error context "Invalid URL\n" url))
-			(_ 
-				(context::write-common 302 @plain)
-				(context::write-header "Location" "/")
-				(context::write "\r\n")
-			)
+			(_ ())
 		)))
 	)]
 
@@ -74,145 +98,148 @@
 
     ;; GET
 	[::user := (lambda (context)
-		(if [context::username == null]
+		(if [[context::username == null] or [[context::username : 0] == "!"]]
 			(::user-login context)
 			{
-			    (var dir UserOp::get-dir context::username)
-                (var user-data read-file-lines (+ dir "/data"))
+			    (var f UserOp::get-data-path context::username)
+                (var user-data read-file-lines f)
                 (context::write-common 200 @html)
                 (context::write "\r\n")
                 (context::write (Template::member-info context user-data))
 			})
 	)]
 
-        ;; GET
-		[::user-login := (lambda (context)
-			(context::write-common 200 @html)
-			(context::write "\r\n")
+    ;; GET
+	[::user-login := (lambda (context)
+		(context::write-common 200 @html)
+		(context::write "\r\n")
+		(context::write (Template::login context))
+	)]
 
-			(context::write (Template::login context))
-		)]
+    ;; POST
+	[::signup := (lambda (context)
+		(try {
+			(var username [context::post : @username])
+			(if [(len username) > 32] (exit 30))
+			(if [(len username) < 4] (exit 31))
+			(if (not (UserOp::valid-username username)) (exit 40))
 
-        ;; POST
-		[::signup := (lambda (context)
-			(try {
-				(var username [context::post : @username])
-				(if [(len username) > 32] (exit 30))
-				(if [(len username) < 4] (exit 31))
-				(if (not (UserOp::valid-username username)) (exit 40))
+			(var password [context::post : @password])
+			(if [(len password) > 32] (exit 32))
+			(if [(len password) < 8] (exit 33))
 
-				(var password [context::post : @password])
-				(if [(len password) > 32] (exit 32))
-				(if [(len password) < 8] (exit 33))
+			(var f (UserOp::get-data-path username))
+			(if (file-exists f) (exit 34))
 
-				(var dir (+ ~path "data/users/" [username : 0] "/" username))
-				(if (file-exists dir) (exit 34))
+			(sync (var next-id get-next-id (+ ~path "data/users/index")))
 
-				(sync
-				    (var next-id + 1 (num (read-file (+ ~path "data/users/index"))))
-				    (write-file (+ ~path "data/users/index") (str next-id))
-				)
+			(make-dir (+ ~path "data/users/" [username : 0]))
 
-				(make-dir dir)
-				(write-file (+ dir "/data") (list
-				    (str next-id)           ; member id
-				    (hash-string password)  ; password
-				    (str (floor (time 1)))  ; sign up ts
-				    (str (floor (time 1)))  ; last login ts
-				    context::ip             ; ip when signed up
-				    context::ip             ; last login ip
-				    "0"                     ; total posts
-				    (str Config::new-member-karma) ; karma
-				    ""                      ; about
-				    ""                      ; email
-				    Config::new-member-group; member group
-				    " "                     ; add trail
-				))
-
-                (var session (UserOp::generate-token username))
-                (write-file (+ dir "/session") session)
-
-				(context::write-common 302 @plain)
-				(context::write-header "Location" "/welcome")
-				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
-				(context::write "\r\n")
-			}
-
-			(cond ~e 
-				(30 (::error context "Username too long (32 chars max.)\n" username))
-				(31 (::error context "Username too short (4 chars min.)\n" username))
-				(40 (::error context "Username contains non-alphanumeric chars\n" username))
-				(32 (::error context "Password too long (32 chars max.)\n" password))
-				(33 (::error context "Password too short (8 chars min.)\n" password))
-				(34 (::error context "User already existed\n" username))
-				(_ ())
+			(var session (UserOp::generate-token username))
+			(write-file f (list
+			    (str next-id)           ; member id
+			    (hash-string password)  ; password
+			    (str (floor (time 1)))  ; sign up ts
+			    (str (floor (time 1)))  ; last login ts
+			    context::ip             ; ip when signed up
+			    context::ip             ; last login ip
+			    "0"                     ; total posts
+			    (str Config::new-member-karma) ; karma
+			    " "                     ; about
+			    " "                     ; email
+			    Config::new-member-group; member group
+			    session					; session
+			    " "                     ; add trail
 			))
-		)]
 
-        ;; POST
-		[::login := (lambda (context)
-			(try {
-				(var username [context::post : @username])
-				(if (or (eq username null) [(len username) < 4]) (exit 30))
-
-				(var password [context::post : @password])
-				(if (eq password null) (exit 31))
-				
-				(var dir UserOp::get-dir username)
-				(if (not (file-exists dir)) (exit 32))
-
-                (var user-data (read-file-lines (+ dir "/data")))
-				(if [[user-data : UserOp::PASSWORD] != (hash-string password)] (exit 33))
-
-				(set [user-data : UserOp::LAST_LOGIN_TS] (str (time 1)))
-				(set [user-data : UserOp::LAST_LOGIN_IP] context::ip)
-				(write-file (+ dir "/data") user-data)
-
-				(var session (UserOp::generate-token username))
-				(write-file (+ dir "/session") session)
-
-				(context::write-common 302 @plain)
-				(context::write-cookie "uid" session (dict ("Expires" 31536000)))
-				(context::write-header "Location" "/welcome")
-				(context::write "\r\n")
-			}
-
-			(cond ~e 
-				(30 (::error context "Invalid username"))
-				(31 (::error context "Invalid password"))
-				(32 (::error context "Wrong username"))
-				(33 (::error context "Wrong password"))
-				(_ ())
-			))
-		)]
-
-        ;; GET
-        [::logout := (lambda (context)
-            (try {
-                (if [context::username == null] (exit 30))
-
-                (var session (UserOp::generate-token context::username))
-                (var dir UserOp::get-dir context::username)
-                (write-file (+ dir "/session") session)
-
-                (context::write-common 302 @plain)
-                (context::write-header "Location" "/")
-                (context::write "\r\n")
-            }
-
-            (cond ~e
-                (30 (::forbidden context))
-                (_ ())
-            ))
-        )]
-
-        ;; GET
-		[::welcome := (lambda (context)
-			(context::write-common 200 @html)
+			(context::write-common 302 @plain)
+			(context::write-header "Location" "/welcome")
+			(context::write-cookie "uid" session Config::cookie-options)
 			(context::write "\r\n")
+		}
 
-			(context::write (Template::welcome context))
-		)]	
+		(cond ~e 
+			(30 (::error context "Username too long (32 chars max.)\n" username))
+			(31 (::error context "Username too short (4 chars min.)\n" username))
+			(40 (::error context "Username contains non-alphanumeric chars\n" username))
+			(32 (::error context "Password too long (32 chars max.)\n" password))
+			(33 (::error context "Password too short (8 chars min.)\n" password))
+			(34 (::error context "User already existed\n" username))
+			(_ ())
+		))
+	)]
+
+    ;; POST
+	[::login := (lambda (context)
+		(try {
+			(var username [context::post : @username])
+			(if (or (eq username null) [(len username) < 4]) (exit 30))
+
+			(var password [context::post : @password])
+			(if (eq password null) (exit 31))
+			
+			(var f UserOp::get-data-path username)
+			(if (not (file-exists f)) (exit 32))
+
+            (var user-data (read-file-lines f))
+			(if [[user-data : UserOp::PASSWORD] != (hash-string password)] (exit 33))
+
+			(var session (UserOp::generate-token username))
+			(set [user-data : UserOp::LAST_LOGIN_TS] (str (time 1)))
+			(set [user-data : UserOp::LAST_LOGIN_IP] context::ip)
+			(set [user-data : UserOp::SESSION] session)
+			(write-file f user-data)
+
+			(context::write-common 302 @plain)
+			(context::write-cookie "uid" session Config::cookie-options)
+			(context::write-header "Location" "/welcome")
+			(context::write "\r\n")
+		}
+
+		(cond ~e 
+			(30 (::error context "Invalid username"))
+			(31 (::error context "Invalid password"))
+			(32 (::error context "Wrong username"))
+			(33 (::error context "Wrong password"))
+			(_ ())
+		))
+	)]
+
+    ;; GET
+    [::logout := (lambda (context)
+        (try {
+            (if [context::username == null] (exit 30))
+            (if [[context::username : 0] == "!"] (exit 31))
+
+            (var session (UserOp::generate-token context::username))
+            (var f UserOp::get-data-path context::username)
+            (var lines read-file-lines f)
+            (set [lines : UserOp::SESSION] session)
+            (write-file f lines)
+
+            (context::write-common 302 @plain)
+            (context::write-header "Location" "/")
+            (context::write "\r\n")
+        }
+
+        (cond ~e
+            (30 (::forbidden context))
+            (31
+            	(context::write-common 302 @plain)
+            	(context::write-header "Location" "/")
+            	(context::write-cookie "uid" "" Config::cookie-options)
+            	(context::write "\r\n"))
+            (_ ())
+        ))
+    )]
+
+    ;; GET
+	[::welcome := (lambda (context)
+		(context::write-common 200 @html)
+		(context::write "\r\n")
+
+		(context::write (Template::welcome context))
+	)]	
 
 	[::not-found := (lambda (context)
 		(context::write-common 404 @html)
@@ -227,22 +254,19 @@
 	)]
 
 	[::serve-file := (lambda (context)
-		(var uri-ends ends-with context::route)
-		(var path (sub context::route 1))
-		(cond true
-			((uri-ends ".js") 
-				(context::write-common 200 @js)
+		(var uri-ends-in ends-with context::route)
+		(var path + ~path (sub context::route 1))
+		(if (file-exists path)
+			{
+				(cond true
+					((uri-ends ".js")  (context::write-common 200 @js))
+					((uri-ends ".css") (context::write-common 200 @css))
+					((uri-ends ".html")(context::write-common 200 @html))
+					(_                 (context::write-common 200 @binary))
+				)
 				(context::write "\r\n")
-				(context::write-bytes (read-file-binary (+ ~path path)))
-			)
-			((uri-ends ".css") 
-				(context::write-common 200 @css)
-				(context::write "\r\n")
-				(context::write-bytes (read-file-binary (+ ~path path)))
-			)
-			(_
-				(::not-found context)
-			)
-		)
+				(context::write-bytes (read-file-binary path))
+			}
+			(::not-found context))
 	)]
 )
