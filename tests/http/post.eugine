@@ -14,4 +14,4 @@
 (var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
 (create-if-not-exist (+ posts-dir "/list") "")
 (append-file (+ posts-dir "/list") 
-	(+ (str next-id) " 0 0 open " author " " (str ts) " " (str ts) " " (encodeURI title) "\n"))
+	(+ (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) "\n"))

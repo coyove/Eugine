@@ -12,13 +12,19 @@ public class SEFor extends SExpression {
     private SExpression list;
     private SExpression body;
 
-    public SEFor() {}
+    private DIRECTION direction;
 
-    public SEFor(Atom ha, Compound c) throws VMException {
+    public enum DIRECTION {ASC, DESC}
+
+    public SEFor() {
+    }
+
+    public SEFor(Atom ha, Compound c, DIRECTION dir) throws VMException {
         super(ha, c, 2);
 
         list = SExpression.cast(c.atoms.pop());
         body = SExpression.cast(c.atoms.pop());
+        direction = dir;
     }
 
     private SValue execLoop(SClosure body, SValue v, int idx) throws VMException {
@@ -52,11 +58,6 @@ public class SEFor extends SExpression {
 
         if (list_ instanceof SList) {
             values = ((SList) list_).get();
-
-            if (values.size() == 0) {
-                whileLoop = true;
-                condAlwaysTrue = true;
-            }
         } else if (list_ instanceof SBool) {
             whileLoop = true;
             condAlwaysTrue = false;
@@ -71,10 +72,18 @@ public class SEFor extends SExpression {
                     break;
             }
         } else {
-            for (int i = 0; i < values.size(); i++) {
-                SValue ret = execLoop(body, values.get(i), i);
-                if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
-                    break;
+            if (direction == DIRECTION.ASC) {
+                for (int i = 0; i < values.size(); i++) {
+                    SValue ret = execLoop(body, values.get(i), i);
+                    if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                        break;
+                }
+            } else {
+                for (int i = values.size() - 1; i >= 0; i--) {
+                    SValue ret = execLoop(body, values.get(i), i);
+                    if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                        break;
+                }
             }
         }
 
@@ -88,6 +97,8 @@ public class SEFor extends SExpression {
         ret.tailCompound = this.tailCompound;
         ret.list = this.list.deepClone();
         ret.body = this.body.deepClone();
+        ret.direction = this.direction;
+
         return ret;
     }
 }

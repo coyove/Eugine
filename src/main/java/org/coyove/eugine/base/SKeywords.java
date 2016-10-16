@@ -151,7 +151,12 @@ public class SKeywords {
                 });
                 put("loop", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFor(ha, c);
+                        return new SEFor(ha, c, SEFor.DIRECTION.ASC);
+                    }
+                });
+                put("roop", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFor(ha, c, SEFor.DIRECTION.DESC);
                     }
                 });
 

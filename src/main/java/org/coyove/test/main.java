@@ -13,6 +13,7 @@ import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;

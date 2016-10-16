@@ -6,6 +6,7 @@
 (var jURLDecoder (cls "java.net.URLDecoder"))
 (var jURLEncoder (cls "java.net.URLEncoder"))
 (var jMessageDigest (cls "java.security.MessageDigest"))
+(var jStringEscapeUtils (cls "org.apache.commons.lang3.StringEscapeUtils"))
 
 (~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
 (~define (struct ~name ~desc ~body...) ((def ~name () ~body...) ()))
@@ -114,11 +115,26 @@
 
 (struct Post "Post"
 	[::Id := 0]
-	[::Id := 0]
-	[::Id := 0]
-	[::Id := 0]
-	[::Id := 0]
-	[::Id := 0]
+	[::Comments := 0]
+	[::Points := 0]
+	[::State := ""]
+	[::Author := ""]
+	[::Commenter := ""]
+	[::CreatedTS := 0]
+	[::CommentedTS := 0]
+    [::Title := ""]
+
+    [::~init := (lambda (id comments points state author commenter created-ts commented-ts title)
+        [::Id           := (num id)]
+        [::Comments     := (num comments)]
+        [::Points       := (num points)]
+        [::State        := state]
+        [::Author       := author]
+        [::Commenter    := commenter]
+        [::CreatedTS    := (num created-ts)]
+        [::CommentedTS  := (num commented-ts)]
+        [::Title        := (decodeURI title)]
+    )]
 )
 
 (def starts-with (text prefix)
@@ -212,6 +228,22 @@
 
 (def decodeURI (text) [jURLDecoder . @decode (list jString. jString.) text "utf-8"])
 
+(def escape-html (text) [jStringEscapeUtils . @escapeHtml3 (list jString.) text])
+
+(def unescape-html (text) [jStringEscapeUtils . @unescapeHtml3 (list jString.) text])
+
 (def take-last-n (l n)
-	(if [(len l) < n] l (sub l [(len l) - n]))
+    (if [l == null] (list)
+	    (if [(len l) < n] l (sub l [(len l) - n])))
+)
+
+(def pretty-date (ts)
+    (var diff / (- (time 1) ts) 1000)
+    (if [diff < 60]
+        (+ (str diff) " seconds")
+        (if [diff < 3600]
+            (+ (str (/ diff 60)) " minutes")
+            (if [diff < 86400]
+                (+ (str (/ diff 3600)) " hours")
+                (+ (str (/ diff 86400)) " days"))))
 )
