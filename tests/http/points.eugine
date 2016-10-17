@@ -17,34 +17,25 @@
 	(floor points)
 )
 
-(def update-list (lst id idx value)
+(def update-list (list-file id ops...)
 	(var sid + (str id) " ")
+    (var lines read-file-lines list-file)
 
-	(loop lst [(item i) =>
-		(if [item starts-with sid] {
-			(var parts split item " ")
-			(set [parts : idx] (str value))
-			(set [lst : i] join-string parts " ")
-		})
-	])
+    (if [lines != null]
+        (loop lines [(item i) =>
+            (if [item starts-with sid] {
+                (var parts split item " ")
 
-	(lst)
-)
+                (loop ops [(op) =>
+                    (var idx [op : 0])
+                    (set [parts : idx] ([op : 1] [parts : idx]))
+                ])
 
-(def update-list2 (lst id idx value)
-	(var sid + (str id) " ")
+                (set [lines : i] join-string parts " ")
+            })
+        ]))
 
-	(loop lst [(item i) =>
-		(if [item starts-with sid] {
-			(var parts split item " ")
-			(set [parts : idx] (str value))
-			(var comments num [parts : 1])
-			(set [parts : 1] (str (++ comments)))
-			(set [lst : i] join-string parts " ")
-		})
-	])
-
-	(lst)
+	(write-file list-file lines)
 )
 
 (def recalc-points-of-item (id)
@@ -77,19 +68,18 @@
 	(set [user-data : UserOp::KARMA] (str [[karma - old-points] + points]))
 	(write-file user-dp user-data)
 
+	(var user-list UserOp::get-user-path [data : 0])
+
 	(if [[data : 9] != "0"] {
 		;; update item's parent's list
 		(var path get-post-path (num [data : 9]))
-		(var comments read-file-lines (+ path "/list"))
-
-		(if [comments != null] 
-			(write-file (+ path "/list") (update-list comments id 2 points)))
+		(+= user-list "/comments-list")
 	} {
 		;; update main list
-		(var path (+ ~path "data/posts/" (str (/ id 1000)) "/list"))
-		(var posts read-file-lines path)
-
-		(if [posts != null] 
-			(write-file path (update-list posts id 2 points)))
+		(var path (+ ~path "data/posts/" (str (/ id 1000))))
+		(+= user-list "/submitted-list")
 	})
+
+	(update-list (+ path "/list") id (2 [() => (str points)]))
+	(update-list user-list id (2 [() => (str points)]))
 )	

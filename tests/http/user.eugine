@@ -56,6 +56,10 @@
 	)]
 
 	[::get-data-path := (lambda (username)
-	    (+ ~path "data/users/" [username : 0] "/" username)
+	    (+ ~path "data/users/" [username : 0] "/" username "/data")
 	)]
+
+	[::get-user-path := (lambda (username)
+        (+ ~path "data/users/" [username : 0] "/" username)
+    )]
 )

@@ -12,7 +12,7 @@
     <td>" post::Comments "</td>
     <td>" post::points "</td>
     <td><a href='/item/" post::id "'>" (escape-html post::Title) "</a></td>
-    <td>" post::Author "</td>
+    <td><a href='/user/" post::Author "'>" post::Author "</a></td>
     <td>" (pretty-date post::CommentedTS) " ago</td>
 </tr>")
         ])
@@ -20,7 +20,7 @@
         (table)
     )]
 
-	[::index := (lambda (context posts)
+	[::index := (lambda (context posts start)
         (var index (join-string (~include "index.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 

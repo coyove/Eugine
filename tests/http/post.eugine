@@ -33,36 +33,48 @@
 
 	(if (file-exists parent-dir) {
 		(create-if-not-exist (+ parent-dir "/list") "")
-		(append-file (+ parent-dir "/list") 
-			(+ (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI text) "\n"))
+		(var liner + (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI text) "\n")
+		(append-file (+ parent-dir "/list") liner)
+
+		(var user-list UserOp::get-user-path context::username)
+        (create-if-not-exist (+ user-list "/comments-list") "")
+        (append-file (+ user-list "/comments-list") liner)
 
 		(var parent-data (read-file-lines (+ parent-dir "/data")))
 		(set parent-comments num [parent-data : 5])
 		(set [parent-data : 5] (str (++ parent-comments)))
 		(write-file (+ parent-dir "/data") parent-data)
 
+        (var parent-user-list UserOp::get-user-path [parent-data : 0])
+
 		(if [[parent-data : 9] != "0"] {
 			(var parent-parent-id num [parent-data : 9])
-			(var parent-parent-dir get-post-path parent-parent-id)
-			(var parent-parent-list read-file-lines (+ parent-parent-dir "/list"))
-
-			(if [parent-parent-list != null]
-				(write-file (+ parent-parent-dir "/list") (update-list2 parent-parent-list id 7 ts)))
+			(var pp-dir get-post-path parent-parent-id)
+		    (+= parent-user-list "/comments-list")
 		} {
-			(var parent-parent-path (+ ~path "data/posts/" (str (/ id 1000)) "/list"))
-			(var parent-parent-list read-file-lines parent-parent-path)
-
-			(if [parent-parent-list != null]
-				(write-file parent-parent-path (update-list2 parent-parent-list id 7 ts)))
+			(var pp-dir (+ ~path "data/posts/" (str (/ id 1000))))
+			(+= parent-user-list "/submitted-list")
 		})
+
+		(update-list (+ pp-dir "/list") id
+		    (1 [(count) => (str (+ (num count) 1))])
+		    (7 [() => (str ts)]))
+
+		(update-list parent-user-list id
+            (1 [(count) => (str (+ (num count) 1))])
+            (7 [() => (str ts)]))
 	})
 
 	(var return-to (+ "/item/" (str id)))
 } {
 	(var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
 	(create-if-not-exist (+ posts-dir "/list") "")
-	(append-file (+ posts-dir "/list") 
-		(+ (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) "\n"))
+	(var liner + (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) "\n")
+	(append-file (+ posts-dir "/list") liner)
+
+	(var user-list UserOp::get-user-path context::username)
+    (create-if-not-exist (+ user-list "/submitted-list") "")
+    (append-file (+ user-list "/submitted-list") liner)
 
 	(var return-to "/")
 })

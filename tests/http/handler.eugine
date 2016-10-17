@@ -6,37 +6,20 @@
 	[::index := (lambda (context)
 		(context::write-common 200 @html)
 		(context::write "\r\n")
-
-		(try {
-			(var newest (num (read-file (+ ~path "data/posts/main-index"))))
-			(var gap / newest 1000)
-			(var ppp Config::posts-per-page)
-			(var posts (list))
-
-			(loop [ppp > 0] [() =>
-			    (var data (read-file-lines (+ ~path "data/posts/" (str gap) "/list")))
-			    (if [data == null] (exit 30))
-
-                (var tmp (take-last-n data ppp))
-                (+. posts (explode tmp))
-
-                [ppp -= (len tmp)]
-                (-- gap)
-			])
-		})
-
-        (try {
-            (loop posts [(post i) =>
-                (var parts (split post " "))
-                (if [(len parts) != 9] (exit 30))
-
-                (set [posts : i] clone Post (explode parts))
-            ])
-        } () (cond ~e
-            (30 (::error context "Corrupted index file"))
-            (_ (context::write (Template::index context posts)))
-        ))
+        (context::write (Template::index context (load-list "main" 0) 0))
 	)]
+
+	[::paging := (lambda (context count)
+	    (set count num count)
+
+	    (if (or [count == null] [count < 0])
+	        (::not-found context)
+	        {
+                (context::write-common 200 @html)
+                (context::write "\r\n")
+                (context::write (Template::index context (load-list "main" count) count))
+            })
+    )]
 
 	[::item := (lambda (context id)
 
@@ -54,19 +37,10 @@
 			(var item::aye-users read-file-lines (+ path "/aye"))
 			(var item::no-users read-file-lines (+ path "/no"))
 
-			(var comments (read-file-lines (+ path "/list")))
-			(if [comments == null] { (set comments (list)) (exit 99) })
-
-            (loop comments [(post i) =>
-                (var parts (split post " "))
-                (if [(len parts) != 9] (exit 31))
-
-                (set [comments : i] clone Post (explode parts))
-            ])
+			(var comments load-list (+ path "/list") 0)
 
 		} () (cond ~e
             (30 (::not-found context))
-            (31 (::error context "Corrupted index file"))
             (_ 
             	(context::write-common 200 @html)
 				(context::write "\r\n")
@@ -166,7 +140,7 @@
 
     ;; GET
 	[::user := (lambda (context)
-		(if [[context::username == null] or [[context::username : 0] == "!"]]
+		(if (not context::is-logged-in)
 			(::user-login context)
 			{
                 (context::write-common 200 @html)
@@ -174,6 +148,17 @@
                 (context::write (Template::member-info context context::user-data))
 			})
 	)]
+
+	;; GET
+    [::user-visitor-view := (lambda (context username)
+        (context::write-common 200 @html)
+        (context::write "\r\n")
+
+        (var user-data read-file-lines (UserOp::get-data-path username))
+        (if [user-data != null]
+            (context::write (Template::member-info context user-data))
+            (::not-found context))
+    )]
 
     ;; GET
 	[::user-login := (lambda (context)
@@ -199,7 +184,7 @@
 
 			(sync (var next-id get-next-id (+ ~path "data/users/index")))
 
-			(make-dir (+ ~path "data/users/" [username : 0]))
+			(make-dir (+ ~path "data/users/" [username : 0] "/" username))
 
 			(var session (UserOp::generate-token username))
 			(write-file f (list
@@ -275,7 +260,6 @@
     [::logout := (lambda (context)
         (try {
             (if [context::username == null] (exit 30))
-            (if [[context::username : 0] == "!"] (exit 31))
 
             (var session (UserOp::generate-token context::username))
             (var f UserOp::get-data-path context::username)

@@ -8,4 +8,7 @@
 </form>
 </div>
 
-<div class='posts'>%s</div>")
+<div class='posts'>%s</div>"
+(if [(set has-prev (- start Config::posts-per-page)) >= 0]
+    (+ "<a href='/after/" (str has-prev) "'>prev</a>"))
+"<a href='/after/" (str (+ start Config::posts-per-page)) "'>next</a>")
