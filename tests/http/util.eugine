@@ -114,9 +114,9 @@
 )
 
 (struct Post "Post"
-	[::Id := 0]
+	[::id := 0]
 	[::Comments := 0]
-	[::Points := 0]
+	[::points := 0]
 	[::State := ""]
 	[::Author := ""]
 	[::Commenter := ""]
@@ -125,15 +125,48 @@
     [::Title := ""]
 
     [::~init := (lambda (id comments points state author commenter created-ts commented-ts title)
-        [::Id           := (num id)]
+        [::id           := (num id)]
         [::Comments     := (num comments)]
-        [::Points       := (num points)]
+        [::points       := (num points)]
         [::State        := state]
         [::Author       := author]
         [::Commenter    := commenter]
         [::CreatedTS    := (num created-ts)]
         [::CommentedTS  := (num commented-ts)]
         [::Title        := (decodeURI title)]
+    )]
+)
+
+(struct Item "Item"
+	[::id := 0]
+	[::Author := ""]
+	[::Title := ""]
+	[::CreatedTS := 0]
+	[::ModifiedTS := 0]
+	[::State := ""]
+	[::Content := ""]
+	[::comments := 0]
+	[::points := 0]
+	[::upvotes := 0]
+	[::downvotes := 0]
+	[::parent := 0]
+
+	;; refer to handler.eugine/::item
+    [::~init := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent content)
+        [::id           := id]
+        [::State        := state]
+        [::Author       := author]
+        [::CreatedTS    := (num created-ts)]
+        [::ModifiedTS  	:= (num modified-ts)]
+        [::Title        := (decodeURI title)]
+        [::Content 		:= content]
+        [::comments 	:= comments]
+		[::points 		:= points]
+		[::upvotes 		:= upvotes]
+		[::downvotes 	:= downvotes]
+		[::parent 		:= parent]
+		[::aye-users 	:= (list)]
+		[::no-users 	:= (list)]
     )]
 )
 
@@ -246,4 +279,18 @@
             (if [diff < 86400]
                 (+ (str (/ diff 3600)) " hours")
                 (+ (str (/ diff 86400)) " days"))))
+)
+
+(def get-post-path (id) 
+	(var path (+ ~path "data/posts/" (str (/ id 1000)) "/" (str id)))
+	(if (file-exists path) path null))
+
+(def list-contains (l elem)
+	(var ret -1)
+	(loop l [(item i) =>
+		(if [item == elem] 
+			{ (set ret i) false }
+			true)
+	])
+	(ret)
 )

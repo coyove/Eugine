@@ -30,7 +30,7 @@ public class SENum extends SExpression {
                     return new SInteger(Long.parseLong(str));
                 }
             } catch (Exception e) {
-                throw new VMException(3008, "invalid content to convert", headAtom);
+                return new SNull();
             }
         } else if (arg instanceof SBool) {
             return new SInteger(arg.<Boolean>get() ? 1 : 0);

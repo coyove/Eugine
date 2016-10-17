@@ -9,5 +9,5 @@
 	[::new-member-karma := 10]
 	[::new-member-group := "user"]
 
-	[::cookie-options := (dict ("Expires" 31536000) ("Path" "/"))]
+	[::cookie-options := (dict ("Expires" 31536000))]
 )

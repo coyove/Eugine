@@ -5,18 +5,20 @@
 
 (var ~mt) ; enable multi-threading
 
-;(var start (time 1))
-;(loop (range 0 1000) [() =>
-;(var lines (read-file-lines (+ ~path "http.eugine")))
-;(set [lines : 12] "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
-;(write-file (+ ~path "tmp") lines)
-;])
-;(println [(time 1) - start])
+; (var start (time 1))
+; (loop (range 0 1000) [() =>
+; 	; (write-file (+ ~path "tmp") (str (range 0 10000)))
+; 	(var lines read-file-lines (+ ~path "tmp"))
+; 	(loop lines [(line) => [line != "731"] ])
+; ])
+; (println [(time 1) - start])
 
 (def dispatcher (context)
-	(var test-path (starts-with context::route))
+	(var test-path starts-with context::route)
 	(var context::username (UserOp::valid-token [context::cookies : @uid]))
 	(var context::is-logged-in neq context::username null)
+	(if context::is-logged-in (var context::user-data read-file-lines (UserOp::get-data-path context::username)))
+
 	(var context::ip "127.0.0.1") ; test
 
 	(cond true
@@ -24,6 +26,12 @@
 			(HTTP-Handler::index context))
 		((test-path "/post/") 
 			(HTTP-Handler::post context (sub context::route 6)))
+		((test-path "/item/")
+			(HTTP-Handler::item context (sub context::route 6)))
+		((test-path "/aye/")
+			(HTTP-Handler::aye context (sub context::route 5)))
+		((test-path "/no/")
+			(HTTP-Handler::no context (sub context::route 4)))
 		((eq context::route "/submit") 
 			(HTTP-Handler::submit context))
 		((eq context::route "/user") 

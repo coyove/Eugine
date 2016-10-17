@@ -47,8 +47,12 @@
 	)]
 
 	[::valid-username := (lambda (username)
-		(var m (match username %"[a-zA-Z0-9\-\_\~\#\(\)\[\]]"))
-		[(len m) == (len username)]
+		(if [(num username) != null]
+			false ;; pure number username is not allowed
+			{
+				(var m (match username %"[a-zA-Z0-9\-\_\~\#\(\)\[\]]"))
+				[(len m) == (len username)]
+			})
 	)]
 
 	[::get-data-path := (lambda (username)

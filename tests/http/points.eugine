@@ -1,0 +1,95 @@
+(def calc-rank (lst)
+	(var idx 1)
+	(var points 0.0)
+	(var limit 500.0)
+
+	(loop [idx < (len lst)] [() =>
+		(var karma num [lst : idx])
+
+		(cond true
+			([karma > limit] (+= points 1.0))
+			([karma > 10] (+= points (pow [karma / limit] 0.45)))
+			(_ ()))
+
+		(+= idx 2)
+	])
+
+	(floor points)
+)
+
+(def update-list (lst id idx value)
+	(var sid + (str id) " ")
+
+	(loop lst [(item i) =>
+		(if [item starts-with sid] {
+			(var parts split item " ")
+			(set [parts : idx] (str value))
+			(set [lst : i] join-string parts " ")
+		})
+	])
+
+	(lst)
+)
+
+(def update-list2 (lst id idx value)
+	(var sid + (str id) " ")
+
+	(loop lst [(item i) =>
+		(if [item starts-with sid] {
+			(var parts split item " ")
+			(set [parts : idx] (str value))
+			(var comments num [parts : 1])
+			(set [parts : 1] (str (++ comments)))
+			(set [lst : i] join-string parts " ")
+		})
+	])
+
+	(lst)
+)
+
+(def recalc-points-of-item (id)
+	(var path get-post-path id)
+
+	(create-if-not-exist (+ path "/aye") "")
+	(var aye read-file-lines (+ path "/aye"))
+	(var aye-count len aye)
+	(var aye-points calc-rank aye)
+
+	(create-if-not-exist (+ path "/no") "")
+	(var no read-file-lines (+ path "/no"))
+	(var no-count len no)
+	(var no-points calc-rank no)
+
+	(var points (- aye-points no-points))
+
+	;; update the item data
+	(var data read-file-lines (+ path "/data"))
+	(var old-points num [data : 6])
+	(set [data : 6] (str points))
+	(set [data : 7] (str (/ aye-count 2)))
+	(set [data : 8] (str (/ no-count 2)))
+	(write-file (+ path "/data") data)
+
+	;; update item's author data
+	(var user-dp UserOp::get-data-path [data : 0])
+	(var user-data read-file-lines user-dp)
+	(var karma num [user-data : UserOp::KARMA])
+	(set [user-data : UserOp::KARMA] (str [[karma - old-points] + points]))
+	(write-file user-dp user-data)
+
+	(if [[data : 9] != "0"] {
+		;; update item's parent's list
+		(var path get-post-path (num [data : 9]))
+		(var comments read-file-lines (+ path "/list"))
+
+		(if [comments != null] 
+			(write-file (+ path "/list") (update-list comments id 2 points)))
+	} {
+		;; update main list
+		(var path (+ ~path "data/posts/" (str (/ id 1000)) "/list"))
+		(var posts read-file-lines path)
+
+		(if [posts != null] 
+			(write-file path (update-list posts id 2 points)))
+	})
+)	

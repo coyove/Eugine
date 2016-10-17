@@ -73,8 +73,12 @@ public class SEFile extends SExpression {
                 case EXISTS:
                     return new SBool(Files.exists(path));
                 default:
-                    StandardOpenOption oo = fileOp == OPERATION.APPEND ?
-                        StandardOpenOption.APPEND : StandardOpenOption.CREATE;
+                    StandardOpenOption[] oo = fileOp == OPERATION.APPEND ?
+                            new StandardOpenOption[]{StandardOpenOption.APPEND} :
+                            new StandardOpenOption[]{
+                                    StandardOpenOption.CREATE,
+                                    StandardOpenOption.TRUNCATE_EXISTING,
+                                    StandardOpenOption.WRITE};
 
                     if (data instanceof SString) {
                         Files.write(path, data.<String>get().getBytes("utf-8"), oo);

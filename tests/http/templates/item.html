@@ -1,0 +1,27 @@
+(list "<div class='item'>
+<div>" item::Author ", " (pretty-date item::ModifiedTS) " ago, " (str item::comments) " comments, " (str item::points) " points, <a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a></div>"
+
+"<div><a href='/aye/" (str item::id) "'>"
+(if [(list-contains item::aye-users context::username) < 0]
+	"aye"
+	"<b>aye</b>")
+"</a></div>"
+
+"<div><a href='/no/" (str item::id) "'>"
+(if [(list-contains item::no-users context::username) < 0]
+	"no"
+	"<b>no</b>")
+"</a></div>"
+
+"<hr>
+<div>" item::Content "</div>
+<hr>
+<form method=post action='/post/" (str item::id) "'>
+<table>
+	<tr><td valign=top>Comment:</td><td><textarea name='text' rows='5'></textarea></td></tr>
+	<tr><td></td><td><input type='submit' value='submit'></td></tr>
+</table>
+</form>
+<hr>
+%s
+")

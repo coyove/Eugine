@@ -2,16 +2,67 @@
 (make-dir post-dir)
 
 (var ts (time 1))
-
-(write-file (+ post-dir "/data") (list
-	author
-	title
-	(str ts)
+(var data (list
+	author		; author
+	(encodeURI title)		; title
+	(str ts)	; created ts
+	(str ts)	; modified ts
+	"open"		; state
+	"0"			; comments
+	"0"			; points
+	"0"			; aye count
+	"0"			; no count
+	(str id)	; parent
 ))
 
+(write-file (+ post-dir "/data") data)
 (write-file (+ post-dir "/raw") text)
+(write-file (+ post-dir "/aye") "")
+(write-file (+ post-dir "/no") "")
 
-(var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
-(create-if-not-exist (+ posts-dir "/list") "")
-(append-file (+ posts-dir "/list") 
-	(+ (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) "\n"))
+(if context::is-logged-in {
+	(var user-dp UserOp::get-data-path context::username)
+	(var user-data read-file-lines user-dp)
+	(var total-posts num [user-data : UserOp::TOTAL_POSTS])
+	(set [user-data : UserOp::TOTAL_POSTS] (str (++ total-posts)))
+	(write-file user-dp user-data)
+})
+
+(if [id != 0] {
+	(var parent-dir get-post-path id)
+
+	(if (file-exists parent-dir) {
+		(create-if-not-exist (+ parent-dir "/list") "")
+		(append-file (+ parent-dir "/list") 
+			(+ (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI text) "\n"))
+
+		(var parent-data (read-file-lines (+ parent-dir "/data")))
+		(set parent-comments num [parent-data : 5])
+		(set [parent-data : 5] (str (++ parent-comments)))
+		(write-file (+ parent-dir "/data") parent-data)
+
+		(if [[parent-data : 9] != "0"] {
+			(var parent-parent-id num [parent-data : 9])
+			(var parent-parent-dir get-post-path parent-parent-id)
+			(var parent-parent-list read-file-lines (+ parent-parent-dir "/list"))
+
+			(if [parent-parent-list != null]
+				(write-file (+ parent-parent-dir "/list") (update-list2 parent-parent-list id 7 ts)))
+		} {
+			(var parent-parent-path (+ ~path "data/posts/" (str (/ id 1000)) "/list"))
+			(var parent-parent-list read-file-lines parent-parent-path)
+
+			(if [parent-parent-list != null]
+				(write-file parent-parent-path (update-list2 parent-parent-list id 7 ts)))
+		})
+	})
+
+	(var return-to (+ "/item/" (str id)))
+} {
+	(var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
+	(create-if-not-exist (+ posts-dir "/list") "")
+	(append-file (+ posts-dir "/list") 
+		(+ (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) "\n"))
+
+	(var return-to "/")
+})
