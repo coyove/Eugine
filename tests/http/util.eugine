@@ -62,6 +62,7 @@
             (301 (::write "HTTP/1.1 301 Moved Permanently\r\n"))
             (_   (::write "HTTP/1.1 200 OK\r\n"))
         )
+
         (cond ctype
             (@css   (::write-header "Content-Type" "text/css; charset=utf-8"))
             (@js    (::write-header "Content-Type" "application/x-javascript; charset=utf-8"))
@@ -121,25 +122,25 @@
 
 (struct Post "Post"
 	[::id := 0]
-	[::Comments := 0]
+	[::comments := 0]
 	[::points := 0]
 	[::State := ""]
 	[::Author := ""]
 	[::Commenter := ""]
-	[::CreatedTS := 0]
-	[::CommentedTS := 0]
-    [::Title := ""]
+	[::created-ts := 0]
+	[::commented-ts := 0]
+    [::title := ""]
 
     [::~init := (lambda (id comments points state author commenter created-ts commented-ts title)
         [::id           := (num id)]
-        [::Comments     := (num comments)]
+        [::comments     := (num comments)]
         [::points       := (num points)]
         [::State        := state]
         [::Author       := author]
         [::Commenter    := commenter]
-        [::CreatedTS    := (num created-ts)]
-        [::CommentedTS  := (num commented-ts)]
-        [::Title        := (decodeURI title)]
+        [::created-ts   := (num created-ts)]
+        [::commented-ts := (num commented-ts)]
+        [::title        := (decodeURI title)]
     )]
 )
 
@@ -147,10 +148,10 @@
 	[::id := 0]
 	[::Author := ""]
 	[::Title := ""]
-	[::CreatedTS := 0]
+	[::created-ts := 0]
 	[::ModifiedTS := 0]
 	[::State := ""]
-	[::Content := ""]
+	[::content := ""]
 	[::comments := 0]
 	[::points := 0]
 	[::upvotes := 0]
@@ -162,10 +163,10 @@
         [::id           := id]
         [::State        := state]
         [::Author       := author]
-        [::CreatedTS    := (num created-ts)]
+        [::created-ts   := (num created-ts)]
         [::ModifiedTS  	:= (num modified-ts)]
         [::Title        := (decodeURI title)]
-        [::Content 		:= content]
+        [::content 		:= content]
         [::comments 	:= comments]
 		[::points 		:= points]
 		[::upvotes 		:= upvotes]
@@ -329,9 +330,12 @@
     )
 
     (var true-start [(len posts) - end])
-    (if [true-start < 0] (set true-start 0))
-
-    (set posts sub posts true-start ppp)
+    
+    (if [true-start < 0] 
+    	(if [(set true-ppp + ppp true-start) >= 0] 
+    		(set posts sub posts 0 true-ppp)
+    		(set posts (list)))
+    	(set posts sub posts true-start ppp))
 
     (try {
         (loop posts [(post i) =>
@@ -347,4 +351,24 @@
     ))
 
     (posts)
+)
+
+(def parse-code (text)
+	(var texts split (escape-html text) "\n")
+	(var ret clone "")
+	(var code-flag false)
+	(loop texts [(t) =>
+		(if [(trim t) == "```"] 
+			{ 
+				(set code-flag not code-flag)
+				(if code-flag 
+					(+. ret "<pre><code>")
+					(+. ret "</pre></code>"))
+			} 
+			(if code-flag
+				(+. ret t "\n")
+				(+. ret (re-place t %"(https?:\/\/\S+)" "<a href='$1' target='_blank'>$1</a>") "<br>")))
+	])
+
+	(ret)
 )

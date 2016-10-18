@@ -440,7 +440,12 @@ public class SKeywords {
                 });
                 put("replace", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEReplace(ha, c);
+                        return new SEReplace(ha, c, SEReplace.OPERATION.NORMAL);
+                    }
+                });
+                put("re-place", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEReplace(ha, c, SEReplace.OPERATION.REGEX);
                     }
                 });
                 put("trim", new CallableKeyword() {

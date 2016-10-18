@@ -19,17 +19,18 @@
         (context::write (Template::index context (load-list "main" count) count))
 	)]
 
-    [::user-submits := (lambda (context username)
-        (var path + (UserOp::get-user-path username) "/submitted-list")
+    [::user-submits-or-comments := (lambda (context username type)
+    	(var user-home UserOp::get-user-path username)
+        (var path + (UserOp::get-user-path username) "/" type "-list")
 
-        (if (not (file-exists path))
+        (if (not (file-exists user-home))
             (::not-found context)
             {
                 (var count ::get-paging context)
 
                 (context::write-common 200 @html)
                 (context::write "\r\n")
-                (context::write (Template::index context (load-list path count) count))
+                (context::write (Template::lister context (load-list path count) count))
             })
     )]
 
@@ -45,18 +46,19 @@
 			(var data read-file-lines (+ path "/data"))
 			(var raw read-file (+ path "/raw"))
 
-			(var item clone Item id (explode data) (escape-html raw))
+			(var item clone Item id (explode data) raw)
 			(var item::aye-users read-file-lines (+ path "/aye"))
 			(var item::no-users read-file-lines (+ path "/no"))
 
-			(var comments load-list (+ path "/list") 0)
+			(var count ::get-paging context)
+			(var comments load-list (+ path "/list") count)
 
 		} () (cond ~e
             (30 (::not-found context))
             (_ 
             	(context::write-common 200 @html)
 				(context::write "\r\n")
-            	(context::write (Template::item context item comments)))
+            	(context::write (Template::item context item comments count)))
         ))
 	)]
 
@@ -78,11 +80,14 @@
 
 			(var title [context::post : @title])
 			(if [(len title) > 128] (exit 30))
-			(if [[title == null] or [title == ""]] (set title "Untitled"))
+			(if [[title == null] or [title == ""]] (set title "untitled"))
 
 			(var text [context::post : @text])
 			(if [(len text) > 4096]	(exit 32))
 			(if [(len text) < 4] 	(exit 35))
+
+			(set text parse-code text)
+			; (println (match text %"(https?:\/\/\S+)"))
 
 			(var next-id get-next-id (+ ~path "data/posts/index"))
 			(if [id == 0] (write-file (+ ~path "data/posts/main-index") (str id)))
@@ -112,16 +117,46 @@
 			(var path get-post-path id)
 			(if [path == null] (exit 31))
 
-			(set path + path "/" opt)
-			(create-if-not-exist path "")
-			(var aye-users read-file-lines path)
+			(set aye-path + path "/aye")
+			(set no-path + path "/no")
+			(create-if-not-exist aye-path "")
+			(create-if-not-exist no-path "")
 
-			(if [(set idx (list-contains aye-users context::username)) >= 0]
-				{ (del aye-users idx) (del aye-users idx) }
-				(+. aye-users context::username [context::user-data : UserOp::KARMA]))
+			(var aye-users read-file-lines aye-path)
+			(var no-users read-file-lines no-path)
 
-			(write-file path aye-users)
-			(recalc-points-of-item id)
+			(if [opt == "aye"] {
+				(if [(set idx (list-contains aye-users context::username)) >= 0]
+					{ 
+						(del aye-users idx) 
+						(del aye-users idx) 
+					}
+					{
+						(+. aye-users context::username [context::user-data : UserOp::KARMA])
+						(if [(set idx list-contains no-users context::username) >= 0] {
+							(del no-users idx) 
+							(del no-users idx)
+						})
+					})
+			} {
+				(if [(set idx (list-contains no-users context::username)) >= 0]
+					{ 
+						(del no-users idx) 
+						(del no-users idx) 
+					}
+					{
+						(+. no-users context::username [context::user-data : UserOp::KARMA])
+						(if [(set idx list-contains aye-users context::username) >= 0] {
+							(del aye-users idx) 
+							(del aye-users idx)
+						})
+					})
+			})
+
+			(write-file aye-path aye-users)
+			(write-file no-path no-users)
+
+			(recalc-points-of-item id aye-users no-users)
 
 			(context::write-common 302 @plain)
 			(context::write-header "Location" (+ "/item/" (str id)))
@@ -142,6 +177,42 @@
 		(::say-aye-or-no context id "no")
 	)]
 
+	;; POST
+	[::update := (lambda (context)
+		(sync (try {
+			(if (not context::is-logged-in) (exit 99))
+			(var username context::username)
+
+			(var about [context::post : @about])
+			(if [(len about) > 256] (exit 30))
+			(if [about == null] (exit 31))
+
+			(var email [context::post : @email])
+			(if [(len email) > 64] (exit 32))
+			(if [email == null] (exit 33))
+
+			(var user-dp UserOp::get-data-path username)
+			(var user-data read-file-lines user-dp)
+
+			(set [user-data : UserOp::ABOUT] encodeURI about)
+			(set [user-data : UserOp::EMAIL] encodeURI email)
+
+			(write-file user-dp user-data)
+
+			(context::write-common 302 @plain)
+			(context::write-header "Location" "/user")
+			(context::write "\r\n")
+		} ()
+		(cond ~e 
+			(99 (::error context "Please login first"))
+			(30 (::error context "Description too long (256 chars max.)\n" about))
+			(31 (::error context "Missing description"))
+			(32 (::error context "Email too long (64 chars max.)\n" email))
+			(33 (::error context "Missing email"))
+			(_ ())
+		)))
+	)]
+
     ;; GET
 	[::submit := (lambda (context)
 		(context::write-common 200 @html)
@@ -157,7 +228,7 @@
 			{
                 (context::write-common 200 @html)
                 (context::write "\r\n")
-                (context::write (Template::member-info context context::user-data))
+                (context::write (Template::user-info context context::user-data))
 			})
 	)]
 
@@ -208,8 +279,8 @@
 			    context::ip             ; last login ip
 			    "0"                     ; total posts
 			    (str Config::new-member-karma) ; karma
-			    " "                     ; about
-			    " "                     ; email
+			    ""                     ; about
+			    ""                     ; email
 			    Config::new-member-group; member group
 			    session					; session
 			    username                ; username
@@ -322,9 +393,9 @@
 		(if (file-exists path)
 			{
 				(cond true
-					((uri-ends ".js")  (context::write-common 200 @js))
-					((uri-ends ".css") (context::write-common 200 @css))
-					((uri-ends ".html")(context::write-common 200 @html))
+					((uri-ends-in ".js")  (context::write-common 200 @js))
+					((uri-ends-in ".css") (context::write-common 200 @css))
+					((uri-ends-in ".html")(context::write-common 200 @html))
 					(_                 (context::write-common 200 @binary))
 				)
 				(context::write "\r\n")

@@ -53,7 +53,7 @@
 		    (+= parent-user-list "/comments-list")
 		} {
 			(var pp-dir (+ ~path "data/posts/" (str (/ id 1000))))
-			(+= parent-user-list "/submitted-list")
+			(+= parent-user-list "/submits-list")
 		})
 
 		(update-list (+ pp-dir "/list") id
@@ -73,8 +73,8 @@
 	(append-file (+ posts-dir "/list") liner)
 
 	(var user-list UserOp::get-user-path context::username)
-    (create-if-not-exist (+ user-list "/submitted-list") "")
-    (append-file (+ user-list "/submitted-list") liner)
+    (create-if-not-exist (+ user-list "/submits-list") "")
+    (append-file (+ user-list "/submits-list") liner)
 
 	(var return-to "/")
 })

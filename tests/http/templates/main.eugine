@@ -5,19 +5,49 @@
 	)]
 
     [::build-posts := (lambda (posts)
-        (var table clone "<table border=1>")
+        (var table clone "<div class='lister'>")
+        (var zebra false)
         (roop posts [(post) =>
             (+. table
-"<tr>
-    <td>" post::Comments "</td>
-    <td>" post::points "</td>
-    <td><a href='/item/" post::id "'>" (escape-html post::Title) "</a></td>
-    <td><a href='/user/" post::Author "'>" post::Author "</a></td>
-    <td>" (pretty-date post::CommentedTS) " ago</td>
-</tr>")
+"<div class='item item-" (str (set zebra (not zebra))) "'>
+    <div class='title'><a href='/item/" post::id "'>" post::title "</a></div>
+    <div class='info'>" post::comments " comments" (if [post::comments > 0] (+ " (" (pretty-date post::commented-ts) " ago)")) " | " post::points " points | "
+            "by <a href='/user/" post::Author "'>" post::Author "</a> "
+            "at " (pretty-date post::created-ts) " ago</div>
+</div>")
         ])
-        (+. table "</table>")
+        (+. table "</div>")
         (table)
+    )]
+
+    [::build-posts2 := (lambda (posts)
+        (var table clone "<div class='lister'>")
+        (var zebra false)
+        (roop posts [(post) =>
+            (+. table
+"<div class='item item-" (str (set zebra (not zebra))) "'>
+    <div class='title'>" post::title "</div>
+    <div class='info'>" post::comments " comments" (if [post::comments > 0] (+ " (" (pretty-date post::commented-ts) " ago)")) " | " post::points " points | "
+            "by <a href='/user/" post::Author "'>" post::Author "</a> "
+            "at " (pretty-date post::created-ts) " ago | <a href='/item/" post::id "'>view</a></div>
+</div>")
+        ])
+        (+. table "</div>")
+        (table)
+    )]
+
+    [::build-pager := (lambda (start size)
+        (var ppp Config::posts-per-page)
+        (var prev - start ppp)
+        (var next + start ppp)
+        (var ret "<div class='banner'>")
+        
+        (if [prev >= 0]
+            (set ret + ret "<a class='nav' href='?after=" (str prev) "'>&laquo; prev</a>"))
+
+        (set ret + ret "<a class='nav' href='?after=" (str next) "'>next &raquo;</a>")
+
+        (+ ret "</div>")
     )]
 
 	[::index := (lambda (context posts start)
@@ -27,11 +57,11 @@
         (+ (::make-header context "Index") (sprintf index (::build-posts posts)) footer)
     )]
 
-    [::item := (lambda (context item comments)
+    [::item := (lambda (context item comments start)
         (var item-page (join-string (~include "item.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context item::Title) (sprintf item-page (::build-posts comments)) footer)
+        (+ (::make-header context item::Title) (sprintf item-page (::build-posts2 comments)) footer)
     )]
 
 	[::submit := (lambda (context)
@@ -57,12 +87,28 @@
 
     [::member-info := (lambda (context user-data)
         (var sign-up (num [user-data : UserOp::SIGN_UP_TS]))
-        (var age [(time 1) - sign-up])
-        (set age / age 86400000)
+        (var age / [(time 1) - sign-up] 86400000)
+        (var username [user-data : UserOp::USERNAME])
         (var member-info (join-string (~include "member.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Member") member-info footer)
+        (+ (::make-header context username) member-info footer)
+    )]
+
+    [::user-info := (lambda (context user-data)
+        (var sign-up (num [user-data : UserOp::SIGN_UP_TS]))
+        (var age / [(time 1) - sign-up] 86400000)
+        (var user-info (join-string (~include "user.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "User") user-info footer)
+    )]
+
+    [::lister := (lambda (context posts start)
+        (var list-page (join-string (~include "list.html") ""))
+        (var footer (join-string (~include "footer.html") ""))
+
+        (+ (::make-header context "User") (sprintf list-page (::build-posts posts)) footer)
     )]
 
     [::error := (lambda (context text)

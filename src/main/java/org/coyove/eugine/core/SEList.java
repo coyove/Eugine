@@ -16,9 +16,7 @@ public class SEList extends SExpression {
     public SEList(Atom ha, Compound c) throws VMException {
         super(ha, c);
 
-        values = new List<SExpression>();
-        for (Base a : c.atoms)
-            values.add(SExpression.cast(a));
+        values = SExpression.castPlain(c);
     }
 
     @Override

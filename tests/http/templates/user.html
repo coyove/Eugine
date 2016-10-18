@@ -1,0 +1,20 @@
+(list "<form method='post' action='/update'><table>
+    <tr><td>id:</td><td>" [user-data : UserOp::ID] "</td></tr>
+    <tr><td>group:</td><td>" [user-data : UserOp::GROUP] "</td></tr>
+    <tr><td>user:</td><td>" [user-data : UserOp::USERNAME] "</td></tr>
+    <tr><td>created:</td><td>" (str age) " days</td></tr>
+    <tr><td>last login:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) " @ " 
+        [user-data : UserOp::LAST_LOGIN_IP]
+    "</td></tr>
+    <tr><td>submits:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
+    <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
+    <tr><td valign='top'>about:</td><td>
+        <textarea name='about' rows='10'>" (decodeURI [user-data : UserOp::ABOUT]) "</textarea>
+    </td></tr>
+    <tr><td valign='top'>email:</td><td>
+        <input type='text' name='email' value='" (decodeURI [user-data : UserOp::EMAIL]) "'>
+    </td></tr>
+    <tr><td></td><td><a href='/submits/" [user-data : UserOp::USERNAME] "'>submits</a></td></tr>
+    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>
+    <tr><td><input type='submit' value='update'></td><td></td></tr>
+</table></form>")

@@ -38,16 +38,14 @@
 	(write-file list-file lines)
 )
 
-(def recalc-points-of-item (id)
+(def recalc-points-of-item (id aye no)
 	(var path get-post-path id)
 
-	(create-if-not-exist (+ path "/aye") "")
-	(var aye read-file-lines (+ path "/aye"))
+	; (var aye read-file-lines (+ path "/aye"))
 	(var aye-count len aye)
 	(var aye-points calc-rank aye)
 
-	(create-if-not-exist (+ path "/no") "")
-	(var no read-file-lines (+ path "/no"))
+	; (var no read-file-lines (+ path "/no"))
 	(var no-count len no)
 	(var no-points calc-rank no)
 
@@ -77,7 +75,7 @@
 	} {
 		;; update main list
 		(var path (+ ~path "data/posts/" (str (/ id 1000))))
-		(+= user-list "/submitted-list")
+		(+= user-list "/submits-list")
 	})
 
 	(update-list (+ path "/list") id (2 [() => (str points)]))

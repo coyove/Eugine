@@ -1,27 +1,32 @@
-(list "<div class='item'>
-<div>" item::Author ", " (pretty-date item::ModifiedTS) " ago, " (str item::comments) " comments, " (str item::points) " points, <a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a></div>"
+(list "
+<div class='lister'>
+<div class='item'>
+<div class='title'>" item::content "</div>
+<div class='info'>" (str item::comments) " comments | " (str item::points) " points | "
+"by <a href='/user/" item::Author "'>" item::Author "</a> at " (pretty-date item::created-ts) " ago | <a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a> | "
 
-"<div><a href='/aye/" (str item::id) "'>"
+"<a class='aye' href='/aye/" (str item::id) "'>"
 (if [(list-contains item::aye-users context::username) < 0]
 	"aye"
 	"<b>aye</b>")
-"</a></div>"
+"</a> | "
 
-"<div><a href='/no/" (str item::id) "'>"
+"<a class='no' href='/no/" (str item::id) "'>"
 (if [(list-contains item::no-users context::username) < 0]
 	"no"
 	"<b>no</b>")
-"</a></div>"
+"</a>"
 
-"<hr>
-<div>" item::Content "</div>
-<hr>
-<form method=post action='/post/" (str item::id) "'>
-<table>
-	<tr><td valign=top>Comment:</td><td><textarea name='text' rows='5'></textarea></td></tr>
-	<tr><td></td><td><input type='submit' value='submit'></td></tr>
-</table>
+"</div>
+</div>"
+
+"<div class='post'>
+<form method='post' action='/post/" (str item::id) "'>
+<textarea name='text' rows='5'></textarea>
+<div><input type='submit' value='comment'></div>
 </form>
+</div>
+
 <hr>
 %s
-")
+" (::build-pager start (len comments)))

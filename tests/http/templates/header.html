@@ -6,10 +6,13 @@
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<title>" title " | " Config::site-name "</title>
 	<script type='text/javascript' src='/assets/main.js'></script>
+	<link rel='stylesheet' type='text/css' href='/assets/main.css'>
 </head>
-<body>"
-"<div><a href='/'>Home</a> " (if context::is-logged-in
-	(+ "<a href='/user'>" context::username "</a> <a href='/logout'>Log out</a> <a href='/submit'>Submit</a>")
-	"<a href='/user'>Log in</a>") "</div>
-<hr>"
+<body>
+<div id='container'>
+<div class='banner'><a href='/'>timeline</a> " 
+(if context::is-logged-in
+	(+ "<a href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a> <a href='/logout'>log out</a>")
+	"<a href='/user'>Log in</a>") 
+"</div>"
 )
