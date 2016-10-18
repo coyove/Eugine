@@ -9,6 +9,7 @@ import org.coyove.eugine.value.SNull;
 import org.coyove.eugine.value.SString;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Formatter;
 
 /**
@@ -69,5 +70,37 @@ public final class Utils {
         }
 
         return formatter.toString();
+    }
+
+    private static<T> void quickSort(T[] arr, int left, int right, Comparator<T> comp) {
+        int i = left, j = right;
+        T tmp;
+        T pivot = arr[(left + right) / 2];
+
+        while (i <= j) {
+            while (comp.compare(arr[i], pivot) < 0) {
+                i++;
+            }
+
+            while (comp.compare(arr[j], pivot) > 0) {
+                j--;
+            }
+
+            if (i <= j) {
+                tmp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = tmp;
+                i++;
+                j--;
+            }
+        }
+        if (left < j)
+            quickSort(arr, left, j, comp);
+        if (i < right)
+            quickSort(arr, i, right, comp);
+    }
+
+    public static<T> void quickSort(T[] arr, Comparator<T> comp) {
+        quickSort(arr, 0, arr.length - 1, comp);
     }
 }

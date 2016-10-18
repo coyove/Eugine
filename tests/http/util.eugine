@@ -124,9 +124,9 @@
 	[::id := 0]
 	[::comments := 0]
 	[::points := 0]
-	[::State := ""]
-	[::Author := ""]
-	[::Commenter := ""]
+	[::state := ""]
+	[::author := ""]
+	[::commenter := ""]
 	[::created-ts := 0]
 	[::commented-ts := 0]
     [::title := ""]
@@ -135,9 +135,9 @@
         [::id           := (num id)]
         [::comments     := (num comments)]
         [::points       := (num points)]
-        [::State        := state]
-        [::Author       := author]
-        [::Commenter    := commenter]
+        [::state        := state]
+        [::author       := author]
+        [::commenter    := commenter]
         [::created-ts   := (num created-ts)]
         [::commented-ts := (num commented-ts)]
         [::title        := (decodeURI title)]
@@ -146,7 +146,7 @@
 
 (struct Item "Item"
 	[::id := 0]
-	[::Author := ""]
+	[::author := ""]
 	[::Title := ""]
 	[::created-ts := 0]
 	[::ModifiedTS := 0]
@@ -162,7 +162,7 @@
     [::~init := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent content)
         [::id           := id]
         [::State        := state]
-        [::Author       := author]
+        [::author       := author]
         [::created-ts   := (num created-ts)]
         [::ModifiedTS  	:= (num modified-ts)]
         [::Title        := (decodeURI title)]
@@ -307,8 +307,8 @@
     (var ppp Config::posts-per-page)
     (var end + start ppp)
 
-    (if [file == "main"]
-        (try {
+    (cond file
+        ("main" (try {
             (var newest (num (read-file (+ ~path "data/posts/main-index"))))
             (var gap / newest 1000)
 
@@ -321,12 +321,17 @@
 
                 (-- gap)
             ])
-        })
+        }))
 
-        (try {
+        ("rank" (try {
+            (var posts read-file-lines (+ ~path "data/posts/ranking"))
+            (if [posts == null] (set posts (list)))
+        }))
+
+        (_ (try {
             (var posts read-file-lines file)
             (if [posts == null] (set posts (list)))
-        })
+        }))
     )
 
     (var true-start [(len posts) - end])

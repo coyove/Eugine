@@ -1,12 +1,2 @@
-(list "<div class='post'>
-<form method=post action='/post/0'>
-<table>
-	<tr><td>Title:</td><td><input type='text' name='title'></td></tr>
-	<tr><td valign=top>Text:</td><td><textarea name='text' rows='10'></textarea></td></tr>
-	<tr><td></td><td><input type='submit' value='Submit'></td></tr>
-</table>
-</form>
-</div>
-
-%s"
+(list "%s"
 (::build-pager start (len posts)))

@@ -10,9 +10,13 @@
 </head>
 <body>
 <div id='container'>
-<div class='banner'><a href='/'>timeline</a> " 
+<div class='banner'>"
+    "<a id='timeline' href='/'>timeline</a>"
+    "<a id='ranking' href='/rank'>ranking</a>"
+    "<a id='submit' href='/submit'>submit</a>"
 (if context::is-logged-in
-	(+ "<a href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a> <a href='/logout'>log out</a>")
-	"<a href='/user'>Log in</a>") 
+	(+ "<a id='userinfo' href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a>"
+	"<a href='/logout'>log out</a>")
+	"<a href='/user'>log in</a>")
 "</div>"
 )

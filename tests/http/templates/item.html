@@ -3,7 +3,11 @@
 <div class='item'>
 <div class='title'>" item::content "</div>
 <div class='info'>" (str item::comments) " comments | " (str item::points) " points | "
-"by <a href='/user/" item::Author "'>" item::Author "</a> at " (pretty-date item::created-ts) " ago | <a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a> | "
+"by <a href='/user/" item::Author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago | "
+"<a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a> | "
+
+(if [context::username == item::author]
+	(+ "<a href='/delete/" (str item::id) "'>delete</a> | ") "")
 
 "<a class='aye' href='/aye/" (str item::id) "'>"
 (if [(list-contains item::aye-users context::username) < 0]

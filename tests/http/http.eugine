@@ -5,13 +5,14 @@
 
 (var ~mt) ; enable multi-threading
 
-; (var start (time 1))
+;(var start (time 1))
 ; (loop (range 0 1000) [() =>
 ; 	; (write-file (+ ~path "tmp") (str (range 0 10000)))
 ; 	(var lines read-file-lines (+ ~path "tmp"))
 ; 	(loop lines [(line) => [line != "731"] ])
 ; ])
-; (println [(time 1) - start])
+
+;(println [(time 1) - start])
 
 (def dispatcher (context)
 	(var test-path starts-with context::route)
@@ -23,7 +24,9 @@
 
 	(cond true
 		((eq context::route "/") 
-			(HTTP-Handler::index context))
+			(HTTP-Handler::index context "main"))
+		((eq context::route "/rank")
+            (HTTP-Handler::index context "rank"))
 		((test-path "/post/") 
 			(HTTP-Handler::post context (sub context::route 6)))
 		((test-path "/item/")
@@ -138,32 +141,16 @@
 (create-if-not-exist (+ ~path "data/posts/index") "0")
 (create-if-not-exist (+ ~path "data/posts/main-index") "0")
 
+(go (lambda ()
+    (loop true [() =>
+        (ranking ())
+        (sleep 10000)
+    ])
+) ())
+
 [ss := (new (cls @java.net.ServerSocket) (list @int) Config::port)]
 (println "listening on port " Config::port)
 (loop (true) [() =>
     (var client [ss . @accept ()])
     (go handle client)
 ])
-
-; (struct dummy "struct"
-; 	[::base := 0]
-; 	[::zzz := ""]
-; 	[::~init := (lambda (i)
-; 		[::zzz := i]
-; 	)]
-
-; 	[::sss := (lambda ()
-; 		(sleep (floor (* 1000.0 (random 0))))
-; 		(str (+ ::zzz ::base))
-; 	)]
-; )
-
-; (loop (range 0 100) [(i) => 
-; 	(go (lambda (i)
-; 		(var a clone dummy i)
-; 		(println ( + (a::sss()) " "))
-; 	) (i))
-; ])
-
-; (sleep 500)
-; (set dummy::base 10000)

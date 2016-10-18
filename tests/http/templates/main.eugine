@@ -12,7 +12,7 @@
 "<div class='item item-" (str (set zebra (not zebra))) "'>
     <div class='title'><a href='/item/" post::id "'>" post::title "</a></div>
     <div class='info'>" post::comments " comments" (if [post::comments > 0] (+ " (" (pretty-date post::commented-ts) " ago)")) " | " post::points " points | "
-            "by <a href='/user/" post::Author "'>" post::Author "</a> "
+            "by <a href='/user/" post::author "'>" post::author "</a> "
             "at " (pretty-date post::created-ts) " ago</div>
 </div>")
         ])
@@ -28,7 +28,7 @@
 "<div class='item item-" (str (set zebra (not zebra))) "'>
     <div class='title'>" post::title "</div>
     <div class='info'>" post::comments " comments" (if [post::comments > 0] (+ " (" (pretty-date post::commented-ts) " ago)")) " | " post::points " points | "
-            "by <a href='/user/" post::Author "'>" post::Author "</a> "
+            "by <a href='/user/" post::author "'>" post::author "</a> "
             "at " (pretty-date post::created-ts) " ago | <a href='/item/" post::id "'>view</a></div>
 </div>")
         ])

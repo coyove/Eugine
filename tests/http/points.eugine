@@ -12,6 +12,9 @@
 			(_ ()))
 
 		(+= idx 2)
+
+		(if [[lst : (- idx 1)] == "~fixed"]
+		    { (set points karma) false })
 	])
 
 	(floor points)
@@ -80,4 +83,45 @@
 
 	(update-list (+ path "/list") id (2 [() => (str points)]))
 	(update-list user-list id (2 [() => (str points)]))
-)	
+)
+
+(def ranking ()
+    (var newest (num (read-file (+ ~path "data/posts/main-index"))))
+    (var gap1 / newest 1000)
+    (var gap2 - gap1 1)
+
+    (var data1 read-file-lines (+ ~path "data/posts/" (str gap1) "/list"))
+    (if [data1 == null] (set data1 (list)))
+
+    (var data2 read-file-lines (+ ~path "data/posts/" (str gap2) "/list"))
+    (if [data2 == null] (set data2 (list)))
+
+    (var posts + data1 (explode data2))
+    (try {
+        (loop posts [(post i) =>
+            (var parts (split post " "))
+            (if [(len parts) != 9] (exit 30))
+
+            (var p clone Post (explode parts))
+            (var T / [(time 1) - (num p::created-ts)] 3600000)
+
+            (var R [(num p::points) / (pow [T + 2] 1.8)])
+            (var p::~comparator R)
+            (set [posts : i] p)
+        ])
+    } () (cond ~e
+        (30
+            (set posts (list))
+            (println "Corrupted index file: " file))
+    ))
+
+    (sort posts)
+    (var output (list))
+    (loop posts [(post) =>
+        (+. output (+ (str post::id) " " (str post::comments) " " (str post::points) " "
+            post::state " " post::author " " post::commenter " "
+            (str post::created-ts) " " (str post::commented-ts) " " (encodeURI post::title)))
+    ])
+
+    (write-file (+ ~path "data/posts/ranking") output)
+)

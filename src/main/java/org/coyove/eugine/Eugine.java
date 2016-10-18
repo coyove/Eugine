@@ -22,6 +22,7 @@ public class Eugine implements Serializable {
         put("#t", new SBool(true, true));
         put("#f", new SBool(false, true));
         put("~init", new SString("~init", true));
+        put("~comparator", new SString("~comparator", true));
         put("~doc", new SString("~doc", true));
         put("~integer.max", new SInteger(Long.MAX_VALUE, true));
         put("~integer.min", new SInteger(Long.MIN_VALUE, true));

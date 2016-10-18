@@ -10,27 +10,49 @@ body {
 	font: normal 14px Arial,"Helvetica Neue",Helvetica,sans-serif;
 	line-height: 1.2;
 	padding: 0 10px;
-	background: #F0EBE4;
+	background: #f0ebe4;
 }
 
 #container {
 	width: 100%;
 	max-width: 750px;
 	margin: 0 auto;
+	background: #f0ebe4;
+	height: 100%;
 }
 
 .banner {
 	background: #54638c;
 	padding: 4px;
+	clear: both;
 }
 
-.banner * {
+/*.banner:first-child {
+	padding-top: 8px;
+}*/
+
+.banner a {
 	text-decoration: none !important;
-	color: white !important;
-	margin: 0 4px;
+	color: white;
+	margin: -4px 0;
+    padding: 4px 4px;
+	display: inline-block;
+}
+
+.banner a:hover {
+	color: #eee;
+	background: #424e70;
+}
+
+.banner .right {
+	float: right;
 }
 
 a {text-decoration:none;color:#54638c;}a:hover{color:#00207a;text-decoration:underline;}
+
+table.info {
+	margin: 6px 0;
+}
 
 div.lister {
 	width: 100%;

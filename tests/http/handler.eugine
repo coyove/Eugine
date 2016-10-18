@@ -11,17 +11,17 @@
     )]
 
     ;; GET
-	[::index := (lambda (context)
+	[::index := (lambda (context file)
         (var count ::get-paging context)
 
 		(context::write-common 200 @html)
 		(context::write "\r\n")
-        (context::write (Template::index context (load-list "main" count) count))
+        (context::write (Template::lister context (load-list file count) count))
 	)]
 
-    [::user-submits-or-comments := (lambda (context username type)
+    [::user-submits-or-comments := (lambda (context username ltype)
     	(var user-home UserOp::get-user-path username)
-        (var path + (UserOp::get-user-path username) "/" type "-list")
+        (var path + (UserOp::get-user-path username) "/" ltype "-list")
 
         (if (not (file-exists user-home))
             (::not-found context)
@@ -87,7 +87,7 @@
 			(if [(len text) < 4] 	(exit 35))
 
 			(set text parse-code text)
-			; (println (match text %"(https?:\/\/\S+)"))
+			(set title escape-html title)
 
 			(var next-id get-next-id (+ ~path "data/posts/index"))
 			(if [id == 0] (write-file (+ ~path "data/posts/main-index") (str id)))

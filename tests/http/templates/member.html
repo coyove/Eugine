@@ -1,4 +1,4 @@
-(list "<table>
+(list "<table class='info'>
     <tr><td>id:</td><td>" [user-data : UserOp::ID] "</td></tr>
     <tr><td>user:</td><td>" username " (" [user-data : UserOp::GROUP] ")</td></tr>
     <tr><td>created:</td><td>" (str age) " days</td></tr>
@@ -6,7 +6,9 @@
     <tr><td>submits:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
     <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
     <tr><td valign='top'>about:</td><td>" (parse-code (decodeURI [user-data : UserOp::ABOUT])) "</td></tr>
-    <tr><td>email:</td><td><a href='mailto:" (set email decodeURI [user-data : UserOp::EMAIL]) "'>" email "</a></td></tr>
+    <tr><td>email:</td><td><a href='mailto:" (set email decodeURI [user-data : UserOp::EMAIL]) "'>"
+        (escape-html email)
+    "</a></td></tr>
     <tr><td></td><td><a href='/submits/" [user-data : UserOp::USERNAME] "'>submits</a></td></tr>
     <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>
 </table>")

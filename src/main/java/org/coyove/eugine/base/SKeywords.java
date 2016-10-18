@@ -422,6 +422,11 @@ public class SKeywords {
                         return new SEListOp(ha, c, SEListOp.OPERATION.INSERT);
                     }
                 });
+                put("sort", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEListOp(ha, c, SEListOp.OPERATION.SORT);
+                    }
+                });
                 put("reverse", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEReverse(ha, c);
