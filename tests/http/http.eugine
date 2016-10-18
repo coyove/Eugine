@@ -24,8 +24,6 @@
 	(cond true
 		((eq context::route "/") 
 			(HTTP-Handler::index context))
-		((test-path "/after/")
-        	(HTTP-Handler::paging context (sub context::route 7)))
 		((test-path "/post/") 
 			(HTTP-Handler::post context (sub context::route 6)))
 		((test-path "/item/")
@@ -40,6 +38,8 @@
 			(HTTP-Handler::user context))
 		((test-path "/user/")
             (HTTP-Handler::user-visitor-view context (sub context::route 6)))
+        ((test-path "/submits/")
+            (HTTP-Handler::user-submits context (sub context::route 9)))
 		((eq context::route "/login") 
 			(HTTP-Handler::login context))
 		((eq context::route "/logout")

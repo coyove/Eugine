@@ -11,6 +11,7 @@
     [::EMAIL            := 9]
     [::GROUP            := 10]
     [::SESSION 			:= 11]
+    [::USERNAME         := 12]
 
 	[::generate-token := (lambda (username)
 		(var payload + username "&")
@@ -60,6 +61,7 @@
 	)]
 
 	[::get-user-path := (lambda (username)
-        (+ ~path "data/users/" [username : 0] "/" username)
+	    (if [(len username) > 0]
+            (+ ~path "data/users/" [username : 0] "/" username) "")
     )]
 )

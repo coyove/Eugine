@@ -23,7 +23,13 @@
 
 	[::parse-post-body := (lambda ()
 		[::post := parse-pairs ::data "&"]
-		;(println (addressof ::post))
+		(var parts split ::route "\\?")
+		(if [(len parts) == 2] {
+		    (var tmp parse-pairs [parts : 1] "&")
+		    (loop (keys tmp) [(k) => (set [::post : k] [tmp : k])])
+
+		    (set ::route [parts : 0])
+		})
 	)]
 
 	[::parse-cookie := (lambda ()

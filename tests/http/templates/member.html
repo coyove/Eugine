@@ -1,6 +1,6 @@
 (list "<table>
 	<tr><td>id:</td><td>" [user-data : UserOp::ID] "</td></tr>
-	<tr><td>username:</td><td>" context::username "</td></tr>
+	<tr><td>username:</td><td>" [user-data : UserOp::USERNAME] "</td></tr>
     <tr><td>created:</td><td>" (str age) " days</td></tr>
     <tr><td>last login:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) "</td></tr>
     <tr><td>submits:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
@@ -8,4 +8,5 @@
     <tr><td>about:</td><td>" [user-data : UserOp::ABOUT] "</td></tr>
     <tr><td>email:</td><td>" [user-data : UserOp::EMAIL] "</td></tr>
     <tr><td>member group:</td><td>" [user-data : UserOp::GROUP] "</td></tr>
+    <tr><td></td><td><a href='/submits/" [user-data : UserOp::USERNAME] "'>submits</a></td></tr>
 </table>")

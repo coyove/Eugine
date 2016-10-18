@@ -2,22 +2,34 @@
 (~include "points.eugine")
 
 (struct HTTP-Handler "handler"
+    [::get-paging := (lambda (context)
+        (var count num [context::post : "after"])
+        (if [count == null] (set count 0))
+        (if [count < 0] (set count 0))
+
+        (count)
+    )]
+
     ;; GET
 	[::index := (lambda (context)
+        (var count ::get-paging context)
+
 		(context::write-common 200 @html)
 		(context::write "\r\n")
-        (context::write (Template::index context (load-list "main" 0) 0))
+        (context::write (Template::index context (load-list "main" count) count))
 	)]
 
-	[::paging := (lambda (context count)
-	    (set count num count)
+    [::user-submits := (lambda (context username)
+        (var path + (UserOp::get-user-path username) "/submitted-list")
 
-	    (if (or [count == null] [count < 0])
-	        (::not-found context)
-	        {
+        (if (not (file-exists path))
+            (::not-found context)
+            {
+                (var count ::get-paging context)
+
                 (context::write-common 200 @html)
                 (context::write "\r\n")
-                (context::write (Template::index context (load-list "main" count) count))
+                (context::write (Template::index context (load-list path count) count))
             })
     )]
 
@@ -200,6 +212,7 @@
 			    " "                     ; email
 			    Config::new-member-group; member group
 			    session					; session
+			    username                ; username
 			    " "                     ; add trail
 			))
 (println session)

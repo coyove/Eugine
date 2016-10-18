@@ -1,14 +1,14 @@
 (def calc-rank (lst)
 	(var idx 1)
 	(var points 0.0)
-	(var limit 500.0)
+	(var limit 100.0)
 
 	(loop [idx < (len lst)] [() =>
 		(var karma num [lst : idx])
 
 		(cond true
 			([karma > limit] (+= points 1.0))
-			([karma > 10] (+= points (pow [karma / limit] 0.45)))
+			([karma > 10] (+= points (pow [karma / limit] 0.9)))
 			(_ ()))
 
 		(+= idx 2)
