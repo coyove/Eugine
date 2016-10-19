@@ -31,6 +31,7 @@ public class SETry extends SExpression {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
+            env.put("~ex", new SString(ex.toString()));
             if (this.catchBody != null) {
                 this.catchBody.evaluate(env);
             }

@@ -1,10 +1,18 @@
+(if [id != 0] {
+	(var parent-dir get-post-path id)
+	(if (file-exists parent-dir) {
+		(var parent-data (read-file-lines (+ parent-dir "/data")))
+		(if [[parent-data : 4] == "locked"] (exit 40))
+	} (exit 41))
+})
+
 (var post-dir (+ ~path "data/posts/" (str [next-id / 1000]) "/" (str next-id)))
 (make-dir post-dir)
 
 (var ts (time 1))
 (var data (list
 	author		; author
-	(encodeURI title)		; title
+	(encodeURI title)		; title, escaped
 	(str ts)	; created ts
 	(str ts)	; modified ts
 	"open"		; state
@@ -29,7 +37,6 @@
 })
 
 (if [id != 0] {
-	(var parent-dir get-post-path id)
 
 	(if (file-exists parent-dir) {
 		(create-if-not-exist (+ parent-dir "/list") "")
@@ -40,7 +47,6 @@
         (create-if-not-exist (+ user-list "/comments-list") "")
         (append-file (+ user-list "/comments-list") liner)
 
-		(var parent-data (read-file-lines (+ parent-dir "/data")))
 		(set parent-comments num [parent-data : 5])
 		(set [parent-data : 5] (str (++ parent-comments)))
 		(write-file (+ parent-dir "/data") parent-data)
@@ -53,7 +59,7 @@
 		    (+= parent-user-list "/comments-list")
 		} {
 			(var pp-dir (+ ~path "data/posts/" (str (/ id 1000))))
-			(+= parent-user-list "/submits-list")
+			(+= parent-user-list "/submissions-list")
 		})
 
 		(update-list (+ pp-dir "/list") id
@@ -73,8 +79,8 @@
 	(append-file (+ posts-dir "/list") liner)
 
 	(var user-list UserOp::get-user-path context::username)
-    (create-if-not-exist (+ user-list "/submits-list") "")
-    (append-file (+ user-list "/submits-list") liner)
+    (create-if-not-exist (+ user-list "/submissions-list") "")
+    (append-file (+ user-list "/submissions-list") liner)
 
 	(var return-to "/")
 })

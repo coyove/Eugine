@@ -128,10 +128,11 @@ public class main {
             }
         }
 
-//        ServerSocket ss = new ServerSocket(80);
-//        Socket s = ss.accept();
-//        s.getOutputStream().close();
-//        s.close();
-//        s.isClosed()
+        ServerSocket ss = new ServerSocket();
+        ss.bind(new InetSocketAddress("127.0.0.1", 8090));
+        Socket s = ss.accept();
+        s.getOutputStream().close();
+        s.close();
+        s.isClosed()
     }
 }

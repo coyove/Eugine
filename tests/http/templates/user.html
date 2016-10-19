@@ -8,13 +8,16 @@
     "</td></tr>
     <tr><td>submits:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
     <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
+    <tr><td>autohide pt:</td><td>
+        <input class='nar' name='autohide' value='" [user-data : UserOp::AUTOHIDE] "'>
+    </td></tr>
     <tr><td valign='top'>about:</td><td>
         <textarea name='about' rows='10'>" (decodeURI [user-data : UserOp::ABOUT]) "</textarea>
     </td></tr>
     <tr><td valign='top'>email:</td><td>
         <input type='text' name='email' value='" (decodeURI [user-data : UserOp::EMAIL]) "'>
     </td></tr>
-    <tr><td></td><td><a href='/submits/" [user-data : UserOp::USERNAME] "'>submits</a></td></tr>
+    <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>submissions</a></td></tr>
     <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>
     <tr><td><input type='submit' value='update'></td><td></td></tr>
 </table></form>")

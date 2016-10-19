@@ -10,13 +10,22 @@
 </head>
 <body>
 <div id='container'>
+<div class='footer'>
+	<span style='font-size: 16px'>Temp News</span>
+</div>
 <div class='banner'>"
     "<a id='timeline' href='/'>timeline</a>"
     "<a id='ranking' href='/rank'>ranking</a>"
     "<a id='submit' href='/submit'>submit</a>"
+    "<a id='memberinfo' class='hide'></a>"
 (if context::is-logged-in
 	(+ "<a id='userinfo' href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a>"
 	"<a href='/logout'>log out</a>")
 	"<a href='/user'>log in</a>")
 "</div>"
+
+(if context::is-logged-in
+	(+ "<script type='text/javascript'>
+		window.__AutoHidePt = " [context::user-data : UserOp::AUTOHIDE] ";
+	</script>"))
 )

@@ -1,21 +1,30 @@
-(list "
-<div class='lister'>
-<div class='item'>
-<div class='title'>" item::content "</div>
-<div class='info'>" (str item::comments) " comments | " (str item::points) " points | "
-"by <a href='/user/" item::Author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago | "
+(list 
+(if [[item::title != "Comment"] and [item::state != "deleted"]] (+ "<h2>" item::title "</h2>"))
+"<div class='lister'>
+<div class='item' id='item-" item-id "'>
+	<div class='title'>" 
+		(if [item::state == "deleted"] 
+            "<span red>[deleted]</span>"
+            item::content)
+	"</div>
+<div class='info'>" (str item::comments) " comments | <span points>" (str item::points) "</span> points | "
+"by <a href='/user/" item::author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago | "
 "<a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a> | "
+"<a class='hider' href='javascript:hide(" item-id ")'>hide</a> | "
 
-(if [context::username == item::author]
-	(+ "<a href='/delete/" (str item::id) "'>delete</a> | ") "")
+(if [[context::username == item::author] or [[context::user-data : UserOp::GROUP] == "mod"]]
+	(+ "<a href='javascript:del(" item-id ")'>delete</a> | ") "")
 
-"<a class='aye' href='/aye/" (str item::id) "'>"
+(if [[context::user-data : UserOp::GROUP] == "mod"]
+	(+ "<a href='/opnctl/" item-id "'>un/lock</a> | ") "")
+
+"<a class='aye' href='/aye/" item-id "'>"
 (if [(list-contains item::aye-users context::username) < 0]
 	"aye"
 	"<b>aye</b>")
 "</a> | "
 
-"<a class='no' href='/no/" (str item::id) "'>"
+"<a class='no' href='/no/" item-id "'>"
 (if [(list-contains item::no-users context::username) < 0]
 	"no"
 	"<b>no</b>")
@@ -24,13 +33,15 @@
 "</div>
 </div>"
 
+(if [item::state != "locked"] (+
 "<div class='post'>
-<form method='post' action='/post/" (str item::id) "'>
+<form method='post' action='/post/" item-id "'>
+<input type='hidden' name='title' value='Comment'>
 <textarea name='text' rows='5'></textarea>
-<div><input type='submit' value='comment'></div>
+<input type='submit' value='comment' style='margin-top: 4px;'>
 </form>
-</div>
+</div>"))
 
-<hr>
+"<hr>
 %s
 " (::build-pager start (len comments)))

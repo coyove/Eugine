@@ -9,6 +9,18 @@
     <tr><td>email:</td><td><a href='mailto:" (set email decodeURI [user-data : UserOp::EMAIL]) "'>"
         (escape-html email)
     "</a></td></tr>
-    <tr><td></td><td><a href='/submits/" [user-data : UserOp::USERNAME] "'>submits</a></td></tr>
-    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>
-</table>")
+    <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>submissions</a></td></tr>
+    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>"
+    (if [[context::user-data : UserOp::GROUP] == "mod"]
+        (+ "<tr><td></td><td>
+            <form method='post' action='/lock/" [user-data : UserOp::USERNAME] "'>
+                <select name='long'>
+                    <option value='0' selected>forever</option>
+                    <option value='86400000'>1 day</option>
+                    <option value='604800000'>1 week</option>
+                    <option value='2592000000'>1 month</option>
+                    <option value='31536000000'>1 year</option>
+                </select>
+                <input type='submit' value='lock/unlock user'>
+            </form></td></tr>"))
+"</table>")

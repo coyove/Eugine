@@ -18,9 +18,14 @@
 	(var test-path starts-with context::route)
 	(var context::username (UserOp::valid-token [context::cookies : @uid]))
 	(var context::is-logged-in neq context::username null)
-	(if context::is-logged-in (var context::user-data read-file-lines (UserOp::get-data-path context::username)))
+	(if context::is-logged-in {
+		(var context::user-data read-file-lines (UserOp::get-data-path context::username))
+		(var context::user-is-locked starts-with [context::user-data : UserOp::GROUP] "lock-")
+	})
 
-	(var context::ip "127.0.0.1") ; test
+	; (var context::ip "127.0.0.1") ; test
+	(var context::ip [context::headers : @x-forwarded-for])
+	(append-file log-path (+ context::route " " context::username " " context::ip "\n"))
 
 	(cond true
 		((eq context::route "/") 
@@ -35,14 +40,24 @@
 			(HTTP-Handler::aye context (sub context::route 5)))
 		((test-path "/no/")
 			(HTTP-Handler::no context (sub context::route 4)))
+		((test-path "/aye-voters/")
+			(HTTP-Handler::voters context (sub context::route 12) "aye"))
+		((test-path "/no-voters/")
+			(HTTP-Handler::voters context (sub context::route 12) "no"))
+		((test-path "/delete/")
+			(HTTP-Handler::delete context (sub context::route 8)))
+		((test-path "/opnctl/")
+            (HTTP-Handler::lock-unlock-post context (sub context::route 8)))
 		((eq context::route "/submit") 
 			(HTTP-Handler::submit context))
 		((eq context::route "/user") 
 			(HTTP-Handler::user context))
 		((test-path "/user/")
             (HTTP-Handler::user-visitor-view context (sub context::route 6)))
-        ((test-path "/submits/")
-            (HTTP-Handler::user-submits-or-comments context (sub context::route 9) "submits"))
+		((test-path "/lock/")
+            (HTTP-Handler::lock-unlock-user context (sub context::route 6)))
+        ((test-path "/submissions/")
+            (HTTP-Handler::user-submits-or-comments context (sub context::route 13) "submissions"))
         ((test-path "/comments/")
             (HTTP-Handler::user-submits-or-comments context (sub context::route 10) "comments"))
        	((eq context::route "/update")
@@ -63,6 +78,7 @@
 )
 
 (def handle (client)
+	(try {
 	[client call @setSoTimeout (list @int) Config::socket-read-timeout]
 	(var is [client . @getInputStream ()])
 	(var buf (buffer 1024))
@@ -130,25 +146,35 @@
 		(HTTP-Handler::forbidden http-context)
 		(dispatcher http-context)
 	)
-
-	(http-context::close ())
-	[is call @close ()]
+	} (println "http error: " ~ex)
+	{
+		(http-context::close ())
+		[is call @close ()]
+	})
 )
 
 (make-dir (+ ~path "data/posts"))
 (make-dir (+ ~path "data/users"))
+(make-dir (+ ~path "data/log"))
 (create-if-not-exist (+ ~path "data/users/index") "0")
 (create-if-not-exist (+ ~path "data/posts/index") "0")
 (create-if-not-exist (+ ~path "data/posts/main-index") "0")
 
+(var log-path + ~path "data/log/" (str (time 1)) ".log")
+(create-if-not-exist log-path "")
+
 (go (lambda ()
     (loop true [() =>
         (ranking ())
+        (access-control-list-watcher ())
         (sleep 10000)
     ])
 ) ())
 
-[ss := (new (cls @java.net.ServerSocket) (list @int) Config::port)]
+[ss := (new (cls @java.net.ServerSocket) ())]
+[ss call @bind (list @java.net.SocketAddress) 
+	(new (cls @java.net.InetSocketAddress) (list jString. @int) "127.0.0.1" Config::port)]
+
 (println "listening on port " Config::port)
 (loop (true) [() =>
     (var client [ss . @accept ()])

@@ -7,6 +7,8 @@
 (var jURLEncoder (cls "java.net.URLEncoder"))
 (var jMessageDigest (cls "java.security.MessageDigest"))
 (var jStringEscapeUtils (cls "org.apache.commons.lang3.StringEscapeUtils"))
+(var user-access-fast-ring (dict)) ;; 1 second rate
+(var user-access-slow-ring (dict)) ;; 10 seconds rate
 
 (~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
 (~define (struct ~name ~desc ~body...) ((def ~name () ~body...) ()))
@@ -147,10 +149,10 @@
 (struct Item "Item"
 	[::id := 0]
 	[::author := ""]
-	[::Title := ""]
+	[::title := ""]
 	[::created-ts := 0]
 	[::ModifiedTS := 0]
-	[::State := ""]
+	[::state := ""]
 	[::content := ""]
 	[::comments := 0]
 	[::points := 0]
@@ -161,11 +163,11 @@
 	;; refer to handler.eugine/::item
     [::~init := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent content)
         [::id           := id]
-        [::State        := state]
+        [::state        := state]
         [::author       := author]
         [::created-ts   := (num created-ts)]
         [::ModifiedTS  	:= (num modified-ts)]
-        [::Title        := (decodeURI title)]
+        [::title        := (decodeURI title)]
         [::content 		:= content]
         [::comments 	:= comments]
 		[::points 		:= points]
@@ -376,4 +378,41 @@
 	])
 
 	(ret)
+)
+
+(def check-csrf (context) {
+	(var referer [context::headers : @referer])
+	(if [referer == null]
+		false
+		(starts-with referer Config::referer))
+})
+
+(def access-slow-control (context)
+	(try {
+		(if [(type context) == "String"]
+			(var username context)
+			{
+				(var username context::username)
+				(if [[context::user-data : 10] == "mod"] (exit 2))
+			})
+
+		(if [(set last-access [user-access-slow-ring : username]) != null]
+			(if [[(time 1) - last-access] < Config::access-slow-cooldown]
+				(exit 1)))
+
+		(exit 2)
+	}
+	()
+	(cond ~e
+		(1 true)
+		(_ (set [user-access-slow-ring : username] (time 1)) false))
+	)
+)
+
+(def access-control-list-watcher ()
+	(var now time 1)
+	(loop (keys user-access-slow-ring) [(k) =>
+		(if [[now - [user-access-slow-ring : k]] > Config::access-slow-cooldown]
+			(del user-access-slow-ring k))
+	])
 )

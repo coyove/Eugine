@@ -4,6 +4,10 @@
 	[::site-name := "Test Site"]
 	[::salt := "test salt"]
 
+	[::referer := "http://127.0.0.1:8080/"]
+	[::access-slow-cooldown := 10000]
+	[::access-fast-cooldown := 1000]
+
 	[::posts-per-page := 20]
 
 	[::new-member-karma := 10]

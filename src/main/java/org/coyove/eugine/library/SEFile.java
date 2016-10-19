@@ -7,6 +7,7 @@ import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,7 +65,7 @@ public class SEFile extends SExpression {
                 case OPEN_BINARY:
                     return new SObject(Files.readAllBytes(path));
                 case OPEN_LINES:
-                    java.util.List<String> lines = Files.readAllLines(path);
+                    java.util.List<String> lines = Files.readAllLines(path, Charset.forName("UTF-8"));
                     List<SValue> ret = new List<SValue>(lines.size());
                     for (String line : lines) {
                         ret.add(new SString(line));

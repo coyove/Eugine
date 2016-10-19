@@ -4,32 +4,35 @@
 		(join-string (~include "header.html") "")
 	)]
 
-    [::build-posts := (lambda (posts)
+    [::build-posts := (lambda (posts start is-comment)
         (var table clone "<div class='lister'>")
         (var zebra false)
-        (roop posts [(post) =>
-            (+. table
-"<div class='item item-" (str (set zebra (not zebra))) "'>
-    <div class='title'><a href='/item/" post::id "'>" post::title "</a></div>
-    <div class='info'>" post::comments " comments" (if [post::comments > 0] (+ " (" (pretty-date post::commented-ts) " ago)")) " | " post::points " points | "
-            "by <a href='/user/" post::author "'>" post::author "</a> "
-            "at " (pretty-date post::created-ts) " ago</div>
-</div>")
-        ])
-        (+. table "</div>")
-        (table)
-    )]
+        (var length len posts)
 
-    [::build-posts2 := (lambda (posts)
-        (var table clone "<div class='lister'>")
-        (var zebra false)
-        (roop posts [(post) =>
+        (roop posts [(post i) =>
+            (var title post::title)
+            (var id post::id)
+            (var no + (- length i) start)
+
+            (if [post::state == "deleted"] 
+                (set title "<span red>[deleted]</span>"))
+
             (+. table
-"<div class='item item-" (str (set zebra (not zebra))) "'>
-    <div class='title'>" post::title "</div>
-    <div class='info'>" post::comments " comments" (if [post::comments > 0] (+ " (" (pretty-date post::commented-ts) " ago)")) " | " post::points " points | "
-            "by <a href='/user/" post::author "'>" post::author "</a> "
-            "at " (pretty-date post::created-ts) " ago | <a href='/item/" post::id "'>view</a></div>
+"<div class='item item-" (str (set zebra (not zebra))) "' id='item-" id "'>
+    <div class='title'>" 
+        (if is-comment 
+            title
+            (+ "<b>" (str no) "</b>. <a href='/item/" id "'>" title "</a>")) 
+    "</div>
+    <div class='info'>" post::comments " comments" 
+        (if [post::comments > 0] 
+            (+ " (" (pretty-date post::commented-ts) " ago)"))
+            " | <span points>" post::points "</span> points | "
+            "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago | "
+        (if is-comment 
+            (+ "<a href='/item/" id "'>view</a> | "))
+            "<a class='hider' href='javascript:hide(" id ")'>hide</a>
+    </div>
 </div>")
         ])
         (+. table "</div>")
@@ -54,14 +57,15 @@
         (var index (join-string (~include "index.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Index") (sprintf index (::build-posts posts)) footer)
+        (+ (::make-header context "Index") (sprintf index (::build-posts posts start false)) footer)
     )]
 
     [::item := (lambda (context item comments start)
+        (var item-id (str item::id))
         (var item-page (join-string (~include "item.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context item::Title) (sprintf item-page (::build-posts2 comments)) footer)
+        (+ (::make-header context item::title) (sprintf item-page (::build-posts comments start true)) footer)
     )]
 
 	[::submit := (lambda (context)
@@ -79,10 +83,11 @@
     )]
 
 	[::welcome := (lambda (context)
-        (var welcome (join-string (~include "welcome.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Welcome") (sprintf welcome context::username) footer)
+        (+ (::make-header context "Welcome") (sprintf 
+            "<div class='welcome'>Welcome! %s<div>Back to <a href='/'>timeline</a></div></div>"
+            context::username) footer)
     )]
 
     [::member-info := (lambda (context user-data)
@@ -104,22 +109,17 @@
         (+ (::make-header context "User") user-info footer)
     )]
 
-    [::lister := (lambda (context posts start)
+    [::lister := (lambda (context posts page-title start)
         (var list-page (join-string (~include "list.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "User") (sprintf list-page (::build-posts posts)) footer)
+        (+ (::make-header context page-title) (sprintf list-page (::build-posts posts start false)) footer)
     )]
 
     [::error := (lambda (context text)
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Error") "<div class='error'>" text "</div>" footer)
-    )]
-
-    [::warning := (lambda (context text)
-        (var footer (join-string (~include "footer.html") ""))
-
-        (+ (::make-header context "Warning") "<div class='warning'>" text "</div>" footer)
+        (+ (::make-header context "Error") "<div class='error' onclick='history.go(-1)'>" 
+            text "</div>" footer)
     )]
 )

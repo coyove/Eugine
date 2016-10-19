@@ -10,7 +10,7 @@ body {
 	font: normal 14px Arial,"Helvetica Neue",Helvetica,sans-serif;
 	line-height: 1.2;
 	padding: 0 10px;
-	background: #f0ebe4;
+	background: #f0eeee;
 }
 
 #container {
@@ -21,22 +21,25 @@ body {
 	height: 100%;
 }
 
+.hide {
+	display: none !important;
+}
+
 .banner {
 	background: #54638c;
 	padding: 4px;
 	clear: both;
+	overflow: hidden;
+	line-height: 1.5;
 }
-
-/*.banner:first-child {
-	padding-top: 8px;
-}*/
 
 .banner a {
 	text-decoration: none !important;
 	color: white;
-	margin: -4px 0;
-    padding: 4px 4px;
+	/*margin: -4px 0;*/
+    padding: 4px 6px;
 	display: inline-block;
+	line-height: 1;
 }
 
 .banner a:hover {
@@ -44,14 +47,42 @@ body {
 	background: #424e70;
 }
 
-.banner .right {
-	float: right;
+.footer {
+	background: #4b597d;
+	padding: 4px 6px;
+	color: white;
 }
 
-a {text-decoration:none;color:#54638c;}a:hover{color:#00207a;text-decoration:underline;}
+a {
+	text-decoration:none;
+	color:#54638c;
+}
 
-table.info {
+a:hover{
+	color:#00207a;
+	text-decoration:underline;
+}
+
+table.info, div.welcome, div.error {
 	margin: 6px 0;
+	line-height: 1.2;
+	padding: 4px;
+}
+
+div.error {
+	white-space: pre-wrap;
+	padding: 4px;
+	line-height: 1.5;
+	cursor: pointer;
+}
+
+div.error:before {
+	content: 'error';
+	background: red;
+	color: white;
+	padding: 4px;
+	font-weight: bold;
+	margin-right: 8px;
 }
 
 div.lister {
@@ -60,8 +91,16 @@ div.lister {
 
 div.lister div.item {
 	width: 100%;
-	margin: 6px 0;
-	padding: 4px;
+	padding: 6px;
+}
+
+h2 {
+	padding: 0 4px;
+	margin-top: 4px;
+}
+
+span[red] {
+	color: red;
 }
 
 div.lister .title a {
@@ -78,12 +117,20 @@ div.item-true {
 	background: #eae5de;
 }
 
+div.item-false {
+	background: #f0ebe4;
+}
+
 .aye b {
-	color: green;
+	background: green;
+    color: white;
+    padding: 2px 4px;
 }
 
 .no b {
-	color: red;
+	background: red;
+    color: white;
+    padding: 2px 4px;
 }
 
 pre, code {
@@ -109,7 +156,22 @@ input[type=text], textarea {
 	max-width: 400px;
 }
 
+textarea {
+	display: block;
+}
+
+input.nar {
+	width: 100%;
+	max-width: 150px;
+}
+
 hr {
 	border-style: dotted;
 	border-color: #aaa;
+}
+
+@media screen and (max-width: 480px) {
+    body {
+        padding: 0;
+    }
 }
