@@ -364,6 +364,10 @@
 	(var texts split (escape-html text) "\n")
 	(var ret clone "")
 	(var code-flag false)
+	(var replacer lambda (t)
+		(set t (re-place t %"(https?:\/\/\S+)" "<a href='$1' target='_blank'>$1</a>"))
+		(re-place t %"#(\d+)" "<a href='/item/$1' target='_blank'>#$1</a>")
+	)
 	(loop texts [(t) =>
 		(if [(trim t) == "```"] 
 			{ 
@@ -374,7 +378,7 @@
 			} 
 			(if code-flag
 				(+. ret t "\n")
-				(+. ret (re-place t %"(https?:\/\/\S+)" "<a href='$1' target='_blank'>$1</a>") "<br>")))
+				(+. ret (replacer t) "<br>")))
 	])
 
 	(ret)
@@ -415,4 +419,17 @@
 		(if [[now - [user-access-slow-ring : k]] > Config::access-slow-cooldown]
 			(del user-access-slow-ring k))
 	])
+)
+
+(def alter-post-state (post id state) 
+	(set [post : 4] state)
+
+	(var user-dp UserOp::get-user-path [post : 0])
+	(if [[post : 9] != "0"] {
+		(update-list (+ (get-post-path (num [post : 9])) "/list") id (3 [() => state]))
+		(update-list (+ user-dp "/comments-list") id (3 [() => state]))
+	} {
+		(update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id (3 [() => state]))
+		(update-list (+ user-dp "/submissions-list") id (3 [() => state]))
+	})
 )

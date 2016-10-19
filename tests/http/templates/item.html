@@ -1,8 +1,8 @@
 (list 
-(if [[item::title != "Comment"] and [item::state != "deleted"]] (+ "<h2>" item::title "</h2>"))
+(if [[item::title != "Comment"] and [item::state != "deleted"]] (+ "<h2><b>#" item-id "</b>. " item::title "</h2>"))
 "<div class='lister'>
 <div class='item' id='item-" item-id "'>
-	<div class='title'>" 
+	<div class='title'>"
 		(if [item::state == "deleted"] 
             "<span red>[deleted]</span>"
             item::content)

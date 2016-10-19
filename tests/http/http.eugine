@@ -23,8 +23,9 @@
 		(var context::user-is-locked starts-with [context::user-data : UserOp::GROUP] "lock-")
 	})
 
-	; (var context::ip "127.0.0.1") ; test
 	(var context::ip [context::headers : @x-forwarded-for])
+	(if [context::ip == null]
+		(set [context::ip] "unknown"))
 	(append-file log-path (+ context::route " " context::username " " context::ip "\n"))
 
 	(cond true
@@ -70,6 +71,8 @@
 			(HTTP-Handler::signup context))
 		((eq context::route "/welcome")
 			(HTTP-Handler::welcome context))
+		((eq context::route "/oauth-github")
+			(HTTP-Handler::oauth-github context))
 		((test-path "/assets/")
 			(HTTP-Handler::serve-file context))
 		(_ 

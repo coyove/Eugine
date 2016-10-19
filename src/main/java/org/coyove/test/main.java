@@ -127,12 +127,5 @@ public class main {
                 ex.printStackTrace();
             }
         }
-
-        ServerSocket ss = new ServerSocket();
-        ss.bind(new InetSocketAddress("127.0.0.1", 8090));
-        Socket s = ss.accept();
-        s.getOutputStream().close();
-        s.close();
-        s.isClosed()
     }
 }

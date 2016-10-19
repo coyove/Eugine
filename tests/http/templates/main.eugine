@@ -22,9 +22,11 @@
     <div class='title'>" 
         (if is-comment 
             title
-            (+ "<b>" (str no) "</b>. <a href='/item/" id "'>" title "</a>")) 
+            (+ "<b>" (str no) "</b>. <a href='/item/" id "'>" title "</a>"))
+        (if [post::state == "locked"]
+            "<span locked>locked</span>")
     "</div>
-    <div class='info'>" post::comments " comments" 
+    <div class='info'>#" post::id " | " post::comments " comments" 
         (if [post::comments > 0] 
             (+ " (" (pretty-date post::commented-ts) " ago)"))
             " | <span points>" post::points "</span> points | "
@@ -79,7 +81,7 @@
         (var login (join-string (~include "login.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Log in") login footer)
+        (+ (::make-header context "Login") login footer)
     )]
 
 	[::welcome := (lambda (context)

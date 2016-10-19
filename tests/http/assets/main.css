@@ -53,6 +53,10 @@ body {
 	color: white;
 }
 
+.footer a {
+	color: white !important;
+}
+
 a {
 	text-decoration:none;
 	color:#54638c;
@@ -101,6 +105,12 @@ h2 {
 
 span[red] {
 	color: red;
+}
+
+span[locked] {
+	font-size: 10px;
+	margin-left: 6px;
+	color: #666;
 }
 
 div.lister .title a {

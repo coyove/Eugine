@@ -1,6 +1,6 @@
 (if [id != 0] {
 	(var parent-dir get-post-path id)
-	(if (file-exists parent-dir) {
+	(if (neq parent-dir null) {
 		(var parent-data (read-file-lines (+ parent-dir "/data")))
 		(if [[parent-data : 4] == "locked"] (exit 40))
 	} (exit 41))

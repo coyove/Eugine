@@ -20,8 +20,8 @@
     "<a id='memberinfo' class='hide'></a>"
 (if context::is-logged-in
 	(+ "<a id='userinfo' href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a>"
-	"<a href='/logout'>log out</a>")
-	"<a href='/user'>log in</a>")
+	"<a href='/logout'>logout</a>")
+	"<a href='/user'>login</a>")
 "</div>"
 
 (if context::is-logged-in

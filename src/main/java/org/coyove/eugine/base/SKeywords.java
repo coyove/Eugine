@@ -529,6 +529,11 @@ public class SKeywords {
                         return new SEInteropClass(ha, c);
                     }
                 });
+                put("cast", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEInteropCast(ha, c);
+                    }
+                });
                 put("new", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEInteropNew(ha, c);

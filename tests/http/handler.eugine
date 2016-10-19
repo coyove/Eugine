@@ -279,17 +279,8 @@
 				(if [[context::user-data : UserOp::GROUP] != "mod"]
 					(exit 32)))
 
-			(set [post : 4] "deleted")
+			(alter-post-state post id "deleted")
 			(write-file (+ path "/data") post)
-
-			(var user-dp UserOp::get-user-path [post : 0])
-			(if [[post : 9] != "0"] {
-				(update-list (+ (get-post-path (num [post : 9])) "/list") id (3 [() => "deleted"]))
-				(update-list (+ user-dp "/comments-list") id (3 [() => "deleted"]))
-			} {
-				(update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id (3 [() => "deleted"]))
-				(update-list (+ user-dp "/submissions-list") id (3 [() => "deleted"]))
-			})
 
 			(context::write-common 302 @plain)
 			(context::write-header "Location" (+ "/item/" (str id)))
@@ -362,8 +353,8 @@
 			(var path get-post-path id)
 			(var data read-file-lines (+ path "/data"))
 			(if [[data : 4] == "open"]
-				(set [data : 4] "locked")
-				(set [data : 4] "open"))
+				(alter-post-state data id "locked")
+				(alter-post-state data id "open"))
 
 			(write-file (+ path "/data") data)
 
@@ -560,7 +551,13 @@
 		(context::write "\r\n")
 
 		(context::write (Template::welcome context))
-	)]	
+	)]
+
+	[::oauth-github := (lambda (context)
+		(context::write-common 200 @html)
+		(context::write "\r\n")
+		(println context::post)
+	)]
 
 	[::not-found := (lambda (context)
 		(context::write-common 404 @html)
@@ -579,14 +576,23 @@
 		(var path + ~path (sub context::route 1))
 		(if (file-exists path)
 			{
-				(cond true
-					((uri-ends-in ".js")  (context::write-common 200 @js))
-					((uri-ends-in ".css") (context::write-common 200 @css))
-					((uri-ends-in ".html")(context::write-common 200 @html))
-					(_                 (context::write-common 200 @binary))
+				(var send lambda () 
+					(context::write "\r\n")
+					(context::write-bytes (read-file-binary path))
 				)
-				(context::write "\r\n")
-				(context::write-bytes (read-file-binary path))
+
+				(cond true
+					((uri-ends-in ".js")  (context::write-common 200 @js) (send ()))
+					((uri-ends-in ".css") (context::write-common 200 @css) (send ()))
+					((uri-ends-in ".html")
+						(context::write-common 200 @html)
+						(context::write "\r\n")
+						(context::write (+ (Template::make-header context path) 
+							(read-file path)
+							(join-string (~include "templates/footer.html") "")))
+						)
+					(_  (context::write-common 200 @binary) (send ()))
+				)
 			}
 			(::not-found context))
 	)]
