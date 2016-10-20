@@ -545,6 +545,11 @@ public class SKeywords {
                         return new SEThread(ha, c);
                     }
                 });
+                put("sleep", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SESleep(ha, c);
+                    }
+                });
                 put("try", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SETry(ha, c);

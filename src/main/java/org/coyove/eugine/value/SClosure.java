@@ -32,8 +32,15 @@ public class SClosure extends SValue {
         extra.put("~doc", new SString(description));
     }
 
-    public SClosure(ExecEnvironment env, final SExpression single) {
-        this(env, new List<String>(), new List<SExpression>(){{ add(single);}});
+    public SClosure(ExecEnvironment env, SExpression single) {
+        List<SExpression> body_ = new List<SExpression>();
+        body_.add(single);
+
+        outerEnv = env;
+        arguments = new List<String>();
+        argCount = 0;
+        body = body_;
+        extra = new ExecEnvironment();
         transparent = true;
     }
 
@@ -65,6 +72,10 @@ public class SClosure extends SValue {
         SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
+//        if (this.extra.containsKey("~init")) {
+//            ret.extra.putVar("~init", this.extra.get("~init").clone());
+//        }
+
         ret.transparent = this.transparent;
         ret.proto = this;
 

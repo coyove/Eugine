@@ -13,6 +13,8 @@ public abstract class SValue extends SExpression {
     public Object underlying;
     public boolean immutable;
 
+    public SValue() {}
+
     public SValue(Object underlying) {
         this.underlying = underlying;
         this.immutable = false;

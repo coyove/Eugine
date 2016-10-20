@@ -27,20 +27,21 @@ public class SECond extends SExpression {
         branches = new List<Branch>();
 
         for (Base a : c.atoms) {
-            final Compound b = (Compound) a;
+            Compound b = (Compound) a;
             if (b == null || b.atoms.size() < 2)
                 throw new VMException(2002, "invalid branch definition", ha);
 
-            final Base cond = b.atoms.pop();
+            Base cond = b.atoms.pop();
 
             if (cond instanceof Atom && ((Atom) cond).token.type == Token.TokenType.ATOMIC &&
                     ((Atom) cond).token.value.toString().equals("_")) {
                 defaultBranch = SExpression.castPlain(b);
             } else {
-                branches.add(new Branch() {{
-                    recv = SExpression.cast(cond);
-                    body = SExpression.castPlain(b);
-                }});
+                Branch n = new Branch();
+                n.recv = SExpression.cast(cond);
+                n.body = SExpression.castPlain(b);
+
+                branches.add(n);
             }
         }
     }
@@ -81,11 +82,12 @@ public class SECond extends SExpression {
         }
 
         ret.branches = new List<Branch>(this.branches.size());
-        for (final Branch branch : this.branches) {
-            ret.branches.add(new Branch() {{
-                this.recv = branch.recv.deepClone();
-                this.body = List.deepClone(branch.body);
-            }});
+        for (Branch branch : this.branches) {
+            Branch n = new Branch();
+            n.recv = branch.recv.deepClone();
+            n.body = List.deepClone(branch.body);
+
+            ret.branches.add(n);
         }
 
         return ret;

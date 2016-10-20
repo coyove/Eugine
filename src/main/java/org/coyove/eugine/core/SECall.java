@@ -89,7 +89,7 @@ public class SECall extends SExpression {
                 ret = continueState.TAIL_CALL;
             }
         } else if (se instanceof SEIf) {
-            final SEIf iif = (SEIf) se;
+            SEIf iif = (SEIf) se;
             ret = continueState.TAIL_CALL;
 
             if (iif.evaluateCondition(env)) {
@@ -100,13 +100,13 @@ public class SECall extends SExpression {
                 ret = continueState.FALSE_NULL;
             }
         } else if (se instanceof SECond) {
-            final SECond cond = (SECond) se;
+            SECond cond = (SECond) se;
             Object tester = cond.condition.evaluate(env).get();
             boolean flag = false;
 
             ret = continueState.TAIL_CALL;
 
-            for (final SECond.Branch b : cond.branches) {
+            for (SECond.Branch b : cond.branches) {
                 if (b.recv.evaluate(env).get().equals(tester)) {
                     retCls = new SClosure(env, b.body);
                     flag = true;
@@ -166,24 +166,27 @@ public class SECall extends SExpression {
                 for (String a : argNames)
                     newArgs.add(new SEVariable(a, headAtom, tailCompound));
 
-                final SECall newBody = new SECall(closure, newArgs, headAtom, tailCompound);
+                SECall newBody = new SECall(closure, newArgs, headAtom, tailCompound);
+                List<SExpression> body = new List<SExpression>();
+                body.add(newBody);
 
-                return new SClosure(env, argNames, new List<SExpression>() {{
-                    add(newBody);
-                }});
+                return new SClosure(env, argNames, body);
             }
 
             ExecEnvironment newEnv = prepareExecEnvironment(closure.arguments, arguments);
             newEnv.put("~parent", new SDict(closure.outerEnv));
             newEnv.put("~atom", new SObject(headAtom));
 
-            if (closure.refer instanceof SClosure) {
-                SClosure refer = ((SClosure) closure.refer);
-                newEnv.put("~this", refer);
-                newEnv.put("~proto", refer.proto);
-            } else {
-                newEnv.put("~this", closure);
+            if (!newEnv.containsKey("~this")) {
+                if (closure.refer instanceof SClosure) {
+                    SClosure refer = ((SClosure) closure.refer);
+                    newEnv.put("~this", refer);
+                    newEnv.put("~proto", refer.proto);
+                } else {
+                    newEnv.put("~this", closure);
+                }
             }
+
             if (closure.outerEnv != null) {
                 if (closure.transparent) {
                     newEnv = closure.outerEnv; //.cloneClosureAndConstOnly();

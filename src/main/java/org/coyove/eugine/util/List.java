@@ -64,4 +64,13 @@ public class List<T> extends java.util.ArrayList<T> {
         }
         return ret;
     }
+
+    public static List<String> deepCloneString(List<String> src) throws VMException {
+        List<String> ret = new List<String>(src.size());
+
+        for (String t : src) {
+            ret.add(t);
+        }
+        return ret;
+    }
 }

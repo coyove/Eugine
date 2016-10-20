@@ -1,0 +1,18 @@
+((def ZZZ ()
+	[::zzz := ""]
+	[::~init := lambda (a)
+		(var ::zzz a)
+	]
+) ())
+
+(var ~mt)
+
+(go (lambda ()
+    (loop true [() =>
+        (var zzz clone ZZZ 1)
+        (println zzz::zzz)
+        (sleep 1000)
+    ])
+) ())
+
+(sleep 86400000)

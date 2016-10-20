@@ -27,14 +27,15 @@ public class SEClone extends SExpression {
 
         if (n instanceof SClosure) {
             synchronized (n) {
-                SValue ret = ((SClosure) n).getCopy();
-                ExecEnvironment extra = ((SClosure) ret).extra;
+//                SValue ret = ((SClosure) n).getCopy();
+                SClosure cls = ((SClosure) n);
+//                ExecEnvironment extra = ((SClosure) ret).extra;
 
-                if (extra.containsKey("~init")) {
+                if (cls.extra.containsKey("~init")) {
 
-                    SClosure init = Utils.cast(extra.get("~init"), SClosure.class);
+                    SClosure init = Utils.cast(cls.extra.get("~init"), SClosure.class);
                     if (init == null)
-                        return ret;
+                        return cls.getCopy();
 
                     List<SValue> arguments = SExpression.eval(this.arguments, env);
 
@@ -45,15 +46,16 @@ public class SEClone extends SExpression {
 
                     newEnv.put("~parent", new SDict(init.outerEnv));
                     newEnv.put("~atom", new SObject(headAtom));
-                    newEnv.put("~this", ret);
+                    newEnv.put("~this", cls.getCopy());
 
                     newEnv.parentEnv = init.outerEnv;
                     for (SExpression se : init.body)
                         se.evaluate(newEnv);
 
+                    return newEnv.get("~this");
                 }
 
-                return ret;
+                return cls.getCopy();
             }
         } else {
             return n.clone();

@@ -20,13 +20,13 @@ public class SEExplode extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        final SValue var = this.list.evaluate(env);
+        SValue var = this.list.evaluate(env);
         if (var instanceof SList) {
             return new SExploded(var.<List<SValue>>get());
         } else {
-            return new SExploded(new List<SValue>() {{
-                add(var);
-            }});
+            List<SValue> n = new List<SValue>();
+            n.add(var);
+            return new SExploded(n);
         }
     }
 
