@@ -13,21 +13,30 @@ function hide(id) {
 	var hider = info.querySelector(".hider");
 	if (hider.innerHTML == "hide") {
 		hider.innerHTML = "un-hide";
-		title.style.display = "none";
+		display(title, "none");
 		hiddens[id] = new Date().getTime();
 	} else {
 		hider.innerHTML = "hide";
-		title.style.display = "block";
+		display(title, "block");
 		delete hiddens[id];
 	}
 
 	localStorage.setItem("hidden_posts", JSON.stringify(hiddens));
 }
 
+function unhideAll() {
+	localStorage.setItem("hidden_posts", "{}");
+	location.href = "/";
+}
+
 function del(id) {
 	if (confirm("Deletion cannot be restored")) {
 		location.href = "/delete/" + id;
 	}
+}
+
+function display(dom, d) {
+	(typeof dom === 'string' ? document.getElementById(dom) : dom).style.display = d;
 }
 
 window.onload = function() {
@@ -44,6 +53,12 @@ window.onload = function() {
 		document.getElementById('memberinfo').innerHTML = 
 			location.href.match(/\/user\/(\S+)$/)[1] + "'s profile";
 		hlTab("memberinfo");
+	}
+
+	if (/\?password-changed$/.test(location.href)) {
+		document.getElementById("password-changed").innerHTML = "Your password is changed";
+	} else if (/\?password-reseted$/.test(location.href)) {
+		document.getElementById("password-reseted").innerHTML = "Your request has been scheduled, please wait";
 	}
 
 	var hiddens = JSON.parse(localStorage.getItem("hidden_posts") || "{}");

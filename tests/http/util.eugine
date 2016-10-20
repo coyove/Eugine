@@ -113,12 +113,14 @@
 	)]
 
 	;; ctor
-	[::~init := (lambda (client)
-		[::headers := (dict)]
-		[::post := (dict)]
-		[::cookies := (dict)]
-		(var ::response-socket client)
-		(var ::response-stream [client . @getOutputStream ()])
+	[::new := (lambda (client)
+		[ret := clone ~this]
+		[ret::headers := (dict)]
+		[ret::post := (dict)]
+		[ret::cookies := (dict)]
+		(var ret::response-socket client)
+		(var ret::response-stream [client . @getOutputStream ()])
+		(ret)
 	)]
 )
 
@@ -133,16 +135,18 @@
 	[::commented-ts := 0]
     [::title := ""]
 
-    [::~init := (lambda (id comments points state author commenter created-ts commented-ts title)
-        [::id           := (num id)]
-        [::comments     := (num comments)]
-        [::points       := (num points)]
-        [::state        := state]
-        [::author       := author]
-        [::commenter    := commenter]
-        [::created-ts   := (num created-ts)]
-        [::commented-ts := (num commented-ts)]
-        [::title        := (decodeURI title)]
+    [::new := (lambda (id comments points state author commenter created-ts commented-ts title)
+    	[ret := clone ~this]
+        [ret::id           := (num id)]
+        [ret::comments     := (num comments)]
+        [ret::points       := (num points)]
+        [ret::state        := state]
+        [ret::author       := author]
+        [ret::commenter    := commenter]
+        [ret::created-ts   := (num created-ts)]
+        [ret::commented-ts := (num commented-ts)]
+        [ret::title        := (decodeURI title)]
+        (ret)
     )]
 )
 
@@ -161,21 +165,23 @@
 	[::parent := 0]
 
 	;; refer to handler.eugine/::item
-    [::~init := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent content)
-        [::id           := id]
-        [::state        := state]
-        [::author       := author]
-        [::created-ts   := (num created-ts)]
-        [::ModifiedTS  	:= (num modified-ts)]
-        [::title        := (decodeURI title)]
-        [::content 		:= content]
-        [::comments 	:= comments]
-		[::points 		:= points]
-		[::upvotes 		:= upvotes]
-		[::downvotes 	:= downvotes]
-		[::parent 		:= parent]
-		[::aye-users 	:= (list)]
-		[::no-users 	:= (list)]
+    [::new := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent content)
+    	[ret := clone ~this]
+        [ret::id           := id]
+        [ret::state        := state]
+        [ret::author       := author]
+        [ret::created-ts   := (num created-ts)]
+        [ret::ModifiedTS  	:= (num modified-ts)]
+        [ret::title        	:= (decodeURI title)]
+        [ret::content 		:= content]
+        [ret::comments 		:= comments]
+		[ret::points 		:= points]
+		[ret::upvotes 		:= upvotes]
+		[ret::downvotes 	:= downvotes]
+		[ret::parent 		:= parent]
+		[ret::aye-users 	:= (list)]
+		[ret::no-users 		:= (list)]
+		(ret)
     )]
 )
 
@@ -349,7 +355,7 @@
             (var parts (split post " "))
             (if [(len parts) != 9] (exit 30))
 
-            (set [posts : i] clone Post (explode parts))
+            (set [posts : i] Post::new (explode parts))
         ])
     } () (cond ~e
         (30

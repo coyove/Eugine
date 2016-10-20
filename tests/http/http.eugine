@@ -53,6 +53,10 @@
 			(HTTP-Handler::submit context))
 		((eq context::route "/user") 
 			(HTTP-Handler::user context))
+		((eq context::route "/password/change") 
+			(HTTP-Handler::change-password context))
+		((eq context::route "/password/reset") 
+			(HTTP-Handler::reset-password context))
 		((test-path "/user/")
             (HTTP-Handler::user-visitor-view context (sub context::route 6)))
 		((test-path "/lock/")
@@ -113,7 +117,7 @@
 	)
 
 	(var requests (split raw-request "\r\n"))
-	(var http-context clone HTTP-Request client)
+	(var http-context HTTP-Request::new client)
 
 	(loop requests [(request) =>
 		(var parts (split request " "))

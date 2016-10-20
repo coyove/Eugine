@@ -33,7 +33,7 @@
 "</div>
 </div>"
 
-(if [item::state != "locked"] (+
+(if [[item::state != "locked"] and [item::state != "deleted"]] (+
 "<div class='post'>
 <form method='post' action='/post/" item-id "'>
 <input type='hidden' name='title' value='Comment'>

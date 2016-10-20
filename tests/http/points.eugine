@@ -101,7 +101,7 @@
             (var parts (split post " "))
             (if [(len parts) != 9] (exit 30))
 
-            (var p clone Post (explode parts))
+            (var p Post::new (explode parts))
             (var T / [(time 1) - (num p::created-ts)] 3600000)
 
             (var R [(num p::points) / (pow [T + 2] 1.8)])

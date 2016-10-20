@@ -49,7 +49,7 @@
 			(var data read-file-lines (+ path "/data"))
 			(var raw read-file (+ path "/raw"))
 
-			(var item clone Item id (explode data) raw)
+			(var item Item::new id (explode data) raw)
 			(var item::aye-users read-file-lines (+ path "/aye"))
 			(var item::no-users read-file-lines (+ path "/no"))
 
@@ -149,6 +149,9 @@
 			(var path get-post-path id)
 			(if [path == null] (exit 31))
 
+			(var data read-file-lines (+ path "/data"))
+			(if [[[data : 4] == "deleted"] or [[data : 4] == "locked"]] (exit 32))
+
 			(set aye-path + path "/aye")
 			(set no-path + path "/no")
 			(create-if-not-exist aye-path "")
@@ -204,6 +207,7 @@
 			(102 (::error context "Frequent access"))
 			(30 (::error context "Please login to say " opt))
 			(31 (::error context "Invalid ID"))
+			(32 (::error context "Voting is closed"))
 			(_ ())
 		)))
 	)]
@@ -544,6 +548,84 @@
             (_ ())
         ))
     )]
+
+    ;; POST
+	[::change-password := (lambda (context)
+		(try {
+			(if (not (check-csrf context)) (exit 100))
+			(if (not context::is-logged-in) (exit 31))
+
+			(var old-password [context::post : @old])
+			(if [old-password == null] (exit 30))
+
+			(var new-password [context::post : @new])
+			(if [(len new-password) > 32] (exit 32))
+			(if [(len new-password) < 8] (exit 33))
+
+			(var f (UserOp::get-data-path context::username))
+			(if (not (file-exists f)) (exit 34))
+
+			(var user-data read-file-lines f)
+			(if [[user-data : UserOp::PASSWORD] != (hash-string old-password)] (exit 35))
+
+			(set [user-data : UserOp::PASSWORD] hash-string new-password)
+			(write-file f user-data)
+
+			(context::write-common 302 @plain)
+			(context::write-header "Location" "/user?password-changed")
+			(context::write "\r\n")
+		}
+
+		(cond ~e 
+			(100 (::error context "CSRF error"))
+			(30 (::error context "Please enter old password to continue"))
+			(31 (::error context "Please login to change password"))
+			(32 (::error context "New password too long (32 chars max.)\n" new-password))
+			(33 (::error context "New password too short (8 chars min.)\n" new-password))
+			(34 (::error context "Invalid user"))
+			(35 (::error context "Old password is not correct\n" old-password))
+			(_ ())
+		))
+	)]
+
+	;; POST
+	[::reset-password := (lambda (context)
+		(try {
+			(if (not (check-csrf context)) (exit 100))
+
+			(var username [context::post : @username])
+			(if [username == null] (exit 30))
+
+			(var email [context::post : @email])
+			(if [email == null] (exit 31))
+
+			(var f (UserOp::get-data-path username))
+			(if (not (file-exists f)) (exit 32))
+
+			(var user-data read-file-lines f)
+			(var user-email [user-data : UserOp::EMAIL])
+
+			(if [user-email == ""] (exit 33))
+			(if [user-email != (encodeURI email)] (exit 34))
+
+			(create-if-not-exist (+ ~path "data/reset-requests") "")
+			(append-file (+ ~path "data/reset-requests") (+ username " " (str (time 1)) " " email))
+
+			(context::write-common 302 @plain)
+			(context::write-header "Location" "/user?password-reseted")
+			(context::write "\r\n")
+		}
+
+		(cond ~e 
+			(100 (::error context "CSRF error"))
+			(30 (::error context "Please enter username"))
+			(31 (::error context "Please enter email"))
+			(33 (::error context "User's email address is empty"))
+			(32 (::error context "Invalid user"))
+			(34 (::error context "Invalid email\n" email))
+			(_ ())
+		))
+	)]
 
     ;; GET
 	[::welcome := (lambda (context)

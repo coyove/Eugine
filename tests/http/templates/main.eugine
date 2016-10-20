@@ -88,7 +88,7 @@
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context "Welcome") (sprintf 
-            "<div class='welcome'>Welcome! %s<div>Back to <a href='/'>timeline</a></div></div>"
+            "<div class='welcome'>Welcome %s! Back to <a href='/'>timeline</a></div>"
             context::username) footer)
     )]
 

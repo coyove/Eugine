@@ -1,18 +1,35 @@
-(list "<form method=post action='/login'>
+(list "<form method=post action='/login' id='login'>
 <table class='info'>
-	<tr><td><b>login</b></td></tr>
+	<tr><td colspan='2'><b>login</b></td></tr>
 	<tr><td>username:</td><td><input class='nar' name='username'></td></tr>
 	<tr><td>password:</td><td><input class='nar' type='password' name='password'></td></tr>
 	<tr><td></td><td><input type='submit' value='login'></td></tr>
+	<tr><td>&nbsp;</td><td><span red id='password-reseted'></span></td></tr>
+	<tr><td></td><td><a href='javascript:showhide()'>Forgot password?</a></td></tr>
+</table>
+</form>
+<form method=post action='/password/reset' id='reset' style='display:none'>
+<table class='info'>
+	<tr><td colspan='2'><b>reset password</b></td></tr>
+	<tr><td>username:</td><td><input class='nar' name='username'></td></tr>
+	<tr><td>email:</td><td><input class='nar' name='email'></td></tr>
+	<tr><td></td><td><input type='submit' value='reset'></td></tr>
 </table>
 </form>
 <hr>
-<form method=post action='/signup'>
+<form method=post action='/signup' id='signup'>
 <table class='info'>
-	<tr><td><b>sign up</b></td></tr>
+	<tr><td colspan='2'><b>sign up</b></td></tr>
 	<tr><td>username:</td><td><input class='nar' name='username'></td></tr>
-	<tr><td>password:</td><td><input class='nar' type='password' name='password'></td></tr>
+	<tr><td>password:</td><td><input class='nar' name='password'></td></tr>
 	<tr><td></td><td><input type='submit' value='sign up'></td></tr>
 </table>
 </form>
+<script type='text/javascript'>
+	function showhide() {
+		display('login', 'none');
+		display('signup', 'none');
+		display('reset', 'block');
+	}
+</script>
 ")
