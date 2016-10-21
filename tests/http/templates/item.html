@@ -4,12 +4,12 @@
 <div class='item' id='item-" item-id "'>
 	<div class='title'>"
 		(if [item::state == "deleted"] 
-            "<span red>[deleted]</span>"
+            "<span deleted>deleted</span>"
             item::content)
 	"</div>
 <div class='info'>" (str item::comments) " comments | <span points>" (str item::points) "</span> points | "
 "by <a href='/user/" item::author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago | "
-"<a href='" (if [item::parent == "0"] "/" (+ "/item/" item::parent)) "'>parent</a> | "
+(if [item::parent != "0"] (+ "<a href='/item/" item::parent "'>parent</a> | "))
 "<a class='hider' href='javascript:hide(" item-id ")'>hide</a> | "
 
 (if [[context::username == item::author] or [[context::user-data : UserOp::GROUP] == "mod"]]

@@ -47,13 +47,13 @@ body {
 	background: #424e70;
 }
 
-.footer {
+.outer {
 	background: #4b597d;
 	padding: 4px 6px;
 	color: white;
 }
 
-.footer a {
+.outer a {
 	color: white !important;
 }
 
@@ -89,11 +89,17 @@ div.error:before {
 	margin-right: 8px;
 }
 
-div.lister {
+.lister {
 	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
 }
 
-div.lister div.item {
+.lister td {
+	padding: 4px;
+}
+
+.lister div.item {
 	width: 100%;
 	padding: 6px;
 }
@@ -107,15 +113,31 @@ span[red] {
 	color: red;
 }
 
-span[locked] {
+span[locked], span[deleted] {
 	font-size: 10px;
-	margin-left: 6px;
-	color: #666;
+    color: white;
+    padding: 2px 4px;
+    margin: 4px;
+    background: #666;
+    vertical-align: middle;
+}
+
+span[deleted] {
+    background: #ff5050;
+    margin: 0;
 }
 
 div.lister .title a {
 	text-decoration: none;
 }
+
+.title div {
+	margin-bottom: 6px;
+}
+
+/*.title div:first-child {
+	margin-top: 0;
+}*/
 
 div.lister .info {
 	color: #aaa;
@@ -123,11 +145,11 @@ div.lister .info {
 	margin-top: 2px;
 }
 
-div.item-true {
+.item-true {
 	background: #eae5de;
 }
 
-div.item-false {
+.item-false {
 	background: #f0ebe4;
 }
 
@@ -146,6 +168,7 @@ div.item-false {
 pre, code {
 	font-family: "Courier New", Courier, monospace;
 	font-size: 12px;
+	margin-bottom: 6px;
 }
 
 table {

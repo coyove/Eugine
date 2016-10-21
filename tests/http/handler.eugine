@@ -11,18 +11,18 @@
     )]
 
     ;; GET
-	[::index := (lambda (context file)
+    [::index := (lambda (context file)
         (var count ::get-paging context)
 
-		(context::write-common 200 @html)
-		(context::write "\r\n")
+        (context::write-common 200 @html)
+        (context::write "\r\n")
         (context::write (Template::lister context (load-list file count) 
-        	(+ (if [file == "main"] "Timeline " "Ranking ") (str count)) count))
-	)]
+            (+ (if [file == "main"] "Timeline " "Ranking ") (str count)) count))
+    )]
 
-	;; GET
+    ;; GET
     [::user-submits-or-comments := (lambda (context username ltype)
-    	(var user-home UserOp::get-user-path username)
+        (var user-home UserOp::get-user-path username)
         (var path + (UserOp::get-user-path username) "/" ltype "-list")
 
         (if (not (file-exists user-home))
@@ -33,496 +33,509 @@
                 (context::write-common 200 @html)
                 (context::write "\r\n")
                 (context::write (Template::lister context (load-list path count) 
-                	(+ username "'s " ltype " " (str count)) count))
+                    (+ username "'s " ltype " " (str count)) count))
             })
     )]
 
     ;; GET
-	[::item := (lambda (context id)
-		(try {
-			(set id num id)
-			(if [id == null] (exit 30))
+    [::item := (lambda (context id)
+        (try {
+            (set id num id)
+            (if [id == null] (exit 30))
 
-			(var path get-post-path id)
-			(if [path == null] (exit 30))
+            (var path get-post-path id)
+            (if [path == null] (exit 30))
 
-			(var data read-file-lines (+ path "/data"))
-			(var raw read-file (+ path "/raw"))
+            (var data read-file-lines (+ path "/data"))
+            (var raw read-file (+ path "/raw"))
 
-			(var item Item::new id (explode data) raw)
-			(var item::aye-users read-file-lines (+ path "/aye"))
-			(var item::no-users read-file-lines (+ path "/no"))
+            (var item Item::new id (explode data) raw)
+            (var item::aye-users read-file-lines (+ path "/aye"))
+            (var item::no-users read-file-lines (+ path "/no"))
 
-			(var count ::get-paging context)
-			(var comments load-list (+ path "/list") count)
+            (var count ::get-paging context)
+            (var comments load-list (+ path "/list") count)
 
-		} () (cond ~e
+        } () (cond ~e
             (30 (::not-found context))
             (_ 
-            	(context::write-common 200 @html)
-				(context::write "\r\n")
-            	(context::write (Template::item context item comments count)))
+                (context::write-common 200 @html)
+                (context::write "\r\n")
+                (context::write (Template::item context item comments count)))
         ))
-	)]
+    )]
+
+    ;; GET
+    [::leaders := (lambda (context)
+        (var leaders read-file-lines (+ ~path "data/users/ranking"))
+        (loop leaders [(l i) => (set [leaders : i] UserListItem::new (explode (split l " ")))])
+
+        (context::write-common 200 @html)
+        (context::write "\r\n")
+        (context::write (Template::leaders context leaders))
+    )]
 
     ;; POST
-	[::post := (lambda (context id)
-		(sync (try {
-			(if (not (check-csrf context)) (exit 100))
+    [::post := (lambda (context id)
+        (sync (try {
+            (if (not (check-csrf context)) (exit 100))
 
-			(var id num id)
-			(if [id == null] (exit 31))
+            (var id num id)
+            (if [id == null] (exit 31))
 
-			(if (not context::is-logged-in) (exit 99))
-			(if context::user-is-locked (exit 101))
+            (if (not context::is-logged-in) (exit 99))
+            (if context::user-is-locked (exit 101))
 
-			(var author context::username)
-			(if (access-slow-control context) (exit 102))
+            (var author context::username)
+            (if (access-slow-control context) (exit 102))
 
-			(var title [context::post : @title])
-			(if [(len title) > 128] (exit 30))
-			(if [[title == null] or [(len title) < 4]] (exit 33))
+            (var title [context::post : @title])
+            (if [(len title) > 128] (exit 30))
+            (if [[title == null] or [(len title) < 4]] (exit 33))
 
-			(var text [context::post : @text])
-			(if [(len text) > 4096]	(exit 32))
-			(if [(len text) < 4] 	(exit 35))
+            (var text [context::post : @text])
+            (if [(len text) > 4096] (exit 32))
+            (if [(len text) < 4]    (exit 35))
 
-			(set text parse-code text)
-			(set title escape-html title)
+            (set text parse-code text)
+            (set title escape-html title)
 
-			(var next-id get-next-id (+ ~path "data/posts/index"))
-			(if [id == 0] (write-file (+ ~path "data/posts/main-index") (str id)))
+            (var next-id get-next-id (+ ~path "data/posts/index"))
+            (if [id == 0] (write-file (+ ~path "data/posts/main-index") (str id)))
 
-			(~include "post.eugine")
+            (~include "post.eugine")
 
-			(context::write-common 302 @plain)
-			(context::write-header "Location" return-to)
-			(context::write "\r\n")
-		} ()
-		(cond ~e 
-			(99 (::error context "Please login first"))
-			(100 (::error context "CSRF error"))
-			(101 (::error context "You are locked"))
-			(102 (::error context "Frequent access"))
-			(30 (::error context "Title too long (128 chars max.)\n" title))
-			(33 (::error context "Title too short (4 chars min.)\n" title))
-			(31 (::error context "Invalid ID"))
-			(32 (::error context "Text too long (4096 chars max.)\n" text))
-			(35 (::error context "Text too short (4 chars min.)\n" text))
-			(40 (::error context "Parent is locked"))
-			(41 (::error context "Parent doesn't exist"))
-			(_ ())
-		)))
-	)]
+            (context::write-common 302 @plain)
+            (context::write-header "Location" return-to)
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (99 (::error context "Please login first"))
+            (100 (::error context "CSRF error"))
+            (101 (::error context "You are locked"))
+            (102 (::error context "Frequent access"))
+            (30 (::error context "Title too long (128 chars max.)"))
+            (33 (::error context "Title too short (4 chars min.)"))
+            (31 (::error context "Invalid ID"))
+            (32 (::error context "Text too long (4096 chars max.)"))
+            (35 (::error context "Text too short (4 chars min.)"))
+            (40 (::error context "Parent is locked"))
+            (41 (::error context "Parent doesn't exist"))
+            (_ ())
+        )))
+    )]
 
-	[::voters := (lambda (context id opt)
-		(sync (try {
-			(var id num id)
-			(if [id == null] (exit 31))
+    [::voters := (lambda (context id opt)
+        (sync (try {
+            (var id num id)
+            (if [id == null] (exit 31))
 
-			(var path get-post-path id)
-			(if [path == null] (exit 31))
+            (var path get-post-path id)
+            (if [path == null] (exit 31))
 
-			(set path + path "/" opt)
-			(create-if-not-exist path "")
+            (set path + path "/" opt)
+            (create-if-not-exist path "")
 
-			(context::write-common 200 @plain)
-			(context::write "\r\n")
-			(context::write-bytes (read-file-binary path))
-		} ()
-		(cond ~e 
-			(31 (::error context "Invalid ID"))
-			(_ ())
-		)))
-	)]
+            (context::write-common 200 @plain)
+            (context::write "\r\n")
+            (context::write-bytes (read-file-binary path))
+        } ()
+        (cond ~e 
+            (31 (::error context "Invalid ID"))
+            (_ ())
+        )))
+    )]
 
-	[::say-aye-or-no := (lambda (context id opt)
-		(sync (try {
-			(if (not (check-csrf context)) (exit 100))
-			(if (not context::is-logged-in) (exit 30))
-			(if context::user-is-locked (exit 101))
-			(if (access-slow-control context) (exit 102))
+    [::say-aye-or-no := (lambda (context id opt)
+        (sync (try {
+            (if (not (check-csrf context)) (exit 100))
+            (if (not context::is-logged-in) (exit 30))
+            (if context::user-is-locked (exit 101))
+            (if (access-slow-control context) (exit 102))
 
-			(var id num id)
-			(if [id == null] (exit 31))
+            (var id num id)
+            (if [id == null] (exit 31))
 
-			(var path get-post-path id)
-			(if [path == null] (exit 31))
+            (var path get-post-path id)
+            (if [path == null] (exit 31))
 
-			(var data read-file-lines (+ path "/data"))
-			(if [[[data : 4] == "deleted"] or [[data : 4] == "locked"]] (exit 32))
+            (var data read-file-lines (+ path "/data"))
+            (if [[[data : 4] == "deleted"] or [[data : 4] == "locked"]] (exit 32))
 
-			(set aye-path + path "/aye")
-			(set no-path + path "/no")
-			(create-if-not-exist aye-path "")
-			(create-if-not-exist no-path "")
+            (set aye-path + path "/aye")
+            (set no-path + path "/no")
+            (create-if-not-exist aye-path "")
+            (create-if-not-exist no-path "")
 
-			(var aye-users read-file-lines aye-path)
-			(var no-users read-file-lines no-path)
+            (var aye-users read-file-lines aye-path)
+            (var no-users read-file-lines no-path)
 
-			(if [opt == "aye"] {
-				(if [(set idx (list-contains aye-users context::username)) >= 0]
-					{ 
-						(del aye-users idx) 
-						(del aye-users idx)
-						(del aye-users idx)
-					}
-					{
-						(+. aye-users context::username [context::user-data : UserOp::KARMA] (str (time 1)))
-						(if [(set idx list-contains no-users context::username) >= 0] {
-							(del no-users idx)
-							(del no-users idx)
-							(del no-users idx)
-						})
-					})
-			} {
-				(if [(set idx (list-contains no-users context::username)) >= 0]
-					{ 
-						(del no-users idx)
-						(del no-users idx)
-						(del no-users idx)
-					}
-					{
-						(+. no-users context::username [context::user-data : UserOp::KARMA])
-						(if [(set idx list-contains aye-users context::username) >= 0] {
-							(del aye-users idx) 
-							(del aye-users idx)
-							(del aye-users idx)
-						})
-					})
-			})
+            (if [opt == "aye"] {
+                (if [(set idx (list-contains aye-users context::username)) >= 0]
+                    { 
+                        (del aye-users idx) 
+                        (del aye-users idx)
+                        (del aye-users idx)
+                    }
+                    {
+                        (+. aye-users context::username [context::user-data : UserOp::KARMA] (str (time 1)))
+                        (if [(set idx list-contains no-users context::username) >= 0] {
+                            (del no-users idx)
+                            (del no-users idx)
+                            (del no-users idx)
+                        })
+                    })
+            } {
+                (if [(set idx (list-contains no-users context::username)) >= 0]
+                    { 
+                        (del no-users idx)
+                        (del no-users idx)
+                        (del no-users idx)
+                    }
+                    {
+                        (+. no-users context::username [context::user-data : UserOp::KARMA])
+                        (if [(set idx list-contains aye-users context::username) >= 0] {
+                            (del aye-users idx) 
+                            (del aye-users idx)
+                            (del aye-users idx)
+                        })
+                    })
+            })
 
-			(write-file aye-path aye-users)
-			(write-file no-path no-users)
+            (write-file aye-path aye-users)
+            (write-file no-path no-users)
 
-			(recalc-points-of-item id aye-users no-users)
+            (recalc-points-of-item id aye-users no-users)
 
-			(context::write-common 302 @plain)
-			(context::write-header "Location" (+ "/item/" (str id)))
-			(context::write "\r\n")
-		} ()
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(101 (::error context "You are locked"))
-			(102 (::error context "Frequent access"))
-			(30 (::error context "Please login to say " opt))
-			(31 (::error context "Invalid ID"))
-			(32 (::error context "Voting is closed"))
-			(_ ())
-		)))
-	)]
+            (context::write-common 302 @plain)
+            (context::write-header "Location" (+ "/item/" (str id)))
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (101 (::error context "You are locked"))
+            (102 (::error context "Frequent access"))
+            (30 (::error context "Please login to say " opt))
+            (31 (::error context "Invalid ID"))
+            (32 (::error context "Voting is closed"))
+            (_ ())
+        )))
+    )]
 
-	[::aye := (lambda (context id)
-		(::say-aye-or-no context id "aye")
-	)]
+    [::aye := (lambda (context id)
+        (::say-aye-or-no context id "aye")
+    )]
 
-	[::no := (lambda (context id)
-		(::say-aye-or-no context id "no")
-	)]
+    [::no := (lambda (context id)
+        (::say-aye-or-no context id "no")
+    )]
 
-	;; POST
-	[::update := (lambda (context)
-		(sync (try {
-			(if (not (check-csrf context)) (exit 100))
+    ;; POST
+    [::update := (lambda (context)
+        (sync (try {
+            (if (not (check-csrf context)) (exit 100))
 
-			(if (not context::is-logged-in) (exit 99))
+            (if (not context::is-logged-in) (exit 99))
 
-			(var username context::username)
-			(if (access-slow-control context) (exit 102))
+            (var username context::username)
+            (if (access-slow-control context) (exit 102))
 
-			(var about [context::post : @about])
-			(if [(len about) > 256] (exit 30))
-			(if [about == null] (set about ""))
+            (var about [context::post : @about])
+            (if [(len about) > 256] (exit 30))
+            (if [about == null] (set about ""))
 
-			(var email [context::post : @email])
-			(if [(len email) > 64] (exit 32))
-			(if [email == null] (set email ""))
+            (var email [context::post : @email])
+            (if [(len email) > 64] (exit 32))
+            (if [email == null] (set email ""))
 
-			(var autohide num [context::post : @autohide])
-			(if [autohide == null] (exit 33))
+            (var autohide num [context::post : @autohide])
+            (if [autohide == null] (exit 33))
 
-			(var user-dp UserOp::get-data-path username)
-			(var user-data read-file-lines user-dp)
+            (var user-dp UserOp::get-data-path username)
+            (var user-data read-file-lines user-dp)
 
-			(set [user-data : UserOp::ABOUT] encodeURI about)
-			(set [user-data : UserOp::EMAIL] encodeURI email)
-			(set [user-data : UserOp::AUTOHIDE] str autohide)
+            (set [user-data : UserOp::ABOUT] encodeURI about)
+            (set [user-data : UserOp::EMAIL] encodeURI email)
+            (set [user-data : UserOp::AUTOHIDE] str autohide)
 
-			(write-file user-dp user-data)
+            (write-file user-dp user-data)
 
-			(context::write-common 302 @plain)
-			(context::write-header "Location" "/user")
-			(context::write "\r\n")
-		} ()
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(102 (::error context "Frequent access"))
-			(99 (::error context "Please login first"))
-			(30 (::error context "Description too long (256 chars max.)\n" about))
-			(32 (::error context "Email too long (64 chars max.)\n" email))
-			(33 (::error context "Invalid autohide points"))
-			(_ ())
-		)))
-	)]
-
-	;; GET
-	[::delete := (lambda (context id)
-		(sync (try {
-			(if (not (check-csrf context)) (exit 100))
-
-			(var id num id)
-			(if (not context::is-logged-in) (exit 30))
-			(if context::user-is-locked (exit 101))
-			(if [id == null] (exit 31))
-
-			(var path get-post-path id)
-			(if [path == null] (exit 31))
-
-			(var post read-file-lines (+ path "/data"))
-			(if [context::username != [post : 0]]
-				(if [[context::user-data : UserOp::GROUP] != "mod"]
-					(exit 32)))
-
-			(alter-post-state post id "deleted")
-			(write-file (+ path "/data") post)
-
-			(context::write-common 302 @plain)
-			(context::write-header "Location" (+ "/item/" (str id)))
-			(context::write "\r\n")
-		} ()
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(101 (::error context "You are locked"))
-			(30 (::error context "Please login to delete"))
-			(31 (::error context "Invalid ID"))
-			(32 (::error context "You don't have rights to delete"))
-			(_ ())
-		)))
-	)]
-
-	;; POST
-	[::lock-unlock-user := (lambda (context username)
-		(sync (try {
-			(if (not (check-csrf context)) (exit 100))
-
-			(if (not context::is-logged-in) (exit 30))
-			(if [[context::user-data : UserOp::GROUP] != "mod"]
-				(exit 32))
-
-			(var user-dp UserOp::get-data-path username)
-			(var user-pp UserOp::get-user-path username)
-
-			(var user-data read-file-lines user-dp)
-			(if [user-data == null] (exit 31))
-
-			(var long [context::post : @long])
-			(if [[long == null] or [(num long) == 0]]
-				(set long 0)
-				(set long + (time 1) (num long)))
-
-			(if [[user-data : UserOp::GROUP] == "user"]
-				(set [user-data : UserOp::GROUP] + "lock-" (str long))
-				(set [user-data : UserOp::GROUP] "user"))
-
-			(write-file user-dp user-data)
-
-			(create-if-not-exist (+ user-pp "/lock-log") "")
-			(append-file (+ user-pp "/lock-log") (+ context::username "\n"))
-
-			(context::write-common 302 @plain)
-			(context::write-header "Location" (+ "/user/" username))
-			(context::write "\r\n")
-		} ()
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(30 (::error context "Please login to lock"))
-			(31 (::error context "Invalid user"))
-			(32 (::error context "You don't have rights to lock"))
-			(_ ())
-		)))
-	)]
-
-	;; GET
-	[::lock-unlock-post := (lambda (context id)
-		(sync (try {
-			(if (not (check-csrf context)) (exit 100))
-
-			(if (not context::is-logged-in) (exit 30))
-			(if [[context::user-data : UserOp::GROUP] != "mod"]
-				(exit 32))
-
-			(var id num id)
-			(if [id == null] (exit 31))
-			
-			(var path get-post-path id)
-			(var data read-file-lines (+ path "/data"))
-			(if [[data : 4] == "open"]
-				(alter-post-state data id "locked")
-				(alter-post-state data id "open"))
-
-			(write-file (+ path "/data") data)
-
-			(context::write-common 302 @plain)
-			(context::write-header "Location" (+ "/item/" (str id)))
-			(context::write "\r\n")
-		} ()
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(30 (::error context "Please login to lock"))
-			(31 (::error context "Invalid ID"))
-			(32 (::error context "You don't have rights to lock"))
-			(_ ())
-		)))
-	)]
+            (context::write-common 302 @plain)
+            (context::write-header "Location" "/user")
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (102 (::error context "Frequent access"))
+            (99 (::error context "Please login first"))
+            (30 (::error context "Description too long (256 chars max.)"))
+            (32 (::error context "Email too long (64 chars max.)"))
+            (33 (::error context "Invalid autohide points"))
+            (_ ())
+        )))
+    )]
 
     ;; GET
-	[::submit := (lambda (context)
-		(context::write-common 200 @html)
-		(context::write "\r\n")
+    [::delete := (lambda (context id)
+        (sync (try {
+            (if (not (check-csrf context)) (exit 100))
 
-		(context::write (Template::submit context))
-	)]
+            (var id num id)
+            (if (not context::is-logged-in) (exit 30))
+            (if context::user-is-locked (exit 101))
+            (if [id == null] (exit 31))
+
+            (var path get-post-path id)
+            (if [path == null] (exit 31))
+
+            (var post read-file-lines (+ path "/data"))
+            (if [context::username != [post : 0]]
+                (if [[context::user-data : UserOp::GROUP] != "mod"]
+                    (exit 32)))
+
+            (alter-post-state post id "deleted")
+            (write-file (+ path "/data") post)
+
+            (context::write-common 302 @plain)
+            (context::write-header "Location" (+ "/item/" (str id)))
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (101 (::error context "You are locked"))
+            (30 (::error context "Please login to delete"))
+            (31 (::error context "Invalid ID"))
+            (32 (::error context "You don't have rights to delete"))
+            (_ ())
+        )))
+    )]
+
+    ;; POST
+    [::lock-unlock-user := (lambda (context username)
+        (sync (try {
+            (if (not (check-csrf context)) (exit 100))
+
+            (if (not context::is-logged-in) (exit 30))
+            (if [[context::user-data : UserOp::GROUP] != "mod"]
+                (exit 32))
+
+            (var user-dp UserOp::get-data-path username)
+            (var user-pp UserOp::get-user-path username)
+
+            (var user-data read-file-lines user-dp)
+            (if [user-data == null] (exit 31))
+
+            (var long [context::post : @long])
+            (if [[long == null] or [(num long) == 0]]
+                (set long 0)
+                (set long + (time 1) (num long)))
+
+            (if [[user-data : UserOp::GROUP] == "user"]
+                (set [user-data : UserOp::GROUP] + "lock-" (str long))
+                (set [user-data : UserOp::GROUP] "user"))
+
+            (write-file user-dp user-data)
+
+            (create-if-not-exist (+ user-pp "/lock-log") "")
+            (append-file (+ user-pp "/lock-log") (+ context::username "\n"))
+
+            (context::write-common 302 @plain)
+            (context::write-header "Location" (+ "/user/" username))
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (30 (::error context "Please login to lock"))
+            (31 (::error context "Invalid user"))
+            (32 (::error context "You don't have rights to lock"))
+            (_ ())
+        )))
+    )]
 
     ;; GET
-	[::user := (lambda (context)
-		(if (not context::is-logged-in)
-			(::user-login context)
-			{
+    [::lock-unlock-post := (lambda (context id)
+        (sync (try {
+            (if (not (check-csrf context)) (exit 100))
+
+            (if (not context::is-logged-in) (exit 30))
+            (if [[context::user-data : UserOp::GROUP] != "mod"]
+                (exit 32))
+
+            (var id num id)
+            (if [id == null] (exit 31))
+            
+            (var path get-post-path id)
+            (var data read-file-lines (+ path "/data"))
+            (if [[data : 4] == "open"]
+                (alter-post-state data id "locked")
+                (alter-post-state data id "open"))
+
+            (write-file (+ path "/data") data)
+
+            (context::write-common 302 @plain)
+            (context::write-header "Location" (+ "/item/" (str id)))
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (30 (::error context "Please login to lock"))
+            (31 (::error context "Invalid ID"))
+            (32 (::error context "You don't have rights to lock"))
+            (_ ())
+        )))
+    )]
+
+    ;; GET
+    [::submit := (lambda (context)
+        (context::write-common 200 @html)
+        (context::write "\r\n")
+
+        (context::write (Template::submit context))
+    )]
+
+    ;; GET
+    [::user := (lambda (context)
+        (if (not context::is-logged-in)
+            (::user-login context)
+            {
                 (context::write-common 200 @html)
                 (context::write "\r\n")
                 (context::write (Template::user-info context context::user-data))
-			})
-	)]
+            })
+    )]
 
-	;; GET
+    ;; GET
     [::user-visitor-view := (lambda (context username)
         (var user-data read-file-lines (UserOp::get-data-path username))
         (if [user-data != null]
             {
-            	(context::write-common 200 @html)
-        		(context::write "\r\n")
-            	(context::write (Template::member-info context user-data))
+                (context::write-common 200 @html)
+                (context::write "\r\n")
+                (context::write (Template::member-info context user-data))
             }
             (::not-found context))
     )]
 
     ;; GET
-	[::user-login := (lambda (context)
-		(context::write-common 200 @html)
-		(context::write "\r\n")
-		(context::write (Template::login context))
-	)]
+    [::user-login := (lambda (context)
+        (context::write-common 200 @html)
+        (context::write "\r\n")
+        (context::write (Template::login context))
+    )]
 
     ;; POST
-	[::signup := (lambda (context)
-		(try {
-			(if (not (check-csrf context)) (exit 100))
+    [::signup := (lambda (context)
+        (try {
+            (if (not (check-csrf context)) (exit 100))
 
-			(var username [context::post : @username])
-			(if [(len username) > 32] (exit 30))
-			(if [(len username) < 4] (exit 31))
-			(if (not (UserOp::valid-username username)) (exit 40))
+            (var username [context::post : @username])
+            (if [(len username) > 32] (exit 30))
+            (if [(len username) < 4] (exit 31))
+            (if (not (UserOp::valid-username username)) (exit 40))
 
-			(var password [context::post : @password])
-			(if [(len password) > 32] (exit 32))
-			(if [(len password) < 8] (exit 33))
+            (var password [context::post : @password])
+            (if [(len password) > 32] (exit 32))
+            (if [(len password) < 8] (exit 33))
 
-			(var f (UserOp::get-data-path username))
-			(if (file-exists f) (exit 34))
+            (var f (UserOp::get-data-path username))
+            (if (file-exists f) (exit 34))
 
-			(sync (var next-id get-next-id (+ ~path "data/users/index")))
+            (sync (var next-id get-next-id (+ ~path "data/users/index")))
 
-			(make-dir (+ ~path "data/users/" [username : 0] "/" username))
+            (make-dir (+ ~path "data/users/" [username : 0] "/" username))
 
-			(var session (UserOp::generate-token username))
-			(write-file f (list
-			    (str next-id)           ; member id
-			    (hash-string password)  ; password
-			    (str (floor (time 1)))  ; sign up ts
-			    (str (floor (time 1)))  ; last login ts
-			    context::ip             ; ip when signed up
-			    context::ip             ; last login ip
-			    "0"                     ; total posts
-			    (str Config::new-member-karma) ; karma
-			    ""                      ; about
-			    ""                      ; email
-			    Config::new-member-group; member group
-			    session					; session
-			    username                ; username
-			    "-10"					; autohide points
-			    " "                     ; add trail
-			))
-(println session)
-			(context::write-common 302 @plain)
-			(context::write-header "Location" "/welcome")
-			(context::write-cookie "uid" session Config::cookie-options)
-			(context::write "\r\n")
-		}
+            (var session (UserOp::generate-token username))
+            (write-file f (list
+                (str next-id)           ; member id
+                (hash-string password)  ; password
+                (str (time 1))          ; sign up ts
+                (str (time 1))          ; last login ts
+                context::ip             ; ip when signed up
+                context::ip             ; last login ip
+                "0"                     ; total posts
+                (str Config::new-member-karma) ; karma
+                ""                      ; about
+                ""                      ; email
+                Config::new-member-group; member group
+                session                 ; session
+                username                ; username
+                "-10"                   ; autohide points
+                " "                     ; add trail
+            ))
 
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(30 (::error context "Username too long (32 chars max.)\n" username))
-			(31 (::error context "Username too short (4 chars min.)\n" username))
-			(40 (::error context "Username contains non-alphanumeric chars\n" username))
-			(32 (::error context "Password too long (32 chars max.)\n" password))
-			(33 (::error context "Password too short (8 chars min.)\n" password))
-			(34 (::error context "User already existed\n" username))
-			(_ ())
-		))
-	)]
+            (println session)
+            (append-file (+ ~path "data/users/list") (+ username " " (str Config::new-member-karma) " " (str (time 1))))
+
+            (context::write-common 302 @plain)
+            (context::write-header "Location" "/welcome")
+            (context::write-cookie "uid" session Config::cookie-options)
+            (context::write "\r\n")
+        }
+
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (30 (::error context "Username too long (32 chars max.)"))
+            (31 (::error context "Username too short (4 chars min.)"))
+            (40 (::error context "Username contains non-alphanumeric chars"))
+            (32 (::error context "Password too long (32 chars max.)"))
+            (33 (::error context "Password too short (8 chars min.)"))
+            (34 (::error context "User already existed"))
+            (_ ())
+        ))
+    )]
 
     ;; POST
-	[::login := (lambda (context)
-		(try {
-			(if (not (check-csrf context)) (exit 100))
+    [::login := (lambda (context)
+        (try {
+            (if (not (check-csrf context)) (exit 100))
 
-			(var username [context::post : @username])
-			(if (or (eq username null) [(len username) < 4]) (exit 30))
-			(if (access-slow-control username) (exit 102))
+            (var username [context::post : @username])
+            (if (or (eq username null) [(len username) < 4]) (exit 30))
+            (if (access-slow-control username) (exit 102))
 
-			(var password [context::post : @password])
-			(if (eq password null) (exit 31))
-			
-			(var f UserOp::get-data-path username)
-			(if (not (file-exists f)) (exit 32))
+            (var password [context::post : @password])
+            (if (eq password null) (exit 31))
+            
+            (var f UserOp::get-data-path username)
+            (if (not (file-exists f)) (exit 32))
 
             (var user-data (read-file-lines f))
-			(if [[user-data : UserOp::PASSWORD] != (hash-string password)] (exit 33))
+            (if [[user-data : UserOp::PASSWORD] != (hash-string password)] (exit 33))
 
-			(var session (UserOp::generate-token username))
-			(set [user-data : UserOp::LAST_LOGIN_TS] (str (time 1)))
-			(set [user-data : UserOp::LAST_LOGIN_IP] context::ip)
-			(set [user-data : UserOp::SESSION] session)
+            (var session (UserOp::generate-token username))
+            (set [user-data : UserOp::LAST_LOGIN_TS] (str (time 1)))
+            (set [user-data : UserOp::LAST_LOGIN_IP] context::ip)
+            (set [user-data : UserOp::SESSION] session)
 
-			(if (starts-with [user-data : UserOp::GROUP] "lock-") {
-				(var long num (sub [user-data : UserOp::GROUP] 5))
-				(if (and [long > 0] [(time 1) > long])
-					(set [user-data : UserOp::GROUP] "user"))
-			})
+            (if (starts-with [user-data : UserOp::GROUP] "lock-") {
+                (var long num (sub [user-data : UserOp::GROUP] 5))
+                (if (and [long > 0] [(time 1) > long])
+                    (set [user-data : UserOp::GROUP] "user"))
+            })
 
-			(write-file f user-data)
+            (write-file f user-data)
 
-			(context::write-common 302 @plain)
-			(context::write-cookie "uid" session Config::cookie-options)
-			(context::write-header "Location" "/welcome")
-			(context::write "\r\n")
-		}
+            (context::write-common 302 @plain)
+            (context::write-cookie "uid" session Config::cookie-options)
+            (context::write-header "Location" "/welcome")
+            (context::write "\r\n")
+        }
 
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(102 (::error context "Frequent access"))
-			(30 (::error context "Invalid username"))
-			(31 (::error context "Invalid password"))
-			(32 (::error context "Wrong username"))
-			(33 (::error context "Wrong password"))
-			(_ ())
-		))
-	)]
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (102 (::error context "Frequent access"))
+            (30 (::error context "Invalid username"))
+            (31 (::error context "Invalid password"))
+            (32 (::error context "Wrong username"))
+            (33 (::error context "Wrong password"))
+            (_ ())
+        ))
+    )]
 
     ;; GET
     [::logout := (lambda (context)
         (try {
-        	(if (not (check-csrf context)) (exit 100))
+            (if (not (check-csrf context)) (exit 100))
 
             (if [context::username == null] (exit 30))
 
@@ -538,151 +551,151 @@
         }
 
         (cond ~e
-        	(100 (::error context "CSRF error"))
+            (100 (::error context "CSRF error"))
             (30 (::forbidden context))
             (31
-            	(context::write-common 302 @plain)
-            	(context::write-header "Location" "/")
-            	(context::write-cookie "uid" "" Config::cookie-options)
-            	(context::write "\r\n"))
+                (context::write-common 302 @plain)
+                (context::write-header "Location" "/")
+                (context::write-cookie "uid" "" Config::cookie-options)
+                (context::write "\r\n"))
             (_ ())
         ))
     )]
 
     ;; POST
-	[::change-password := (lambda (context)
-		(try {
-			(if (not (check-csrf context)) (exit 100))
-			(if (not context::is-logged-in) (exit 31))
+    [::change-password := (lambda (context)
+        (try {
+            (if (not (check-csrf context)) (exit 100))
+            (if (not context::is-logged-in) (exit 31))
 
-			(var old-password [context::post : @old])
-			(if [old-password == null] (exit 30))
+            (var old-password [context::post : @old])
+            (if [old-password == null] (exit 30))
 
-			(var new-password [context::post : @new])
-			(if [(len new-password) > 32] (exit 32))
-			(if [(len new-password) < 8] (exit 33))
+            (var new-password [context::post : @new])
+            (if [(len new-password) > 32] (exit 32))
+            (if [(len new-password) < 8] (exit 33))
 
-			(var f (UserOp::get-data-path context::username))
-			(if (not (file-exists f)) (exit 34))
+            (var f (UserOp::get-data-path context::username))
+            (if (not (file-exists f)) (exit 34))
 
-			(var user-data read-file-lines f)
-			(if [[user-data : UserOp::PASSWORD] != (hash-string old-password)] (exit 35))
+            (var user-data read-file-lines f)
+            (if [[user-data : UserOp::PASSWORD] != (hash-string old-password)] (exit 35))
 
-			(set [user-data : UserOp::PASSWORD] hash-string new-password)
-			(write-file f user-data)
+            (set [user-data : UserOp::PASSWORD] hash-string new-password)
+            (write-file f user-data)
 
-			(context::write-common 302 @plain)
-			(context::write-header "Location" "/user?password-changed")
-			(context::write "\r\n")
-		}
+            (context::write-common 302 @plain)
+            (context::write-header "Location" "/user?password-changed")
+            (context::write "\r\n")
+        }
 
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(30 (::error context "Please enter old password to continue"))
-			(31 (::error context "Please login to change password"))
-			(32 (::error context "New password too long (32 chars max.)\n" new-password))
-			(33 (::error context "New password too short (8 chars min.)\n" new-password))
-			(34 (::error context "Invalid user"))
-			(35 (::error context "Old password is not correct\n" old-password))
-			(_ ())
-		))
-	)]
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (30 (::error context "Please enter old password to continue"))
+            (31 (::error context "Please login to change password"))
+            (32 (::error context "New password too long (32 chars max.)"))
+            (33 (::error context "New password too short (8 chars min.)"))
+            (34 (::error context "Invalid user"))
+            (35 (::error context "Old password is not correct"))
+            (_ ())
+        ))
+    )]
 
-	;; POST
-	[::reset-password := (lambda (context)
-		(try {
-			(if (not (check-csrf context)) (exit 100))
+    ;; POST
+    [::reset-password := (lambda (context)
+        (try {
+            (if (not (check-csrf context)) (exit 100))
 
-			(var username [context::post : @username])
-			(if [username == null] (exit 30))
+            (var username [context::post : @username])
+            (if [username == null] (exit 30))
 
-			(var email [context::post : @email])
-			(if [email == null] (exit 31))
+            (var email [context::post : @email])
+            (if [email == null] (exit 31))
 
-			(var f (UserOp::get-data-path username))
-			(if (not (file-exists f)) (exit 32))
+            (var f (UserOp::get-data-path username))
+            (if (not (file-exists f)) (exit 32))
 
-			(var user-data read-file-lines f)
-			(var user-email [user-data : UserOp::EMAIL])
+            (var user-data read-file-lines f)
+            (var user-email [user-data : UserOp::EMAIL])
 
-			(if [user-email == ""] (exit 33))
-			(if [user-email != (encodeURI email)] (exit 34))
+            (if [user-email == ""] (exit 33))
+            (if [user-email != (encodeURI email)] (exit 34))
 
-			(create-if-not-exist (+ ~path "data/reset-requests") "")
-			(append-file (+ ~path "data/reset-requests") (+ username " " (str (time 1)) " " email))
+            (create-if-not-exist (+ ~path "data/reset-requests") "")
+            (append-file (+ ~path "data/reset-requests") (+ username " " (str (time 1)) " " email))
 
-			(context::write-common 302 @plain)
-			(context::write-header "Location" "/user?password-reseted")
-			(context::write "\r\n")
-		}
+            (context::write-common 302 @plain)
+            (context::write-header "Location" "/user?password-reseted")
+            (context::write "\r\n")
+        }
 
-		(cond ~e 
-			(100 (::error context "CSRF error"))
-			(30 (::error context "Please enter username"))
-			(31 (::error context "Please enter email"))
-			(33 (::error context "User's email address is empty"))
-			(32 (::error context "Invalid user"))
-			(34 (::error context "Invalid email\n" email))
-			(_ ())
-		))
-	)]
+        (cond ~e 
+            (100 (::error context "CSRF error"))
+            (30 (::error context "Please enter username"))
+            (31 (::error context "Please enter email"))
+            (33 (::error context "User's email address is empty"))
+            (32 (::error context "Invalid user"))
+            (34 (::error context "Invalid email"))
+            (_ ())
+        ))
+    )]
 
     ;; GET
-	[::welcome := (lambda (context)
-		(context::write-common 200 @html)
-		(context::write "\r\n")
+    [::welcome := (lambda (context)
+        (context::write-common 200 @html)
+        (context::write "\r\n")
 
-		(context::write (Template::welcome context))
-	)]
+        (context::write (Template::welcome context))
+    )]
 
-	[::oauth-github := (lambda (context)
-		(context::write-common 200 @html)
-		(context::write "\r\n")
-		(println context::post)
-	)]
+    [::oauth-github := (lambda (context)
+        (context::write-common 200 @html)
+        (context::write "\r\n")
+        (println context::post)
+    )]
 
-	[::not-found := (lambda (context)
-		(context::write-common 404 @html)
-		(context::write "\r\n")
-		(context::write (Template::error context "404 Page Not Found"))
-	)]
+    [::not-found := (lambda (context)
+        (context::write-common 404 @html)
+        (context::write "\r\n")
+        (context::write (Template::error context "404 Page Not Found"))
+    )]
 
-	[::forbidden := (lambda (context)
-		(context::write-common 403 @html)
-		(context::write "\r\n")
-		(context::write "403 Forbidden")
-	)]
+    [::forbidden := (lambda (context)
+        (context::write-common 403 @html)
+        (context::write "\r\n")
+        (context::write "403 Forbidden")
+    )]
 
-	[::serve-file := (lambda (context)
-		(var uri-ends-in ends-with context::route)
-		(var path + ~path (sub context::route 1))
-		(if (file-exists path)
-			{
-				(var send lambda () 
-					(context::write "\r\n")
-					(context::write-bytes (read-file-binary path))
-				)
+    [::serve-file := (lambda (context)
+        (var uri-ends-in ends-with context::route)
+        (var path + ~path (sub context::route 1))
+        (if (file-exists path)
+            {
+                (var send lambda () 
+                    (context::write "\r\n")
+                    (context::write-bytes (read-file-binary path))
+                )
 
-				(cond true
-					((uri-ends-in ".js")  (context::write-common 200 @js) (send ()))
-					((uri-ends-in ".css") (context::write-common 200 @css) (send ()))
-					((uri-ends-in ".html")
-						(context::write-common 200 @html)
-						(context::write "\r\n")
-						(context::write (+ (Template::make-header context path) 
-							(read-file path)
-							(join-string (~include "templates/footer.html") "")))
-						)
-					(_  (context::write-common 200 @binary) (send ()))
-				)
-			}
-			(::not-found context))
-	)]
+                (cond true
+                    ((uri-ends-in ".js")  (context::write-common 200 @js) (send ()))
+                    ((uri-ends-in ".css") (context::write-common 200 @css) (send ()))
+                    ((uri-ends-in ".html")
+                        (context::write-common 200 @html)
+                        (context::write "\r\n")
+                        (context::write (+ (Template::make-header context path) 
+                            (read-file path)
+                            (join-string (~include "templates/footer.html") "")))
+                        )
+                    (_  (context::write-common 200 @binary) (send ()))
+                )
+            }
+            (::not-found context))
+    )]
 
-	;; GET
-	[::error := (lambda (context text...)
-		(context::write-common 400 @html)
-		(context::write "\r\n")
-		(context::write (Template::error context (+ (explode text))))
-	)]
+    ;; GET
+    [::error := (lambda (context text...)
+        (context::write-common 400 @html)
+        (context::write "\r\n")
+        (context::write (Template::error context (+ (explode text))))
+    )]
 )

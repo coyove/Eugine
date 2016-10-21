@@ -70,6 +70,7 @@
             (@js    (::write-header "Content-Type" "application/x-javascript; charset=utf-8"))
             (@plain (::write-header "Content-Type" "text/plain; charset=utf-8"))
             (@html  (::write-header "Content-Type" "text/html; charset=utf-8"))
+            (@png   (::write-header "Content-Type" "image/png"))
             (_      (::write-header "Content-Type" "application/octet-stream"))
         )
     )]
@@ -181,6 +182,21 @@
 		[ret::parent 		:= parent]
 		[ret::aye-users 	:= (list)]
 		[ret::no-users 		:= (list)]
+		(ret)
+    )]
+)
+
+(struct UserListItem "data/users/list"
+	[::username := ""]
+	[::karma := 0]
+	[::created-ts := 0]
+
+	;; refer to handler.eugine/::item
+    [::new := (lambda (username karma created-ts)
+    	[ret := clone ~this]
+    	[ret::username := username]
+    	[ret::karma := num karma]
+    	[ret::created-ts := num created-ts]
 		(ret)
     )]
 )
@@ -384,7 +400,7 @@
 			} 
 			(if code-flag
 				(+. ret t "\n")
-				(+. ret (replacer t) "<br>")))
+				(+. ret "<div>" (replacer t) "</div>")))
 	])
 
 	(ret)

@@ -5,7 +5,7 @@ function hlTab(id) {
 }
 
 function hide(id) {
-	var item = document.getElementById("item-" + id);
+	var item = getid("item-" + id);
 	var title = item.querySelector(".title");
 	var info = item.querySelector(".info");
 	var hiddens = JSON.parse(localStorage.getItem("hidden_posts") || "{}");
@@ -36,7 +36,15 @@ function del(id) {
 }
 
 function display(dom, d) {
-	(typeof dom === 'string' ? document.getElementById(dom) : dom).style.display = d;
+	getid(dom).style.display = d;
+}
+
+function getid(id) {
+	if (typeof id === 'string') {
+		return document.getElementById(id);
+	} else {
+		return id;
+	}
 }
 
 window.onload = function() {
@@ -49,16 +57,19 @@ window.onload = function() {
 	} else if (/\/submit$/.test(location.href)) {
 		hlTab("submit");
 	} else if (/\/user\/\S+$/.test(location.href)) {
-		document.getElementById('memberinfo').className = "";
-		document.getElementById('memberinfo').innerHTML = 
-			location.href.match(/\/user\/(\S+)$/)[1] + "'s profile";
+		getid('memberinfo').className = "";
+		getid('memberinfo').innerHTML = location.href.match(/\/user\/(\S+)$/)[1] + "'s profile";
+		hlTab("memberinfo");
+	} else if (/\/leaders$/.test(location.href)) {
+		getid('memberinfo').className = "";
+		getid('memberinfo').innerHTML = "leaderboard";
 		hlTab("memberinfo");
 	}
 
 	if (/\?password-changed$/.test(location.href)) {
-		document.getElementById("password-changed").innerHTML = "Your password is changed";
+		getid("password-changed").innerHTML = "Your password is changed";
 	} else if (/\?password-reseted$/.test(location.href)) {
-		document.getElementById("password-reseted").innerHTML = "Your request has been scheduled, please wait";
+		getid("password-reseted").innerHTML = "Your request has been scheduled, please wait";
 	}
 
 	var hiddens = JSON.parse(localStorage.getItem("hidden_posts") || "{}");

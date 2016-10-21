@@ -61,12 +61,14 @@
 	(set [data : 8] (str (/ no-count 2)))
 	(write-file (+ path "/data") data)
 
-	;; update item's author data
+	;; update post's author data
 	(var user-dp UserOp::get-data-path [data : 0])
 	(var user-data read-file-lines user-dp)
 	(var karma num [user-data : UserOp::KARMA])
 	(set [user-data : UserOp::KARMA] (str [[karma - old-points] + points]))
 	(write-file user-dp user-data)
+
+	(update-list (+ ~path "data/users/list") [data : 0] (1 [() => [user-data : UserOp::KARMA]]))
 
 	(var user-list UserOp::get-user-path [data : 0])
 
@@ -83,6 +85,8 @@
 	(update-list (+ path "/list") id (2 [() => (str points)]))
 	(update-list user-list id (2 [() => (str points)]))
 )
+
+(var incr-counter-for-leaders-ranking 0)
 
 (def ranking ()
     (var newest (num (read-file (+ ~path "data/posts/main-index"))))
@@ -123,4 +127,45 @@
     ])
 
     (write-file (+ ~path "data/posts/ranking") output)
+
+    (++ incr-counter-for-leaders-ranking)
+    (if [[incr-counter-for-leaders-ranking % 6] == 1] (leader-ranking ())) ; every 1 minute
+)
+
+(def leader-ranking ()
+	;; users ranking
+    (var users read-file-lines (+ ~path "data/users/list"))
+    (if [users == null] (set users (list)))
+
+    (var leaders list (UserListItem::new "EOF" 0.0 (time 1)))
+
+    (try {
+        (loop users [(user i) =>
+            (var parts (split user " "))
+            (if [(len parts) != 3] (exit 30))
+
+            (var u UserListItem::new (explode parts))
+            
+            (loop leaders [(leader i) =>
+            	(if [u::karma >= leader::karma]
+            		{
+            			(insert leaders i u)
+            			false
+        			})
+        	])
+
+        	(if [(len leaders) > 20] (set leaders sub leaders 0 20))
+        ])
+    } () (cond ~e
+        (30
+            (set users (list))
+            (println "Corrupted users list"))
+    ))
+
+    (var output (list))
+    (loop leaders [(leader) =>
+        (+. output (+ leader::username " " leader::karma " " leader::created-ts))
+    ])
+
+    (write-file (+ ~path "data/users/ranking") output)
 )

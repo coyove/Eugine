@@ -15,7 +15,7 @@
             (var no + (- length i) start)
 
             (if [post::state == "deleted"] 
-                (set title "<span red>[deleted]</span>"))
+                (set title "<span deleted>deleted</span>"))
 
             (+. table
 "<div class='item item-" (str (set zebra (not zebra))) "' id='item-" id "'>
@@ -116,6 +116,24 @@
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context page-title) (sprintf list-page (::build-posts posts start false)) footer)
+    )]
+
+    [::leaders := (lambda (context leaders)
+        (var footer (join-string (~include "footer.html") ""))
+        (var table clone "<table class='lister'>")
+        (var zebra false)
+
+        (loop leaders [(leader i) =>
+            (+. table
+"<tr class='item-" (str (set zebra (not zebra))) "'>
+    <td><b>" (str (+ i 1)) "</b>.</td>
+    <td><a href='/user/" leader::username "'>" leader::username "</a></td>
+    <td>" leader::karma "</td>
+    <td>" (pretty-date leader::created-ts) "</td>
+</tr>")
+        ])
+        (+. table "</table>")
+        (+ (::make-header context "Leaders") table footer)
     )]
 
     [::error := (lambda (context text)

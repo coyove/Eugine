@@ -37,6 +37,8 @@
 			(HTTP-Handler::post context (sub context::route 6)))
 		((test-path "/item/")
 			(HTTP-Handler::item context (sub context::route 6)))
+		((eq context::route "/leaders") 
+			(HTTP-Handler::leaders context))
 		((test-path "/aye/")
 			(HTTP-Handler::aye context (sub context::route 5)))
 		((test-path "/no/")
@@ -164,6 +166,7 @@
 (make-dir (+ ~path "data/users"))
 (make-dir (+ ~path "data/log"))
 (create-if-not-exist (+ ~path "data/users/index") "0")
+(create-if-not-exist (+ ~path "data/users/list") "")
 (create-if-not-exist (+ ~path "data/posts/index") "0")
 (create-if-not-exist (+ ~path "data/posts/main-index") "0")
 
