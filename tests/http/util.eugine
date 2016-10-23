@@ -135,8 +135,10 @@
 	[::created-ts := 0]
 	[::commented-ts := 0]
     [::title := ""]
+    [::parent := 0]
+    [::root := 0]
 
-    [::new := (lambda (id comments points state author commenter created-ts commented-ts title)
+    [::new := (lambda (id comments points state author commenter created-ts commented-ts title parent root)
     	[ret := clone ~this]
         [ret::id           := (num id)]
         [ret::comments     := (num comments)]
@@ -147,6 +149,8 @@
         [ret::created-ts   := (num created-ts)]
         [ret::commented-ts := (num commented-ts)]
         [ret::title        := (decodeURI title)]
+        [ret::parent 	   := parent]
+        [ret::root         := root]
         (ret)
     )]
 )
@@ -164,9 +168,10 @@
 	[::upvotes := 0]
 	[::downvotes := 0]
 	[::parent := 0]
+	[::root := 0]
 
 	;; refer to handler.eugine/::item
-    [::new := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent content)
+    [::new := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent root content)
     	[ret := clone ~this]
         [ret::id           := id]
         [ret::state        := state]
@@ -180,6 +185,7 @@
 		[ret::upvotes 		:= upvotes]
 		[ret::downvotes 	:= downvotes]
 		[ret::parent 		:= parent]
+		[ret::root	 		:= root]
 		[ret::aye-users 	:= (list)]
 		[ret::no-users 		:= (list)]
 		(ret)
@@ -218,6 +224,11 @@
 (def join-string (texts delim)
 	(var ret "")
 	(loop texts [(text) => (+= ret (+ text delim))])
+
+	(if [(set rl [(len ret) - 1]) >= 0] 
+		(if [[ret : rl] == delim]
+			(set ret sub ret 0 rl)))
+
 	(ret)
 )
 
@@ -235,6 +246,10 @@
 		[jFiles . @createDirectories (list "java.nio.file.Path" "java.nio.file.attribute.FileAttribute...") p ()]
 	))
 )
+
+(def delete-file (path)
+	(try
+	[jFiles . @delete (list "java.nio.file.Path") [jPaths call @get (list jString. "java.lang.String...") path ()]]))
 
 (def extract-domain (url)
 	(var m (match url %"(https?:\/\/[a-z0-9\.\-\:]+)"))
@@ -318,11 +333,12 @@
 
 (def list-contains (l elem)
 	(var ret -1)
+	(if [l != null]
 	(loop l [(item i) =>
 		(if [item == elem] 
 			{ (set ret i) false }
 			true)
-	])
+	]))
 	(ret)
 )
 
@@ -358,18 +374,20 @@
         }))
     )
 
-    (var true-start [(len posts) - end])
-    
-    (if [true-start < 0] 
-    	(if [(set true-ppp + ppp true-start) >= 0] 
-    		(set posts sub posts 0 true-ppp)
-    		(set posts (list)))
-    	(set posts sub posts true-start ppp))
+    (if [start >= 0] {
+	    (var true-start [(len posts) - end])
+	    
+	    (if [true-start < 0] 
+	    	(if [(set true-ppp + ppp true-start) >= 0] 
+	    		(set posts sub posts 0 true-ppp)
+	    		(set posts (list)))
+	    	(set posts sub posts true-start ppp))
+    })
 
     (try {
         (loop posts [(post i) =>
             (var parts (split post " "))
-            (if [(len parts) != 9] (exit 30))
+            (if [(len parts) != 11] (exit 30))
 
             (set [posts : i] Post::new (explode parts))
         ])
@@ -447,11 +465,27 @@
 	(set [post : 4] state)
 
 	(var user-dp UserOp::get-user-path [post : 0])
+	(var update-action (3 [() => state]))
+
 	(if [[post : 9] != "0"] {
-		(update-list (+ (get-post-path (num [post : 9])) "/list") id (3 [() => state]))
-		(update-list (+ user-dp "/comments-list") id (3 [() => state]))
+		(update-list (+ (get-post-path (num [post : 10])) "/list") id update-action)
+		(update-list (+ user-dp "/comments-list") id update-action)
 	} {
-		(update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id (3 [() => state]))
-		(update-list (+ user-dp "/submissions-list") id (3 [() => state]))
+		(update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id update-action)
+		(update-list (+ user-dp "/submissions-list") id update-action)
 	})
+)
+
+(def find-in-list (lines id)
+	(var sid + (str id) " ")
+	(var ret -1)
+
+    (loop lines [(item i) =>
+        (if [item starts-with sid] {
+            (set ret i)
+            false
+        })
+    ])
+
+    (ret)
 )

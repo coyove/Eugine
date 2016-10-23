@@ -4,8 +4,8 @@
 		(join-string (~include "header.html") "")
 	)]
 
-    [::build-posts := (lambda (posts start is-comment)
-        (var table clone "<div class='lister'>")
+    [::build-submissions-list := (lambda (posts start)
+        (var table clone "<div class='lister fat'>")
         (var zebra false)
         (var length len posts)
 
@@ -19,23 +19,102 @@
 
             (+. table
 "<div class='item item-" (str (set zebra (not zebra))) "' id='item-" id "'>
-    <div class='title'>" 
-        (if is-comment 
-            title
-            (+ "<b>" (str no) "</b>. <a href='/item/" id "'>" title "</a>"))
-        (if [post::state == "locked"]
-            "<span locked>locked</span>")
+<div class='inner-item'>
+    <div class='title'>
+        <b>" (str no) "</b>. <a href='/item/" id "'>" title "</a>"
+        (if [post::state == "locked"] "<span locked>locked</span>")
     "</div>
-    <div class='info'>#" post::id " | " post::comments " comments" 
+    <div class='info'>#" post::id
         (if [post::comments > 0] 
-            (+ " (" (pretty-date post::commented-ts) " ago)"))
+            (+ " | " post::comments " comments (" (pretty-date post::commented-ts) " ago)"))
             " | <span points>" post::points "</span> points | "
             "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago | "
-        (if is-comment 
-            (+ "<a href='/item/" id "'>view</a> | "))
             "<a class='hider' href='javascript:hide(" id ")'>hide</a>
     </div>
+</div>
 </div>")
+        ])
+        (+. table "</div>")
+        (table)
+    )]
+
+    [::build-linear-comments-list := (lambda (posts start)
+        (var table clone "<div class='lister fat'>")
+        (var zebra false)
+
+        (roop posts [(post i) =>
+            (var title post::title)
+            (var id post::id)
+
+            (if [post::state == "deleted"] 
+                (set title "<span deleted>deleted</span>"))
+
+            (+. table
+"<div class='item item-" (str (set zebra (not zebra))) "' id='item-" id "'>
+<div class='inner-item'>
+    <div class='title'>" 
+        title 
+        (if [post::state == "locked"] "<span locked>locked</span>")
+    "</div>
+    <div class='info'>#" post::id
+        " | <span points>" post::points "</span> points | "
+        "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago | "
+        "<a href='/item/" post::root "#item-" post::parent "'>parent</a> | "
+        "<a href='/item/" post::root "#item-" post::id "'>root</a> | "
+        "<a class='hider' href='javascript:hide(" id ")'>hide</a>
+    </div>
+</div>
+</div>")
+        ])
+        (+. table "</div>")
+        (table)
+    )]
+
+    [::build-comments-list := (lambda (posts)
+        (var table clone "<div class='lister'>")
+        (var zebra false)
+        (var length len posts)
+        (var level 0)
+        (var stack (list))
+
+        (loop posts [(post i) =>
+            (var title post::title)
+            (var id post::id)
+
+            (if [post::state == "deleted"] 
+                (set title ""))
+
+            (if [post::state == "pop"]
+                {
+                    (+. table "</div>")
+                    (-- level)
+                } {
+                    (+. table
+    "<div class='item item-" (str (set zebra (not zebra))) "' 
+        id='item-" id "'
+        level='" (str level) "'>
+        <div class='inner-item' style='margin-left: " (str (* level 30)) "px'>
+            <table><tr><td class='vote-area'>
+                <div title='say aye' class='unvote' upvote onclick='sayaye(" id ")'>&#9650;</div>
+                <div title='say no' class='unvote' downvote onclick='sayno(" id ")'>&#9660;</div>
+            </td><td>
+            <div class='info2'>#" post::id " | <span points>" post::points "</span> points "
+                "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago
+                <a class='folder' href='javascript:fold(" id ")'>-</a>
+            </div>
+            <div class='title'>" 
+                title
+            "</div>
+            <div class='info'>"
+            (cond post::state
+            	("locked" "<span comment locked>locked</span>")
+            	("deleted" "<span deleted>deleted</span>")
+            	(_ (+ "<a href='/item/" id "'>reply</a>"))) " | 
+                <a class='hider' href='javascript:hide(" id ")'>hide</a>
+            </div></td></tr></table>
+        </div>")
+                    (++ level)
+                })
         ])
         (+. table "</div>")
         (table)
@@ -55,19 +134,31 @@
         (+ ret "</div>")
     )]
 
-	[::index := (lambda (context posts start)
-        (var index (join-string (~include "index.html") ""))
-        (var footer (join-string (~include "footer.html") ""))
-
-        (+ (::make-header context "Index") (sprintf index (::build-posts posts start false)) footer)
-    )]
-
-    [::item := (lambda (context item comments start)
+    [::item := (lambda (context item comments)
         (var item-id (str item::id))
         (var item-page (join-string (~include "item.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context item::title) (sprintf item-page (::build-posts comments start true)) footer)
+        (var aye-items (list))
+        (var no-items (list))
+        (if context::is-logged-in (loop item::aye-users [(user) =>
+            (if (starts-with user context::username) (+. aye-items (+ "\"" user "\"")))
+        ]))
+        (if context::is-logged-in (loop item::no-users [(user) =>
+            (if (starts-with user context::username) (+. no-items (+ "\"" user "\"")))
+        ]))
+
+        (var path + (get-post-path item::id) "/comments-cache." cache-token)
+        (if [(file-exists path) and [(len comments) > 0]]
+            (var built read-file path)
+            {
+                (var built ::build-comments-list comments)
+                (write-file path built)
+            })
+
+        (+ (::make-header context item::title) item-page built (sprintf 
+        	"<script type='text/javascript'>window.ayeItems = [%s]; window.noItems = [%s];</script>"
+            (join-string aye-items ",") (join-string no-items ",")) footer)
     )]
 
 	[::submit := (lambda (context)
@@ -111,16 +202,19 @@
         (+ (::make-header context "User") user-info footer)
     )]
 
-    [::lister := (lambda (context posts page-title start)
+    [::lister := (lambda (context posts page-title start ctype)
         (var list-page (join-string (~include "list.html") ""))
         (var footer (join-string (~include "footer.html") ""))
+        (if [ctype == "sub"]
+            (var content ::build-submissions-list posts start)
+            (var content ::build-linear-comments-list posts start))
 
-        (+ (::make-header context page-title) (sprintf list-page (::build-posts posts start false)) footer)
+        (+ (::make-header context page-title) (sprintf list-page content "" "") footer)
     )]
 
     [::leaders := (lambda (context leaders)
         (var footer (join-string (~include "footer.html") ""))
-        (var table clone "<table class='lister'>")
+        (var table clone "<table class='lister leaders'>")
         (var zebra false)
 
         (loop leaders [(leader i) =>

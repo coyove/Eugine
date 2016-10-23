@@ -67,6 +67,19 @@ a:hover{
 	text-decoration:underline;
 }
 
+.folder {
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bold;
+}
+
+.folder:before {
+	content: '[';
+}
+
+.folder:after {
+	content: ']';
+}
+
 table.info, div.welcome, div.error {
 	margin: 6px 0;
 	line-height: 1.2;
@@ -89,24 +102,26 @@ div.error:before {
 	margin-right: 8px;
 }
 
-.lister {
+.lister, .lister table {
 	width: 100%;
 	border-collapse: collapse;
 	border-spacing: 0;
 }
 
-.lister td {
+.lister.leaders td {
 	padding: 4px;
 }
 
 .lister div.item {
 	width: 100%;
+}
+
+div.item .inner-item {
 	padding: 6px;
 }
 
 h2 {
-	padding: 0 4px;
-	margin-top: 4px;
+	margin-bottom: 6px;
 }
 
 span[red] {
@@ -122,6 +137,10 @@ span[locked], span[deleted] {
     vertical-align: middle;
 }
 
+span[comment] {
+	margin: 0;
+}
+
 span[deleted] {
     background: #ff5050;
     margin: 0;
@@ -131,18 +150,39 @@ div.lister .title a {
 	text-decoration: none;
 }
 
+div.lister.fat .title {
+	margin-bottom: 4px;
+}
+
 .title div {
 	margin-bottom: 6px;
 }
 
-/*.title div:first-child {
-	margin-top: 0;
-}*/
-
-div.lister .info {
+div.lister .info, div.lister .info2 {
 	color: #aaa;
 	font-size: 12px;
 	margin-top: 2px;
+}
+
+.info2 {
+	margin-bottom: 6px;
+}
+
+.vote-area {
+	padding-right: 4px;
+}
+
+.unvote {
+	color: #bbb;
+}
+
+.vote {
+	color: black;
+}
+
+div[upvote], div[downvote] {
+	cursor: pointer;
+	font-size: 12px;
 }
 
 .item-true {

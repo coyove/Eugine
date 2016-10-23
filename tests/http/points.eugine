@@ -40,7 +40,7 @@
 	(write-file list-file lines)
 )
 
-(def recalc-points-of-item (id aye no)
+(def recalc-points-of-item (id root-id aye no)
 	(var path get-post-path id)
 
 	; (var aye read-file-lines (+ path "/aye"))
@@ -53,7 +53,7 @@
 
 	(var points (- aye-points no-points))
 
-	;; update the item data
+	;; update the post data
 	(var data read-file-lines (+ path "/data"))
 	(var old-points num [data : 6])
 	(set [data : 6] (str points))
@@ -68,23 +68,39 @@
 	(set [user-data : UserOp::KARMA] (str [[karma - old-points] + points]))
 	(write-file user-dp user-data)
 
+    ;; update global users list
 	(update-list (+ ~path "data/users/list") [data : 0] (1 [() => [user-data : UserOp::KARMA]]))
 
 	(var user-list UserOp::get-user-path [data : 0])
+    (var update-action list 2 [() => (str points)])
 
 	(if [[data : 9] != "0"] {
 		;; update item's parent's list
-		(var path get-post-path (num [data : 9]))
-		(+= user-list "/comments-list")
+        (update-list (+ user-list "/comments-list") id update-action)
+        (update-list (+ (get-post-path root-id) "/list") id update-action)
 	} {
 		;; update main list
-		(var path (+ ~path "data/posts/" (str (/ id 1000))))
-		(+= user-list "/submits-list")
+		(update-list (+ user-list "/submissions-list") id update-action)
+        (update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id update-action)
 	})
-
-	(update-list (+ path "/list") id (2 [() => (str points)]))
-	(update-list user-list id (2 [() => (str points)]))
 )
+
+(def verify-and-update-points (opt aye-users no-users vote-marker karma) 
+    (var vote-list if [opt == "aye"] aye-users no-users)
+    (var opposite-list if [opt == "aye"] no-users aye-users)
+
+    (if [(set idx (list-contains vote-list vote-marker)) >= 0]
+        { (del vote-list idx) (del vote-list idx) (del vote-list idx) } ;; cancel the vote
+        {
+            (+. vote-list vote-marker karma (str (time 1)))
+
+            (if [(set idx list-contains opposite-list vote-marker) >= 0] {
+                (del opposite-list idx) (del opposite-list idx) (del opposite-list idx)
+            })
+        })
+)
+
+;; ranking routines
 
 (var incr-counter-for-leaders-ranking 0)
 
@@ -103,7 +119,7 @@
     (try {
         (loop posts [(post i) =>
             (var parts (split post " "))
-            (if [(len parts) != 9] (exit 30))
+            (if [(len parts) != 11] (exit 30))
 
             (var p Post::new (explode parts))
             (var T / [(time 1) - (num p::created-ts)] 3600000)
@@ -123,7 +139,8 @@
     (loop posts [(post) =>
         (+. output (+ (str post::id) " " (str post::comments) " " (str post::points) " "
             post::state " " post::author " " post::commenter " "
-            (str post::created-ts) " " (str post::commented-ts) " " (encodeURI post::title)))
+            (str post::created-ts) " " (str post::commented-ts) " " (encodeURI post::title) " "
+            (str post::parent) " " (str post::root)))
     ])
 
     (write-file (+ ~path "data/posts/ranking") output)

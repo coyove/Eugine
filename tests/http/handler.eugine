@@ -17,13 +17,14 @@
         (context::write-common 200 @html)
         (context::write "\r\n")
         (context::write (Template::lister context (load-list file count) 
-            (+ (if [file == "main"] "Timeline " "Ranking ") (str count)) count))
+            (+ (if [file == "main"] "Timeline " "Ranking ") (str count)) count "sub"))
     )]
 
     ;; GET
     [::user-submits-or-comments := (lambda (context username ltype)
         (var user-home UserOp::get-user-path username)
-        (var path + (UserOp::get-user-path username) "/" ltype "-list")
+        (var path + (UserOp::get-user-path username) "/" 
+            (if [ltype == "sub"] "submissions-list" "comments-list"))
 
         (if (not (file-exists user-home))
             (::not-found context)
@@ -33,7 +34,7 @@
                 (context::write-common 200 @html)
                 (context::write "\r\n")
                 (context::write (Template::lister context (load-list path count) 
-                    (+ username "'s " ltype " " (str count)) count))
+                    (+ username (if [ltype == "sub"] "'s submissions " "'s comments ") (str count)) count ltype))
             })
     )]
 
@@ -53,15 +54,14 @@
             (var item::aye-users read-file-lines (+ path "/aye"))
             (var item::no-users read-file-lines (+ path "/no"))
 
-            (var count ::get-paging context)
-            (var comments load-list (+ path "/list") count)
+            (var comments load-list (+ path "/list") -1)
 
         } () (cond ~e
             (30 (::not-found context))
             (_ 
                 (context::write-common 200 @html)
                 (context::write "\r\n")
-                (context::write (Template::item context item comments count)))
+                (context::write (Template::item context item comments)))
         ))
     )]
 
@@ -108,7 +108,7 @@
             (context::write-common 302 @plain)
             (context::write-header "Location" return-to)
             (context::write "\r\n")
-        } ()
+        } (println ~ex)
         (cond ~e 
             (99 (::error context "Please login first"))
             (100 (::error context "CSRF error"))
@@ -162,55 +162,47 @@
             (var data read-file-lines (+ path "/data"))
             (if [[[data : 4] == "deleted"] or [[data : 4] == "locked"]] (exit 32))
 
-            (set aye-path + path "/aye")
-            (set no-path + path "/no")
+            (var root-id num [data : 10])
+            (var root-path get-post-path root-id) ;; get the root
+            (if [root-path == null] (exit 31))
+
+            (var root-data read-file-lines (+ root-path "/data"))
+            (if [[[root-data : 4] == "deleted"] or [[root-data : 4] == "locked"]] (exit 32))
+
+            (var aye-path + path "/aye")
+            (var no-path + path "/no")
             (create-if-not-exist aye-path "")
             (create-if-not-exist no-path "")
 
             (var aye-users read-file-lines aye-path)
             (var no-users read-file-lines no-path)
 
-            (if [opt == "aye"] {
-                (if [(set idx (list-contains aye-users context::username)) >= 0]
-                    { 
-                        (del aye-users idx) 
-                        (del aye-users idx)
-                        (del aye-users idx)
-                    }
-                    {
-                        (+. aye-users context::username [context::user-data : UserOp::KARMA] (str (time 1)))
-                        (if [(set idx list-contains no-users context::username) >= 0] {
-                            (del no-users idx)
-                            (del no-users idx)
-                            (del no-users idx)
-                        })
-                    })
-            } {
-                (if [(set idx (list-contains no-users context::username)) >= 0]
-                    { 
-                        (del no-users idx)
-                        (del no-users idx)
-                        (del no-users idx)
-                    }
-                    {
-                        (+. no-users context::username [context::user-data : UserOp::KARMA])
-                        (if [(set idx list-contains aye-users context::username) >= 0] {
-                            (del aye-users idx) 
-                            (del aye-users idx)
-                            (del aye-users idx)
-                        })
-                    })
-            })
+            (var vote-marker + context::username "#" (str id))
+            (verify-and-update-points opt aye-users no-users vote-marker [context::user-data : UserOp::KARMA])
 
             (write-file aye-path aye-users)
             (write-file no-path no-users)
 
-            (recalc-points-of-item id aye-users no-users)
+            (recalc-points-of-item id root-id aye-users no-users)
+
+            (if [id != root-id] {
+                (var aye-path + root-path "/aye") (create-if-not-exist aye-path "")
+                (var no-path + root-path "/no") (create-if-not-exist no-path "")
+
+                (var aye-users read-file-lines aye-path)
+                (var no-users read-file-lines no-path)
+                (verify-and-update-points opt aye-users no-users vote-marker [context::user-data : UserOp::KARMA])
+
+                (write-file aye-path aye-users)
+                (write-file no-path no-users)
+            })
+
+            (delete-file (+ root-path "/comments-cache." cache-token))
 
             (context::write-common 302 @plain)
-            (context::write-header "Location" (+ "/item/" (str id)))
+            (context::write-header "Location" (+ "/item/" (str root-id) "#item-" (str id)))
             (context::write "\r\n")
-        } ()
+        } (println ~ex)
         (cond ~e 
             (100 (::error context "CSRF error"))
             (101 (::error context "You are locked"))
@@ -296,6 +288,18 @@
             (alter-post-state post id "deleted")
             (write-file (+ path "/data") post)
 
+            (var root-path get-post-path (num [post : 10]))
+            (delete-file (+ root-path "/comments-cache." cache-token))
+
+            (var user-path UserOp::get-data-path [post : 0])
+            (var user-data read-file-lines user-path)
+
+            (var karma num [user-data : UserOp::KARMA])
+            (-= karma (+ (num [post : 6]) 1)) ;; 1 karma fine
+            (set [user-data : UserOp::KARMA] str karma)
+
+            (write-file user-path user-data)
+
             (context::write-common 302 @plain)
             (context::write-header "Location" (+ "/item/" (str id)))
             (context::write "\r\n")
@@ -371,6 +375,9 @@
                 (alter-post-state data id "open"))
 
             (write-file (+ path "/data") data)
+
+            (var root-path get-post-path (num [data : 10]))
+            (delete-file (+ root-path "/comments-cache." cache-token))
 
             (context::write-common 302 @plain)
             (context::write-header "Location" (+ "/item/" (str id)))
@@ -464,7 +471,8 @@
             ))
 
             (println session)
-            (append-file (+ ~path "data/users/list") (+ username " " (str Config::new-member-karma) " " (str (time 1))))
+            (append-file (+ ~path "data/users/list") 
+                (+ username " " (str Config::new-member-karma) " " (str (time 1)) "\n"))
 
             (context::write-common 302 @plain)
             (context::write-header "Location" "/welcome")

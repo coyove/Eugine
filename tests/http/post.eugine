@@ -2,25 +2,28 @@
 	(var parent-dir get-post-path id)
 	(if (neq parent-dir null) {
 		(var parent-data (read-file-lines (+ parent-dir "/data")))
-		(if [[parent-data : 4] == "locked"] (exit 40))
+		(if [[[parent-data : 4] == "locked"] or [[parent-data : 4] == "deleted"]] (exit 40))
+
+		(var root num [parent-data : 10])
 	} (exit 41))
-})
+} (var root next-id))
 
 (var post-dir (+ ~path "data/posts/" (str [next-id / 1000]) "/" (str next-id)))
 (make-dir post-dir)
 
-(var ts (time 1))
+(var ts time 1)
 (var data (list
-	author		; author
-	(encodeURI title)		; title, escaped
-	(str ts)	; created ts
-	(str ts)	; modified ts
-	"open"		; state
-	"0"			; comments
-	"0"			; points
-	"0"			; aye count
-	"0"			; no count
-	(str id)	; parent
+	author		; 0 author
+	(encodeURI title); 1 title, escaped
+	(str ts)	; 2 created ts
+	(str ts)	; 3 modified ts
+	"open"		; 4 state
+	"0"			; 5 comments
+	"0"			; 6 points
+	"0"			; 7 aye count
+	"0"			; 8 no count
+	(str id)	; 9 parent
+	(str root)  ; 10 root
 ))
 
 (write-file (+ post-dir "/data") data)
@@ -37,45 +40,48 @@
 })
 
 (if [id != 0] {
+	(var liner + (str next-id) " 0 0 open " author " push " (str ts) " " (str ts) " " 
+		(encodeURI text) " " (str id) " " (str root))
 
-	(if (file-exists parent-dir) {
-		(create-if-not-exist (+ parent-dir "/list") "")
-		(var liner + (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI text) "\n")
-		(append-file (+ parent-dir "/list") liner)
+	(var root-path get-post-path root)
+	(create-if-not-exist (+ root-path "/list") "")
+	(var root-list read-file-lines (+ root-path "/list"))
+	(var root-data read-file-lines (+ root-path "/data"))
 
-		(var user-list UserOp::get-user-path context::username)
-        (create-if-not-exist (+ user-list "/comments-list") "")
-        (append-file (+ user-list "/comments-list") liner)
+	(delete-file (+ root-path "/comments-cache." cache-token))
 
-		(set parent-comments num [parent-data : 5])
-		(set [parent-data : 5] (str (++ parent-comments)))
-		(write-file (+ parent-dir "/data") parent-data)
+	;; add this post to its root's list, the root list is used for displaying
+	(var id-pos-in-root find-in-list root-list id)
+	(insert root-list (+ id-pos-in-root 1) liner)
+	(insert root-list (+ id-pos-in-root 2) "0 0 0 pop pop pop 0 0 pop 0 0")
+	(write-file (+ root-path "/list") root-list)
 
-        (var parent-user-list UserOp::get-user-path [parent-data : 0])
+	;; incr the root's comments counter, write back
+	(var root-comments num [root-data : 5])
+	(set [root-data : 5] (str (++ root-comments)))
+	(write-file (+ root-path "/data") root-data)
 
-		(if [[parent-data : 9] != "0"] {
-			(var parent-parent-id num [parent-data : 9])
-			(var pp-dir get-post-path parent-parent-id)
-		    (+= parent-user-list "/comments-list")
-		} {
-			(var pp-dir (+ ~path "data/posts/" (str (/ id 1000))))
-			(+= parent-user-list "/submissions-list")
-		})
+	;; add this post to its author's comments list
+	(var user-list UserOp::get-user-path context::username)
+    (create-if-not-exist (+ user-list "/comments-list") "")
+    (append-file (+ user-list "/comments-list") (+ liner "\n"))
 
-		(update-list (+ pp-dir "/list") id
-		    (1 [(count) => (str (+ (num count) 1))])
-		    (7 [() => (str ts)]))
+    ;; update the comments counter in the root author's submissions list
+    (var root-user-list + (UserOp::get-user-path [root-data : 0]) "/submissions-list")
+    (update-list root-user-list root
+        (1 [(count) => (str (+ (num count) 1))])
+        (7 [() => (str ts)]))
 
-		(update-list parent-user-list id
-            (1 [(count) => (str (+ (num count) 1))])
-            (7 [() => (str ts)]))
-	})
+    ;; update the comments counter in the global list
+	(update-list (+ ~path "data/posts/" (str (/ root 1000)) "/list") root
+	    (1 [(count) => (str (+ (num count) 1))])
+	    (7 [() => (str ts)]))
 
-	(var return-to (+ "/item/" (str id)))
+	(var return-to (+ "/item/" (str root) "#item-" (str id)))
 } {
 	(var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
 	(create-if-not-exist (+ posts-dir "/list") "")
-	(var liner + (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) "\n")
+	(var liner + (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) " 0 0\n")
 	(append-file (+ posts-dir "/list") liner)
 
 	(var user-list UserOp::get-user-path context::username)

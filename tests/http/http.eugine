@@ -26,7 +26,7 @@
 	(var context::ip [context::headers : @x-forwarded-for])
 	(if [context::ip == null]
 		(set [context::ip] "unknown"))
-	(append-file log-path (+ context::route " " context::username " " context::ip "\n"))
+	(append-file log-path (+ (str (time 1)) context::route " " context::username " " context::ip "\n"))
 
 	(cond true
 		((eq context::route "/") 
@@ -64,9 +64,9 @@
 		((test-path "/lock/")
             (HTTP-Handler::lock-unlock-user context (sub context::route 6)))
         ((test-path "/submissions/")
-            (HTTP-Handler::user-submits-or-comments context (sub context::route 13) "submissions"))
+            (HTTP-Handler::user-submits-or-comments context (sub context::route 13) "sub"))
         ((test-path "/comments/")
-            (HTTP-Handler::user-submits-or-comments context (sub context::route 10) "comments"))
+            (HTTP-Handler::user-submits-or-comments context (sub context::route 10) "com"))
        	((eq context::route "/update")
             (HTTP-Handler::update context))
 		((eq context::route "/login") 
@@ -162,6 +162,7 @@
 	})
 )
 
+(make-dir (+ ~path "data"))
 (make-dir (+ ~path "data/posts"))
 (make-dir (+ ~path "data/users"))
 (make-dir (+ ~path "data/log"))
@@ -171,6 +172,7 @@
 (create-if-not-exist (+ ~path "data/posts/main-index") "0")
 
 (var log-path + ~path "data/log/" (str (time 1)) ".log")
+(var cache-token str (time 1))
 (create-if-not-exist log-path "")
 
 (go (lambda ()

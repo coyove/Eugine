@@ -4,24 +4,61 @@ function hlTab(id) {
 	e.style.backgroundColor = "#758ca8";
 }
 
-function hide(id) {
+function hide(id, nowrite) {
 	var item = getid("item-" + id);
 	var title = item.querySelector(".title");
 	var info = item.querySelector(".info");
-	var hiddens = JSON.parse(localStorage.getItem("hidden_posts") || "{}");
+	var info2 = item.querySelector(".info2");
+	var va = item.querySelector(".vote-area");
+
+	var hiddens = nowrite ? {} : JSON.parse(localStorage.getItem("hidden_posts") || "{}");
 
 	var hider = info.querySelector(".hider");
 	if (hider.innerHTML == "hide") {
 		hider.innerHTML = "un-hide";
 		display(title, "none");
 		hiddens[id] = new Date().getTime();
+
+		display(info2, "none");
+		display(va, "none");
 	} else {
 		hider.innerHTML = "hide";
 		display(title, "block");
 		delete hiddens[id];
+
+		display(info2, "block");
+		display(va, "table-cell");
 	}
 
-	localStorage.setItem("hidden_posts", JSON.stringify(hiddens));
+	if (nowrite) {} else {
+		localStorage.setItem("hidden_posts", JSON.stringify(hiddens));
+	}
+}
+
+function fold(id) {
+	var item = getid("item-" + id);
+	var info = item.querySelector(".info2");
+	if (info) {} else return;
+	
+	var subitems = document.querySelectorAll("#item-" + id + " > .item");
+
+	var folded = JSON.parse(localStorage.getItem("folded_posts") || "{}");
+	var folder = info.querySelector(".folder");
+
+	if (folder.innerHTML == "-") {
+		folder.innerHTML = "+" + document.querySelectorAll("#item-" + id + " .item").length;
+		folded[id] = new Date().getTime();
+
+		for (var i = 0; i < subitems.length; i++)
+			display(subitems[i], "none");
+	} else {
+		folder.innerHTML = "-";
+		delete folded[id];
+		for (var i = 0; i < subitems.length; i++)
+			display(subitems[i], "block");
+	}
+
+	localStorage.setItem("folded_posts", JSON.stringify(folded));
 }
 
 function unhideAll() {
@@ -36,7 +73,8 @@ function del(id) {
 }
 
 function display(dom, d) {
-	getid(dom).style.display = d;
+	var e = getid(dom);
+	if (e) e.style.display = d;
 }
 
 function getid(id) {
@@ -45,6 +83,26 @@ function getid(id) {
 	} else {
 		return id;
 	}
+}
+
+function sayaye(id) {
+	location.href = "/aye/" + id;
+}
+
+function sayno(id) {
+	location.href = "/no/" + id;
+}
+
+function purgeStorage(name) {
+	var hiddens = JSON.parse(localStorage.getItem(name) || "{}");
+	var now = new Date().getTime();
+	for (var id in hiddens) {
+		if (now - hiddens[id] > 86400000 * 7) {
+			delete hiddens[id];
+		}
+	}
+	localStorage.setItem(name, JSON.stringify(hiddens));
+	return hiddens;
 }
 
 window.onload = function() {
@@ -72,24 +130,40 @@ window.onload = function() {
 		getid("password-reseted").innerHTML = "Your request has been scheduled, please wait";
 	}
 
-	var hiddens = JSON.parse(localStorage.getItem("hidden_posts") || "{}");
-	var now = new Date().getTime();
-	for (var id in hiddens) {
-		if (now - hiddens[id] > 86400000 * 7) {
-			delete hiddens[id];
-		}
-	}
-	localStorage.setItem("hidden_posts", JSON.stringify(hiddens));
+	var hiddens = purgeStorage("hidden_posts");
+	var foldeds = purgeStorage("folded_posts");
 
 	var items = document.querySelectorAll(".item");
 	var limit = window.__AutoHidePt === undefined ? -10 : window.__AutoHidePt;
 
 	for (var i = 0; i < items.length; i++) {
-		var pt = parseInt(items[i].querySelector("span[points]").innerHTML);
+		var item = items[i];
+		var pt = parseInt(item.querySelector("span[points]").innerHTML);
+		var id = item.id.substr(5);
 
-		if (hiddens[items[i].id.substr(5)] || pt <= limit) {
-			items[i].querySelector(".hider").innerHTML = "un-hide";
-			items[i].querySelector(".title").style.display = "none";
+		if (hiddens[id] || pt <= limit) {
+			hide(id, true);
 		}
+
+		if (foldeds[id]) {
+			fold(id);
+		}
+
+		if (item.childNodes.length == 2) {
+			display(item.querySelector(".folder"), "none");
+		}
+	}
+
+	window.ayeItems = window.ayeItems || [];
+	window.noItems = window.noItems || [];
+
+	for (var i = 0; i < (window.ayeItems).length; i++) {
+		var id = ayeItems[i].split("#")[1];
+		getid("item-" + id).querySelector("div[upvote]").className = "vote";
+	}
+
+	for (var i = 0; i < (window.noItems).length; i++) {
+		var id = noItems[i].split("#")[1];
+		getid("item-" + id).querySelector("div[downvote]").className = "vote";
 	}
 }

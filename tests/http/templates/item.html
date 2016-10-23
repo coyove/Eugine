@@ -1,40 +1,38 @@
 (list 
-(if [[item::title != "Comment"] and [item::state != "deleted"]] (+ "<h2><b>#" item-id "</b>. " item::title "</h2>"))
 "<div class='lister'>
 <div class='item' id='item-" item-id "'>
+<div class='inner-item'>
+	<table><tr><td class='vote-area'>
+        <div class='unvote' upvote onclick='sayaye(" item-id ")'>&#9650;</div>
+        <div class='unvote' downvote onclick='sayno(" item-id ")'>&#9660;</div>
+    </td><td>
 	<div class='title'>"
+		(if [[item::title != "Comment"] and [item::state != "deleted"]] (+ "<h2>" item::title "</h2>"))
 		(if [item::state == "deleted"] 
             "<span deleted>deleted</span>"
             item::content)
 	"</div>
-<div class='info'>" (str item::comments) " comments | <span points>" (str item::points) "</span> points | "
-"by <a href='/user/" item::author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago | "
-(if [item::parent != "0"] (+ "<a href='/item/" item::parent "'>parent</a> | "))
-"<a class='hider' href='javascript:hide(" item-id ")'>hide</a> | "
+	<div class='info'>#" item-id " | " (if [(num item::comments) > 0] (+ item::comments " comments | ")) 
+	"<span points>" (str item::points) "</span> points | "
+	"by <a href='/user/" item::author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago"
+	" | <a class='hider' href='javascript:hide(" item-id ")'>hide</a>"
 
-(if [[context::username == item::author] or [[context::user-data : UserOp::GROUP] == "mod"]]
-	(+ "<a href='javascript:del(" item-id ")'>delete</a> | ") "")
+	(if [item::parent != "0"] 
+		(+ " | <a href='/item/" item::parent "#item-" item-id "'>parent</a>"))
 
-(if [[context::user-data : UserOp::GROUP] == "mod"]
-	(+ "<a href='/opnctl/" item-id "'>un/lock</a> | ") "")
+	(if [[context::username == item::author] or [[context::user-data : UserOp::GROUP] == "mod"]]
+		(+ " | <a href='javascript:del(" item-id ")'>delete</a>") "")
 
-"<a class='aye' href='/aye/" item-id "'>"
-(if [(list-contains item::aye-users context::username) < 0]
-	"aye"
-	"<b>aye</b>")
-"</a> | "
+	(if [[context::user-data : UserOp::GROUP] == "mod"]
+		(+ " | <a href='/opnctl/" item-id "'>un/lock</a>") "")
 
-"<a class='no' href='/no/" item-id "'>"
-(if [(list-contains item::no-users context::username) < 0]
-	"no"
-	"<b>no</b>")
-"</a>"
-
-"</div>
+	"</div>
+	</td></tr></table>
+</div>
 </div>"
 
 (if [[item::state != "locked"] and [item::state != "deleted"]] (+
-"<div class='post'>
+"<div class='post' style='margin-top: 0'>
 <form method='post' action='/post/" item-id "'>
 <input type='hidden' name='title' value='Comment'>
 <textarea name='text' rows='5'></textarea>
@@ -42,6 +40,4 @@
 </form>
 </div>"))
 
-"<hr>
-%s
-" (::build-pager start (len comments)))
+"<hr>")
