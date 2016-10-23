@@ -1,0 +1,30 @@
+(list "<form method='post' action='/update'><table class='info'>
+    <tr><td>id:</td><td>" [user-data : UserOp::ID] "</td></tr>
+    <tr><td>group:</td><td>" [user-data : UserOp::GROUP] "</td></tr>
+    <tr><td>user:</td><td>" [user-data : UserOp::USERNAME] "</td></tr>
+    <tr><td>created:</td><td>" (str age) " days</td></tr>
+    <tr><td>last login:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) " @ " 
+        [user-data : UserOp::LAST_LOGIN_IP]
+    "</td></tr>
+    <tr><td>posts:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
+    <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
+    <tr><td>autohide pt:</td><td>
+        <input class='nar' name='autohide' value='" [user-data : UserOp::AUTOHIDE] "'>
+    </td></tr>
+    <tr><td valign='top'>about:</td><td>
+        <textarea name='about' rows='10'>" (decodeURI [user-data : UserOp::ABOUT]) "</textarea>
+    </td></tr>
+    <tr><td>email:</td><td>
+        <input type='text' name='email' value='" (decodeURI [user-data : UserOp::EMAIL]) "'>
+    </td></tr>
+    <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>submissions</a></td></tr>
+    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>
+    <tr><td></td><td><a href='javascript:unhideAll()'>un-hide all posts</a></td></tr>
+    <tr><td><input type='submit' value='update'></td><td></td></tr>
+</table></form>
+<hr>
+<form method='post' action='/password/change'><table class='info'>
+    <tr><td>old password:</td><td><input class='nar' name='old'></td></tr>
+    <tr><td>new password:</td><td><input class='nar' name='new'></td></tr>
+    <tr><td><input type='submit' value='change'></td><td><span red id='password-changed'></span></td></tr>
+</table></form>")

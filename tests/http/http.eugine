@@ -1,0 +1,194 @@
+(~include "util.eugine")
+(~include "config.eugine")
+(~include "user.eugine")
+(~include "handler.eugine")
+
+(var ~mt) ; enable multi-threading
+
+;(var start (time 1))
+; (loop (range 0 1000) [() =>
+; 	; (write-file (+ ~path "tmp") (str (range 0 10000)))
+; 	(var lines read-file-lines (+ ~path "tmp"))
+; 	(loop lines [(line) => [line != "731"] ])
+; ])
+
+;(println [(time 1) - start])
+
+(def dispatcher (context)
+	(var test-path starts-with context::route)
+	(var context::username (UserOp::valid-token [context::cookies : @uid]))
+	(var context::is-logged-in neq context::username null)
+	(if context::is-logged-in {
+		(var context::user-data read-file-lines (UserOp::get-data-path context::username))
+		(var context::user-is-locked starts-with [context::user-data : UserOp::GROUP] "lock-")
+	})
+
+	(var context::ip [context::headers : @x-forwarded-for])
+	(if [context::ip == null]
+		(set [context::ip] "unknown"))
+	(append-file log-path (+ (str (time 1)) context::route " " context::username " " context::ip "\n"))
+
+	(cond true
+		((eq context::route "/") 
+			(HTTP-Handler::index context "main"))
+		((eq context::route "/rank")
+            (HTTP-Handler::index context "rank"))
+		((test-path "/post/") 
+			(HTTP-Handler::post context (sub context::route 6)))
+		((test-path "/item/")
+			(HTTP-Handler::item context (sub context::route 6)))
+		((eq context::route "/leaders") 
+			(HTTP-Handler::leaders context))
+		((test-path "/aye/")
+			(HTTP-Handler::aye context (sub context::route 5)))
+		((test-path "/no/")
+			(HTTP-Handler::no context (sub context::route 4)))
+		((test-path "/aye-voters/")
+			(HTTP-Handler::voters context (sub context::route 12) "aye"))
+		((test-path "/no-voters/")
+			(HTTP-Handler::voters context (sub context::route 12) "no"))
+		((test-path "/delete/")
+			(HTTP-Handler::delete context (sub context::route 8)))
+		((test-path "/opnctl/")
+            (HTTP-Handler::lock-unlock-post context (sub context::route 8)))
+		((eq context::route "/submit") 
+			(HTTP-Handler::submit context))
+		((eq context::route "/user") 
+			(HTTP-Handler::user context))
+		((eq context::route "/password/change") 
+			(HTTP-Handler::change-password context))
+		((eq context::route "/password/reset") 
+			(HTTP-Handler::reset-password context))
+		((test-path "/user/")
+            (HTTP-Handler::user-visitor-view context (sub context::route 6)))
+		((test-path "/lock/")
+            (HTTP-Handler::lock-unlock-user context (sub context::route 6)))
+        ((test-path "/submissions/")
+            (HTTP-Handler::user-submits-or-comments context (sub context::route 13) "sub"))
+        ((test-path "/comments/")
+            (HTTP-Handler::user-submits-or-comments context (sub context::route 10) "com"))
+       	((eq context::route "/update")
+            (HTTP-Handler::update context))
+		((eq context::route "/login") 
+			(HTTP-Handler::login context))
+		((eq context::route "/logout")
+            (HTTP-Handler::logout context))
+		((eq context::route "/signup") 
+			(HTTP-Handler::signup context))
+		((eq context::route "/welcome")
+			(HTTP-Handler::welcome context))
+		((eq context::route "/oauth-github")
+			(HTTP-Handler::oauth-github context))
+		((test-path "/assets/")
+			(HTTP-Handler::serve-file context))
+		(_ 
+			(HTTP-Handler::not-found context))
+	)
+)
+
+(def handle (client)
+	(try {
+	[client call @setSoTimeout (list @int) Config::socket-read-timeout]
+	(var is [client . @getInputStream ()])
+	(var buf (buffer 1024))
+    (var read           0)
+    (var total-read     0)
+    (var raw-request    "")
+    (var body-length    0)
+    (var header-length  0)
+    (var total-length   0)
+    
+    (try 
+		(loop [read != -1] [() => 
+			(+= total-read (set read [is . @read (list "byte[]") buf]))
+			(var output (new jString ("byte[]" "int" "int") buf 0 read))
+			(+. raw-request output)
+
+			(var m match raw-request %"(?i)content-length:\s?(\d+)")
+			(if [(len m) > 0] 
+				(set body-length num [(split [m : 0 @text] ":") : 1])) ; we found Content-Length header
+
+			(set m (match raw-request %"(\r\n\r\n)"))
+			(if [(len m) > 0] 
+				(set total-length + (set header-length [m : 0 @end]) body-length)) ; we reach the end of HTTP request headers
+
+	        (not (or (socket-eos output) (eq total-length total-read)))
+		])
+	; catch
+		(if [raw-request != ""] (println "timeout:\n" raw-request))
+	)
+
+	(var requests (split raw-request "\r\n"))
+	(var http-context HTTP-Request::new client)
+
+	(loop requests [(request) =>
+		(var parts (split request " "))
+
+		(if [(len parts) > 1]
+			(cond (var p [[parts : 0] . @toLowerCase ()])
+				("get" 
+					(var http-context::route [parts : 1])
+					(var http-context::action "get")
+				)
+				("post" 
+					(var http-context::route [parts : 1])
+					(var http-context::action "post")
+				)
+				("cookie:"
+				    (var http-context::cookie (sub request 7))
+				)
+				(_
+				    (var [http-context::headers : (replace p ":" "")] 
+				    	(trim (sub request (len [parts : 0]))))
+				)
+			)
+		)
+	])
+
+	(var http-context::data (sub raw-request header-length))
+	(http-context::parse-post-body ())
+	(http-context::parse-cookie ())
+
+	(var p-ct [[http-context::headers : "content-type"] != "application/x-www-form-urlencoded"])
+
+	(if (and [http-context::action == "post"] p-ct)
+		(HTTP-Handler::forbidden http-context)
+		(dispatcher http-context)
+	)
+	} (println "http error: " ~ex)
+	{
+		(http-context::close ())
+		[is call @close ()]
+	})
+)
+
+(make-dir (+ ~path "data"))
+(make-dir (+ ~path "data/posts"))
+(make-dir (+ ~path "data/users"))
+(make-dir (+ ~path "data/log"))
+(create-if-not-exist (+ ~path "data/users/index") "0")
+(create-if-not-exist (+ ~path "data/users/list") "")
+(create-if-not-exist (+ ~path "data/posts/index") "0")
+(create-if-not-exist (+ ~path "data/posts/main-index") "0")
+
+(var log-path + ~path "data/log/" (str (time 1)) ".log")
+(var cache-token str (time 1))
+(create-if-not-exist log-path "")
+
+(go (lambda ()
+    (loop true [() =>
+        (ranking ())
+        (access-control-list-watcher ())
+        (sleep 10000)
+    ])
+) ())
+
+[ss := (new (cls @java.net.ServerSocket) ())]
+[ss call @bind (list @java.net.SocketAddress) 
+	(new (cls @java.net.InetSocketAddress) (list jString. @int) "127.0.0.1" Config::port)]
+
+(println "listening on port " Config::port)
+(loop (true) [() =>
+    (var client [ss . @accept ()])
+    (go handle client)
+])

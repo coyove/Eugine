@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 /**
  * Created by coyove on 2016/9/9.
  */
-public class Eugine {
+public class Eugine implements Serializable {
     public ExecEnvironment environment = new ExecEnvironment() {{
         put("null", new SNull(true));
         put("#nil", new SNull(true));
@@ -21,7 +21,8 @@ public class Eugine {
         put("false", new SBool(false, true));
         put("#t", new SBool(true, true));
         put("#f", new SBool(false, true));
-        put("~parent", new SString("~parent", true));
+        put("~init", new SString("~init", true));
+        put("~comparator", new SString("~comparator", true));
         put("~doc", new SString("~doc", true));
         put("~integer.max", new SInteger(Long.MAX_VALUE, true));
         put("~integer.min", new SInteger(Long.MIN_VALUE, true));
@@ -44,7 +45,7 @@ public class Eugine {
     public SExpression loadString(String code) throws Exception {
         Parser p = new Parser();
         environment.put("~source", new SString("<vm>"));
-        return SExpression.cast(p.parse(code, "<vm>", "<vm>"));
+        return SExpression.cast(p.parse(code, "", "<vm>"));
     }
 
     public SExpression loadBinary(String filePath) throws Exception {
@@ -66,8 +67,8 @@ public class Eugine {
     }
 
     public SExpression loadFile(String filePath) throws Exception {
-        String code = new String(Files.readAllBytes(Paths.get(filePath)));
         Path p_ = Paths.get(filePath);
+        String code = new String(Files.readAllBytes(p_));
 
         String codeSource = p_.getFileName().toString();
         String codeFolder = filePath.substring(0, filePath.length() - codeSource.length());

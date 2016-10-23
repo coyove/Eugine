@@ -1,0 +1,23 @@
+(list "<table class='info'>
+    <tr><td>id:</td><td>" [user-data : UserOp::ID] "</td></tr>
+    <tr><td>user:</td><td>" username " (" [user-data : UserOp::GROUP] ")</td></tr>
+    <tr><td>created:</td><td>" (str age) " days</td></tr>
+    <tr><td>last login:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) "</td></tr>
+    <tr><td>posts:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
+    <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
+    <tr><td valign='top'>about:</td><td class='title'>" (parse-code (decodeURI [user-data : UserOp::ABOUT])) "</td></tr>
+    <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>submissions</a></td></tr>
+    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>"
+    (if [[context::user-data : UserOp::GROUP] == "mod"]
+        (+ "<tr><td></td><td>
+            <form method='post' action='/lock/" [user-data : UserOp::USERNAME] "'>
+                <select name='long'>
+                    <option value='0' selected>forever</option>
+                    <option value='86400000'>1 day</option>
+                    <option value='604800000'>1 week</option>
+                    <option value='2592000000'>1 month</option>
+                    <option value='31536000000'>1 year</option>
+                </select>
+                <input type='submit' value='lock/unlock user'>
+            </form></td></tr>"))
+"</table>")

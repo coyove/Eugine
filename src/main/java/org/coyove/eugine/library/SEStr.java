@@ -5,17 +5,18 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.Formatter;
+
 /**
  * Created by zezhong on 2016/9/10.
  */
 public class SEStr extends SExpression {
     private SExpression argument;
 
-    public SEStr(Atom ha, Compound c) throws VMException
-    {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException("it takes 1 argument");
+    public SEStr() {}
+
+    public SEStr(Atom ha, Compound c) throws VMException {
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
     }
@@ -32,13 +33,27 @@ public class SEStr extends SExpression {
 
             return new SList(ret);
         } else {
+            if (arg instanceof SObject && arg.get() instanceof byte[]) {
+                byte[] buf = arg.get();
+                return new SString(Utils.bytesToHexString(buf));
+            }
+
             return new SString(arg.get().toString());
         }
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         return convert(argument.evaluate(env));
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEStr ret = new SEStr();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+
+        return ret;
     }
 }

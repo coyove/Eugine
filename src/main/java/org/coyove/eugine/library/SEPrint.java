@@ -1,5 +1,6 @@
 package org.coyove.eugine.library;
 
+import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
@@ -15,11 +16,11 @@ public class SEPrint extends SExpression {
     private List<SExpression> arguments;
     private String delim;
 
+    public SEPrint() {};
+
     public SEPrint(Atom ha, Compound c, String d) throws VMException {
-        super(ha, c);
+        super(ha, c, 1);
         delim = d;
-        if (c.atoms.size() == 0)
-            throw new VMException("it takes at least 1 argument", ha);
 
         arguments = SExpression.castPlain(c);
     }
@@ -33,14 +34,14 @@ public class SEPrint extends SExpression {
 
             ret += ")";
         } else if (re instanceof SDict) {
-            ret += "(dict\n"; //String.format("dict (\n", " ");
+            ret += "(dict\n";
             HashMap< String, SValue > map = re.get();
 
             for (String key : map.keySet()) {
-                ret += String.format("%1$" + padding + "s %2$s=%3$s\n", " ", key,
+                ret += String.format("%1$" + padding + "s %2$s = %3$s\n", " ", key,
                         printSValue(map.get(key).evaluate(env), env, padding + 2) );
             }
-            ret += String.format("%1$" + padding + "s)", " ");
+            ret += StringUtils.leftPad(")", padding - 2);
         } else if (re instanceof SNull) {
             ret = "null";
         } else {
@@ -52,12 +53,24 @@ public class SEPrint extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        SValue ret = new SBool(false);
+        SValue ret = new SNull();
         for (SValue v : SExpression.eval(arguments, env)) {
             ret = v;
             System.out.print(printSValue(v, env, 2));
         }
         System.out.print(delim);
+
+        return ret;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEPrint ret = new SEPrint();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.delim = this.delim;
+        ret.arguments = List.deepClone(this.arguments);
 
         return ret;
     }

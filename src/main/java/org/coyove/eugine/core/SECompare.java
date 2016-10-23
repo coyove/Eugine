@@ -14,10 +14,10 @@ public class SECompare extends SExpression {
     private String action;
     private List<SExpression> values;
 
+    public SECompare() {}
+
     public SECompare(Atom ha, Compound c, String a) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException("it takes at least 2 arguments", ha);
+        super(ha, c, 1);
 
         action = a;
         values = SExpression.castPlain(c);
@@ -78,5 +78,16 @@ public class SECompare extends SExpression {
             return new SBool(compareNumber(results, -1, 0));
 
         return new SNull();
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SECompare ret = new SECompare();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.action = this.action;
+        ret.values = List.deepClone(this.values);
+
+        return ret;
     }
 }

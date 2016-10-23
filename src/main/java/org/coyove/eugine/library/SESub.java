@@ -11,11 +11,10 @@ import org.coyove.eugine.util.*;
 public class SESub extends SExpression {
     private List<SExpression> arguments;
 
-    public SESub(Atom ha, Compound c) throws VMException {
-        super(ha, c);
+    public SESub() {}
 
-        if (c.atoms.size() != 2 && c.atoms.size() != 3)
-            throw new VMException("it takes 2 or 3 arguments", ha);
+    public SESub(Atom ha, Compound c) throws VMException {
+        super(ha, c, 2);
 
         arguments = SExpression.castPlain(c);
     }
@@ -25,8 +24,12 @@ public class SESub extends SExpression {
         List<SValue> arguments = SExpression.eval(this.arguments, env);
         SValue subObj = arguments.head();
 
-        VMException ex = new VMException("start and end index must be integers", headAtom);
+        VMException ex = new VMException(3012, "start and end index must be integers", headAtom);
         int arg1 = Utils.cast(arguments.get(1), SInteger.class, ex).<Long>get().intValue();
+        if (arg1 < 0) {
+            throw new VMException(3015, "start cannot be negative", headAtom);
+        }
+
         SInteger arg2 = null;
 
         if (arguments.size() == 3)
@@ -41,7 +44,7 @@ public class SESub extends SExpression {
                 try {
                     return new SString(subStr.<String>get().substring(arg1, arg1 + arg2.<Long>get().intValue()));
                 } catch (StringIndexOutOfBoundsException se) {
-                    throw new VMException("string index out of range", headAtom);
+                    throw new VMException(3013, "string index out of range", headAtom);
                 }
             }
 
@@ -53,8 +56,18 @@ public class SESub extends SExpression {
                 return new SList(subList.<List<SValue>>get().sub(arg1, arg1 + arg2.<Long>get().intValue()));
             }
         } else {
-            throw new VMException("the first argument must be a string or a list", headAtom);
+            throw new VMException(3014, "subject must be string or list", headAtom);
         }
 
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SESub ret = new SESub();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.arguments = List.deepClone(this.arguments);
+
+        return ret;
     }
 }

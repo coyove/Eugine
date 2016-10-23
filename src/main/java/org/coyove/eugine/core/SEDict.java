@@ -13,32 +13,37 @@ import java.util.HashMap;
 public class SEDict extends SExpression {
     private List<SExpression> values;
 
+    public SEDict() {}
+
     public SEDict(Atom ha, Compound c) throws VMException {
         super(ha, c);
-        values = new List<SExpression>();
-
-        for (Base a : c.atoms) {
-            if (a instanceof Atom || ((Compound) a).atoms.size() != 2)
-                throw new VMException("each element of the dict must be a list with 2 elements", ha);
-
-            values.add(SExpression.cast(a));
-        }
+        values = SExpression.castPlain(c);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         HashMap<String, SValue> ret = new HashMap<String, SValue>();
 
-        for (SExpression v : values)
-        {
-            List<SValue> c = v.evaluate(env).get();
+        for (SValue e : SExpression.eval(values, env)) {
+            SList l = Utils.cast(e, SList.class);
+            if (l == null)
+                throw new VMException(2010, "invalid dict entry definition", headAtom);
 
+            List<SValue> c = l.get();
             SString key = Utils.cast(c.head(), SString.class,
-                    new VMException("key must be string", headAtom));
+                    new VMException(2011, "key must be a string", headAtom));
 
             ret.put(key.<String>get(), c.get(1));
         }
-
         return new SDict(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEDict ret = new SEDict();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.values = List.deepClone(this.values);
+        return ret;
     }
 }

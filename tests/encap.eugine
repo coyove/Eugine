@@ -1,30 +1,57 @@
-((defun base.class() {
-    [@name ::= "base"]
-    [@sayhi ::= [() => (+ "hello " [~this : @name])]]
+((def base.class() {
+    [::name := "base"]
+    [::say_hi := [() => (+ "hello " ::name)]]
 }) ())
 
 [d1.class = clone base.class]
-(var [d1.class : @name] "d1")
+(var d1.class::name "d1")
 
 [d2.class = clone base.class]
-(var [d2.class : @name] "d2")
-(var [d2.class : @sayhi] [() => {
+(var d2.class::name "d2")
+(var d2.class::say_hi [() => {
     (var name "dummy")
-    (+ "hello override " [~this : @name])
+    (+ "hello override " ~this::name)
 }])
 
-(var [d2.class : @sayhi2] [() => (+ "hello " [~proto : @name])])
+(var [d2.class : @say_hi2] [() => (+ "hello " [~proto : @name])])
 
 [d3.class = clone d2.class]
 (var [d3.class : @name] "d3")
-(var [d3.class : @sayhi] [() => (+ "hello over-override " [~this : @name])])
-(var [d2.class : @sayhi2] [() => (+ "hello " [~proto : @name])])
+(var [d3.class : @say_hi] [() => (+ "hello over-override " [~this : @name])])
+(var [d2.class : @say_hi2] [() => (+ "hello " [~proto : @name])])
 
 (var #results (list))
-(loop (list d1.class d2.class d3.class) [(c) => [#results += ([c : @sayhi] ())]])
+(loop (list d1.class d2.class d3.class) [(c) => [#results += ([c : @say_hi] ())]])
 
 (assert (deep-compare-list #results ("hello d1" "hello override d2" "hello over-override d3"))
     "Simple encapsulation")
 
-(assert (deep-compare-list (list ([d2.class : @sayhi2] ()) ([d3.class : @sayhi2] ()))
+(assert (deep-compare-list (list ([d2.class : @say_hi2] ()) ([d3.class : @say_hi2] ()))
     ("hello base" "hello d2")) "Simple encapsulation 2")
+
+
+(def Point(){})
+
+(set [Point :: ~init] lambda (n...) {
+    (if [(len n) == 2] {
+        (set [~this : @x] [n : 0])
+        (set [~this : @y] [n : 1])
+    } {
+        (set [~this : @x] 0)
+        (set [~this : @y] 0)
+    })
+})
+
+((def Rect () {
+    (var [~this :: ~init] lambda (p1 p2) {
+        (set ::p1 p1)
+        (set ::p2 p2)
+        (set [~this :: width] (- [p2 :: x] [p1 :: x]))
+        (set [~this :: height] (- [p2 :: y] [p1 :: y]))
+    })
+
+    (var [~this :: calc] lambda () (* [~this :: width] [~this :: height]))
+}) ())
+
+(set rect clone Rect (clone Point) (clone Point 3 4))
+(assert [(eq (rect::calc()) 12) and [[rect::p2::x == 3] and [rect::p2::y == 4]]] "Point & Rect")

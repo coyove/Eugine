@@ -13,8 +13,10 @@ public class SERange extends SExpression {
     private SExpression interval;
     private SExpression end;
 
+    public SERange() {}
+
     public SERange(Atom ha, Compound c) throws VMException {
-        super(ha, c);
+        super(ha, c, 2);
         List<SExpression> args = SExpression.castPlain(c);
 
         if (args.size() == 2) {
@@ -25,8 +27,6 @@ public class SERange extends SExpression {
             start = args.get(0);
             interval = args.get(1);
             end = args.get(2);
-        } else {
-            throw new VMException("it takes 2 or 3 arguments", ha);
         }
     }
 
@@ -44,9 +44,21 @@ public class SERange extends SExpression {
             for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get())
                 ret.add(new SDouble(i));
         } else {
-            throw new VMException("it only accept integers or doubles as arguments", headAtom);
+            throw new VMException(3009, "needs integers or doubles", headAtom);
         }
 
         return new SList(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SERange ret = new SERange();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.start = this.start.deepClone();
+        ret.interval = this.interval.deepClone();
+        ret.end = this.end.deepClone();
+
+        return ret;
     }
 }

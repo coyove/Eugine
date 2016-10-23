@@ -14,13 +14,22 @@ public class SEGet extends SExpression {
     private SExpression dict;
     private List<SExpression> keys;
 
-    public SEGet(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException("it takes at least 2 arguments", ha);
+    public SEGet() {}
+
+    public SEGet(Atom ha, Compound c, boolean plain) throws VMException {
+        super(ha, c, 2);
 
         dict = SExpression.cast(c.atoms.pop());
-        keys = SExpression.castPlain(c);
+
+        if (plain) {
+            keys = new List<SExpression>();
+            for (Base a : c.atoms) {
+                if (a instanceof Atom)
+                    keys.add(new SString(((Atom) a).token.value.toString()));
+            }
+        } else {
+            keys = SExpression.castPlain(c);
+        }
     }
 
     @Override
@@ -31,7 +40,7 @@ public class SEGet extends SExpression {
         for (SExpression sk : keys) {
             if (dict instanceof SDict) {
                 SString key = Utils.cast(sk, SString.class,
-                        new VMException("it only take a string as the key", headAtom));
+                        new VMException(2019, "dict key must be string", headAtom));
 
                 HashMap<String, SValue> d = dict.get();
                 String k = key.get();
@@ -46,13 +55,13 @@ public class SEGet extends SExpression {
                 dict = dk;
             } else if (dict instanceof SList) {
                 SInteger index = Utils.cast(sk, SInteger.class,
-                        new VMException("it only take an integer as the index", headAtom));
+                        new VMException(2020, "list index must be integer", headAtom));
 
                 List<SValue> l = dict.get();
                 Long idx = index.get();
 
                 if (idx >= l.size() || idx < 0)
-                    throw new VMException("index out of range", headAtom);
+                    throw new VMException(2021, "index out of range", headAtom);
 
                 SValue li = l.get(idx.intValue());
 
@@ -62,19 +71,19 @@ public class SEGet extends SExpression {
                 dict = li;
             } else if (dict instanceof SString) {
                 SInteger index = Utils.cast(sk, SInteger.class,
-                        new VMException("it only take an integer as the index", headAtom));
+                        new VMException(2022, "string index must be integer", headAtom));
 
                 String str = dict.get();
                 Long idx = index.get();
 
                 if (idx >= str.length())
-                    throw new VMException("index out of range", headAtom);
+                    throw new VMException(2023, "index out of range", headAtom);
 
                 return new SString(String.valueOf(str.charAt(idx.intValue())));
 
             } else if (dict instanceof SClosure) {
                 SString key = Utils.cast(sk, SString.class,
-                        new VMException("it only take a string as the key", headAtom));
+                        new VMException(2024, "closure field must be string", headAtom));
 
                 String k = key.get();
                 SValue ret = ((SClosure) dict).extra.containsKey(k) ?
@@ -86,7 +95,7 @@ public class SEGet extends SExpression {
                 dict = ret;
             } else if (dict instanceof SObject) {
                 SString fn = Utils.cast(sk, SString.class,
-                        new VMException("field name must be a string", headAtom));
+                        new VMException(2025, "object field must be string", headAtom));
 
                 String field = fn.get();
                 try {
@@ -104,5 +113,16 @@ public class SEGet extends SExpression {
         }
 
         return dict;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEGet ret = new SEGet();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.dict = this.dict.deepClone();
+        ret.keys = List.deepClone(this.keys);
+
+        return ret;
     }
 }

@@ -17,10 +17,10 @@ public class SEElemArith extends SExpression {
 
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
 
+    public SEElemArith() {}
+
     public SEElemArith(Atom ha, Compound c, ACTION a) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException("it takes at least 2 arguments", ha);
+        super(ha, c, 1);
 
         action = a;
         values = SExpression.castPlain(c);
@@ -51,13 +51,13 @@ public class SEElemArith extends SExpression {
                     break;
                 case DIVIDE:
                     if (next.abs().doubleValue() < 0.000001)
-                        throw new VMException("divided by zero", headAtom);
+                        throw new VMException(2012, "divided by zero", headAtom);
 
                     ret = ret.divide(next, MathContext.DECIMAL64);
                     break;
                 case MODULAR:
                     if (next.abs().doubleValue() < 0.000001)
-                        throw new VMException("moded by zero", headAtom);
+                        throw new VMException(2013, "moded by zero", headAtom);
 
                     Long rem = ret.divide(next, MathContext.DECIMAL64).longValue();
                     ret = ret.subtract(next.multiply(BigDecimal.valueOf(rem)));
@@ -71,5 +71,16 @@ public class SEElemArith extends SExpression {
             return new SInteger(ret.longValue());
         }
 
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEElemArith ret = new SEElemArith();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.action = this.action;
+        ret.values = List.deepClone(this.values);
+
+        return ret;
     }
 }

@@ -1,0 +1,92 @@
+(if [id != 0] {
+	(var parent-dir get-post-path id)
+	(if (neq parent-dir null) {
+		(var parent-data (read-file-lines (+ parent-dir "/data")))
+		(if [[[parent-data : 4] == "locked"] or [[parent-data : 4] == "deleted"]] (exit 40))
+
+		(var root num [parent-data : 10])
+	} (exit 41))
+} (var root next-id))
+
+(var post-dir (+ ~path "data/posts/" (str [next-id / 1000]) "/" (str next-id)))
+(make-dir post-dir)
+
+(var ts time 1)
+(var data (list
+	author		; 0 author
+	(encodeURI title); 1 title, escaped
+	(str ts)	; 2 created ts
+	(str ts)	; 3 modified ts
+	"open"		; 4 state
+	"0"			; 5 comments
+	"0"			; 6 points
+	"0"			; 7 aye count
+	"0"			; 8 no count
+	(str id)	; 9 parent
+	(str root)  ; 10 root
+))
+
+(write-file (+ post-dir "/data") data)
+(write-file (+ post-dir "/raw") text)
+(write-file (+ post-dir "/aye") "")
+(write-file (+ post-dir "/no") "")
+
+(if context::is-logged-in {
+	(var user-dp UserOp::get-data-path context::username)
+	(var user-data read-file-lines user-dp)
+	(var total-posts num [user-data : UserOp::TOTAL_POSTS])
+	(set [user-data : UserOp::TOTAL_POSTS] (str (++ total-posts)))
+	(write-file user-dp user-data)
+})
+
+(if [id != 0] {
+	(var liner + (str next-id) " 0 0 open " author " push " (str ts) " " (str ts) " " 
+		(encodeURI text) " " (str id) " " (str root))
+
+	(var root-path get-post-path root)
+	(create-if-not-exist (+ root-path "/list") "")
+	(var root-list read-file-lines (+ root-path "/list"))
+	(var root-data read-file-lines (+ root-path "/data"))
+
+	(delete-file (+ root-path "/comments-cache." cache-token))
+
+	;; add this post to its root's list, the root list is used for displaying
+	(var id-pos-in-root find-in-list root-list id)
+	(insert root-list (+ id-pos-in-root 1) liner)
+	(insert root-list (+ id-pos-in-root 2) "0 0 0 pop pop pop 0 0 pop 0 0")
+	(write-file (+ root-path "/list") root-list)
+
+	;; incr the root's comments counter, write back
+	(var root-comments num [root-data : 5])
+	(set [root-data : 5] (str (++ root-comments)))
+	(write-file (+ root-path "/data") root-data)
+
+	;; add this post to its author's comments list
+	(var user-list UserOp::get-user-path context::username)
+    (create-if-not-exist (+ user-list "/comments-list") "")
+    (append-file (+ user-list "/comments-list") (+ liner "\n"))
+
+    ;; update the comments counter in the root author's submissions list
+    (var root-user-list + (UserOp::get-user-path [root-data : 0]) "/submissions-list")
+    (update-list root-user-list root
+        (1 [(count) => (str (+ (num count) 1))])
+        (7 [() => (str ts)]))
+
+    ;; update the comments counter in the global list
+	(update-list (+ ~path "data/posts/" (str (/ root 1000)) "/list") root
+	    (1 [(count) => (str (+ (num count) 1))])
+	    (7 [() => (str ts)]))
+
+	(var return-to (+ "/item/" (str root) "#item-" (str id)))
+} {
+	(var posts-dir (+ ~path "data/posts/" (str [next-id / 1000])))
+	(create-if-not-exist (+ posts-dir "/list") "")
+	(var liner + (str next-id) " 0 0 open " author " " author " " (str ts) " " (str ts) " " (encodeURI title) " 0 0\n")
+	(append-file (+ posts-dir "/list") liner)
+
+	(var user-list UserOp::get-user-path context::username)
+    (create-if-not-exist (+ user-list "/submissions-list") "")
+    (append-file (+ user-list "/submissions-list") liner)
+
+	(var return-to "/")
+})

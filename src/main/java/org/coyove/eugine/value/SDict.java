@@ -18,7 +18,14 @@ public class SDict extends SValue {
     @Override
     public SValue clone()
     {
-        SDict ret = new SDict((HashMap<String, SValue>)underlying);
+        HashMap<String, SValue> dict = (HashMap<String, SValue>)underlying;
+        HashMap<String, SValue> n = new HashMap<String, SValue>();
+
+        for (String s : dict.keySet()) {
+            n.put(s, dict.get(s).clone());
+        }
+
+        SDict ret = new SDict(n);
         SValue.copyAttributes(ret, this);
         return ret;
     }

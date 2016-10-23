@@ -1,0 +1,32 @@
+(list "<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<meta name='referrer' content='origin'>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<link href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAKlBMVEVLWX3///9seJVyfZlaZ4heaopUYYS8wc7b3uVjb47x8vXT1t96hJ/8/Pwv3cUDAAAAOklEQVR4XmOgH5hsDAZmcIFGQTAQxy2wEV3AxcVHUDA0NIABDhiYBAUZGBhGrADnRSm0cGZLYKAeAABwbwqMNFT1HQAAAABJRU5ErkJggg==' rel='icon' type='image/x-icon'>
+	<title>" title " | " Config::site-name "</title>
+	<script type='text/javascript' src='/assets/main.js'></script>
+	<link rel='stylesheet' type='text/css' href='/assets/main.css'>
+</head>
+<body>
+<div id='container'>
+<div class='outer'>
+	<span style='font-size: 16px'>Temp News</span>
+</div>
+<div class='banner'>"
+    "<a id='timeline' href='/'>timeline</a>"
+    "<a id='ranking' href='/rank'>ranking</a>"
+    "<a id='submit' href='/submit'>submit</a>"
+    "<a id='memberinfo' class='hide'></a>"
+(if context::is-logged-in
+	(+ "<a id='userinfo' href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a>"
+	"<a href='/logout'>logout</a>")
+	"<a href='/user'>login</a>")
+"</div>"
+
+(if context::is-logged-in
+	(+ "<script type='text/javascript'>
+		window.__AutoHidePt = " [context::user-data : UserOp::AUTOHIDE] ";
+	</script>"))
+)

@@ -11,23 +11,32 @@ import org.coyove.eugine.util.*;
 public class SEExplode extends SExpression {
     private SExpression list;
 
-    public SEExplode(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument", ha);
+    public SEExplode() {}
 
+    public SEExplode(Atom ha, Compound c) throws VMException {
+        super(ha, c, 1);
         list = SExpression.cast(c.atoms.pop());
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        final SValue var = this.list.evaluate(env);
+        SValue var = this.list.evaluate(env);
         if (var instanceof SList) {
             return new SExploded(var.<List<SValue>>get());
         } else {
-            return new SExploded(new List<SValue>() {{
-                add(var);
-            }});
+            List<SValue> n = new List<SValue>();
+            n.add(var);
+            return new SExploded(n);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEExplode ret = new SEExplode();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.list = this.list.deepClone();
+
+        return ret;
     }
 }

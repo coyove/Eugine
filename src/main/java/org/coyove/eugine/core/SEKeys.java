@@ -13,11 +13,10 @@ import java.util.HashMap;
 public class SEKeys extends SExpression {
     private SExpression dict;
 
-    public SEKeys(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument");
+    public SEKeys() {}
 
+    public SEKeys(Atom ha, Compound c) throws VMException {
+        super(ha, c, 1);
         dict = SExpression.cast(c.atoms.pop());
     }
 
@@ -25,15 +24,28 @@ public class SEKeys extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
 
         SValue dict = this.dict.evaluate(env);
+        List<SValue> ret = new List<SValue>();
         if (dict instanceof SDict) {
-            List<SValue> ret = new List<SValue>();
-            for (String k : dict.<HashMap<String, SValue>>get().keySet())
+            for (String k : dict.<HashMap<String, SValue>>get().keySet()) {
                 ret.add(new SString(k));
+            }
+        } else if (dict instanceof SClosure) {
+            for (String k : ((SClosure) dict).extra.keySet()) {
+                ret.add(new SString(k));
+            }
+        } else {
+            throw new VMException(2037, "mismatch types", headAtom);
+        }
 
-            return new SList(ret);
-        }
-        else{
-            throw new VMException("you can only get keys of a dict", headAtom);
-        }
+        return new SList(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEKeys ret = new SEKeys();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.dict = this.dict.deepClone();
+        return ret;
     }
 }

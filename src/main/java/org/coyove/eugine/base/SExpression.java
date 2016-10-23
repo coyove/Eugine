@@ -11,10 +11,18 @@ import org.coyove.eugine.core.*;
 public abstract class SExpression implements java.io.Serializable {
     protected Atom headAtom;
     protected Compound tailCompound;
+    public int argCount; // for library closure
 
     public SExpression(Atom ha, Compound c) {
         headAtom = ha;
         tailCompound = c;
+    }
+
+    public SExpression(Atom ha, Compound c, int count) throws VMException {
+        this(ha, c);
+        argCount = count;
+        if (c.atoms.size() < count)
+            throw new VMException(2000, "not enough arguments", ha);
     }
 
     public SExpression() {
@@ -99,7 +107,7 @@ public abstract class SExpression implements java.io.Serializable {
                 // TODO
                 return new SEVariable(tvalue, head, c);
             } else {
-                return new SECall(tvalue, castPlain(c), head, c);
+                return new SECall(head, c);
             }
 
         } else {
@@ -112,4 +120,6 @@ public abstract class SExpression implements java.io.Serializable {
     public SValue execute(ExecEnvironment env) throws VMException {
         return this.evaluate(env);
     }
+
+    public abstract SExpression deepClone() throws VMException;
 }

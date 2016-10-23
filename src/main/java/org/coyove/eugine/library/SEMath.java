@@ -1,11 +1,15 @@
 package org.coyove.eugine.library;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.security.MessageDigest;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -14,15 +18,18 @@ import java.util.Random;
 public class SEMath extends SExpression {
     private SExpression argument;
     private SExpression argument2;
-    private OPERATION func;
     private static Random defaultRandom = new Random(new Date().getTime());
 
-    public enum OPERATION { SIN, COS, TAN, ASIN, ACOS, ATAN, ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, POW }
+    private OPERATION func;
+
+    public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN,
+        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, UTC_TIME, SHA, POW}
+
+    public SEMath() {
+    }
 
     public SEMath(Atom ha, Compound c, OPERATION f) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException("it takes 1 argument", ha);
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
         if (c.atoms.size() > 0)
@@ -52,11 +59,11 @@ public class SEMath extends SExpression {
             case ROUND:
                 return new SInteger(Math.round(n));
             case FLOOR:
-                return new SInteger((long)Math.floor(n));
+                return new SInteger((long) Math.floor(n));
             case ABS:
                 return new SDouble(Math.abs(n));
             case SGN:
-                return new SInteger((long)Math.signum(n));
+                return new SInteger((long) Math.signum(n));
             case SQRT:
                 return new SDouble(Math.sqrt(n));
             case POW:
@@ -64,16 +71,45 @@ public class SEMath extends SExpression {
                 return new SDouble(Math.pow(n, p));
             case RANDOM:
                 if (n != 0) {
-                    Random rand = new Random((long)n);
+                    Random rand = new Random((long) n);
                     return new SDouble(rand.nextDouble());
                 } else {
                     return new SDouble(defaultRandom.nextDouble());
                 }
             case TIME:
-                return new SDouble((new Date()).getTime() / n);
+                return new SInteger((long) (new Date().getTime() / n));
+            case UTC_TIME:
+                return new SString(DateFormatUtils.formatUTC((long) n,
+                        "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
+            case SHA:
+                try {
+                    MessageDigest md = MessageDigest.getInstance(
+                            String.format("SHA-%d", ((int) n)));
+                    String text = Utils.cast(argument2.evaluate(env), SString.class).get();
+                    if (text != null) {
+                        return new SString(Utils.bytesToHexString(md.digest(text.getBytes("UTF-8"))));
+                    } else {
+                        return new SNull();
+                    }
+                } catch (Exception ex) {
+                    return new SNull();
+                }
             default:
-                throw new VMException("not implemented", headAtom);
+                throw new VMException(3007, "not implemented", headAtom);
         }
     }
 
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEMath ret = new SEMath();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+        if (this.argument2 != null) {
+            ret.argument2 = this.argument2.deepClone();
+        }
+        ret.func = this.func;
+
+        return ret;
+    }
 }

@@ -1,5 +1,7 @@
 package org.coyove.eugine.util;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * Created by coyove on 2016/9/9.
  */
@@ -18,7 +20,7 @@ public class LineFinder
         lineIndex = 0;
     }
 
-    public int[] find(int index)
+    public Pair<Integer, Integer> find(int index)
     {
         while (lastIndex < text.length())
         {
@@ -35,7 +37,7 @@ public class LineFinder
             lineIndex++;
         }
 
-        return new int[]{lastLine, lineIndex};
+        return Pair.of(lastLine, lineIndex);
     }
 
     public String unescapeString(String st) {

@@ -12,10 +12,10 @@ public class SESplit extends SExpression {
     private SExpression text;
     private SExpression delim;
 
+    public SESplit() {}
+
     public SESplit(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException("it takes 2 arguments", ha);
+        super(ha, c, 2);
 
         text = SExpression.cast(c.atoms.pop());
         delim = SExpression.cast(c.atoms.pop());
@@ -24,10 +24,10 @@ public class SESplit extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SString text = Utils.cast(this.text.evaluate(env), SString.class,
-                new VMException("the first argument must be a string", headAtom));
+                new VMException(3010, "subject must be string", headAtom));
 
         SString delim = Utils.cast(this.delim.evaluate(env), SString.class,
-                new VMException("the delimiter must be a string", headAtom));
+                new VMException(3011, "delimiter must be string", headAtom));
 
         List<SValue> ret = new List<SValue>();
         for (String s : text.<String>get().split(delim.<String>get())) {
@@ -35,5 +35,16 @@ public class SESplit extends SExpression {
         }
 
         return new SList(ret);
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SESplit ret = new SESplit();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.text = this.text.deepClone();
+        ret.delim = this.delim.deepClone();
+
+        return ret;
     }
 }

@@ -2,7 +2,7 @@
 
 ;========================================
 
-(defun last-elem (lst) (head (sub lst [(len lst) - 1])))
+(def last-elem (lst) (head (sub lst [(len lst) - 1])))
 
 (set ending (floor [(random 0) * 1000]))
 
@@ -10,7 +10,7 @@
 
 ;========================================
 
-(defun zip-list (lst) 
+(def zip-list (lst) 
 	"zip multiple lists"
 	(->
 		(if [[(type lst) == "List"] and [(len lst) > 0]]
@@ -106,7 +106,7 @@ HTTPS://google.com if you regard safe-browsing as important")
 [lt = [(l r) => (> l r)]]
 [gte = [(l r) => (<= l r)]]
 
-(defun quick-sort (lst)
+(def quick-sort (lst)
 	"Slowest quick sort using recursion"
 	(cond #t
 		([(len lst) == 0] (list))
@@ -122,7 +122,7 @@ HTTPS://google.com if you regard safe-browsing as important")
 	)
 )
 
-(defun quick-sort-2 (arr) (->
+(def quick-sort-2 (arr) (->
 	"A bit faster"
 	[swap = [(a b) => (->
 		[tmp = [arr : a]]
@@ -130,7 +130,7 @@ HTTPS://google.com if you regard safe-browsing as important")
 		[[arr : b] = tmp]
 	)]]
 
-	[sort = [(beg end) => (if [end > [beg + 1]] (->
+	[sort. = [(beg end) => (if [end > [beg + 1]] (->
 		[p = [arr : beg]] 
 		[l = [beg + 1]]
 		[r = end]
@@ -144,15 +144,15 @@ HTTPS://google.com if you regard safe-browsing as important")
 	    
 	    (swap [l --] beg)
 
-	    (sort beg l)
-	    (sort r end)
+	    (sort. beg l)
+	    (sort. r end)
 	))]]
 
-	(sort 0 (len arr))
+	(sort. 0 (len arr))
 	(arr)
 ))
 
-(defun quick-sort-3 (arr) (->
+(def quick-sort-3 (arr) (->
 	"Got rid of recursion"
 	[swap = [(a b) => (->
 		[tmp = [arr : a]]

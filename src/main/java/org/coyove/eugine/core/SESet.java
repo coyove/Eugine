@@ -20,10 +20,10 @@ public class SESet extends SExpression {
     public enum ACTION { IMMUTABLE, MUTABLE }
     public enum DECLARE { DECLARE, SET }
 
+    public SESet() {}
+
     public SESet(Atom ha, Compound c, DECLARE d, ACTION a) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 1)
-            throw new VMException("it takes at least 1 argument", ha);
+        super(ha, c, 1);
 
         Base n = c.atoms.pop();
         if (n instanceof Atom && ((Atom) n).token.type == Token.TokenType.ATOMIC) {
@@ -62,21 +62,19 @@ public class SESet extends SExpression {
             ret.immutable = false;
         }
 
-        if (action == ACTION.IMMUTABLE)
+        if (action == ACTION.IMMUTABLE) {
             ret.immutable = true;
-//
-//        ret.refDict = null;
-//        ret.refList = null;
+        }
 
         if (directName) {
             String sn = n.get();
 
             if (declare == DECLARE.SET) {
                 if (!env.containsKey(sn) && env.strict)
-                    throw new VMException("strict mode", headAtom);
+                    throw new VMException(2042, "strict mode", headAtom);
 
                 if (env.containsKey(sn) && env.get(sn).immutable)
-                    throw new VMException("variable '" + sn + "' is immutable", headAtom);
+                    throw new VMException(2043, "variable '" + sn + "' is immutable", headAtom);
 
                 env.put(sn, ret);
             } else if (declare == DECLARE.DECLARE) {
@@ -84,8 +82,11 @@ public class SESet extends SExpression {
                 env.putVar(sn, ret);
             }
         } else {
-            if (n.refer != null && n.refer instanceof SValue && ((SValue) n.refer).immutable)
-                throw new VMException("referred variable is immutable", headAtom);
+            if (n.refer != null && n.refer instanceof SValue && ((SValue) n.refer).immutable) {
+                if (!(n.refer instanceof SClosure)) {
+                    throw new VMException(2044, "referred variable is immutable", headAtom);
+                }
+            }
 
             if (n.refer instanceof SDict) {
                 ((SDict) n.refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
@@ -103,13 +104,29 @@ public class SESet extends SExpression {
                             ((SClosure) n.refer).extra.put(n.refKey, ret);
                         }
                     } else {
-                        throw new VMException("failed to set field", headAtom);
+                        throw new VMException(2045, "failed to set field", headAtom);
                     }
                 } catch (Exception e) {
-                    throw new VMException(e.getMessage(), headAtom);
+                    throw new VMException(2046, e.getMessage(), headAtom);
                 }
             }
         }
+
+        return ret;
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SESet ret = new SESet();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.varName = this.varName.deepClone();
+        ret.varValue = this.varValue.deepClone();
+
+        ret.directName = this.directName;
+        ret.action  =this.action;
+        ret.declare = this.declare;
 
         return ret;
     }

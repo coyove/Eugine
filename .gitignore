@@ -1,4 +1,7 @@
 .idea/
 target/
-out/
 lib/
+data/
+
+*.jar
+cookies.txt

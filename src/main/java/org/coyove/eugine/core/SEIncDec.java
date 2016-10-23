@@ -7,15 +7,14 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SEIncDec extends SESet {
-    private static Compound wrap(Atom ha, final Compound c, boolean inc) throws VMException {
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument", ha);
+    private static Compound wrap(Atom ha, Compound c, boolean inc) throws VMException {
+        if (c.atoms.size() < 1)
+            throw new VMException(2000, "not enough arguments", ha);
 
         Compound ret = new Compound();
         Compound op = new Compound();
-        ret.atoms = new List<Base>() {{
-            add(c.atoms.head());
-        }};
+        ret.atoms = new List<Base>();
+        ret.atoms.add(c.atoms.head());
 
         op.atoms.add(new Atom(new Token(Token.TokenType.ATOMIC, inc ? "+" : "-")));
         op.atoms.add(ret.clone());

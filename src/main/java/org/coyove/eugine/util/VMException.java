@@ -8,9 +8,15 @@ import org.coyove.eugine.parser.Token;
  */
 public class VMException extends Exception {
     public static String exceptionFormat = "'%1$s': %2$s, File: %3$s, Line: %4$d:%5$d";
+    public int errorCode = 0;
 
     public VMException(String message) {
         super(message);
+    }
+
+    public VMException(int code, String message) {
+        super(message);
+        errorCode = code;
     }
 
     public VMException(String message, Token tok) {
@@ -21,5 +27,15 @@ public class VMException extends Exception {
     public VMException(String message, Atom a) {
         super(String.format(exceptionFormat,
                 a.token.value, message, a.token.source, a.token.line + 1, a.token.lineIndex));
+    }
+
+    public VMException(int code, String message, Atom a) {
+        this(message, a);
+        errorCode = code;
+    }
+
+    public VMException(int code, String message, Token a) {
+        this(message, a);
+        errorCode = code;
     }
 }

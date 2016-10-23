@@ -12,13 +12,19 @@ public class SEFor extends SExpression {
     private SExpression list;
     private SExpression body;
 
-    public SEFor(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException("it takes 2 arguments", ha);
+    private DIRECTION direction;
+
+    public enum DIRECTION {ASC, DESC}
+
+    public SEFor() {
+    }
+
+    public SEFor(Atom ha, Compound c, DIRECTION dir) throws VMException {
+        super(ha, c, 2);
 
         list = SExpression.cast(c.atoms.pop());
         body = SExpression.cast(c.atoms.pop());
+        direction = dir;
     }
 
     private SValue execLoop(SClosure body, SValue v, int idx) throws VMException {
@@ -29,14 +35,20 @@ public class SEFor extends SExpression {
         if (body.arguments.size() == 2)
             newEnv.put(body.arguments.get(1), new SInteger((long) idx));
 
-        newEnv.parentEnv = body.innerEnv;
-        return body.body.evaluate(newEnv);
+        newEnv.parentEnv = body.outerEnv;
+        SValue ret = new SNull();
+
+        for (SExpression se : body.body) {
+            ret = se.evaluate(newEnv);
+        }
+
+        return ret;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SClosure body = Utils.cast(this.body.evaluate(env), SClosure.class,
-                new VMException("the loop body must be a lambda or a named function", headAtom));
+                new VMException(2017, "invalid loop body", headAtom));
 
         SValue list_ = this.list.evaluate(env);
         List<SValue> values = new List<SValue>();
@@ -46,16 +58,12 @@ public class SEFor extends SExpression {
 
         if (list_ instanceof SList) {
             values = ((SList) list_).get();
-
-            if (values.size() == 0) {
-                whileLoop = true;
-                condAlwaysTrue = true;
-            }
         } else if (list_ instanceof SBool) {
             whileLoop = true;
             condAlwaysTrue = false;
-        } else
-            throw new VMException("the first argument must be a list or a bool", headAtom);
+        } else {
+            throw new VMException(2018, "invalid loop condition", headAtom);
+        }
 
         if (whileLoop) {
             while (condAlwaysTrue || this.list.evaluate(env).<Boolean>get()) {
@@ -64,13 +72,33 @@ public class SEFor extends SExpression {
                     break;
             }
         } else {
-            for (int i = 0; i < values.size(); i++) {
-                SValue ret = execLoop(body, values.get(i), i);
-                if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
-                    break;
+            if (direction == DIRECTION.ASC) {
+                for (int i = 0; i < values.size(); i++) {
+                    SValue ret = execLoop(body, values.get(i), i);
+                    if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                        break;
+                }
+            } else {
+                for (int i = values.size() - 1; i >= 0; i--) {
+                    SValue ret = execLoop(body, values.get(i), i);
+                    if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                        break;
+                }
             }
         }
 
         return new SNull();
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEFor ret = new SEFor();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.list = this.list.deepClone();
+        ret.body = this.body.deepClone();
+        ret.direction = this.direction;
+
+        return ret;
     }
 }

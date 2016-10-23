@@ -25,13 +25,23 @@ public class SKeywords {
                 });
                 put("type", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEType(ha, c);
+                        return new SEType(ha, c, SEType.TYPE.TYPE);
+                    }
+                });
+                put("addressof", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEType(ha, c, SEType.TYPE.ADDR);
                     }
                 });
 
                 put("chain", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEChain(ha, c);
+                    }
+                });
+                put("sync", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SESync(ha, c);
                     }
                 });
                 put("->", new CallableKeyword() {
@@ -86,12 +96,17 @@ public class SKeywords {
                 });
                 put("get", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c);
+                        return new SEGet(ha, c, false);
                     }
                 });
                 put(":", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c);
+                        return new SEGet(ha, c, false);
+                    }
+                });
+                put("::", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEGet(ha, c, true);
                     }
                 });
                 put("list", new CallableKeyword() {
@@ -119,9 +134,9 @@ public class SKeywords {
                         return new SELambda(ha, c);
                     }
                 });
-                put("defun", new CallableKeyword() {
+                put("def", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEDefun(ha, c);
+                        return new SEDef(ha, c);
                     }
                 });
                 put("if", new CallableKeyword() {
@@ -136,7 +151,12 @@ public class SKeywords {
                 });
                 put("loop", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFor(ha, c);
+                        return new SEFor(ha, c, SEFor.DIRECTION.ASC);
+                    }
+                });
+                put("roop", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFor(ha, c, SEFor.DIRECTION.DESC);
                     }
                 });
 
@@ -183,7 +203,12 @@ public class SKeywords {
 
                 put("+", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEAdd(ha, c);
+                        return new SEAdd(ha, c, false);
+                    }
+                });
+                put("+.", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEAdd(ha, c, true);
                     }
                 });
                 put("-", new CallableKeyword() {
@@ -341,6 +366,16 @@ public class SKeywords {
                         return new SEMath(ha, c, SEMath.OPERATION.TIME);
                     }
                 });
+                put("utc-time", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEMath(ha, c, SEMath.OPERATION.UTC_TIME);
+                    }
+                });
+                put("sha", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEMath(ha, c, SEMath.OPERATION.SHA);
+                    }
+                });
                 put("round", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEMath(ha, c, SEMath.OPERATION.ROUND);
@@ -382,6 +417,21 @@ public class SKeywords {
                         return new SEListOp(ha, c, SEListOp.OPERATION.LAST);
                     }
                 });
+                put("insert", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEListOp(ha, c, SEListOp.OPERATION.INSERT);
+                    }
+                });
+                put("sort", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEListOp(ha, c, SEListOp.OPERATION.SORT);
+                    }
+                });
+                put("reverse", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEReverse(ha, c);
+                    }
+                });
                 put("sub", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SESub(ha, c);
@@ -391,6 +441,26 @@ public class SKeywords {
                 put("split", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SESplit(ha, c);
+                    }
+                });
+                put("replace", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEReplace(ha, c, SEReplace.OPERATION.NORMAL);
+                    }
+                });
+                put("re-place", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEReplace(ha, c, SEReplace.OPERATION.REGEX);
+                    }
+                });
+                put("trim", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SETrim(ha, c);
+                    }
+                });
+                put("match", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SERegexMatch(ha, c);
                     }
                 });
                 put("asc", new CallableKeyword() {
@@ -413,10 +483,45 @@ public class SKeywords {
                         return new SENum(ha, c);
                     }
                 });
+                put("read-file", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_TEXT);
+                    }
+                });
+                put("read-file-binary", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_BINARY);
+                    }
+                });
+                put("read-file-lines", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_LINES);
+                    }
+                });
+                put("write-file", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.WRITE);
+                    }
+                });
+                put("append-file", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.APPEND);
+                    }
+                });
+                put("file-exists", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEFile(ha, c, SEFile.OPERATION.EXISTS);
+                    }
+                });
 
                 put(".", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropMethod(ha, c);
+                        return new SEInteropMethod(ha, c, SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE);
+                    }
+                });
+                put("call", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEInteropMethod(ha, c, SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
                     }
                 });
                 put("cls", new CallableKeyword() {
@@ -424,9 +529,36 @@ public class SKeywords {
                         return new SEInteropClass(ha, c);
                     }
                 });
+                put("cast", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEInteropCast(ha, c);
+                    }
+                });
                 put("new", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SEInteropNew(ha, c);
+                    }
+                });
+
+                put("go", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEThread(ha, c);
+                    }
+                });
+                put("sleep", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SESleep(ha, c);
+                    }
+                });
+                put("try", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SETry(ha, c);
+                    }
+                });
+
+                put("buffer", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEBytesBuffer(ha, c);
                     }
                 });
             }};

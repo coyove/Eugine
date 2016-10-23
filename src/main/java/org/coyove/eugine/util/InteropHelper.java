@@ -1,5 +1,6 @@
 package org.coyove.eugine.util;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.value.*;
@@ -73,7 +74,6 @@ public class InteropHelper {
             for (SValue value : list) {
                 ret.add(castSValue(value, c.getComponentType()));
             }
-
             return ret.toArray();
         } else {
             return obj.get();
@@ -89,11 +89,11 @@ public class InteropHelper {
         int i = 0;
         for (SValue def : definition.<List<SValue>>get()) {
             if (vararg)
-                throw new VMException("vararg must be at the tail of the definition");
+                throw new VMException(4001, "vararg must be at the tail of the definition");
 
             SString cls = Utils.cast(def, SString.class);
             if (cls == null)
-                throw new VMException("must specify the type using a string");
+                throw new VMException(4002, "must specify the type using string");
 
             String clsName = cls.get();
 
@@ -103,22 +103,44 @@ public class InteropHelper {
             }
 
             if (i >= args.size())
-                throw new VMException("not enough arguments");
+                throw new VMException(4003, "not enough arguments");
 
             try {
                 Class c = ClassUtils.getClass(clsName);
                 classes.add(c);
 
-                Object ret = InteropHelper.castSValue(args.get(i++), c);
+                SValue value = args.get(i++);
+                Object ret = InteropHelper.castSValue(value, c);
 
-                if (c.isArray()) {
+                if (value instanceof SObject) {
+                    passArgs.add(value.get());
+                } else if (c.isArray()) {
                     Object[] tmp = (Object[]) ret;
-                    passArgs.add(Arrays.copyOf(tmp, tmp.length, c));
+                    int len = tmp.length;
+
+                    Class p = c.getComponentType();
+                    if (p == int.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Integer[].class)));
+                    } else if (p == double.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Double[].class)));
+                    } else if (p == float.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Float[].class)));
+                    } else if (p == long.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Long[].class)));
+                    } else if (p == byte.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Byte[].class)));
+                    } else if (p == short.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Short[].class)));
+                    } else if (p == char.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Character[].class)));
+                    } else {
+                        passArgs.add(Arrays.copyOf(tmp, len, c));
+                    }
                 } else {
                     passArgs.add(ret);
                 }
             } catch (ClassNotFoundException ex) {
-                throw new VMException("cannot find type '" + clsName + "'");
+                throw new VMException(4004, "cannot find type '" + clsName + "'");
             }
         }
 
@@ -133,7 +155,7 @@ public class InteropHelper {
             f.setAccessible(true);
             return InteropHelper.castJavaType(f.get(obj));
         } catch (Exception e) {
-            throw new VMException("failed to get '" + field + "', " + e);
+            throw new VMException(4005, "failed to get '" + field + "', " + e);
         }
     }
 
@@ -144,7 +166,7 @@ public class InteropHelper {
             f.set(obj, castSValue(value, f.getType()));
             return value;
         } catch (Exception e) {
-            throw new VMException("failed to set '" + field + "', " + e);
+            throw new VMException(4006, "failed to set '" + field + "', " + e);
         }
     }
 }

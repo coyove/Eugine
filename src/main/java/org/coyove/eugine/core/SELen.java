@@ -11,10 +11,10 @@ import org.coyove.eugine.util.*;
 public class SELen extends SExpression {
     private SExpression argument;
 
+    public SELen() {}
+
     public SELen(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() != 1)
-            throw new VMException("it takes 1 argument");
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
     }
@@ -28,7 +28,21 @@ public class SELen extends SExpression {
         } else if (obj instanceof SList) {
             return new SInteger((long) obj.<List<SValue>>get().size());
         } else {
+            if (obj.get() instanceof byte[]) {
+                byte[] buf = obj.get();
+                return new SInteger(buf.length);
+            }
+
             return new SInteger((long) 0);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SELen ret = new SELen();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+        return ret;
     }
 }

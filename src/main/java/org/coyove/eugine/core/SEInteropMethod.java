@@ -17,16 +17,19 @@ public class SEInteropMethod extends SExpression {
     private SExpression definition;
     private List<SExpression> arguments;
 
-    public SEInteropMethod(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 3)
-            throw new VMException("it takes at least 3 arguments", ha);
+    private RETURN_TYPE type;
+    public enum RETURN_TYPE { DIRECT_RETURN, CAST_TO_SVALUE }
+
+    public SEInteropMethod() {}
+
+    public SEInteropMethod(Atom ha, Compound c, RETURN_TYPE t) throws VMException {
+        super(ha, c, 3);
 
         subject = SExpression.cast(c.atoms.pop());
         methodName = SExpression.cast(c.atoms.pop());
         definition = SExpression.cast(c.atoms.pop());
         arguments = SExpression.castPlain(c);
-
+        type = t;
     }
 
     @Override
@@ -34,21 +37,21 @@ public class SEInteropMethod extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue sub = subject.evaluate(env);
         if (sub instanceof SNull)
-            throw new VMException("null object found", headAtom);
+            throw new VMException(2028, "null object found", headAtom);
 
         SString mn = Utils.cast(methodName.evaluate(env), SString.class,
-                new VMException("method name must be a string", headAtom));
+                new VMException(2029, "method name must be string", headAtom));
         String method = mn.get();
 
         Object[] ret;
         List<SValue> args = SExpression.eval(arguments, env);
         SList definition = Utils.cast(this.definition.evaluate(env), SList.class,
-                new VMException("must provide " + method + "'s definition", headAtom));
+                new VMException(2030, "needs " + method + "'s definition", headAtom));
 
         try {
             ret = InteropHelper.formatDefinition(definition, args);
         } catch (VMException ex) {
-            throw new VMException(ex.getMessage(), headAtom);
+            throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
 
         List<Class> classes = (List<Class>)ret[0];
@@ -57,21 +60,36 @@ public class SEInteropMethod extends SExpression {
         try {
             Object obj = sub.get();
 
-            if (obj instanceof Class) {
-                Method m = ((Class) obj).getDeclaredMethod(method, classes.toArray(new Class[classes.size()]));
-                m.setAccessible(true);
+            Method m = (obj instanceof Class ? (Class) obj : obj.getClass())
+                    .getDeclaredMethod(method, classes.toArray(new Class[classes.size()]));
+            m.setAccessible(true);
 
-                return InteropHelper.castJavaType(m.invoke(null, passArgs.toArray()));
+            Object result = m.invoke((obj instanceof Class) ? null : obj, passArgs.toArray());
+
+            if (this.type == RETURN_TYPE.DIRECT_RETURN) {
+                return new SObject(result);
             } else {
-                Method m = obj.getClass().getDeclaredMethod(method, classes.toArray(new Class[classes.size()]));
-                m.setAccessible(true);
-                return InteropHelper.castJavaType(m.invoke(obj, passArgs.toArray()));
+                return InteropHelper.castJavaType(result);
             }
 
         } catch (InvocationTargetException ie) {
-            throw new VMException("error caused by '" + method + "', " + ie.getCause(), headAtom);
+            throw new VMException(2031, "error caused by '" + method + "': " + ie.getCause(), headAtom);
         } catch (Exception e) {
-            throw new VMException("error found when invoking '" + method + "', " + e, headAtom);
+            throw new VMException(2032, "invoking '" + method + "' failed, " + e, headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEInteropMethod ret = new SEInteropMethod();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+
+        ret.subject = this.subject.deepClone();
+        ret.methodName = this.methodName.deepClone();
+        ret.definition = this.definition.deepClone();
+        ret.arguments = List.deepClone(this.arguments);
+        ret.type = this.type;
+        return ret;
     }
 }

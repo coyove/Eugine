@@ -41,7 +41,7 @@
 
 ;================================================
 
-(defun left-padder (n c)
+(def left-padder (n c)
 	"padder can either pad a string or a list"
 	(lambda (subject) (->
 		(cond #t

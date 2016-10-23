@@ -10,7 +10,7 @@
 (assert (eq ["" . @format (@java.lang.String @java.lang.Object...) "hello %s %.2f" (list "world" 1.0)] 
 	"hello world 1.00") "Java interop (format)")
 
-(defun new' (class-name arg...) {
+(def new' (class-name arg...) {
     (if [(len arg) == 0]
         (new (cls class-name) ())
         (new (cls class-name) (list [arg : 0]) [arg : 1])

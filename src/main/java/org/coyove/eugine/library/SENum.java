@@ -11,11 +11,10 @@ import org.coyove.eugine.util.*;
 public class SENum extends SExpression {
     private SExpression argument;
 
-    public SENum(Atom ha, Compound c) throws VMException
-    {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException("it takes 1 argument");
+    public SENum() {}
+
+    public SENum(Atom ha, Compound c) throws VMException {
+        super(ha, c, 1);
 
         argument = SExpression.cast(c.atoms.pop());
     }
@@ -23,6 +22,7 @@ public class SENum extends SExpression {
     private SValue convert(SValue arg) throws VMException {
         if (arg instanceof SString) {
             String str = arg.get();
+            str = str.trim();
             try {
                 if (str.contains(".")) {
                     return new SDouble(Double.parseDouble(str));
@@ -30,7 +30,7 @@ public class SENum extends SExpression {
                     return new SInteger(Long.parseLong(str));
                 }
             } catch (Exception e) {
-                throw new VMException("invalid content to convert", headAtom);
+                return new SNull();
             }
         } else if (arg instanceof SBool) {
             return new SInteger(arg.<Boolean>get() ? 1 : 0);
@@ -47,13 +47,22 @@ public class SENum extends SExpression {
         } else if (arg instanceof SDouble) {
             return new SInteger(arg.<Double>get().longValue());
         } else {
-            throw new VMException("invalid content to convert", headAtom);
+            return new SNull();
         }
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException
-    {
+    public SValue evaluate(ExecEnvironment env) throws VMException {
         return convert(argument.evaluate(env));
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SENum ret = new SENum();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.argument = this.argument.deepClone();
+
+        return ret;
     }
 }

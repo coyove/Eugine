@@ -1,8 +1,11 @@
 package org.coyove.eugine.parser;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.coyove.eugine.util.*;
 
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.*;
 
@@ -28,12 +31,12 @@ public class Parser {
                 "(%\"(?<rawstr>(\"\"|[^\"])*)\")|" +
                         "(\"(?<str>(\\\\.|[^\"\\\\])*)\")|" +
                         "(?<paren>[\\(\\)\\[\\]\\{\\}])|" +
-                        "((?<atom>[^\\(\\)\\[\\]\\{\\}\\s\\r\\n;]+)(?=[\\s\\r\\n\\(\\)\\[\\]\\{\\}]+))|" +
+                        "((?<atom>[^\\(\\)\\[\\]\\{\\}\\s\\r\\n;]+)(?=[\\s\\r\\n\\(\\)\\[\\]\\{\\};]+))|" +
                         "(?<comment>;(.|\\r)*?(\\n|$))"
         );
 
         if (text.length() < 2)
-            throw new VMException("Invalid code");
+            throw new VMException(1000, "Invalid code");
 
         basePath = path;
 
@@ -46,40 +49,60 @@ public class Parser {
             if (getGroup(m, "comment") != null)
                 continue;
 
+            Pair<Integer, Integer> n = finder.find(m.start());
             Token tok = new Token();
+            tok.line = n.getLeft();
+            tok.lineIndex = n.getRight();
             tok.source = source;
 
             if (getGroup(m, "str") != null) {
                 tok.type = Token.TokenType.STRING;
                 tok.value = finder.unescapeString(getGroup(m, "str"));
+                tokens.add(tok);
             } else if (getGroup(m, "rawstr") != null) {
                 tok.type = Token.TokenType.STRING;
                 tok.value = getGroup(m, "rawstr").replaceAll("\"\"", "\"");
+                tokens.add(tok);
             } else if (getGroup(m, "paren") != null) {
                 tok.value = getGroup(m, "paren");
                 tok.type = Base.bracketLookup.get(tok.value);
+                tokens.add(tok);
             } else if (getGroup(m, "atom") != null) {
                 String v = getGroup(m, "atom");
 
-                try {
-                    if (v.contains(".")) {
-                        tok.value = Double.parseDouble(v);
-                        tok.type = Token.TokenType.DOUBLE;
-                    } else {
-                        tok.value = Long.parseLong(v);
-                        tok.type = Token.TokenType.INTEGER;
+                if (v.contains("::") && !v.equals("::")) {
+                    String[] parts = v.split("::");
+                    Token[] toks = new Token[parts.length + 3];
+
+                    toks[0] = new Token(Token.TokenType.LPAREN, "(");
+                    toks[toks.length - 1] = new Token(Token.TokenType.RPAREN, ")");
+                    toks[1] = new Token(Token.TokenType.ATOMIC, "::");
+                    toks[2] = new Token(Token.TokenType.ATOMIC, parts[0].isEmpty() ? "~this" : parts[0]);
+
+                    for (int i = 1; i < parts.length; i++) {
+                        toks[2 + i] = new Token(Token.TokenType.ATOMIC, parts[i]);
                     }
-                } catch (Exception e) {
-                    tok.type = Token.TokenType.ATOMIC;
-                    tok.value = v;
+
+                    tokens.addAll(Arrays.asList(toks));
+
+                } else {
+                    try {
+                        if (v.contains(".")) {
+                            tok.value = Double.parseDouble(v);
+                            tok.type = Token.TokenType.DOUBLE;
+                            tokens.add(tok);
+                        } else {
+                            tok.value = Long.parseLong(v);
+                            tok.type = Token.TokenType.INTEGER;
+                            tokens.add(tok);
+                        }
+                    } catch (Exception e) {
+                        tok.type = Token.TokenType.ATOMIC;
+                        tok.value = v;
+                        tokens.add(tok);
+                    }
                 }
             }
-
-            int[] n = finder.find(m.start());
-            tok.line = n[0];
-            tok.lineIndex = n[1];
-
-            tokens.add(tok);
         }
 
         Compound chain = new Compound();
@@ -98,7 +121,7 @@ public class Parser {
         if (token.type == Token.TokenType.RPAREN ||
                 token.type == Token.TokenType.RBRACK ||
                 token.type == Token.TokenType.RBRACE)
-            throw new VMException("unexpected character", token);
+            throw new VMException(1000, "unexpected character", token);
 
         if (token.type == Token.TokenType.LPAREN ||
                 token.type == Token.TokenType.LBRACK ||
@@ -122,7 +145,7 @@ public class Parser {
                 comp.atoms.add(parseNext(tokens));
 
             if (tokens.size() == 0 || tokens.head().type != ending)
-                throw new VMException("unexpected character", token);
+                throw new VMException(1000, "unexpected character", token);
 
             tokens.pop();
 
@@ -155,17 +178,26 @@ public class Parser {
                         comp.atoms = new List<Base>();
                         comp.atoms.add(inc);
                     } catch (Exception ex) {
-                        throw new VMException("error when reading '" + codePath + "', " + ex,
+                        throw new VMException(1100, "failed to include '" + codePath + "', " + ex.getMessage(),
                                 (Atom) comp.atoms.get(0));
                     }
-                } else
-                    throw new VMException("path must be a static string", (Atom) comp.atoms.head());
+                } else {
+                    throw new VMException(1101, "path must be a static string", (Atom) comp.atoms.head());
+                }
             }
 
             if (comp.atoms.size() == 3 && comp.atoms.head() instanceof Atom &&
                     ((Atom) comp.atoms.head()).token.value.toString().equals("~define")) {
                 Macro m = new Macro(comp);
                 macros.put(m.macroName, m);
+                return new Compound();
+            }
+
+            if (comp.atoms.size() == 2 && comp.atoms.head() instanceof Atom &&
+                    ((Atom) comp.atoms.head()).token.value.toString().equals("~undef")) {
+                Atom name = Utils.cast(comp.atoms.get(1), Atom.class,
+                        new VMException(1102, "invalid subject to undef", (Atom) comp.atoms.head()));
+                macros.remove(name.token.value.toString());
                 return new Compound();
             }
 

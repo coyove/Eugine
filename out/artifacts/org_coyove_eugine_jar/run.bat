@@ -1,0 +1,1 @@
+java -Xmx256m -Dfile.encoding=utf-8 -cp org.coyove.eugine.jar org.coyove.test.main %1

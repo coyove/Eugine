@@ -1,0 +1,188 @@
+(def calc-rank (lst)
+	(var idx 1)
+	(var points 0.0)
+	(var limit 100.0)
+
+	(loop [idx < (len lst)] [() =>
+		(var karma + 0.0 (num [lst : idx]))
+
+		(cond true
+			([karma > limit] (+= points 1.0))
+			([karma > 9] (+= points (pow [karma / limit] 0.9)))
+			(_ ()))
+
+		(if [[lst : (- idx 1)] == "~fixed"]
+		    { (set points karma) false }
+		    (+= idx 3))
+	])
+
+	(floor points)
+)
+
+(def update-list (list-file id ops...)
+	(var sid + (str id) " ")
+    (var lines read-file-lines list-file)
+
+    (if [lines != null]
+        (loop lines [(item i) =>
+            (if [item starts-with sid] {
+                (var parts split item " ")
+
+                (loop ops [(op) =>
+                    (var idx [op : 0])
+                    (set [parts : idx] ([op : 1] [parts : idx]))
+                ])
+
+                (set [lines : i] join-string parts " ")
+            })
+        ]))
+
+	(write-file list-file lines)
+)
+
+(def recalc-points-of-item (id root-id aye no)
+	(var path get-post-path id)
+
+	; (var aye read-file-lines (+ path "/aye"))
+	(var aye-count len aye)
+	(var aye-points calc-rank aye)
+
+	; (var no read-file-lines (+ path "/no"))
+	(var no-count len no)
+	(var no-points calc-rank no)
+
+	(var points (- aye-points no-points))
+
+	;; update the post data
+	(var data read-file-lines (+ path "/data"))
+	(var old-points num [data : 6])
+	(set [data : 6] (str points))
+	(set [data : 7] (str (/ aye-count 2)))
+	(set [data : 8] (str (/ no-count 2)))
+	(write-file (+ path "/data") data)
+
+	;; update post's author data
+	(var user-dp UserOp::get-data-path [data : 0])
+	(var user-data read-file-lines user-dp)
+	(var karma num [user-data : UserOp::KARMA])
+	(set [user-data : UserOp::KARMA] (str [[karma - old-points] + points]))
+	(write-file user-dp user-data)
+
+    ;; update global users list
+	(update-list (+ ~path "data/users/list") [data : 0] (1 [() => [user-data : UserOp::KARMA]]))
+
+	(var user-list UserOp::get-user-path [data : 0])
+    (var update-action list 2 [() => (str points)])
+
+	(if [[data : 9] != "0"] {
+		;; update item's parent's list
+        (update-list (+ user-list "/comments-list") id update-action)
+        (update-list (+ (get-post-path root-id) "/list") id update-action)
+	} {
+		;; update main list
+		(update-list (+ user-list "/submissions-list") id update-action)
+        (update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id update-action)
+	})
+)
+
+(def verify-and-update-points (opt aye-users no-users vote-marker karma) 
+    (var vote-list if [opt == "aye"] aye-users no-users)
+    (var opposite-list if [opt == "aye"] no-users aye-users)
+
+    (if [(set idx (list-contains vote-list vote-marker)) >= 0]
+        { (del vote-list idx) (del vote-list idx) (del vote-list idx) } ;; cancel the vote
+        {
+            (+. vote-list vote-marker karma (str (time 1)))
+
+            (if [(set idx list-contains opposite-list vote-marker) >= 0] {
+                (del opposite-list idx) (del opposite-list idx) (del opposite-list idx)
+            })
+        })
+)
+
+;; ranking routines
+
+(var incr-counter-for-leaders-ranking 0)
+
+(def ranking ()
+    (var newest (num (read-file (+ ~path "data/posts/main-index"))))
+    (var gap1 / newest 1000)
+    (var gap2 - gap1 1)
+
+    (var data1 read-file-lines (+ ~path "data/posts/" (str gap1) "/list"))
+    (if [data1 == null] (set data1 (list)))
+
+    (var data2 read-file-lines (+ ~path "data/posts/" (str gap2) "/list"))
+    (if [data2 == null] (set data2 (list)))
+
+    (var posts + data1 (explode data2))
+    (try {
+        (loop posts [(post i) =>
+            (var parts (split post " "))
+            (if [(len parts) != 11] (exit 30))
+
+            (var p Post::new (explode parts))
+            (var T / [(time 1) - (num p::created-ts)] 3600000)
+
+            (var R [(num p::points) / (pow [T + 2] 1.8)])
+            (var p::~comparator R)
+            (set [posts : i] p)
+        ])
+    } () (cond ~e
+        (30
+            (set posts (list))
+            (println "Corrupted index file: " file))
+    ))
+
+    (sort posts)
+    (var output (list))
+    (loop posts [(post) =>
+        (+. output (+ (str post::id) " " (str post::comments) " " (str post::points) " "
+            post::state " " post::author " " post::commenter " "
+            (str post::created-ts) " " (str post::commented-ts) " " (encodeURI post::title) " "
+            (str post::parent) " " (str post::root)))
+    ])
+
+    (write-file (+ ~path "data/posts/ranking") output)
+
+    (++ incr-counter-for-leaders-ranking)
+    (if [[incr-counter-for-leaders-ranking % 6] == 1] (leader-ranking ())) ; every 1 minute
+)
+
+(def leader-ranking ()
+	;; users ranking
+    (var users read-file-lines (+ ~path "data/users/list"))
+    (if [users == null] (set users (list)))
+
+    (var leaders list (UserListItem::new "EOF" 0.0 (time 1)))
+
+    (try {
+        (loop users [(user i) =>
+            (var parts (split user " "))
+            (if [(len parts) != 3] (exit 30))
+
+            (var u UserListItem::new (explode parts))
+            
+            (loop leaders [(leader i) =>
+            	(if [u::karma >= leader::karma]
+            		{
+            			(insert leaders i u)
+            			false
+        			})
+        	])
+
+        	(if [(len leaders) > 20] (set leaders sub leaders 0 20))
+        ])
+    } () (cond ~e
+        (30
+            (set users (list))
+            (println "Corrupted users list"))
+    ))
+
+    (var output (list))
+    (loop leaders [(leader) =>
+        (+. output (+ leader::username " " leader::karma " " leader::created-ts))
+    ])
+
+    (write-file (+ ~path "data/users/ranking") output)
+)

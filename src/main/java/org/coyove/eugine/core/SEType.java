@@ -11,16 +11,40 @@ import org.coyove.eugine.util.*;
 public class SEType extends SExpression {
     private SExpression name;
 
-    public SEType(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException("it takes 1 argument", ha);
+    private TYPE type;
+    public enum TYPE {TYPE, ADDR}
+
+    public SEType() {}
+
+    public SEType(Atom ha, Compound c, TYPE t) throws VMException {
+        super(ha, c, 1);
 
         name = SExpression.cast(c.atoms.pop());
+        type = t;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        return new SString(name.evaluate(env).getClass().getSimpleName().substring(1));
+        SValue v = name.evaluate(env);
+
+        if (type == TYPE.ADDR) {
+            return new SInteger(v.hashCode());
+        }
+
+        if (v instanceof SObject) {
+            return new SString(v.underlying.getClass().getSimpleName());
+        } else {
+            return new SString(v.getClass().getSimpleName().substring(1));
+        }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEType ret = new SEType();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.name = this.name.deepClone();
+        ret.type = this.type;
+        return ret;
     }
 }

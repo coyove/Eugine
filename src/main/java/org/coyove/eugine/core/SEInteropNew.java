@@ -6,6 +6,7 @@ import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by coyove on 2016/9/11.
@@ -15,10 +16,10 @@ public class SEInteropNew extends SExpression {
     private SExpression definition;
     private List<SExpression> arguments;
 
+    public SEInteropNew() {}
+
     public SEInteropNew(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() < 2)
-            throw new VMException("it takes at least 1 argument", ha);
+        super(ha, c, 2);
 
         subject = SExpression.cast(c.atoms.pop());
         definition = SExpression.cast(c.atoms.pop());
@@ -30,17 +31,17 @@ public class SEInteropNew extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue sub = subject.evaluate(env);
         if (sub instanceof SNull)
-            throw new VMException("null object found", headAtom);
+            throw new VMException(2033, "null object found", headAtom);
 
         List<SValue> args = SExpression.eval(arguments, env);
         Object[] ret;
         SList definition = Utils.cast(this.definition.evaluate(env), SList.class,
-                new VMException("must provide ctor's definition", headAtom));
+                new VMException(2034, "needs constructor's definition", headAtom));
 
         try {
             ret = InteropHelper.formatDefinition(definition, args);
         } catch (VMException ex) {
-            throw new VMException(ex.getMessage(), headAtom);
+            throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
 
         List<Class> classes = (List<Class>)ret[0];
@@ -54,9 +55,22 @@ public class SEInteropNew extends SExpression {
             ctor.setAccessible(true);
             return InteropHelper.castJavaType(ctor.newInstance(passArgs.toArray()));
 
+        } catch (InvocationTargetException ie) {
+            throw new VMException(2035, "error caused by the constructor: " + ie.getCause(), headAtom);
         } catch (Exception e) {
-            throw new VMException("error found when invoking '" + cls.getSimpleName() + "', " +
-                    e.toString(), headAtom);
+            throw new VMException(2036, "invoking '" + cls.getSimpleName() + "' failed, " +
+                    e.getMessage(), headAtom);
         }
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEInteropNew ret = new SEInteropNew();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.subject = this.subject.deepClone();
+        ret.definition = this.definition.deepClone();
+        ret.arguments = List.deepClone(this.arguments);
+        return ret;
     }
 }

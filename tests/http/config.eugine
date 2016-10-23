@@ -1,0 +1,17 @@
+(struct Config "Configurations"
+	[::port := 8080]
+	[::socket-read-timeout := 5000]
+	[::site-name := "Test Site"]
+	[::salt := "test salt"]
+
+	[::referer := "http://127.0.0.1:8080/"]
+	[::access-slow-cooldown := 10000]
+	[::access-fast-cooldown := 1000]
+
+	[::posts-per-page := 20]
+
+	[::new-member-karma := 10]
+	[::new-member-group := "user"]
+
+	[::cookie-options := (dict ("Expires" 31536000))]
+)

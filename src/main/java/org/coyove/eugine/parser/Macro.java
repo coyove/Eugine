@@ -20,25 +20,25 @@ public class Macro {
     public Macro(Compound macro) throws VMException {
         Atom headAtom = (Atom) macro.atoms.head();
         if (macro.atoms.size() != 3)
-            throw new VMException("must have 2 arguments", headAtom);
+            throw new VMException(1200, "must have 2 arguments", headAtom);
 
         if (macro.atoms.get(1) instanceof Atom)
-            throw new VMException("the 2nd argument must be the macro header", headAtom);
+            throw new VMException(1201, "the 2nd argument must be the macro header", headAtom);
 
         Compound header = (Compound) macro.atoms.get(1);
         if (header.atoms.size() == 0)
-            throw new VMException("macro header must have a name", headAtom);
+            throw new VMException(1202, "macro header must have a name", headAtom);
 
         Base n = header.atoms.get(0);
         if (n instanceof Compound || ((Atom) n).token.type != Token.TokenType.ATOMIC)
-            throw new VMException("macro name must be a string atom", headAtom);
+            throw new VMException(1203, "macro name must be a string atom", headAtom);
 
         macroName = ((Atom) n).token.value.toString();
         macroArgs = new List<String>();
 
         for (Base a : header.atoms.skip(1)) {
             if (a instanceof Compound || ((Atom) a).token.type != Token.TokenType.ATOMIC)
-                throw new VMException("macro argument must be a string atom", headAtom);
+                throw new VMException(1204, "macro argument must be a string atom", headAtom);
 
             macroArgs.add(((Atom) a).token.value.toString());
         }
@@ -50,7 +50,7 @@ public class Macro {
         Atom headAtom = (Atom) src.atoms.head();
 
         if (src.atoms.size() < macroArgs.size() + 1)
-            throw new VMException("not enough arguments to expand macro", headAtom);
+            throw new VMException(1205, "not enough arguments to expand macro", headAtom);
 
         src.atoms.pop(); // first = macro name
 

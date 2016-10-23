@@ -9,17 +9,14 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SEIf extends SExpression {
-    private SExpression condition;
-    private SExpression trueBranch;
-    private SExpression falseBranch;
+    public SExpression condition;
+    public SExpression trueBranch;
+    public SExpression falseBranch;
+
+    public SEIf() {}
 
     public SEIf(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        if (c.atoms.size() == 0)
-            throw new VMException("missing true branch", ha);
-
-        if (c.atoms.size() == 1)
-            throw new VMException("missing false branch", ha);
+        super(ha, c, 2);
 
         condition = SExpression.cast(c.atoms.pop());
         trueBranch = SExpression.cast(c.atoms.pop());
@@ -28,10 +25,7 @@ public class SEIf extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        SBool res = Utils.cast(condition.evaluate(env), SBool.class,
-                new VMException("condition must return a bool", headAtom));
-
-        if (res.get()) {
+        if (evaluateCondition(env)) {
             return trueBranch.evaluate(env);
         } else {
             if (falseBranch != null) {
@@ -40,5 +34,26 @@ public class SEIf extends SExpression {
                 return new SNull();
             }
         }
+    }
+
+    public boolean evaluateCondition(ExecEnvironment env) throws VMException {
+        SBool res = Utils.cast(condition.evaluate(env), SBool.class,
+                new VMException(2026, "invalid condition", headAtom));
+
+        return res.get();
+    }
+
+    @Override
+    public SExpression deepClone() throws VMException {
+        SEIf ret = new SEIf();
+        ret.headAtom = this.headAtom;
+        ret.tailCompound = this.tailCompound;
+        ret.condition = this.condition.deepClone();
+        ret.trueBranch = this.trueBranch.deepClone();
+
+        if (this.falseBranch != null) {
+            ret.falseBranch = this.falseBranch.deepClone();
+        }
+        return ret;
     }
 }

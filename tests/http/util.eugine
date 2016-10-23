@@ -1,0 +1,497 @@
+(var jString (cls @java.lang.String))
+(var jString. "java.lang.String")
+(var jFiles (cls "java.nio.file.Files"))
+(var jFile (cls "java.io.File"))
+(var jPaths (cls "java.nio.file.Paths"))
+(var jURLDecoder (cls "java.net.URLDecoder"))
+(var jURLEncoder (cls "java.net.URLEncoder"))
+(var jMessageDigest (cls "java.security.MessageDigest"))
+(var jStringEscapeUtils (cls "org.apache.commons.lang3.StringEscapeUtils"))
+(var user-access-fast-ring (dict)) ;; 1 second rate
+(var user-access-slow-ring (dict)) ;; 10 seconds rate
+
+(~define (sleep ~millis) [(cls @java.lang.Thread) . @sleep (list @long) ~millis])
+(~define (struct ~name ~desc ~body...) ((def ~name () ~body...) ()))
+(~define (sprintf ~format ~args...) 
+	[jString . @format (list jString. "java.lang.Object...") ~format (list ~args...)])
+
+(struct HTTP-Request "HTTP Request Body Struct"
+   	[::data := ""]
+	[::route := ""]
+	[::action := ""]
+	[::cookie := ""]
+	[::is-logged-in := false]
+	[::username := ""]
+
+	[::parse-post-body := (lambda ()
+		[::post := parse-pairs ::data "&"]
+		(var parts split ::route "\\?")
+		(if [(len parts) == 2] {
+		    (var tmp parse-pairs [parts : 1] "&")
+		    (loop (keys tmp) [(k) => (set [::post : k] [tmp : k])])
+
+		    (set ::route [parts : 0])
+		})
+	)]
+
+	[::parse-cookie := (lambda ()
+	    [::cookies := parse-pairs ::cookie ";"]
+	)]
+
+	(def parse-pairs (text delim)
+	    (var pairs (split text delim))
+	    (var ret (dict))
+        (loop pairs [(pair) =>
+            (var kv (split pair "="))
+            (if [(len kv) == 2] {
+            	(var value decodeURI (trim [kv : 1]))
+            	[[ret : (trim [kv : 0])] := value]
+        	})
+        ])
+
+        (ret)
+	)
+
+	;; response functions
+	[::response-socket := null]
+	[::response-stream := null]
+	[::write-common := (lambda (status ctype)
+        (cond status
+            (404 (::write "HTTP/1.1 404 Not Found\r\n"))
+            (403 (::write "HTTP/1.1 403 Forbidden\r\n"))
+            (400 (::write "HTTP/1.1 400 Bad Request\r\n"))
+            (302 (::write "HTTP/1.1 302 Found\r\n"))
+            (301 (::write "HTTP/1.1 301 Moved Permanently\r\n"))
+            (_   (::write "HTTP/1.1 200 OK\r\n"))
+        )
+
+        (cond ctype
+            (@css   (::write-header "Content-Type" "text/css; charset=utf-8"))
+            (@js    (::write-header "Content-Type" "application/x-javascript; charset=utf-8"))
+            (@plain (::write-header "Content-Type" "text/plain; charset=utf-8"))
+            (@html  (::write-header "Content-Type" "text/html; charset=utf-8"))
+            (@png   (::write-header "Content-Type" "image/png"))
+            (_      (::write-header "Content-Type" "application/octet-stream"))
+        )
+    )]
+	[::write-header := (lambda (key value) 
+		(::write-bytes (buffer (+ key ": " value "\r\n")))
+	)]
+	[::write-cookie := (lambda (key value options)
+	    (var payload (+ key "=" value))
+
+	    (loop (keys options) [(k) => (
+	        (cond k
+                ("Expires"
+                    (var seconds [options : k])
+                    (var millis * seconds 1000)
+                    (+= payload ["; Expires=" + (utc-time [(time 1) + millis])])
+                    (+= payload ["; Max-Age=" + (str seconds)])
+                )
+                ("HttpOnly"
+                    (+= payload "; HttpOnly")
+                )
+                (_
+                    (+= payload (+ "; " k "=" [options : k]))
+                )
+            )
+	    )])
+
+	    (::write-header "Set-Cookie" payload)
+	)]
+	[::write := (lambda (text...) 
+		(var tmp "")
+		(loop text [(t) => (+= tmp t)])
+		(::write-bytes (buffer tmp))
+	)]
+	[::write-bytes := (lambda (bytes) 
+		(if (not [::response-socket . @isClosed ()])
+	    	[::response-stream call @write (list "byte[]") bytes])
+	)]
+	[::close := (lambda () 
+		[::response-stream call @close ()]
+		[::response-socket call @close ()]
+	)]
+
+	;; ctor
+	[::new := (lambda (client)
+		[ret := clone ~this]
+		[ret::headers := (dict)]
+		[ret::post := (dict)]
+		[ret::cookies := (dict)]
+		(var ret::response-socket client)
+		(var ret::response-stream [client . @getOutputStream ()])
+		(ret)
+	)]
+)
+
+(struct Post "Post"
+	[::id := 0]
+	[::comments := 0]
+	[::points := 0]
+	[::state := ""]
+	[::author := ""]
+	[::commenter := ""]
+	[::created-ts := 0]
+	[::commented-ts := 0]
+    [::title := ""]
+    [::parent := 0]
+    [::root := 0]
+
+    [::new := (lambda (id comments points state author commenter created-ts commented-ts title parent root)
+    	[ret := clone ~this]
+        [ret::id           := (num id)]
+        [ret::comments     := (num comments)]
+        [ret::points       := (num points)]
+        [ret::state        := state]
+        [ret::author       := author]
+        [ret::commenter    := commenter]
+        [ret::created-ts   := (num created-ts)]
+        [ret::commented-ts := (num commented-ts)]
+        [ret::title        := (decodeURI title)]
+        [ret::parent 	   := parent]
+        [ret::root         := root]
+        (ret)
+    )]
+)
+
+(struct Item "Item"
+	[::id := 0]
+	[::author := ""]
+	[::title := ""]
+	[::created-ts := 0]
+	[::ModifiedTS := 0]
+	[::state := ""]
+	[::content := ""]
+	[::comments := 0]
+	[::points := 0]
+	[::upvotes := 0]
+	[::downvotes := 0]
+	[::parent := 0]
+	[::root := 0]
+
+	;; refer to handler.eugine/::item
+    [::new := (lambda (id author title created-ts modified-ts state comments points upvotes downvotes parent root content)
+    	[ret := clone ~this]
+        [ret::id           := id]
+        [ret::state        := state]
+        [ret::author       := author]
+        [ret::created-ts   := (num created-ts)]
+        [ret::ModifiedTS  	:= (num modified-ts)]
+        [ret::title        	:= (decodeURI title)]
+        [ret::content 		:= content]
+        [ret::comments 		:= comments]
+		[ret::points 		:= points]
+		[ret::upvotes 		:= upvotes]
+		[ret::downvotes 	:= downvotes]
+		[ret::parent 		:= parent]
+		[ret::root	 		:= root]
+		[ret::aye-users 	:= (list)]
+		[ret::no-users 		:= (list)]
+		(ret)
+    )]
+)
+
+(struct UserListItem "data/users/list"
+	[::username := ""]
+	[::karma := 0]
+	[::created-ts := 0]
+
+	;; refer to handler.eugine/::item
+    [::new := (lambda (username karma created-ts)
+    	[ret := clone ~this]
+    	[ret::username := username]
+    	[ret::karma := num karma]
+    	[ret::created-ts := num created-ts]
+		(ret)
+    )]
+)
+
+(def starts-with (text prefix)
+	(if [(len text) < (var pl (len prefix))]
+		(false)
+		[(sub text 0 pl) == prefix]
+	)
+)
+
+(def ends-with (text suffix)
+	(if [(var tl (len text)) < (var sl (len suffix))]
+		(false)
+		[(sub text [tl - sl]) == suffix]
+	)
+)
+
+(def join-string (texts delim)
+	(var ret "")
+	(loop texts [(text) => (+= ret (+ text delim))])
+
+	(if [(set rl [(len ret) - 1]) >= 0] 
+		(if [[ret : rl] == delim]
+			(set ret sub ret 0 rl)))
+
+	(ret)
+)
+
+(def socket-eos (text)
+	(var length len text)
+	(and 
+    	(eq [text : (- length 1)] [text : (- length 3)] "\n")
+    	(eq [text : (- length 2)] [text : (- length 4)] "\r"))
+)
+
+(def make-dir (path)
+	(var p [jPaths call @get (list jString. "java.lang.String...") path ()])
+	
+	(if (not (file-exists path)) (
+		[jFiles . @createDirectories (list "java.nio.file.Path" "java.nio.file.attribute.FileAttribute...") p ()]
+	))
+)
+
+(def delete-file (path)
+	(try
+	[jFiles . @delete (list "java.nio.file.Path") [jPaths call @get (list jString. "java.lang.String...") path ()]]))
+
+(def extract-domain (url)
+	(var m (match url %"(https?:\/\/[a-z0-9\.\-\:]+)"))
+	(if [(len m) > 0] [m : 0 @text] null)
+)
+
+(def hash-string (s)
+	(sha 1 (sha 1 (+ s Config::salt)))
+)
+
+(def bytes-to-string (bytes)
+	(new jString (list "byte[]") bytes)
+)
+
+(def read-dir (path)
+	(var f (new jFile (list jString.) path))
+	(var ret [f . @listFiles ()])
+	(loop ret [(f i) => (set [ret : i] [f . @toString ()])])
+	(ret)
+)
+
+(def read-dir-files (path)
+	(var f (new jFile (list jString.) path))
+	(var ret [f . @listFiles ()])
+	(var i [(len ret) - 1])
+	(if [i == -1] () {
+		(loop [i >= 0] [() => 
+			(if [[ret : i] . @isDirectory ()] 
+				{ (del ret i) [i -= 2]}
+				[i --])
+		])
+		(ret) })
+)
+
+(def create-if-not-exist (path text)
+	(if (not (file-exists path)) (write-file path text))
+)
+
+(def get-next-id (file)
+	(var next-id + 1 (num (read-file file)))
+	(write-file file (str next-id))
+	(next-id)
+)
+
+(def random-string (length)
+	(var table "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+	(var ret "")
+	(loop (range 0 length) 
+		[() => (+= ret [table : (floor [(random 0) * 58])])])
+
+	(ret)
+)
+
+(def encodeURI (text) [jURLEncoder . @encode (list jString. jString.) text "utf-8"])
+
+(def decodeURI (text) [jURLDecoder . @decode (list jString. jString.) text "utf-8"])
+
+(def escape-html (text) [jStringEscapeUtils . @escapeHtml3 (list jString.) text])
+
+(def unescape-html (text) [jStringEscapeUtils . @unescapeHtml3 (list jString.) text])
+
+(def take-last-n (l n)
+    (if [l == null] (list)
+	    (if [(len l) < n] l (sub l [(len l) - n])))
+)
+
+(def pretty-date (ts)
+    (var diff / (- (time 1) ts) 1000)
+    (if [diff < 60]
+        (+ (str diff) " seconds")
+        (if [diff < 3600]
+            (+ (str (/ diff 60)) " minutes")
+            (if [diff < 86400]
+                (+ (str (/ diff 3600)) " hours")
+                (+ (str (/ diff 86400)) " days"))))
+)
+
+(def get-post-path (id) 
+	(var path (+ ~path "data/posts/" (str (/ id 1000)) "/" (str id)))
+	(if (file-exists path) path null))
+
+(def list-contains (l elem)
+	(var ret -1)
+	(if [l != null]
+	(loop l [(item i) =>
+		(if [item == elem] 
+			{ (set ret i) false }
+			true)
+	]))
+	(ret)
+)
+
+(def load-list (file start)
+    (var posts (list))
+    (var ppp Config::posts-per-page)
+    (var end + start ppp)
+
+    (cond file
+        ("main" (try {
+            (var newest (num (read-file (+ ~path "data/posts/main-index"))))
+            (var gap / newest 1000)
+
+            (loop [ppp > 0] [() =>
+                (var data read-file-lines (+ ~path "data/posts/" (str gap) "/list"))
+                (if [data == null] (exit 30))
+
+                (set posts + data (explode posts))
+                (if [(len posts) >= end] (exit 30))
+
+                (-- gap)
+            ])
+        }))
+
+        ("rank" (try {
+            (var posts read-file-lines (+ ~path "data/posts/ranking"))
+            (if [posts == null] (set posts (list)))
+        }))
+
+        (_ (try {
+            (var posts read-file-lines file)
+            (if [posts == null] (set posts (list)))
+        }))
+    )
+
+    (if [start >= 0] {
+	    (var true-start [(len posts) - end])
+	    
+	    (if [true-start < 0] 
+	    	(if [(set true-ppp + ppp true-start) >= 0] 
+	    		(set posts sub posts 0 true-ppp)
+	    		(set posts (list)))
+	    	(set posts sub posts true-start ppp))
+    })
+
+    (try {
+        (loop posts [(post i) =>
+            (var parts (split post " "))
+            (if [(len parts) != 11] (exit 30))
+
+            (set [posts : i] Post::new (explode parts))
+        ])
+    } () (cond ~e
+        (30
+            (set posts (list))
+            (println "Corrupted index file: " file))
+    ))
+
+    (posts)
+)
+
+(def parse-code (text)
+	(var texts split (escape-html text) "\n")
+	(var ret clone "")
+	(var code-flag false)
+	(var replacer lambda (t)
+		(set t (re-place t %"(https?:\/\/\S+)" "<a href='$1' target='_blank'>$1</a>"))
+		(re-place t %"#(\d+)" "<a href='/item/$1' target='_blank'>#$1</a>")
+	)
+	(loop texts [(t) =>
+		(if [(trim t) == "```"] 
+			{ 
+				(set code-flag not code-flag)
+				(if code-flag 
+					(+. ret "<pre><code>")
+					(+. ret "</pre></code>"))
+			} 
+			(if code-flag
+				(+. ret t "\n")
+				(+. ret "<div>" (replacer t) "</div>")))
+	])
+
+	(ret)
+)
+
+(def parse-title (text)
+	(var text escape-html text)
+	(re-place text %"(https?:\/\/\S+)" "<a href='$1' target='_blank' class='source'>&nbsp;</a>")
+)
+
+
+(def check-csrf (context) {
+	(var referer [context::headers : @referer])
+	(if [referer == null]
+		false
+		(starts-with referer Config::referer))
+})
+
+(def access-slow-control (context)
+	(try {
+		(if [(type context) == "String"]
+			(var username context)
+			{
+				(var username context::username)
+				(if [[context::user-data : 10] == "mod"] (exit 2))
+			})
+
+		(if [(set last-access [user-access-slow-ring : username]) != null]
+			(if [[(time 1) - last-access] < Config::access-slow-cooldown]
+				(exit 1)))
+
+		(exit 2)
+	}
+	()
+	(cond ~e
+		(1 true)
+		(_ (set [user-access-slow-ring : username] (time 1)) false))
+	)
+)
+
+(def access-control-list-watcher ()
+	(var now time 1)
+	(loop (keys user-access-slow-ring) [(k) =>
+		(if [[now - [user-access-slow-ring : k]] > Config::access-slow-cooldown]
+			(del user-access-slow-ring k))
+	])
+)
+
+(def alter-post-state (post id state) 
+	(set [post : 4] state)
+
+	(var user-dp UserOp::get-user-path [post : 0])
+	(var update-action (3 [() => state]))
+
+	(if [[post : 9] != "0"] {
+		(update-list (+ (get-post-path (num [post : 10])) "/list") id update-action)
+		(update-list (+ user-dp "/comments-list") id update-action)
+	} {
+		(update-list (+ ~path "data/posts/" (str [id / 1000]) "/list") id update-action)
+		(update-list (+ user-dp "/submissions-list") id update-action)
+	})
+)
+
+(def find-in-list (lines id)
+	(var sid + (str id) " ")
+	(var ret -1)
+
+    (loop lines [(item i) =>
+        (if [item starts-with sid] {
+            (set ret i)
+            false
+        })
+    ])
+
+    (ret)
+)
