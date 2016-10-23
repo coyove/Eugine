@@ -3,7 +3,7 @@
     <tr><td>user:</td><td>" username " (" [user-data : UserOp::GROUP] ")</td></tr>
     <tr><td>created:</td><td>" (str age) " days</td></tr>
     <tr><td>last login:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) "</td></tr>
-    <tr><td>submits:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
+    <tr><td>posts:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
     <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
     <tr><td valign='top'>about:</td><td class='title'>" (parse-code (decodeURI [user-data : UserOp::ABOUT])) "</td></tr>
     <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>submissions</a></td></tr>

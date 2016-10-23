@@ -424,6 +424,12 @@
 	(ret)
 )
 
+(def parse-title (text)
+	(var text escape-html text)
+	(re-place text %"(https?:\/\/\S+)" "<a href='$1' target='_blank' class='source'>&nbsp;</a>")
+)
+
+
 (def check-csrf (context) {
 	(var referer [context::headers : @referer])
 	(if [referer == null]

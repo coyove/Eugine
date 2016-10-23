@@ -15,10 +15,19 @@ body {
 
 #container {
 	width: 100%;
-	max-width: 750px;
+	max-width: 900px;
 	margin: 0 auto;
 	background: #f0ebe4;
 	height: 100%;
+}
+
+.source {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	vertical-align: middle;
+	margin-left: 2px;
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAMAAABhq6zVAAAAPFBMVEUAAAAAAAABAQEAAAABAQEAAAABAQFHcEwBAQEBAQEAAAABAQEBAQEAAAAAAAAAAAAAAAABAQEBAQEBAQFiVSqqAAAAE3RSTlMqaNZH8QOGAOiCG+HAFSUNPqCfXPr2mAAAAFtJREFUeF41jlcOwDAIQ5lxVvf971qStHxYz8jIENaQGIM+zkmNlzlyAdSm8e0MTTIMtedylEw08qX2PRg0eO91MCgYfj9t5iWFnpvPAlPE7bHa2DTlvxps8jFeLe4D3opZ97EAAAAASUVORK5CYII=');
 }
 
 .hide {
@@ -169,7 +178,8 @@ div.lister .info, div.lister .info2 {
 }
 
 .vote-area {
-	padding-right: 4px;
+	padding: 2px 4px 0 0;
+	vertical-align: top;
 }
 
 .unvote {
@@ -205,10 +215,17 @@ div[upvote], div[downvote] {
     padding: 2px 4px;
 }
 
+b[onclick] {
+	cursor: pointer;
+}
+
 pre, code {
 	font-family: "Courier New", Courier, monospace;
 	font-size: 12px;
 	margin-bottom: 6px;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 table {

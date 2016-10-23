@@ -21,7 +21,7 @@
 "<div class='item item-" (str (set zebra (not zebra))) "' id='item-" id "'>
 <div class='inner-item'>
     <div class='title'>
-        <b>" (str no) "</b>. <a href='/item/" id "'>" title "</a>"
+        <b onclick='location.href=\"/item/" id "\"'>" (str no) "</b>. <a href='/item/" id "'>" title "</a>"
         (if [post::state == "locked"] "<span locked>locked</span>")
     "</div>
     <div class='info'>#" post::id
@@ -105,11 +105,11 @@
             <div class='title'>" 
                 title
             "</div>
-            <div class='info'>"
+            <div class='info'><span class='reply'>"
             (cond post::state
             	("locked" "<span comment locked>locked</span>")
             	("deleted" "<span deleted>deleted</span>")
-            	(_ (+ "<a href='/item/" id "'>reply</a>"))) " | 
+            	(_ (+ "<a href='/item/" id "'>reply</a>"))) " | </span>
                 <a class='hider' href='javascript:hide(" id ")'>hide</a>
             </div></td></tr></table>
         </div>")

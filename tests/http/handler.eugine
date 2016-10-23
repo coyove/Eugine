@@ -90,7 +90,7 @@
             (if (access-slow-control context) (exit 102))
 
             (var title [context::post : @title])
-            (if [(len title) > 128] (exit 30))
+            (if [(len title) > 256] (exit 30))
             (if [[title == null] or [(len title) < 4]] (exit 33))
 
             (var text [context::post : @text])
@@ -98,10 +98,10 @@
             (if [(len text) < 4]    (exit 35))
 
             (set text parse-code text)
-            (set title escape-html title)
+            (set title parse-title title)
 
             (var next-id get-next-id (+ ~path "data/posts/index"))
-            (if [id == 0] (write-file (+ ~path "data/posts/main-index") (str id)))
+            (if [id == 0] (write-file (+ ~path "data/posts/main-index") (str next-id)))
 
             (~include "post.eugine")
 
@@ -114,7 +114,7 @@
             (100 (::error context "CSRF error"))
             (101 (::error context "You are locked"))
             (102 (::error context "Frequent access"))
-            (30 (::error context "Title too long (128 chars max.)"))
+            (30 (::error context "Title too long (256 chars max.)"))
             (33 (::error context "Title too short (4 chars min.)"))
             (31 (::error context "Invalid ID"))
             (32 (::error context "Text too long (4096 chars max.)"))

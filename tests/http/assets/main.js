@@ -10,17 +10,19 @@ function hide(id, nowrite) {
 	var info = item.querySelector(".info");
 	var info2 = item.querySelector(".info2");
 	var va = item.querySelector(".vote-area");
+	var reply = item.querySelector(".reply");
 
 	var hiddens = nowrite ? {} : JSON.parse(localStorage.getItem("hidden_posts") || "{}");
 
 	var hider = info.querySelector(".hider");
 	if (hider.innerHTML == "hide") {
-		hider.innerHTML = "un-hide";
+		hider.innerHTML = info2 ? ("un-hide #" + id) : "un-hide";
 		display(title, "none");
 		hiddens[id] = new Date().getTime();
 
 		display(info2, "none");
 		display(va, "none");
+		display(reply, "none");
 	} else {
 		hider.innerHTML = "hide";
 		display(title, "block");
@@ -28,6 +30,7 @@ function hide(id, nowrite) {
 
 		display(info2, "block");
 		display(va, "table-cell");
+		display(reply, "inline");
 	}
 
 	if (nowrite) {} else {
@@ -106,6 +109,12 @@ function purgeStorage(name) {
 }
 
 window.onload = function() {
+	var _extra = function (text) {
+		getid('memberinfo').className = "";
+		getid('memberinfo').innerHTML = text;
+		hlTab("memberinfo");
+	}
+
 	if (/\/rank(\?\S+)?$/.test(location.href)) {
 		hlTab("ranking");
 	} else if (/\/(\?\S+)?$/.test(location.href)) {
@@ -115,13 +124,13 @@ window.onload = function() {
 	} else if (/\/submit$/.test(location.href)) {
 		hlTab("submit");
 	} else if (/\/user\/\S+$/.test(location.href)) {
-		getid('memberinfo').className = "";
-		getid('memberinfo').innerHTML = location.href.match(/\/user\/(\S+)$/)[1] + "'s profile";
-		hlTab("memberinfo");
+		_extra(location.href.match(/\/user\/(\S+)$/)[1] + "'s profile");
 	} else if (/\/leaders$/.test(location.href)) {
-		getid('memberinfo').className = "";
-		getid('memberinfo').innerHTML = "leaderboard";
-		hlTab("memberinfo");
+		_extra("leaderboard");
+	} else if (/\/comments\/\S+$/.test(location.href)) {
+		_extra(location.href.match(/\/comments\/(\S+)$/)[1] + "'s comments");
+	} else if (/\/submissions\/\S+$/.test(location.href)) {
+		_extra(location.href.match(/\/submissions\/(\S+)$/)[1] + "'s submissions");
 	}
 
 	if (/\?password-changed$/.test(location.href)) {
