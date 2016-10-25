@@ -458,6 +458,11 @@ public class SKeywords {
                         return new SETrim(ha, c);
                     }
                 });
+                put("instr", new CallableKeyword() {
+                    public SExpression call(Atom ha, Compound c) throws VMException {
+                        return new SEInStr(ha, c);
+                    }
+                });
                 put("match", new CallableKeyword() {
                     public SExpression call(Atom ha, Compound c) throws VMException {
                         return new SERegexMatch(ha, c);
