@@ -1,30 +1,37 @@
 (list "<form method='post' action='/update'><table class='info'>
-    <tr><td>id:</td><td>" [user-data : UserOp::ID] "</td></tr>
-    <tr><td>group:</td><td>" [user-data : UserOp::GROUP] "</td></tr>
-    <tr><td>user:</td><td>" [user-data : UserOp::USERNAME] "</td></tr>
-    <tr><td>created:</td><td>" (str age) " days</td></tr>
-    <tr><td>last login:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) " @ " 
+    <tr><td>ID:</td><td>" [user-data : UserOp::ID] "</td></tr>
+    <tr><td>用户组:</td><td>" [user-data : UserOp::GROUP] "</td></tr>
+    <tr><td>用户名:</td><td>" [user-data : UserOp::USERNAME] "</td></tr>
+    <tr><td>注册于:</td><td>" (str age) " 天前</td></tr>
+    <tr><td>上次登入:</td><td>" (utc-time (num [user-data : UserOp::LAST_LOGIN_TS])) " @ " 
         [user-data : UserOp::LAST_LOGIN_IP]
     "</td></tr>
-    <tr><td>posts:</td><td>" [user-data : UserOp::TOTAL_POSTS] "</td></tr>
+    <tr><td>发表:</td><td>" [user-data : UserOp::TOTAL_POSTS] " 篇</td></tr>
     <tr><td>karma:</td><td>" [user-data : UserOp::KARMA] "</td></tr>
-    <tr><td>autohide pt:</td><td>
+    <tr><td>自动隐藏:</td><td>
         <input class='nar' name='autohide' value='" [user-data : UserOp::AUTOHIDE] "'>
     </td></tr>
-    <tr><td valign='top'>about:</td><td>
+    <tr><td>时间线:</td><td>
+        <select name='showdel'>
+            <option value='yes'>显示删除</option>
+            <option value='no' " (if [[user-data : UserOp::SHOWDELETED] == "no"] "selected") ">隐藏删除</option>
+        </select>
+    </td></tr>
+    <tr><td valign='top'>个人介绍:</td><td>
         <textarea name='about' rows='10'>" (decodeURI [user-data : UserOp::ABOUT]) "</textarea>
     </td></tr>
-    <tr><td>email:</td><td>
+    <tr><td>Email:</td><td>
         <input type='text' name='email' value='" (decodeURI [user-data : UserOp::EMAIL]) "'>
     </td></tr>
-    <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>submissions</a></td></tr>
-    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>comments</a></td></tr>
-    <tr><td></td><td><a href='javascript:unhideAll()'>un-hide all posts</a></td></tr>
-    <tr><td><input type='submit' value='update'></td><td></td></tr>
+    <tr><td></td><td><a href='/favorites/" [user-data : UserOp::USERNAME] "'>我的收藏</a></td></tr>
+    <tr><td></td><td><a href='/submissions/" [user-data : UserOp::USERNAME] "'>我的主题</a></td></tr>
+    <tr><td></td><td><a href='/comments/" [user-data : UserOp::USERNAME] "'>我的回复</a></td></tr>
+    <!-- <tr><td></td><td><a href='javascript:unhideAll()'>显示所有隐藏</a></td></tr> -->
+    <tr><td><input type='submit' value='更新'></td><td></td></tr>
 </table></form>
 <hr>
 <form method='post' action='/password/change'><table class='info'>
-    <tr><td>old password:</td><td><input class='nar' name='old'></td></tr>
-    <tr><td>new password:</td><td><input class='nar' name='new'></td></tr>
-    <tr><td><input type='submit' value='change'></td><td><span red id='password-changed'></span></td></tr>
+    <tr><td>旧密码:</td><td><input class='nar' name='old'></td></tr>
+    <tr><td>新密码:</td><td><input class='nar' name='new'></td></tr>
+    <tr><td><input type='submit' value='修改'></td><td><span red id='password-changed'></span></td></tr>
 </table></form>")

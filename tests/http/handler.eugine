@@ -4,20 +4,25 @@
 (struct HTTP-Handler "handler"
     [::get-paging := (lambda (context)
         (var count num [context::post : "after"])
+        
         (if [count == null] (set count 0))
         (if [count < 0] (set count 0))
 
-        (count)
+        (* (+ 0 [count % Config::max-pages]) Config::posts-per-page)
     )]
 
     ;; GET
     [::index := (lambda (context file)
         (var count ::get-paging context)
+        (if context::is-logged-in
+            (var show-deleted eq [context::user-data : UserOp::SHOWDELETED] "yes")
+            (var show-deleted false))
 
         (context::write-common 200 @html)
         (context::write "\r\n")
-        (context::write (Template::lister context (load-list file count) 
-            (+ (if [file == "main"] "Timeline " "Ranking ") (str count)) count "sub"))
+        (context::write (Template::lister context file show-deleted 
+            (if [file == "main"] "最新" "排行")
+            count "sub"))
     )]
 
     ;; GET
@@ -33,8 +38,26 @@
 
                 (context::write-common 200 @html)
                 (context::write "\r\n")
-                (context::write (Template::lister context (load-list path count) 
-                    (+ username (if [ltype == "sub"] "'s submissions " "'s comments ") (str count)) count ltype))
+                (context::write (Template::lister context path true
+                    (+ username (if [ltype == "sub"] "'s submissions" "'s comments")) 
+                    count ltype))
+            })
+    )]
+
+    ;; GET
+    [::favorites := (lambda (context username)
+        (var user-home UserOp::get-user-path username)
+        (var path UserOp::get-data-path username)
+
+        (if (not (file-exists user-home))
+            (::not-found context)
+            {
+                (var count ::get-paging context)
+
+                (context::write-common 200 @html)
+                (context::write "\r\n")
+                (context::write (Template::lister context path true
+                    (+ username "'s favorites") count "fave"))
             })
     )]
 
@@ -54,7 +77,7 @@
             (var item::aye-users read-file-lines (+ path "/aye"))
             (var item::no-users read-file-lines (+ path "/no"))
 
-            (var comments load-list (+ path "/list") -1)
+            (var comments load-list (+ path "/list") -1 true)
 
         } () (cond ~e
             (30 (::not-found context))
@@ -101,7 +124,10 @@
             (set title parse-title title)
 
             (var next-id get-next-id (+ ~path "data/posts/index"))
-            (if [id == 0] (write-file (+ ~path "data/posts/main-index") (str next-id)))
+            (if [id == 0] {
+                (write-file (+ ~path "data/posts/main-index") (str next-id))
+                (delete-conj-cache (+ ~path "data/posts/timeline-cache"))
+            })
 
             (~include "post.eugine")
 
@@ -110,17 +136,17 @@
             (context::write "\r\n")
         } (println ~ex)
         (cond ~e 
-            (99 (::error context "Please login first"))
-            (100 (::error context "CSRF error"))
-            (101 (::error context "You are locked"))
-            (102 (::error context "Frequent access"))
-            (30 (::error context "Title too long (256 chars max.)"))
-            (33 (::error context "Title too short (4 chars min.)"))
-            (31 (::error context "Invalid ID"))
-            (32 (::error context "Text too long (4096 chars max.)"))
-            (35 (::error context "Text too short (4 chars min.)"))
-            (40 (::error context "Parent is locked"))
-            (41 (::error context "Parent doesn't exist"))
+            (99 (::error context ERR-PLEASE-LOGIN))
+            (100 (::error context "CSRF"))
+            (101 (::error context ERR-NO-RIGHTS))
+            (102 (::error context ERR-AC))
+            (30 (::error context "标题过长 (最多 256 字符)"))
+            (33 (::error context "标题过短 (最少 4 字符)"))
+            (31 (::error context ERR-INVALID-ID))
+            (32 (::error context "正文过长 (最多 4096 字符)"))
+            (35 (::error context "正文过短 (最少 4 字符)"))
+            (40 (::error context "父主题已被锁住"))
+            (41 (::error context "父主题不存在"))
             (_ ())
         )))
     )]
@@ -141,7 +167,7 @@
             (context::write-bytes (read-file-binary path))
         } ()
         (cond ~e 
-            (31 (::error context "Invalid ID"))
+            (31 (::error context ERR-INVALID-ID))
             (_ ())
         )))
     )]
@@ -195,7 +221,9 @@
 
                 (write-file aye-path aye-users)
                 (write-file no-path no-users)
-            })
+            }
+                (delete-conj-cache (+ ~path "data/posts/timeline-cache"))
+            )
 
             (delete-file (+ root-path "/comments-cache." cache-token))
 
@@ -204,12 +232,12 @@
             (context::write "\r\n")
         } (println ~ex)
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (101 (::error context "You are locked"))
-            (102 (::error context "Frequent access"))
-            (30 (::error context "Please login to say " opt))
-            (31 (::error context "Invalid ID"))
-            (32 (::error context "Voting is closed"))
+            (100 (::error context "CSRF"))
+            (101 (::error context ERR-NO-RIGHTS))
+            (102 (::error context ERR-AC))
+            (30 (::error context ERR-PLEASE-LOGIN))
+            (31 (::error context ERR-INVALID-ID))
+            (32 (::error context "无法评分"))
             (_ ())
         )))
     )]
@@ -220,6 +248,43 @@
 
     [::no := (lambda (context id)
         (::say-aye-or-no context id "no")
+    )]
+
+    [::fave := (lambda (context id)
+        (try {
+            (if (not (check-csrf context)) (exit 100))
+            (if (not context::is-logged-in) (exit 30))
+            (if context::user-is-locked (exit 101))
+            (if (access-slow-control context) (exit 102))
+
+            (var id num id)
+            (if [id == null] (exit 31))
+
+            (var path get-post-path id)
+            (if [path == null] (exit 31))
+
+            (var user-path UserOp::get-data-path context::username)
+            (var user-data read-file-lines user-path)
+
+            (var favorites split [user-data : UserOp::FAVORITES] ",")
+            (if [(set id-pos find-in-list favorites id) == -1]
+                (insert favorites 0 (+ (str id) " : 1"))
+                (del favorites id-pos))
+            (set [user-data : UserOp::FAVORITES] join-string favorites ",")
+            (write-file user-path user-data)
+
+            (context::write-common 302 @plain)
+            (context::write-header "Location" (+ "/favorites/" context::username))
+            (context::write "\r\n")
+        } ()
+        (cond ~e 
+            (100 (::error context "CSRF"))
+            (101 (::error context ERR-NO-RIGHTS))
+            (102 (::error context ERR-AC))
+            (30 (::error context ERR-PLEASE-LOGIN))
+            (31 (::error context ERR-INVALID-ID))
+            (_ ())
+        ))
     )]
 
     ;; POST
@@ -243,11 +308,15 @@
             (var autohide num [context::post : @autohide])
             (if [autohide == null] (exit 33))
 
+            (var showdel [context::post : @showdel])
+            (if [showdel == null] (exit 34))
+
             (var user-dp UserOp::get-data-path username)
             (var user-data read-file-lines user-dp)
 
             (set [user-data : UserOp::ABOUT] encodeURI about)
             (set [user-data : UserOp::EMAIL] encodeURI email)
+            (set [user-data : UserOp::SHOWDELETED] encodeURI showdel)
             (set [user-data : UserOp::AUTOHIDE] str autohide)
 
             (write-file user-dp user-data)
@@ -257,12 +326,13 @@
             (context::write "\r\n")
         } ()
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (102 (::error context "Frequent access"))
-            (99 (::error context "Please login first"))
-            (30 (::error context "Description too long (256 chars max.)"))
-            (32 (::error context "Email too long (64 chars max.)"))
-            (33 (::error context "Invalid autohide points"))
+            (100 (::error context "CSRF"))
+            (102 (::error context ERR-AC))
+            (99 (::error context ERR-PLEASE-LOGIN))
+            (30 (::error context "个人描述过长 (最多 256 位)"))
+            (32 (::error context "邮箱地址过长 (最多 64 位)"))
+            (33 (::error context ERR-NO-RIGHTS))
+            (34 (::error context ERR-NO-RIGHTS))
             (_ ())
         )))
     )]
@@ -288,8 +358,11 @@
             (alter-post-state post id "deleted")
             (write-file (+ path "/data") post)
 
-            (var root-path get-post-path (num [post : 10]))
+            (var root-path get-post-path (var root-id (num [post : 10])))
             (delete-file (+ root-path "/comments-cache." cache-token))
+
+            (if [id == root-id]
+                (delete-conj-cache (+ ~path "data/posts/timeline-cache")))
 
             (var user-path UserOp::get-data-path [post : 0])
             (var user-data read-file-lines user-path)
@@ -305,11 +378,11 @@
             (context::write "\r\n")
         } ()
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (101 (::error context "You are locked"))
-            (30 (::error context "Please login to delete"))
-            (31 (::error context "Invalid ID"))
-            (32 (::error context "You don't have rights to delete"))
+            (100 (::error context "CSRF"))
+            (101 (::error context ERR-NO-RIGHTS))
+            (30 (::error context ERR-PLEASE-LOGIN))
+            (31 (::error context ERR-INVALID-ID))
+            (32 (::error context ERR-NO-RIGHTS))
             (_ ())
         )))
     )]
@@ -348,10 +421,10 @@
             (context::write "\r\n")
         } ()
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (30 (::error context "Please login to lock"))
-            (31 (::error context "Invalid user"))
-            (32 (::error context "You don't have rights to lock"))
+            (100 (::error context "CSRF"))
+            (30 (::error context ERR-PLEASE-LOGIN))
+            (31 (::error context ERR-INVALID-USER))
+            (32 (::error context ERR-NO-RIGHTS))
             (_ ())
         )))
     )]
@@ -376,18 +449,21 @@
 
             (write-file (+ path "/data") data)
 
-            (var root-path get-post-path (num [data : 10]))
+            (var root-path get-post-path (var root-id (num [data : 10])))
             (delete-file (+ root-path "/comments-cache." cache-token))
+
+            (if [id == root-id]
+                (delete-conj-cache (+ ~path "data/posts/timeline-cache")))
 
             (context::write-common 302 @plain)
             (context::write-header "Location" (+ "/item/" (str id)))
             (context::write "\r\n")
         } ()
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (30 (::error context "Please login to lock"))
-            (31 (::error context "Invalid ID"))
-            (32 (::error context "You don't have rights to lock"))
+            (100 (::error context "CSRF"))
+            (30 (::error context ERR-PLEASE-LOGIN))
+            (31 (::error context ERR-INVALID-ID))
+            (32 (::error context ERR-NO-RIGHTS))
             (_ ())
         )))
     )]
@@ -467,6 +543,7 @@
                 session                 ; session
                 username                ; username
                 "-10"                   ; autohide points
+                "yes"                   ; show deleted
                 " "                     ; add trail
             ))
 
@@ -481,13 +558,13 @@
         }
 
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (30 (::error context "Username too long (32 chars max.)"))
-            (31 (::error context "Username too short (4 chars min.)"))
-            (40 (::error context "Username contains non-alphanumeric chars"))
-            (32 (::error context "Password too long (32 chars max.)"))
-            (33 (::error context "Password too short (8 chars min.)"))
-            (34 (::error context "User already existed"))
+            (100 (::error context "CSRF"))
+            (30 (::error context "用户名过长 (最多 32 位)"))
+            (31 (::error context "用户名过短 (最少 4 位)"))
+            (40 (::error context "用户名只能包含字母数字"))
+            (32 (::error context "密码过长 (最多 32 位)"))
+            (33 (::error context "密码过短 (最少 8 位)"))
+            (34 (::error context "用户名重复"))
             (_ ())
         ))
     )]
@@ -521,6 +598,9 @@
                     (set [user-data : UserOp::GROUP] "user"))
             })
 
+            (if [[user-data : UserOp::GROUP] == "mod"]
+                (set [user-data : UserOp::KARMA] "4294967296"))
+
             (write-file f user-data)
 
             (context::write-common 302 @plain)
@@ -530,12 +610,12 @@
         }
 
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (102 (::error context "Frequent access"))
-            (30 (::error context "Invalid username"))
-            (31 (::error context "Invalid password"))
-            (32 (::error context "Wrong username"))
-            (33 (::error context "Wrong password"))
+            (100 (::error context "CSRF"))
+            (102 (::error context ERR-AC))
+            (30 (::error context "无效用户名"))
+            (31 (::error context "无效密码"))
+            (32 (::error context "用户名错误"))
+            (33 (::error context "密码错误"))
             (_ ())
         ))
     )]
@@ -598,13 +678,13 @@
         }
 
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (30 (::error context "Please enter old password to continue"))
-            (31 (::error context "Please login to change password"))
-            (32 (::error context "New password too long (32 chars max.)"))
-            (33 (::error context "New password too short (8 chars min.)"))
-            (34 (::error context "Invalid user"))
-            (35 (::error context "Old password is not correct"))
+            (100 (::error context "CSRF"))
+            (30 (::error context "请输入旧密码"))
+            (31 (::error context ERR-PLEASE-LOGIN))
+            (32 (::error context "新密码过长 (最多 32 位)"))
+            (33 (::error context "新密码过短 (最少 8 位)"))
+            (34 (::error context ERR-INVALID-USER))
+            (35 (::error context "旧密码错误"))
             (_ ())
         ))
     )]
@@ -638,12 +718,12 @@
         }
 
         (cond ~e 
-            (100 (::error context "CSRF error"))
-            (30 (::error context "Please enter username"))
-            (31 (::error context "Please enter email"))
-            (33 (::error context "User's email address is empty"))
-            (32 (::error context "Invalid user"))
-            (34 (::error context "Invalid email"))
+            (100 (::error context "CSRF"))
+            (30 (::error context "请输入用户名"))
+            (31 (::error context "请输入邮箱地址"))
+            (33 (::error context "该用户没有邮箱记录"))
+            (32 (::error context ERR-INVALID-USER))
+            (34 (::error context "无效邮箱地址"))
             (_ ())
         ))
     )]

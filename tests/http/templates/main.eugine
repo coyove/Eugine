@@ -26,10 +26,10 @@
     "</div>
     <div class='info'>#" post::id
         (if [post::comments > 0] 
-            (+ " | " post::comments " comments (" (pretty-date post::commented-ts) " ago)"))
-            " | <span points>" post::points "</span> points | "
-            "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago | "
-            "<a class='hider' href='javascript:hide(" id ")'>hide</a>
+            (+ " | " post::comments " 回复 (" (pretty-date post::commented-ts) "前)"))
+            " | <span points inline>" post::points "</span> pt | 
+            <a href='/user/" post::author "'>" post::author "</a> 发表于 " (pretty-date post::created-ts) "前 | 
+            <a grey class='hider' href='javascript:hide(" id ")' state='un-hide'>隐藏</a>
     </div>
 </div>
 </div>")
@@ -56,12 +56,38 @@
         title 
         (if [post::state == "locked"] "<span locked>locked</span>")
     "</div>
-    <div class='info'>#" post::id
-        " | <span points>" post::points "</span> points | "
-        "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago | "
-        "<a href='/item/" post::root "#item-" post::parent "'>parent</a> | "
-        "<a href='/item/" post::root "#item-" post::id "'>root</a> | "
-        "<a class='hider' href='javascript:hide(" id ")'>hide</a>
+    <div class='info'>#" id " | <span points inline>" post::points "</span> pt | 
+        <a href='/user/" post::author "'>" post::author "</a> 发表于 " (pretty-date post::created-ts) "前 | 
+        <a grey href='/item/" post::root "#item-" post::parent "'>父主题</a> | 
+        <a grey href='/item/" post::root "#item-" id "'>根主题</a> | 
+        <a grey class='hider' href='javascript:hide(" id ")' state='un-hide'>隐藏</a>
+    </div>
+</div>
+</div>")
+        ])
+        (+. table "</div>")
+        (table)
+    )]
+
+    [::build-favorites-list := (lambda (posts start)
+        (var table clone "<div class='lister fat'>")
+        (var zebra false)
+
+        (loop posts [(post i) =>
+            (var title post::title)
+            (var id post::id)
+
+            (if [post::state == "deleted"] 
+                (set title "<span deleted>deleted</span>"))
+
+            (+. table
+"<div class='item item-" (str (set zebra (not zebra))) "' id='item-" id "'>
+<div class='inner-item'>
+    <div class='title'>" title "</div>
+    <div class='info'>#" id " | <span points inline>" post::points "</span> pt | 
+        <a href='/user/" post::author "'>" post::author "</a> 发表于 " (pretty-date post::created-ts) "前 | 
+        <a grey href='/item/" id "'>查看</a> | 
+        <a grey class='fave' fave-id='" id "' href='/fave/" id "'>收藏</a>
     </div>
 </div>
 </div>")
@@ -95,11 +121,12 @@
         level='" (str level) "'>
         <div class='inner-item' style='margin-left: " (str (* level 30)) "px'>
             <table><tr><td class='vote-area'>
-                <div title='say aye' class='unvote' upvote onclick='sayaye(" id ")'>&#9650;</div>
-                <div title='say no' class='unvote' downvote onclick='sayno(" id ")'>&#9660;</div>
+                <div title='赞成' class='unvote' upvote onclick='sayaye(" id ")'>&#9650;</div>
+                <span points>" post::points "</span>
+                <div title='反对' class='unvote' downvote onclick='sayno(" id ")'>&#9660;</div>
             </td><td>
-            <div class='info2'>#" post::id " | <span points>" post::points "</span> points "
-                "by <a href='/user/" post::author "'>" post::author "</a> at " (pretty-date post::created-ts) " ago
+            <div class='info2'>#" post::id " | "
+                "<a href='/user/" post::author "'>" post::author "</a> 发表于 " (pretty-date post::created-ts) "前
                 <a class='folder' href='javascript:fold(" id ")'>-</a>
             </div>
             <div class='title'>" 
@@ -109,8 +136,8 @@
             (cond post::state
             	("locked" "<span comment locked>locked</span>")
             	("deleted" "<span deleted>deleted</span>")
-            	(_ (+ "<a href='/item/" id "'>reply</a>"))) " | </span>
-                <a class='hider' href='javascript:hide(" id ")'>hide</a>
+            	(_ (+ "<a grey href='/item/" id "'>回复</a>"))) " | </span>
+                <a grey class='hider' state='un-hide' href='javascript:hide(" id ")'>隐藏</a>
             </div></td></tr></table>
         </div>")
                     (++ level)
@@ -122,14 +149,14 @@
 
     [::build-pager := (lambda (start size)
         (var ppp Config::posts-per-page)
-        (var prev - start ppp)
-        (var next + start ppp)
+        (var prev - (/ start ppp) 1)
+        (var next + (/ start ppp) 1)
         (var ret "<div class='banner'>")
         
         (if [prev >= 0]
-            (set ret + ret "<a class='nav' href='?after=" (str prev) "'>&laquo; prev</a>"))
+            (set ret + ret "<a class='nav' href='?after=" (str prev) "'>&laquo; 上一页</a>"))
 
-        (set ret + ret "<a class='nav' href='?after=" (str next) "'>next &raquo;</a>")
+        (set ret + ret "<a class='nav' href='?after=" (str next) "'>下一页 &raquo;</a>")
 
         (+ ret "</div>")
     )]
@@ -149,14 +176,12 @@
         ]))
 
         (var path + (get-post-path item::id) "/comments-cache." cache-token)
-        (if [(file-exists path) and [(len comments) > 0]]
-            (var built read-file path)
-            {
-                (var built ::build-comments-list comments)
-                (write-file path built)
-            })
+        (var built read-file path)
 
-        (+ (::make-header context item::title) item-page built (sprintf 
+        (if [(len comments) == 0] (set built ""))
+        (if [built == null] (write-file path (set built ::build-comments-list comments)))
+
+        (+ (::make-header context (if [item::title == "Comment"] "回复" item::title)) item-page built (sprintf 
         	"<script type='text/javascript'>window.ayeItems = [%s]; window.noItems = [%s];</script>"
             (join-string aye-items ",") (join-string no-items ",")) footer)
     )]
@@ -165,21 +190,21 @@
         (var submit (join-string (~include "submit.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Submit") submit footer)
+        (+ (::make-header context "发表主题") submit footer)
      )]
 
 	[::login := (lambda (context)
         (var login (join-string (~include "login.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Login") login footer)
+        (+ (::make-header context "登入") login footer)
     )]
 
 	[::welcome := (lambda (context)
         (var footer (join-string (~include "footer.html") ""))
 
         (+ (::make-header context "Welcome") (sprintf 
-            "<div class='welcome'>Welcome %s! Back to <a href='/'>timeline</a></div>"
+            "<div class='welcome'>欢迎 %s! 返回<a href='/'>首页</a></div>"
             context::username) footer)
     )]
 
@@ -199,23 +224,43 @@
         (var user-info (join-string (~include "user.html") ""))
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "User") user-info footer)
+        (+ (::make-header context "用户") user-info footer)
     )]
 
-    [::lister := (lambda (context posts page-title start ctype)
+    [::lister := (lambda (context path show-deleted page-title start ctype)
+        (if [ctype == "fave"]
+            (var posts load-index-list path start)
+            (var posts load-list path start show-deleted))
+
+        (cond path
+            ("main" (var cache-file + ~path "data/posts/timeline-cache"))
+            ("rank" (var cache-file + ~path "data/posts/ranking-cache"))
+            (_      (var cache-file null)))
+
+        (set cache-file + cache-file "-" (str show-deleted) "-" (str (/ start Config::posts-per-page)) "." cache-token)
+
         (var list-page (join-string (~include "list.html") ""))
         (var footer (join-string (~include "footer.html") ""))
-        (if [ctype == "sub"]
-            (var content ::build-submissions-list posts start)
-            (var content ::build-linear-comments-list posts start))
+
+        (if [cache-file == null] (set cache-file ""))
+
+        (var content read-file cache-file)
+        (if [content == null]
+            (write-file cache-file (cond ctype
+                ("sub"  (set content ::build-submissions-list posts start))
+                ("fave" (set content ::build-favorites-list posts start))
+                (_      (set content ::build-linear-comments-list posts start))
+            )))
 
         (+ (::make-header context page-title) (sprintf list-page content "" "") footer)
     )]
 
     [::leaders := (lambda (context leaders)
         (var footer (join-string (~include "footer.html") ""))
-        (var table clone "<table class='lister leaders'>")
-        (var zebra false)
+        (var table clone "<div class='welcome'>每天更新</div><hr>
+            <table class='lister leaders'>
+            <tr class='item-true'><td></td><th>用户</th><th>karma</th></tr>")
+        (var zebra true)
 
         (loop leaders [(leader i) =>
             (+. table
@@ -223,17 +268,16 @@
     <td><b>" (str (+ i 1)) "</b>.</td>
     <td><a href='/user/" leader::username "'>" leader::username "</a></td>
     <td>" leader::karma "</td>
-    <td>" (pretty-date leader::created-ts) "</td>
 </tr>")
         ])
         (+. table "</table>")
-        (+ (::make-header context "Leaders") table footer)
+        (+ (::make-header context "用户排名") table footer)
     )]
 
     [::error := (lambda (context text)
         (var footer (join-string (~include "footer.html") ""))
 
-        (+ (::make-header context "Error") "<div class='error' onclick='history.go(-1)'>" 
+        (+ (::make-header context "错误") "<div class='error' onclick='history.go(-1)'>" 
             text "</div>" footer)
     )]
 )

@@ -4,6 +4,7 @@
 <div class='inner-item'>
 	<table><tr><td class='vote-area'>
         <div class='unvote' upvote onclick='sayaye(" item-id ")'>&#9650;</div>
+        <span points>" (str item::points) "</span>
         <div class='unvote' downvote onclick='sayno(" item-id ")'>&#9660;</div>
     </td><td>
 	<div class='title'>"
@@ -12,32 +13,31 @@
             "<span deleted>deleted</span>"
             item::content)
 	"</div>
-	<div class='info'>#" item-id " | " (if [(num item::comments) > 0] (+ item::comments " comments | ")) 
-	"<span points>" (str item::points) "</span> points | "
-	"by <a href='/user/" item::author "'>" item::author "</a> at " (pretty-date item::created-ts) " ago"
-	" | <a class='hider' href='javascript:hide(" item-id ")'>hide</a>"
+	<div class='info'>#" item-id (if [(num item::comments) > 0] (+ " | " item::comments " 回复")) 
+	" | <a href='/user/" item::author "'>" item::author "</a> 发表于 " (pretty-date item::created-ts) "前"
+	" | <a grey class='hider' state='un-hide' href='javascript:hide(" item-id ")'>隐藏</a>"
+	" | <a grey class='fave' fave-id='" item-id "' href='/fave/" item-id "'>收藏</a>"
 
 	(if [item::parent != "0"] 
-		(+ " | <a href='/item/" item::parent "#item-" item-id "'>parent</a>"))
+		(+ " | <a grey href='/item/" item::parent "#item-" item-id "'>父主题</a>"))
 
 	(if [[context::username == item::author] or [[context::user-data : UserOp::GROUP] == "mod"]]
-		(+ " | <a href='javascript:del(" item-id ")'>delete</a>") "")
+		(+ " | <a grey href='javascript:del(" item-id ")'>删除</a>") "")
 
 	(if [[context::user-data : UserOp::GROUP] == "mod"]
-		(+ " | <a href='/opnctl/" item-id "'>un/lock</a>") "")
+		(+ " | <a grey href='/opnctl/" item-id "'>锁</a>") "")
 
-	"</div>
-	</td></tr></table>
-</div>
-</div>"
+	"</div>"
 
 (if [[item::state != "locked"] and [item::state != "deleted"]] (+
-"<div class='post' style='margin-top: 0'>
+"<div class='post'>
 <form method='post' action='/post/" item-id "'>
 <input type='hidden' name='title' value='Comment'>
 <textarea name='text' rows='5'></textarea>
-<input type='submit' value='comment' style='margin-top: 4px;'>
+<input type='submit' value='回复' style='margin-top: 4px;'>
 </form>
 </div>"))
 
-"<hr>")
+"</td></tr></table>
+</div>
+</div><hr>")

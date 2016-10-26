@@ -7,6 +7,9 @@
 	<link href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAKlBMVEVLWX3///9seJVyfZlaZ4heaopUYYS8wc7b3uVjb47x8vXT1t96hJ/8/Pwv3cUDAAAAOklEQVR4XmOgH5hsDAZmcIFGQTAQxy2wEV3AxcVHUDA0NIABDhiYBAUZGBhGrADnRSm0cGZLYKAeAABwbwqMNFT1HQAAAABJRU5ErkJggg==' rel='icon' type='image/x-icon'>
 	<title>" title " | " Config::site-name "</title>
 	<script type='text/javascript' src='/assets/main.js'></script>
+	<script type='text/javascript'>
+		window.__userFavorites = {" (if context::is-logged-in [context::user-data : UserOp::FAVORITES]) "};
+	</script>
 	<link rel='stylesheet' type='text/css' href='/assets/main.css'>
 </head>
 <body>
@@ -15,18 +18,19 @@
 	<span style='font-size: 16px'>Temp News</span>
 </div>
 <div class='banner'>"
-    "<a id='timeline' href='/'>timeline</a>"
-    "<a id='ranking' href='/rank'>ranking</a>"
-    "<a id='submit' href='/submit'>submit</a>"
+    "<a id='timeline' href='/'>最新</a>"
+    "<a id='ranking' href='/rank'>排行</a>"
+    "<a id='submit' href='/submit'>发表主题</a>"
     "<a id='memberinfo' class='hide'></a>"
 (if context::is-logged-in
-	(+ "<a id='userinfo' href='/user'>" context::username " (" [context::user-data : UserOp::KARMA] ")</a>"
-	"<a href='/logout'>logout</a>")
-	"<a href='/user'>login</a>")
+	(+ "<a id='userinfo' href='/user'>" context::username "</a><a href='/logout'>登出</a>")
+	"<a href='/user'>登入</a>")
 "</div>"
 
 (if context::is-logged-in
 	(+ "<script type='text/javascript'>
 		window.__AutoHidePt = " [context::user-data : UserOp::AUTOHIDE] ";
 	</script>"))
+
+"<script type='text/javascript'>window.__siteTitle = '" Config::site-name "';</script>"
 )

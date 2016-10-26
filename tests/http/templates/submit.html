@@ -1,12 +1,28 @@
 (list "<div class='post'>
 	<form method=post action='/post/0'>
 		<table class='info'>
-			<tr><td>title:</td><td><input type='text' name='title'></td></tr>
-			<tr><td valign=top>text:</td><td><textarea name='text' rows='10'></textarea></td></tr>
-			<tr><td></td><td><input type='submit' value='submit'></td></tr>
-			<tr><td>&nbsp;</td></tr>
-			<tr><td></td><td><a href='/assets/formatting.html'>formatting tips</a></td></tr>
-			<tr><td></td><td><a href='https://tmp.is' target='_blank'>images hosting</a></td></tr>
+			<tr><td>标题:</td><td><input type='text' name='title'></td></tr>
+			<tr><td valign=top>正文:</td><td><textarea name='text' rows='10'></textarea></td></tr>
+			<tr><td></td><td><input type='submit' value='发表'></td></tr>
 		</table>
 	</form>
+</div>
+<hr>
+<div class='welcome'>
+	<ol style='line-height: 1.5; font-size: 12px'>
+		<li>
+			若要提交URL, 请直接在标题后追加 (使用空格分隔), 发表后其自动变为: <a href='#' class='source'></a>.
+		</li>
+		<li>
+			使用 #post-num 引用另一篇主题或回复 (如 #123). 
+		</li>
+		<li>
+			在单独一行使用3个反引号 (```) 开始/结束代码块, 代码块以外的行首空格会被消除.
+<pre><b>```</b>
+    func main() {
+        // code
+    }
+<b>```</b></pre>
+		</li>
+	</ol>
 </div>")

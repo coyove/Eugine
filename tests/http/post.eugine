@@ -59,6 +59,7 @@
 	;; incr the root's comments counter, write back
 	(var root-comments num [root-data : 5])
 	(set [root-data : 5] (str (++ root-comments)))
+	(set [root-data : 3] str ts)
 	(write-file (+ root-path "/data") root-data)
 
 	;; add this post to its author's comments list

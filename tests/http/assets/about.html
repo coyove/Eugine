@@ -1,8 +1,8 @@
 <script type="text/javascript">
-	document.title = "About";
+	document.title = "About | " + window.__siteTitle;
 </script>
 <div class="welcome title">
-	<div>Temp News is an experimental project created to test the reliability of my toy language, Eugine. TN's source code can be found <a href="https://github.com/coyove/Eugine/tree/dev/tests/http">here</a>.</div>
+	<div>Temp News is an experimental project created to test the reliability of my toy language, Eugine. TN's source code can be found <a href="https://github.com/coyove/Eugine/tree/master/tests">here</a>.</div>
 
 	<div>TN stores data in files so it tends to be very slow even on an SSD. Besides, the HTTP server is thread-based, which consumes CPU and memory greatly. Running on a 1024 linode box with -Xmx256m, server can roughly handle 50~60 rps (GET /?after=0). On an i5-5200U + 7200rpm HDD laptop with -Xmx2g requesting the same page, the result is around 200 rps.</div>
 

@@ -5,14 +5,13 @@
 
 (var ~mt) ; enable multi-threading
 
-;(var start (time 1))
+; (var start (time 1))
+; (var zzz (list))
 ; (loop (range 0 1000) [() =>
-; 	; (write-file (+ ~path "tmp") (str (range 0 10000)))
-; 	(var lines read-file-lines (+ ~path "tmp"))
-; 	(loop lines [(line) => [line != "731"] ])
+; 	(+. zzz 1)
 ; ])
 
-;(println [(time 1) - start])
+; (println [(time 1) - start])
 
 (def dispatcher (context)
 	(var test-path starts-with context::route)
@@ -41,6 +40,10 @@
 			(HTTP-Handler::leaders context))
 		((test-path "/aye/")
 			(HTTP-Handler::aye context (sub context::route 5)))
+		((test-path "/fave/")
+			(HTTP-Handler::fave context (sub context::route 6)))
+		((test-path "/favorites/")
+			(HTTP-Handler::favorites context (sub context::route 11)))
 		((test-path "/no/")
 			(HTTP-Handler::no context (sub context::route 4)))
 		((test-path "/aye-voters/")

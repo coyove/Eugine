@@ -7,7 +7,7 @@
 }
 
 body {
-	font: normal 14px Arial,"Helvetica Neue",Helvetica,sans-serif;
+	font: normal 14px Arial, "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
 	line-height: 1.2;
 	padding: 0 10px;
 	background: #f0eeee;
@@ -45,8 +45,8 @@ body {
 .banner a {
 	text-decoration: none !important;
 	color: white;
-	/*margin: -4px 0;*/
-    padding: 4px 6px;
+	font-size: 12px;
+    padding: 6px 6px;
 	display: inline-block;
 	line-height: 1;
 }
@@ -63,6 +63,7 @@ body {
 }
 
 .outer a {
+	font-size: 12px;
 	color: white !important;
 }
 
@@ -71,14 +72,27 @@ a {
 	color:#54638c;
 }
 
-a:hover{
+a:hover {
 	color:#00207a;
 	text-decoration:underline;
+}
+
+a[grey] {
+	color: #888;
+}
+
+a[grey]:hover {
+	color: #00207a;
+	text-decoration: none;
 }
 
 .folder {
 	font-family: "Courier New", Courier, monospace;
 	font-weight: bold;
+}
+
+a.folder:hover {
+	text-decoration: none;
 }
 
 .folder:before {
@@ -117,8 +131,9 @@ div.error:before {
 	border-spacing: 0;
 }
 
-.lister.leaders td {
+.lister.leaders td, .lister.leaders th {
 	padding: 4px;
+	text-align: center;
 }
 
 .lister div.item {
@@ -131,6 +146,17 @@ div.item .inner-item {
 
 h2 {
 	margin-bottom: 6px;
+}
+
+span[inline] {
+	display: inline !important;
+}
+
+span[points] {
+	display: block;
+	width: 100%;
+	text-align: center;
+	color: #aaa;
 }
 
 span[red] {
@@ -178,7 +204,7 @@ div.lister .info, div.lister .info2 {
 }
 
 .vote-area {
-	padding: 2px 4px 0 0;
+	padding: 2px 6px 0 0;
 	vertical-align: top;
 }
 

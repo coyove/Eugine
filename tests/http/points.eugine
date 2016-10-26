@@ -1,7 +1,7 @@
 (def calc-rank (lst)
 	(var idx 1)
 	(var points 0.0)
-	(var limit 100.0)
+	(var limit 45.0)
 
 	(loop [idx < (len lst)] [() =>
 		(var karma + 0.0 (num [lst : idx]))
@@ -144,9 +144,10 @@
     ])
 
     (write-file (+ ~path "data/posts/ranking") output)
+    (delete-conj-cache (+ ~path "data/posts/ranking-cache"))
 
     (++ incr-counter-for-leaders-ranking)
-    (if [[incr-counter-for-leaders-ranking % 6] == 1] (leader-ranking ())) ; every 1 minute
+    (if [[incr-counter-for-leaders-ranking % 8640] == 1] (leader-ranking ())) ; everyday
 )
 
 (def leader-ranking ()
@@ -159,7 +160,7 @@
     (try {
         (loop users [(user i) =>
             (var parts (split user " "))
-            (if [(len parts) != 3] (exit 30))
+            (if [(len parts) != 2] (exit 30))
 
             (var u UserListItem::new (explode parts))
             
