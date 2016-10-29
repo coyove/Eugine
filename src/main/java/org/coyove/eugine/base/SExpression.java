@@ -1,5 +1,6 @@
 package org.coyove.eugine.base;
 
+import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;

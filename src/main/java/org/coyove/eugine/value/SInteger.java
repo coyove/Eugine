@@ -6,6 +6,10 @@ import org.coyove.eugine.base.SValue;
  * Created by coyove on 2016/9/9.
  */
 public class SInteger extends SValue {
+    public SInteger(String v) { super(Long.valueOf(v)); }
+
+    public SInteger(String v, boolean imm) { super(Long.valueOf(v), imm); }
+
     public SInteger(Long num) {
         super(num);
     }

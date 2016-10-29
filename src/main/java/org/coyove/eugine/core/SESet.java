@@ -22,6 +22,15 @@ public class SESet extends SExpression {
 
     public SESet() {}
 
+    public SESet(SExpression name, SExpression value, DECLARE d, ACTION a) {
+        varName = name;
+        varValue = value;
+
+        directName = name instanceof SString;
+        action = a;
+        declare = d;
+    }
+
     public SESet(Atom ha, Compound c, DECLARE d, ACTION a) throws VMException {
         super(ha, c, 1);
 

@@ -11,7 +11,9 @@ import org.coyove.eugine.util.*;
 public class SEChain extends SExpression {
     public List<SExpression> expressions;
 
-    public SEChain() {}
+    public SEChain() {
+        expressions = new List<SExpression>();
+    }
 
     public SEChain(Atom ha, Compound c) throws VMException {
         super(ha, c);

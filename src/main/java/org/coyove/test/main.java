@@ -1,30 +1,18 @@
 package org.coyove.test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
 import java.lang.System;
-import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.OpenOption;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.util.Date;
-import java.util.Locale;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.coyove.eugine.*;
+import org.coyove.eugine.antlr.EugineLexer;
+import org.coyove.eugine.antlr.EugineParser;
 import org.coyove.eugine.base.SExpression;
-import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.core.SEChain;
 import org.coyove.eugine.parser.Compound;
 import org.coyove.eugine.parser.Parser;
 import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.VMException;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import static org.coyove.test.REPLTask.multi;
 import static org.coyove.test.REPLTask.multiLine;
@@ -64,6 +52,26 @@ final class REPLTask implements Runnable {
 public class main {
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
+        try {
+            InputStream is = new FileInputStream("./tests/antlr.eugine");
+
+            ANTLRInputStream input = new ANTLRInputStream(is);
+            EugineLexer lexer = new EugineLexer(input);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            // lexer.reset();
+            EugineParser parser = new EugineParser(tokens);
+            Eugine e = new Eugine();
+            EugineParser.ProgContext pc = parser.prog();
+            System.out.println(pc.v.execute(e.environment));
+            System.out.println(pc.toStringTree(parser));
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (1==1) return;
+
         if (args.length == 0) {
             return;
         }

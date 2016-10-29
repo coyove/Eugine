@@ -13,6 +13,10 @@ public class SEVariable extends SExpression {
 
     public SEVariable() {}
 
+    public SEVariable(String n) {
+        varName = n;
+    }
+
     public SEVariable(String n, Atom ha, Compound c) {
         super(ha, c);
         varName = n;
