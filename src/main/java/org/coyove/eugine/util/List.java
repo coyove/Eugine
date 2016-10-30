@@ -20,6 +20,15 @@ public class List<T> extends java.util.ArrayList<T> {
     public List() {
     }
 
+    public static <TV>List build(TV... values) {
+        List<TV> ret = new List<TV>(values.length);
+        for (int i = 0; i < values.length; i++) {
+            ret.add(values[i]);
+        }
+
+        return ret;
+    }
+
     public T pop() {
         if (this.size() > 0)
             return this.remove(0);

@@ -16,6 +16,14 @@ public class SEDef extends SExpression {
 
     public SEDef() {}
 
+    public SEDef(Atom ha, String f, List<String> a, String d, List<SExpression> b) {
+        headAtom = ha;
+        body = b;
+        arguments = a;
+        description = d;
+        func = f;
+    }
+
     public SEDef(Atom ha, Compound c) throws VMException {
         super(ha, c, 3);
 

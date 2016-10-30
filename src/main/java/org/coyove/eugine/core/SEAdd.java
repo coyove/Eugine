@@ -16,6 +16,13 @@ public class SEAdd extends SExpression {
 
     public SEAdd() {}
 
+    public SEAdd(Atom ha, List<SExpression> args, boolean s) {
+        super(ha, args, 1);
+
+        values = args;
+        self = s;
+    }
+
     public SEAdd(Atom ha, Compound c, boolean s) throws VMException {
         super(ha, c, 1);
         values = SExpression.castPlain(c);

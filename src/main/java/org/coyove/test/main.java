@@ -2,11 +2,13 @@ package org.coyove.test;
 
 import java.lang.System;
 import org.coyove.eugine.*;
+import org.coyove.eugine.antlr.EugineImportListener;
 import org.coyove.eugine.antlr.EugineLexer;
 import org.coyove.eugine.antlr.EugineParser;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.parser.Compound;
 import org.coyove.eugine.parser.Parser;
+import org.coyove.eugine.util.ANTLRHelper;
 import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.VMException;
 import org.antlr.v4.runtime.*;
@@ -53,18 +55,19 @@ public class main {
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         try {
-            InputStream is = new FileInputStream("./tests/antlr.eugine");
-
-            ANTLRInputStream input = new ANTLRInputStream(is);
-            EugineLexer lexer = new EugineLexer(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            // lexer.reset();
-            EugineParser parser = new EugineParser(tokens);
             Eugine e = new Eugine();
-            EugineParser.ProgContext pc = parser.prog();
-            System.out.println(pc.v.execute(e.environment));
-            System.out.println(pc.toStringTree(parser));
 
+            TokenStream tokens = ANTLRHelper.loadFile("./tests/antlr.eugine");
+            EugineParser parser = new EugineParser(tokens);
+            EugineParser.ProgContext pc = parser.prog();
+
+            ParseTreeWalker walk = new ParseTreeWalker();
+            EugineImportListener eil = new EugineImportListener();
+            eil.env = e.environment;
+            walk.walk(eil, pc);
+
+            System.out.println(pc.toStringTree(parser));
+            System.out.println(pc.v.execute(e.environment));
 
         } catch (Exception e) {
             e.printStackTrace();

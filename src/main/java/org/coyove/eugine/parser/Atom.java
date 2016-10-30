@@ -11,6 +11,14 @@ public class Atom extends Base {
         token = tok;
     }
 
+    public Atom(org.antlr.v4.runtime.Token tok) {
+        token = new Token();
+        token.line = tok.getLine() - 1;
+        token.lineIndex = tok.getCharPositionInLine();
+        token.source = tok.getTokenSource().getSourceName();
+        token.value = tok.getText();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof Atom) {

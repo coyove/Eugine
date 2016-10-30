@@ -9,6 +9,8 @@ import org.coyove.eugine.value.SNull;
 import org.coyove.eugine.value.SString;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Formatter;
 
@@ -16,6 +18,17 @@ import java.util.Formatter;
  * Created by coyove on 2016/9/10.
  */
 public final class Utils {
+
+    public static String getFileName(String path) {
+        Path p = Paths.get(path);
+        return p.getFileName().toString();
+    }
+
+    public static String getDirectoryName(String path) {
+        Path p = Paths.get(path);
+        String name = p.getFileName().toString();
+        return path.substring(0, path.length() - name.length());
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> T cast(Object obj, Class<T> cls) {
@@ -35,7 +48,7 @@ public final class Utils {
         }
     }
 
-    public static BigDecimal getNumber(SValue num, Atom headAtom) throws VMException {
+    public static BigDecimal getNumber(SValue num, Atom headAtom) {
         BigDecimal ret;
 
         if (num instanceof SInteger) {
@@ -43,7 +56,8 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = BigDecimal.valueOf(num.<Double>get());
         } else {
-            throw new VMException(4008, "non-number found", headAtom);
+            ret = BigDecimal.valueOf(0);
+            ErrorHandler.print(4008, "non-number found", headAtom);
         }
 
         return ret;

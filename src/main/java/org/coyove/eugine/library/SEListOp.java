@@ -98,14 +98,11 @@ public class SEListOp extends SExpression {
                                 return 0;
                             }
 
-                            try {
-                                BigDecimal num1 = Utils.getNumber(v1, headAtom);
-                                BigDecimal num2 = Utils.getNumber(v2, headAtom);
+                            BigDecimal num1 = Utils.getNumber(v1, headAtom);
+                            BigDecimal num2 = Utils.getNumber(v2, headAtom);
 
-                                double sign = Math.signum(num1.subtract(num2).doubleValue());
-                                return ((int) sign);
-                            } catch(VMException ex) {}
-                            return 0;
+                            double sign = Math.signum(num1.subtract(num2).doubleValue());
+                            return ((int) sign);
                         }
                     });
 

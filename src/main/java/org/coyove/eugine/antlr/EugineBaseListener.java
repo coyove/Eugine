@@ -6,6 +6,8 @@ import org.coyove.eugine.util.*;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
+import org.coyove.eugine.library.*;
+import org.coyove.eugine.parser.Atom;
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -35,6 +37,18 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBlock(EugineParser.BlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlock(EugineParser.BlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterStmt(EugineParser.StmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -47,6 +61,18 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterImportStmt(EugineParser.ImportStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImportStmt(EugineParser.ImportStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclareStmt(EugineParser.DeclareStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -54,6 +80,42 @@ public class EugineBaseListener implements EugineListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDeclareStmt(EugineParser.DeclareStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDefinitionsList(EugineParser.DefinitionsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDefinitionsList(EugineParser.DefinitionsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDefineStmt(EugineParser.DefineStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDefineStmt(EugineParser.DefineStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCallStmt(EugineParser.CallStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCallStmt(EugineParser.CallStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

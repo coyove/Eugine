@@ -19,6 +19,13 @@ public class SEElemArith extends SExpression {
 
     public SEElemArith() {}
 
+    public SEElemArith(Atom ha, List<SExpression> args, ACTION a) {
+        super(ha, args, 1);
+
+        action = a;
+        values = args;
+    }
+
     public SEElemArith(Atom ha, Compound c, ACTION a) throws VMException {
         super(ha, c, 1);
 
@@ -70,7 +77,6 @@ public class SEElemArith extends SExpression {
         } else {
             return new SInteger(ret.longValue());
         }
-
     }
 
     @Override

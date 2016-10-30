@@ -10,8 +10,9 @@ import org.coyove.eugine.core.*;
  * Created by coyove on 2016/9/9.
  */
 public abstract class SExpression implements java.io.Serializable {
-    protected Atom headAtom;
-    protected Compound tailCompound;
+    public Atom headAtom;
+    public Compound tailCompound;
+
     public int argCount; // for library closure
 
     public SExpression(Atom ha, Compound c) {
@@ -26,6 +27,14 @@ public abstract class SExpression implements java.io.Serializable {
             throw new VMException(2000, "not enough arguments", ha);
     }
 
+    public SExpression(Atom ha, List<SExpression> args, int count) {
+        headAtom = ha;
+
+        if (args.size() < count) {
+            System.out.println((new VMException(2000, "not enough arguments", ha)).toString());
+        }
+    }
+
     public SExpression() {
     }
 
@@ -35,11 +44,13 @@ public abstract class SExpression implements java.io.Serializable {
 
         List<SValue> ret = new List<SValue>();
         for (SExpression e : arguments) {
-            SValue v = e.evaluate(env);
-            if (v instanceof SExploded) {
-                ret.addAll(((SExploded) v).comps);
-            } else {
-                ret.add(v);
+            if (e != null) {
+                SValue v = e.evaluate(env);
+                if (v instanceof SExploded) {
+                    ret.addAll(((SExploded) v).comps);
+                } else {
+                    ret.add(v);
+                }
             }
         }
 

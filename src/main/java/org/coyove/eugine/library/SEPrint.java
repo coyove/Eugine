@@ -16,7 +16,14 @@ public class SEPrint extends SExpression {
     private List<SExpression> arguments;
     private String delim;
 
-    public SEPrint() {};
+    public SEPrint() {}
+
+    public SEPrint(Atom ha, List<SExpression> args, String d) {
+        super(ha, args, 1);
+
+        arguments = args;
+        delim = d;
+    }
 
     public SEPrint(Atom ha, Compound c, String d) throws VMException {
         super(ha, c, 1);
