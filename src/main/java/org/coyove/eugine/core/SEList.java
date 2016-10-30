@@ -21,7 +21,7 @@ public class SEList extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        return new SList(SExpression.eval(values, env));
+        return new SList(SExpression.eval(values, env).cast(SExpression.class));
     }
 
     @Override

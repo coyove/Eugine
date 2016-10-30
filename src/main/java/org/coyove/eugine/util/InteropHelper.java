@@ -2,6 +2,7 @@ package org.coyove.eugine.util;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
+import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.value.*;
 
@@ -34,7 +35,7 @@ public class InteropHelper {
         } else if (value instanceof Boolean) {
             return new SBool((Boolean) value);
         } else if (value.getClass().isArray()) {
-            List<SValue> ret = new List<SValue>();
+            List<SExpression> ret = new List<SExpression>();
             for (int i = 0; i < Array.getLength(value); i++)
                 ret.add(castJavaType(Array.get(value, i)));
 

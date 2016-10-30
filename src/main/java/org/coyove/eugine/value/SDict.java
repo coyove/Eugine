@@ -1,28 +1,36 @@
 package org.coyove.eugine.value;
 
+import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.util.ErrorHandler;
+import org.coyove.eugine.util.VMException;
+
 import java.util.HashMap;
 
 /**
  * Created by coyove on 2016/9/9.
  */
 public class SDict extends SValue {
-    public SDict(HashMap<String, SValue> dict) {
+    public SDict(HashMap<String, SExpression> dict) {
         super(dict);
     }
 
-    public SDict(HashMap<String, SValue> dict, boolean imm) {
+    public SDict(HashMap<String, SExpression> dict, boolean imm) {
         super(dict, imm);
     }
 
     @Override
     public SValue clone()
     {
-        HashMap<String, SValue> dict = (HashMap<String, SValue>)underlying;
-        HashMap<String, SValue> n = new HashMap<String, SValue>();
+        HashMap<String, SExpression> dict = (HashMap<String, SExpression>)underlying;
+        HashMap<String, SExpression> n = new HashMap<String, SExpression>();
 
-        for (String s : dict.keySet()) {
-            n.put(s, dict.get(s).clone());
+        try {
+            for (String s : dict.keySet()) {
+                n.put(s, dict.get(s).deepClone());
+            }
+        } catch (VMException ex) {
+            ErrorHandler.print(ex);
         }
 
         SDict ret = new SDict(n);

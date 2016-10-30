@@ -35,7 +35,7 @@ public class SERange extends SExpression {
         SValue start = this.start.evaluate(env);
         SValue interval = this.interval.evaluate(env);
         SValue end = this.end.evaluate(env);
-        List<SValue> ret = new List<SValue>();
+        List<SExpression> ret = new List<SExpression>();
 
         if (start instanceof SInteger && interval instanceof SInteger && end instanceof SInteger) {
             for (Long i = start.get(); i < end.<Long>get(); i += interval.<Long>get())

@@ -82,4 +82,13 @@ public class List<T> extends java.util.ArrayList<T> {
         }
         return ret;
     }
+
+    public <T> List<T> cast(Class<T> c) {
+        List<T> ret = new List<T>(super.size());
+        for (int i = 0; i < super.size(); i++) {
+            ret.add((T) super.get(i));
+        }
+
+        return ret;
+    }
 }

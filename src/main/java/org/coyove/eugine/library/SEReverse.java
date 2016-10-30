@@ -16,6 +16,11 @@ public class SEReverse extends SExpression {
 
     public SEReverse() {}
 
+    public SEReverse(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+        list = args.head();
+    }
+
     public SEReverse(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
         list = SExpression.cast(c.atoms.pop());
@@ -23,16 +28,23 @@ public class SEReverse extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        SList list = Utils.cast(this.list.evaluate(env), SList.class);
-        if (list == null)
-            throw new VMException(3015, "require list", headAtom);
+        SValue subject = this.list.evaluate(env);
 
-        List<SValue> l = list.get();
-        Object[] objs = l.toArray(new SValue[l.size()]);
+        if (subject instanceof SList) {
+            List<SExpression> l = subject.get();
+            Object[] objs = l.toArray(new SExpression[l.size()]);
 
-        ArrayUtils.reverse(objs);
-        List<SValue> ret = new List<SValue>(Arrays.asList(Arrays.copyOf(objs, objs.length, SValue[].class)));
-        return new SList(ret);
+            ArrayUtils.reverse(objs);
+            List<SExpression> ret = new List<SExpression>(
+                    Arrays.asList(Arrays.copyOf(objs, objs.length, SExpression[].class)));
+            return new SList(ret);
+        } else if (subject instanceof SInteger) {
+            return new SInteger(-subject.<Long>get());
+        } else if (subject instanceof SDouble) {
+            return new SDouble(-subject.<Double>get());
+        } else {
+            throw new VMException(3015, "require list, integer or double", headAtom);
+        }
     }
 
     @Override

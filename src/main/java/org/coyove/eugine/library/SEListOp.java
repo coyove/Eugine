@@ -42,16 +42,16 @@ public class SEListOp extends SExpression {
         SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
                 new VMException(3005, "subject must be list", headAtom));
 
-        List<SValue> list = listObj.get();
+        List<SExpression> list = listObj.get();
         switch (op) {
             case HEAD:
-                return list.size() > 0 ? list.head() : new SNull();
+                return list.size() > 0 ? list.head().evaluate(env) : new SNull();
             case TAIL:
                 return list.size() > 0 ? new SList(list.skip(1)) : new SNull();
             case INIT:
                 return list.size() > 0 ? new SList(list.sub(0, list.size() - 1)) : new SNull();
             case LAST:
-                return list.size() > 0 ? list.get(list.size() - 1) : new SNull();
+                return list.size() > 0 ? list.get(list.size() - 1).evaluate(env) : new SNull();
             case INSERT:
                 SValue value = this.value.evaluate(env);
                 SInteger pos = Utils.cast(this.pos.evaluate(env), SInteger.class);
@@ -69,7 +69,7 @@ public class SEListOp extends SExpression {
                 if (list.head() instanceof SInteger) {
                     List<Long> arr = new List<Long>(list.size());
                     for (int i = 0; i < list.size(); i++) {
-                        arr.add(list.get(i).<Long>get());
+                        arr.add(list.get(i).evaluate(env).<Long>get());
                     }
 
                     Collections.sort(arr);
@@ -79,7 +79,7 @@ public class SEListOp extends SExpression {
                 } else if (list.head() instanceof SDouble) {
                     List<Double> arr = new List<Double>(list.size());
                     for (int i = 0; i < list.size(); i++) {
-                        arr.add(list.get(i).<Double>get());
+                        arr.add(list.get(i).evaluate(env).<Double>get());
                     }
 
                     Collections.sort(arr);

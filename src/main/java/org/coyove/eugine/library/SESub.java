@@ -51,9 +51,9 @@ public class SESub extends SExpression {
         } else if (subObj instanceof SList) {
             SList subList = (SList) subObj;
             if (arg2 == null) {
-                return new SList(subList.<List<SValue>>get().sub(arg1));
+                return new SList(subList.<List<SExpression>>get().sub(arg1));
             } else {
-                return new SList(subList.<List<SValue>>get().sub(arg1, arg1 + arg2.<Long>get().intValue()));
+                return new SList(subList.<List<SExpression>>get().sub(arg1, arg1 + arg2.<Long>get().intValue()));
             }
         } else {
             throw new VMException(3014, "subject must be string or list", headAtom);

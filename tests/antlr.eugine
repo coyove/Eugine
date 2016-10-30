@@ -5,10 +5,19 @@ def test () "zz"
 	println("hello world");
 };
 
-var x= 1.2;
-var y = 10;
-var zzz=(y-2.0);
-println(zzz,y,x);
+def zzz (a) a; 
 
+var x= 1.2e-4;
+var y = 10;
+var y=x*(y-2);
+println(y+zzz(10));
+
+println([1,"w"+"e",{
+	"zzz": 3*(zzz(80)-2),
+	"inner":{ type: [23, -1.0E+06]},
+	"Abc": "a.b.c"
+}]);
+
+println(-zzz(12));
 
 test();

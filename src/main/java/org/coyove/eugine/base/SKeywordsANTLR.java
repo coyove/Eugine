@@ -60,5 +60,10 @@ public class SKeywordsANTLR {
                         return new SEAdd(new Atom(tok), arguments, true);
                     }
                 });
+                put("reverse", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEReverse(new Atom(tok), arguments);
+                    }
+                });
             }};
 }

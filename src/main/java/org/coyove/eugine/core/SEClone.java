@@ -44,7 +44,7 @@ public class SEClone extends SExpression {
 
                     ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
 
-                    newEnv.put("~parent", new SDict(init.outerEnv));
+                    // TODO: newEnv.put("~parent", new SDict(init.outerEnv));
                     newEnv.put("~atom", new SObject(headAtom));
                     newEnv.put("~this", cls.getCopy());
 

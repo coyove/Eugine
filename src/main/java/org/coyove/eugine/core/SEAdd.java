@@ -78,7 +78,7 @@ public class SEAdd extends SExpression {
         }
 
         if (lead instanceof SList) {
-            List<SValue> list;
+            List<SExpression> list;
             if (self) {
                 list = lead.get();
                 if (lead.immutable) {
@@ -88,7 +88,7 @@ public class SEAdd extends SExpression {
                 list.addAll(results.skip(1));
                 return new SNull();
             } else {
-                list = (List<SValue>) lead.<List<SValue>>get().clone();
+                list = (List<SExpression>) lead.<List<SExpression>>get().clone();
                 list.addAll(results.skip(1));
                 return new SList(list);
             }

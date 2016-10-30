@@ -42,13 +42,13 @@ public class SEGet extends SExpression {
                 SString key = Utils.cast(sk, SString.class,
                         new VMException(2019, "dict key must be string", headAtom));
 
-                HashMap<String, SValue> d = dict.get();
+                HashMap<String, SExpression> d = dict.get();
                 String k = key.get();
 
                 if (!d.containsKey(k))
                     d.put(k, new SNull());
 
-                SValue dk = d.get(k);
+                SValue dk = d.get(k).evaluate(env);
                 dk.refer = Utils.cast(dict, SDict.class);
                 dk.refKey = k;
 
@@ -57,13 +57,13 @@ public class SEGet extends SExpression {
                 SInteger index = Utils.cast(sk, SInteger.class,
                         new VMException(2020, "list index must be integer", headAtom));
 
-                List<SValue> l = dict.get();
+                List<SExpression> l = dict.get();
                 Long idx = index.get();
 
                 if (idx >= l.size() || idx < 0)
                     throw new VMException(2021, "index out of range", headAtom);
 
-                SValue li = l.get(idx.intValue());
+                SValue li = l.get(idx.intValue()).evaluate(env);
 
                 li.refer = Utils.cast(dict, SList.class);
                 li.refIndex = idx.intValue();

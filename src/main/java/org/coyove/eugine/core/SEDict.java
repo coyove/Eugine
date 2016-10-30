@@ -22,7 +22,7 @@ public class SEDict extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        HashMap<String, SValue> ret = new HashMap<String, SValue>();
+        HashMap<String, SExpression> ret = new HashMap<String, SExpression>();
 
         for (SValue e : SExpression.eval(values, env)) {
             SList l = Utils.cast(e, SList.class);

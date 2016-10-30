@@ -46,7 +46,7 @@ public class SECall extends SExpression {
 
             if (argName.length() > 3 && argName.endsWith("...")) {
                 argName = argName.substring(0, argName.length() - 3);
-                newEnv.put(argName, new SList(arguments.skip(i)));
+                newEnv.put(argName, new SList(arguments.skip(i).cast(SExpression.class)));
                 break;
             } else {
                 newEnv.put(argName, arguments.get(i));
@@ -143,7 +143,7 @@ public class SECall extends SExpression {
         if (closure_ instanceof SClosure) {
             closure = (SClosure) closure_;
         } else {
-            List<SValue> ret = new List<SValue>();
+            List<SExpression> ret = new List<SExpression>();
             ret.add(closure_);
 
             for (SValue a : arguments)
@@ -174,7 +174,7 @@ public class SECall extends SExpression {
             }
 
             ExecEnvironment newEnv = prepareExecEnvironment(closure.arguments, arguments);
-            newEnv.put("~parent", new SDict(closure.outerEnv));
+            // TODO: newEnv.put("~parent", new SDict(closure.outerEnv));
             newEnv.put("~atom", new SObject(headAtom));
 
             if (!newEnv.containsKey("~this")) {

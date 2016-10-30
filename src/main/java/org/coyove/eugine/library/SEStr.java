@@ -21,15 +21,15 @@ public class SEStr extends SExpression {
         argument = SExpression.cast(c.atoms.pop());
     }
 
-    private SValue convert(SValue arg) {
+    private SValue convert(SValue arg, ExecEnvironment env) throws VMException {
         if (arg instanceof SString) {
             return arg;
         } else if (arg instanceof SNull) {
             return new SString("null");
         } else if (arg instanceof SList) {
-            List<SValue> ret = new List<SValue>();
-            for (SValue v : arg.<List<SValue>>get())
-                ret.add(convert(v));
+            List<SExpression> ret = new List<SExpression>();
+            for (SExpression v : arg.<List<SExpression>>get())
+                ret.add(convert(v.evaluate(env), env));
 
             return new SList(ret);
         } else {
@@ -44,7 +44,7 @@ public class SEStr extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        return convert(argument.evaluate(env));
+        return convert(argument.evaluate(env), env);
     }
 
     @Override

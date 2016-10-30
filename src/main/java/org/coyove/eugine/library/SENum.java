@@ -19,7 +19,7 @@ public class SENum extends SExpression {
         argument = SExpression.cast(c.atoms.pop());
     }
 
-    private SValue convert(SValue arg) throws VMException {
+    private SValue convert(SValue arg, ExecEnvironment env) throws VMException {
         if (arg instanceof SString) {
             String str = arg.get();
             str = str.trim();
@@ -37,9 +37,9 @@ public class SENum extends SExpression {
         } else if (arg instanceof SNull) {
             return new SNull();
         } else if (arg instanceof SList) {
-            List<SValue> ret = new List<SValue>();
-            for (SValue v : arg.<List<SValue>>get())
-                ret.add(convert(v));
+            List<SExpression> ret = new List<SExpression>();
+            for (SExpression v : arg.<List<SExpression>>get())
+                ret.add(convert(v.evaluate(env), env));
 
             return new SList(ret);
         } else if (arg instanceof SInteger) {
@@ -53,7 +53,7 @@ public class SENum extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        return convert(argument.evaluate(env));
+        return convert(argument.evaluate(env), env);
     }
 
     @Override

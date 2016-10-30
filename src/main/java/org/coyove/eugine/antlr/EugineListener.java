@@ -8,6 +8,7 @@ import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
+import java.util.HashMap;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -96,6 +97,46 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCallStmt(EugineParser.CallStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#dict}.
+	 * @param ctx the parse tree
+	 */
+	void enterDict(EugineParser.DictContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#dict}.
+	 * @param ctx the parse tree
+	 */
+	void exitDict(EugineParser.DictContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#pair}.
+	 * @param ctx the parse tree
+	 */
+	void enterPair(EugineParser.PairContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#pair}.
+	 * @param ctx the parse tree
+	 */
+	void exitPair(EugineParser.PairContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#list}.
+	 * @param ctx the parse tree
+	 */
+	void enterList(EugineParser.ListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#list}.
+	 * @param ctx the parse tree
+	 */
+	void exitList(EugineParser.ListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void enterValue(EugineParser.ValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void exitValue(EugineParser.ValueContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#expr}.
 	 * @param ctx the parse tree

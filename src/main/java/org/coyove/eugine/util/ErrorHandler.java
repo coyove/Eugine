@@ -10,4 +10,9 @@ public class ErrorHandler {
         System.out.println((new VMException(errCode, errMessage, ha)).toString());
         System.exit(errCode);
     }
+
+    public static void print(VMException ex) {
+        System.out.println(ex.toString());
+        System.exit(ex.errorCode);
+    }
 }

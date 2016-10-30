@@ -8,6 +8,7 @@ import org.coyove.eugine.util.*;
 
 import java.lang.System;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -16,7 +17,8 @@ public class SEPrint extends SExpression {
     private List<SExpression> arguments;
     private String delim;
 
-    public SEPrint() {}
+    public SEPrint() {
+    }
 
     public SEPrint(Atom ha, List<SExpression> args, String d) {
         super(ha, args, 1);
@@ -32,23 +34,29 @@ public class SEPrint extends SExpression {
         arguments = SExpression.castPlain(c);
     }
 
-    private String printSValue(SValue re, ExecEnvironment env, int padding) {
+    private String print(SValue re, ExecEnvironment env, int padding) throws VMException {
         String ret = "";
         if (re instanceof SList) {
-            ret += "(list";
-            for (SValue v : re.<List<SValue>>get())
-                ret += (" ") + printSValue(v.evaluate(env), env, padding);
+            List<SExpression> lv = re.get();
+            String[] values = new String[lv.size()];
 
-            ret += ")";
-        } else if (re instanceof SDict) {
-            ret += "(dict\n";
-            HashMap< String, SValue > map = re.get();
-
-            for (String key : map.keySet()) {
-                ret += String.format("%1$" + padding + "s %2$s = %3$s\n", " ", key,
-                        printSValue(map.get(key).evaluate(env), env, padding + 2) );
+            for (int i = 0; i < lv.size(); i++) {
+                values[i] = print(lv.get(i).evaluate(env), env, padding);
             }
-            ret += StringUtils.leftPad(")", padding - 2);
+
+            ret += "[" + StringUtils.join(values, ", ") + "]";
+        } else if (re instanceof SDict) {
+            HashMap<String, SExpression> map = re.get();
+            Set<String> keys = map.keySet();
+            String[] values = new String[keys.size()];
+            int i = 0;
+
+            for (String key : keys) {
+                values[i++] = String.format("%1$" + padding + "s%2$s = %3$s,\n", " ", key,
+                        print(map.get(key).evaluate(env), env, padding + 2));
+            }
+
+            ret += "{\n" + StringUtils.join(values, "") + StringUtils.leftPad("}", padding + 1);
         } else if (re instanceof SNull) {
             ret = "null";
         } else {
@@ -63,7 +71,7 @@ public class SEPrint extends SExpression {
         SValue ret = new SNull();
         for (SValue v : SExpression.eval(arguments, env)) {
             ret = v;
-            System.out.print(printSValue(v, env, 2));
+            System.out.print(print(v, env, 2));
         }
         System.out.print(delim);
 

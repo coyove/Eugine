@@ -66,7 +66,7 @@ public class SEFile extends SExpression {
                     return new SObject(Files.readAllBytes(path));
                 case OPEN_LINES:
                     java.util.List<String> lines = Files.readAllLines(path, Charset.forName("UTF-8"));
-                    List<SValue> ret = new List<SValue>(lines.size());
+                    List<SExpression> ret = new List<SExpression>(lines.size());
                     for (String line : lines) {
                         ret.add(new SString(line));
                     }

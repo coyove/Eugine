@@ -35,9 +35,9 @@ public class SERegexMatch extends SExpression {
 
         Matcher m = Pattern.compile(regex).matcher(text);
 
-        List<SValue> ret = new List<SValue>();
+        List<SExpression> ret = new List<SExpression>();
         while (m.find()) {
-            HashMap<String, SValue> mapMatch = new HashMap<String, SValue>();
+            HashMap<String, SExpression> mapMatch = new HashMap<String, SExpression>();
             int i = 0;
 
             while (m.group(i) != null && i < m.groupCount()) {
