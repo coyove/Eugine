@@ -1,5 +1,6 @@
 package org.coyove.eugine.util;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.parser.Compound;
@@ -77,6 +78,20 @@ public final class Utils {
         return ret;
     }
 
+    public static Long getLong(SValue num, Atom headAtom) throws VMException {
+        Long ret;
+
+        if (num instanceof SInteger) {
+            ret = num.<Long>get();
+        } else if (num instanceof SDouble) {
+            ret = num.<Double>get().longValue();
+        } else {
+            throw new VMException(4007, "non-number found", headAtom);
+        }
+
+        return ret;
+    }
+
     public static String bytesToHexString(byte[] buf) {
         Formatter formatter = new Formatter();
         for (byte b : buf) {
@@ -84,6 +99,16 @@ public final class Utils {
         }
 
         return formatter.toString();
+    }
+
+    public static String unescape(String raw) {
+        if (raw.charAt(0) == '@') {
+            raw = raw.substring(2, raw.length() - 1);
+            return raw.replace("\"\"", "\"");
+        } else {
+            raw = raw.substring(1, raw.length() - 1);
+            return StringEscapeUtils.unescapeJava(raw);
+        }
     }
 
     private static<T> void quickSort(T[] arr, int left, int right, Comparator<T> comp) {

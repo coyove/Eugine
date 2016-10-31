@@ -1,23 +1,27 @@
 import test_import;
 
-def test () "zz"
-{
-	println("hello world");
-};
-
-def zzz (a) a; 
-
 var x= 1.2e-4;
 var y = 10;
 var y=x*(y-2);
 println(y+zzz(10));
 
-println([1,"w"+"e",{
+y = [1,"w"+"e",{
 	"zzz": 3*(zzz(80)-2),
 	"inner":{ type: [23, -1.0E+06]},
-	"Abc": "a.b.c"
-}]);
+	"Abc": @"a.
+	b.c",
+	lambda: (a) => (b) => println("hello ", a, " ", b)
+}];
 
-println(-zzz(12));
+println(y);
+println(y[2]["Abc"], y[2].Abc);
 
-test();
+y[2].Abc = "replaced";
+
+println(y[2]);
+
+println(-zzz(12), y[2].lambda("zz")("z") );
+
+for 1..5 do tester;
+
+if 1 > 0 && 2 > 1 println("zzz");

@@ -21,6 +21,13 @@ prog returns [SExpression v]
     : (block { $v = $block.v; } )+ 
 ;
 
+code returns [SExpression v]
+    : ('{' B1=block '}' | B2=stmt)
+    {
+        $v = $B1.ctx == null ? $B2.v : $B1.v;
+    }
+    ;
+
 block returns [SExpression v]
     @init { $v = new SEChain(); }
     : (stmt { ((SEChain) $v).expressions.add($stmt.v); })+
@@ -28,68 +35,88 @@ block returns [SExpression v]
 
 stmt returns [SExpression v]
     : importStmt Semi   { $v = new SNull(); }
+    | ifStmt            { $v = $ifStmt.v; }
     | declareStmt Semi  { $v = $declareStmt.v; }
     | defineStmt        { $v = $defineStmt.v; }
     | expr Semi         { $v = $expr.v; }
     | Semi              { $v = new SNull(); }
-;
+    ;
 
 importStmt : 'import' Identifier;
 
-declareStmt returns [SExpression v]
-    : Var Identifier '=' expr {
-        $v = new SESet(new SString($Identifier.text), $expr.v, 
-            SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
-    }
-;
+ifStmt returns [SExpression v]
+    : If Condition=expr True=code (Else False=code)?
+        {
+            $v = new SEIf(new Atom($If), $Condition.v, $True.v, $False.start == null ? null : $False.v);
+        }
+    ;
 
-definitionsList returns [org.coyove.eugine.util.List<String> v = new org.coyove.eugine.util.List<String>(); ]
-    : '(' (InitArg=expr ',' { $v.add($InitArg.text); } )* LastArg=expr ')' {
+declareStmt returns [SExpression v]
+    : Var Identifier '=' expr 
+        {
+            $v = new SESet(new SString($Identifier.text), $expr.v, 
+                SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
+        }
+    ;
+
+definitionsList returns [ org.coyove.eugine.util.List<String> v = new org.coyove.eugine.util.List<String>(); ]
+    : '(' (InitArg=Identifier ',' { $v.add($InitArg.text); } )* LastArg=Identifier ')' 
+    {
         $v.add($LastArg.text);
     }
     | '(' ')'
-;
+    ;
+
+argumentsList returns [ org.coyove.eugine.util.List<SExpression> v = 
+        new org.coyove.eugine.util.List<SExpression>() ]
+    : '(' (InitExpr=expr ',' { $v.add($InitExpr.v); } )* LastExpr=expr ')'
+    {
+        $v.add($LastExpr.v);
+    }
+    | '(' ')'
+    ;
 
 defineStmt returns [SExpression v]
     locals [ org.coyove.eugine.util.List<SExpression> body = new org.coyove.eugine.util.List<SExpression>(); ]
-    : Def Identifier definitionsList Desc=(RawString | StringLiteral)? 
-        (('{' (stmt { $body.add($stmt.v); })* '}')|(stmt { $body.add($stmt.v); })) {
+    : Def Identifier definitionsList Desc=(RawString | StringLiteral)? '='
+        (('{' (stmt { $body.add($stmt.v); })* '}')|(stmt { $body.add($stmt.v); })) 
+    {
         $v = new SEDef(new Atom($Identifier), $Identifier.text, $definitionsList.v, 
             $Desc == null ? "" : $Desc.text, $body);
     }
-;
+    ;
+
+lambdaStmt returns [SExpression v]
+    locals [ org.coyove.eugine.util.List<SExpression> body = new org.coyove.eugine.util.List<SExpression>(); ]
+    : definitionsList '=>' ('{' (stmt { $body.add($stmt.v); })* '}'| expr { $body.add($expr.v); })
+    {
+        $v = new SEDef(new Atom($definitionsList.start), null, $definitionsList.v, "", $body);
+    }
+    ;
 
 callStmt returns [SExpression v]
-    locals [ org.coyove.eugine.util.List<SExpression> arguments = 
-        new org.coyove.eugine.util.List<SExpression>() ] 
-    : Identifier '(' 
-        (InitExpr=expr ',' { $arguments.add($InitExpr.v); } )* 
-        LastExpr=expr 
-    ')' {
-        $arguments.add($LastExpr.v);
+    : Identifier argumentsList {
         String func = $Identifier.text;
-
         if (SKeywordsANTLR.KeywordsLookup.containsKey(func)) {
-            $v = SKeywordsANTLR.KeywordsLookup.get(func).call($Identifier, $arguments); 
+            $v = SKeywordsANTLR.KeywordsLookup.get(func).call($Identifier, $argumentsList.v); 
         } else {
-            $v = new SECall(new SEVariable($Identifier.text), $arguments, new Atom($Identifier), null);
+            $v = new SECall(new SEVariable($Identifier.text), $argumentsList.v, new Atom($Identifier), null);
         }
-    }
-    | Identifier '(' ')' {
-        $v = new SECall(new SEVariable($Identifier.text), $arguments, new Atom($Identifier), null);
-    }
-;
+    } 
+    ;
 
 dict returns [SExpression v]
     locals [ HashMap<String, SExpression> ret = new HashMap<String, SExpression>(); ]
-    : '{' pair { $ret.put($pair.k, $pair.v); } (',' pair { $ret.put($pair.k, $pair.v); } )* '}'
+    : '{' pair { $ret.put($pair.k, $pair.v); } (',' pair { $ret.put($pair.k, $pair.v); } )* ','? '}'
         { $v = new SDict($ret); }
     | '{' '}'
         { $v = new SDict($ret); }
     ;
 
 pair returns [String k, SExpression v]
-    : Key=(StringLiteral | RawString | Identifier) ':' Value=value
+    : Key=(StringLiteral | RawString) ':' Value=value
+        { $k = org.coyove.eugine.util.Utils.unescape($Key.text); $v = $Value.v; }
+    | Key=Identifier ':' Value=value
         { $k = $Key.text; $v = $Value.v; }
     ;
 
@@ -107,8 +134,86 @@ value returns [SExpression v]
     | list { $v = $list.v; }
     ;
 
+castExpression
+    :   unaryExpression
+    |   '(' typeName ')' castExpression
+    |   '__extension__' '(' typeName ')' castExpression
+    ;
+
+multiplicativeExpression
+    :   castExpression
+    |   multiplicativeExpression '*' castExpression
+    |   multiplicativeExpression '/' castExpression
+    |   multiplicativeExpression '%' castExpression
+    ;
+
+additiveExpression
+    :   multiplicativeExpression
+    |   additiveExpression '+' multiplicativeExpression
+    |   additiveExpression '-' multiplicativeExpression
+    ;
+
+shiftExpression
+    :   additiveExpression
+    |   shiftExpression '<<' additiveExpression
+    |   shiftExpression '>>' additiveExpression
+    ;
+
+relationalExpression
+    :   shiftExpression
+    |   relationalExpression '<' shiftExpression
+    |   relationalExpression '>' shiftExpression
+    |   relationalExpression '<=' shiftExpression
+    |   relationalExpression '>=' shiftExpression
+    ;
+
+equalityExpression
+    :   relationalExpression
+    |   equalityExpression '==' relationalExpression
+    |   equalityExpression '!=' relationalExpression
+    ;
+
+andExpression
+    :   equalityExpression
+    |   andExpression '&' equalityExpression
+    ;
+
+exclusiveOrExpression
+    :   andExpression
+    |   exclusiveOrExpression '^' andExpression
+    ;
+
+inclusiveOrExpression
+    :   exclusiveOrExpression
+    |   inclusiveOrExpression '|' exclusiveOrExpression
+    ;
+
+logicalAndExpression
+    :   inclusiveOrExpression
+    |   logicalAndExpression '&&' inclusiveOrExpression
+    ;
+
+logicalOrExpression
+    :   logicalAndExpression
+    |   logicalOrExpression '||' logicalAndExpression
+    ;
+
 expr returns [SExpression v]
-    : Sub Right=expr
+    : callStmt
+        { $v = $callStmt.v; }
+    | Called=expr argumentsList
+        { $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null); }
+    | lambdaStmt
+        { $v = $lambdaStmt.v; }
+    | Identifier '=' Value=expr
+        { 
+            $v = new SESet(new SString($Identifier.text), $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE); 
+        }
+    | Subject=expr '=' Value=expr
+        {
+            $v = new SESet($Subject.v, $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
+        }
+    | Sub Right=expr
         {
             if ($Right.v instanceof SInteger) {
                 $v = new SInteger(-((SInteger) $Right.v).<Long>get());
@@ -118,44 +223,56 @@ expr returns [SExpression v]
                 $v = new SEReverse(new Atom($Sub), org.coyove.eugine.util.List.build($Right.v)); 
             }
         }
-    | Left=expr MathOp=('*'|'/') Right=expr 
+    | Left=expr Op=('-'|'*'|'/'|'%'|'=='|'!='|'>'|'<'|'>='|'<='|'&&'|'||') Right=expr 
         { 
-            $v = SKeywordsANTLR.KeywordsLookup.get($MathOp.text).
-            call($MathOp, org.coyove.eugine.util.List.build($Left.v, $Right.v)); 
-        }
-    | Left=expr Sub Right=expr 
-        { 
-            $v = SKeywordsANTLR.KeywordsLookup.get("-").
-            call($Sub, org.coyove.eugine.util.List.build($Left.v, $Right.v)); 
+            $v = SKeywordsANTLR.KeywordsLookup.get($Op.text).call($Op, org.coyove.eugine.util.List.build($Left.v, $Right.v));
         }
     | Left=expr AddOp=('+'|'+.') Right=expr 
         { 
-            $v = SKeywordsANTLR.KeywordsLookup.get($AddOp.text).
-            call($AddOp, org.coyove.eugine.util.List.build($Left.v, $Right.v)); 
+            $v = new SEAdd(new Atom($AddOp), 
+                org.coyove.eugine.util.List.build($Left.v, $Right.v), $AddOp.text.equals("+."));
         }
-    | Identifier    
-        { $v = new SEVariable($Identifier.text); }
-    | RawString     
-        {
-            String t = $RawString.text; 
-            t = t.substring(1, t.length() - 1);
-            $v = new SString(t.replace("\"\"", "\""));
-        }
-    | StringLiteral 
-        { 
-            String t = $StringLiteral.text; 
-            $v = new SString(t.substring(1, t.length() - 1)); 
-        }
-    | Integer
-        { $v = new SInteger($Integer.text); }
-    | Double
-        { $v = new SDouble($Double.text); }
     | '(' Inner=expr ')'
         { $v = $Inner.v; }
-    | callStmt
-        { $v = $callStmt.v; }
+    | For Subject=expr 'do' Body=expr
+        { 
+            $v = new SEFor(new Atom($For), $Subject.v, $Body.v, 
+                $For.text.equals("for") ? SEFor.DIRECTION.ASC : SEFor.DIRECTION.DESC); 
+        }
+    | For Start=expr (',' Next=expr)? ('..' | '...') End=expr 'do' Body=expr
+        { 
+            SEIRange r = new SEIRange(new Atom($For), org.coyove.eugine.util.List.build(
+                    $Start.v, 
+                    $Next.ctx == null ? 
+                        new SInteger(1) : 
+                        new SEElemArith(new Atom($Next.start), 
+                            org.coyove.eugine.util.List.build($Next.v, $Start.v),
+                            SEElemArith.ACTION.SUBTRACT), 
+                    $End.v
+                ));
+            $v = new SEFor(new Atom($For), r, $Body.v, SEFor.DIRECTION.ASC); 
+        }
+    | Subject=expr '[' Key=expr ']'
+        {
+            $v = new SEGet(new Atom($Subject.start), $Subject.v, org.coyove.eugine.util.List.build($Key.v));
+        }
+    | Subject=expr '.' Identifier
+        {
+            $v = new SEGet(new Atom($Subject.start), $Subject.v, 
+                org.coyove.eugine.util.List.build(new SString($Identifier.text)));
+        }
     | list
         { $v = $list.v; }
     | dict
         { $v = $dict.v; }
+    | Identifier    
+        { $v = new SEVariable($Identifier.text); }
+    | RawString     
+        { $v = new SString(org.coyove.eugine.util.Utils.unescape($RawString.text)); }
+    | StringLiteral 
+        { $v = new SString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
+    | Integer
+        { $v = new SInteger($Integer.text); }
+    | Double
+        { $v = new SDouble($Double.text); }
     ;

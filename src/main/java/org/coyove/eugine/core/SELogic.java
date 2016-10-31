@@ -16,6 +16,13 @@ public class SELogic extends SExpression {
 
     public SELogic() {}
 
+    public SELogic(Atom ha, List<SExpression> args, LOGIC a) {
+        super(ha, args, 1);
+
+        log = a;
+        values = args;
+    }
+
     public SELogic(Atom ha, Compound c, LOGIC a) throws VMException {
         super(ha, c, 1);
 

@@ -15,6 +15,13 @@ public class SEIf extends SExpression {
 
     public SEIf() {}
 
+    public SEIf(Atom ha, SExpression c, SExpression t, SExpression f) {
+        headAtom = ha;
+        condition = c;
+        trueBranch = t;
+        falseBranch = f;
+    }
+
     public SEIf(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 

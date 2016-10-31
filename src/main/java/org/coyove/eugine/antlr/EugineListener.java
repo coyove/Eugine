@@ -28,6 +28,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitProg(EugineParser.ProgContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#code}.
+	 * @param ctx the parse tree
+	 */
+	void enterCode(EugineParser.CodeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#code}.
+	 * @param ctx the parse tree
+	 */
+	void exitCode(EugineParser.CodeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#block}.
 	 * @param ctx the parse tree
 	 */
@@ -58,6 +68,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitImportStmt(EugineParser.ImportStmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#ifStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStmt(EugineParser.IfStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#ifStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStmt(EugineParser.IfStmtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#declareStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -78,6 +98,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitDefinitionsList(EugineParser.DefinitionsListContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#argumentsList}.
+	 * @param ctx the parse tree
+	 */
+	void enterArgumentsList(EugineParser.ArgumentsListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#argumentsList}.
+	 * @param ctx the parse tree
+	 */
+	void exitArgumentsList(EugineParser.ArgumentsListContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#defineStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -87,6 +117,16 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDefineStmt(EugineParser.DefineStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#lambdaStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambdaStmt(EugineParser.LambdaStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#lambdaStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambdaStmt(EugineParser.LambdaStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#callStmt}.
 	 * @param ctx the parse tree

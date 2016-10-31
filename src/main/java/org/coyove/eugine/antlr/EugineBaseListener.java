@@ -38,6 +38,18 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCode(EugineParser.CodeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCode(EugineParser.CodeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBlock(EugineParser.BlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -74,6 +86,18 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterIfStmt(EugineParser.IfStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIfStmt(EugineParser.IfStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclareStmt(EugineParser.DeclareStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -98,6 +122,18 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterArgumentsList(EugineParser.ArgumentsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArgumentsList(EugineParser.ArgumentsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDefineStmt(EugineParser.DefineStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -105,6 +141,18 @@ public class EugineBaseListener implements EugineListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDefineStmt(EugineParser.DefineStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLambdaStmt(EugineParser.LambdaStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLambdaStmt(EugineParser.LambdaStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

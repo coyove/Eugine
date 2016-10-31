@@ -46,7 +46,9 @@ public class SELambda extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) {
-        return new SClosure(env, arguments, body);
+        SClosure cls = new SClosure(env, arguments, body);
+        cls.immutable = true;
+        return cls;
     }
 
     @Override

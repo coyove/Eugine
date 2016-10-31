@@ -16,6 +16,13 @@ public class SECompare extends SExpression {
 
     public SECompare() {}
 
+    public SECompare(Atom ha, List<SExpression> args, String a) {
+        super(ha, args, 1);
+
+        action = a;
+        values = args;
+    }
+
     public SECompare(Atom ha, Compound c, String a) throws VMException {
         super(ha, c, 1);
 

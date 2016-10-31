@@ -1,2 +1,12 @@
-var z="zzz";
-println(z);
+def test (a, x...) "zz" =
+{
+	println("hello world", x);
+};
+
+def zzz (a) = a; 
+
+def test_struct () = {
+
+}
+
+def tester (a) = if a == 1 println("one"); else if a == 2 println("two"); else println("unknown");

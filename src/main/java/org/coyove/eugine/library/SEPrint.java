@@ -1,5 +1,6 @@
 package org.coyove.eugine.library;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
@@ -34,14 +35,14 @@ public class SEPrint extends SExpression {
         arguments = SExpression.castPlain(c);
     }
 
-    private String print(SValue re, ExecEnvironment env, int padding) throws VMException {
+    private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws VMException {
         String ret = "";
         if (re instanceof SList) {
             List<SExpression> lv = re.get();
             String[] values = new String[lv.size()];
 
             for (int i = 0; i < lv.size(); i++) {
-                values[i] = print(lv.get(i).evaluate(env), env, padding);
+                values[i] = print(lv.get(i).evaluate(env), env, padding, true);
             }
 
             ret += "[" + StringUtils.join(values, ", ") + "]";
@@ -52,13 +53,19 @@ public class SEPrint extends SExpression {
             int i = 0;
 
             for (String key : keys) {
-                values[i++] = String.format("%1$" + padding + "s%2$s = %3$s,\n", " ", key,
-                        print(map.get(key).evaluate(env), env, padding + 2));
+                values[i++] = String.format("%1$" + padding + "s\"%2$s\": %3$s,\n", " ", key,
+                        print(map.get(key).evaluate(env), env, padding + 2, true));
             }
 
-            ret += "{\n" + StringUtils.join(values, "") + StringUtils.leftPad("}", padding + 1);
+            ret += "{\n" + StringUtils.join(values, "") + StringUtils.leftPad("}", padding - 1);
         } else if (re instanceof SNull) {
             ret = "null";
+        } else if (re instanceof SString) {
+            if (quote) {
+                ret = String.format("\"%1$s\"", StringEscapeUtils.escapeJava(re.underlying.toString()));
+            } else {
+                ret = String.format("%1$s", re.underlying.toString());
+            }
         } else {
             ret = String.format("%1$s", re.underlying.toString());
         }
@@ -71,7 +78,7 @@ public class SEPrint extends SExpression {
         SValue ret = new SNull();
         for (SValue v : SExpression.eval(arguments, env)) {
             ret = v;
-            System.out.print(print(v, env, 2));
+            System.out.print(print(v, env, 2, false));
         }
         System.out.print(delim);
 

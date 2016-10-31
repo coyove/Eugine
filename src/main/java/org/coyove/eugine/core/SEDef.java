@@ -53,7 +53,11 @@ public class SEDef extends SExpression {
     public SValue evaluate(ExecEnvironment env) {
         SValue cls = new SClosure(env, arguments, body, description);
         cls.immutable = true;
-        env.putVar(func, cls);
+
+        if (func != null) {
+            env.putVar(func, cls);
+        }
+
         return cls;
     }
 

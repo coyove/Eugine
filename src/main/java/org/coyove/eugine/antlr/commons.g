@@ -2,9 +2,13 @@ lexer grammar CommonLexerRules;
 
 Var: 'var';
 Def: 'def';
+For: ('for' | 'forr');
+If: 'if';
+Else: 'else';
 
 Add : '+' ;
 Sub : '-' ;
+AryOp: ('-'|'*'|'/'|'%'|'=='|'!='|'>'|'<'|'>='|'<=') ;
 
 Integer
     : [0-9]+
@@ -21,7 +25,7 @@ Semi
     ;
 
 Identifier 
-    : (LETTER | '_')(LETTER | '_' | [0-9])* 
+    : (LETTER | '_')(LETTER | '_' | [0-9])* '...'?
     ;
 
 LETTER: ('A'..'Z' | 'a' .. 'z');

@@ -19,6 +19,13 @@ public class SEFor extends SExpression {
     public SEFor() {
     }
 
+    public SEFor(Atom ha, SExpression l, SExpression b, DIRECTION dir) {
+        headAtom = ha;
+        list = l;
+        body = b;
+        direction = dir;
+    }
+
     public SEFor(Atom ha, Compound c, DIRECTION dir) throws VMException {
         super(ha, c, 2);
 
@@ -27,13 +34,13 @@ public class SEFor extends SExpression {
         direction = dir;
     }
 
-    private SValue execLoop(SClosure body, SValue v, int idx) throws VMException {
+    private SValue execLoop(SClosure body, SValue v, Long idx) throws VMException {
         ExecEnvironment newEnv = new ExecEnvironment();
         if (body.arguments.size() >= 1)
             newEnv.put(body.arguments.head(), v);
 
         if (body.arguments.size() == 2)
-            newEnv.put(body.arguments.get(1), new SInteger((long) idx));
+            newEnv.put(body.arguments.get(1), new SInteger(idx));
 
         newEnv.parentEnv = body.outerEnv;
         SValue ret = new SNull();
@@ -51,40 +58,42 @@ public class SEFor extends SExpression {
                 new VMException(2017, "invalid loop body", headAtom));
 
         SValue list_ = this.list.evaluate(env);
-        List<SValue> values = new List<SValue>();
-
-        boolean whileLoop = false;
-        boolean condAlwaysTrue = false;
 
         if (list_ instanceof SList) {
-            values = ((SList) list_).get();
-        } else if (list_ instanceof SBool) {
-            whileLoop = true;
-            condAlwaysTrue = false;
-        } else {
-            throw new VMException(2018, "invalid loop condition", headAtom);
-        }
+            List<SExpression> values = ((SList) list_).get();
 
-        if (whileLoop) {
-            while (condAlwaysTrue || this.list.evaluate(env).<Boolean>get()) {
-                SValue ret = execLoop(body, new SNull(), 0);
-                if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
-                    break;
-            }
-        } else {
             if (direction == DIRECTION.ASC) {
                 for (int i = 0; i < values.size(); i++) {
-                    SValue ret = execLoop(body, values.get(i), i);
+                    SValue ret = execLoop(body, values.get(i).evaluate(env), (long) i);
                     if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                         break;
                 }
             } else {
                 for (int i = values.size() - 1; i >= 0; i--) {
-                    SValue ret = execLoop(body, values.get(i), i);
+                    SValue ret = execLoop(body, values.get(i).evaluate(env), (long) i);
                     if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                         break;
                 }
             }
+        } else if (list_ instanceof SBool) {
+            Long i = (long) 0;
+            while (this.list.evaluate(env).<Boolean>get()) {
+                SValue ret = execLoop(body, new SNull(), i++);
+                if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                    break;
+            }
+        } else if (list_ instanceof SRange) {
+            SRange r = (SRange) list_;
+            Long i = r.start;
+
+            while (i < r.end) {
+                SValue ret = execLoop(body, new SInteger(i), i);
+                i += r.interval;
+                if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                    break;
+            }
+        } else {
+            throw new VMException(2018, "invalid loop condition", headAtom);
         }
 
         return new SNull();

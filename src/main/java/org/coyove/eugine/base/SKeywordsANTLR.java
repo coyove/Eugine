@@ -60,9 +60,54 @@ public class SKeywordsANTLR {
                         return new SEAdd(new Atom(tok), arguments, true);
                     }
                 });
+                put("==", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SECompare(new Atom(tok), arguments, "==");
+                    }
+                });
+                put("!=", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SECompare(new Atom(tok), arguments, "!=");
+                    }
+                });
+                put(">", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SECompare(new Atom(tok), arguments, ">");
+                    }
+                });
+                put("<", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SECompare(new Atom(tok), arguments, "<");
+                    }
+                });
+                put("<=", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SECompare(new Atom(tok), arguments, "<=");
+                    }
+                });
+                put(">=", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SECompare(new Atom(tok), arguments, ">=");
+                    }
+                });
+                put("&&", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SELogic(new Atom(tok), arguments, SELogic.LOGIC.AND);
+                    }
+                });
+                put("||", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SELogic(new Atom(tok), arguments, SELogic.LOGIC.OR);
+                    }
+                });
                 put("reverse", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> arguments) {
                         return new SEReverse(new Atom(tok), arguments);
+                    }
+                });
+                put("irange", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEIRange(new Atom(tok), arguments);
                     }
                 });
             }};

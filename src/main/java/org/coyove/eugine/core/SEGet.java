@@ -1,5 +1,6 @@
 package org.coyove.eugine.core;
 
+import com.sun.org.apache.bcel.internal.generic.DLOAD;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
@@ -15,6 +16,12 @@ public class SEGet extends SExpression {
     private List<SExpression> keys;
 
     public SEGet() {}
+
+    public SEGet(Atom ha, SExpression d, List<SExpression> k) {
+        headAtom = ha;
+        dict = d;
+        keys = k;
+    }
 
     public SEGet(Atom ha, Compound c, boolean plain) throws VMException {
         super(ha, c, 2);
