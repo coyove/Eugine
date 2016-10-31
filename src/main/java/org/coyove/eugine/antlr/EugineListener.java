@@ -178,6 +178,66 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitValue(EugineParser.ValueContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#topExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterTopExpr(EugineParser.TopExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#topExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitTopExpr(EugineParser.TopExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#inverseExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterInverseExpr(EugineParser.InverseExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#inverseExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitInverseExpr(EugineParser.InverseExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#multiplyExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMultiplyExpr(EugineParser.MultiplyExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#multiplyExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMultiplyExpr(EugineParser.MultiplyExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#addExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAddExpr(EugineParser.AddExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#addExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAddExpr(EugineParser.AddExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#compareExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompareExpr(EugineParser.CompareExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#compareExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompareExpr(EugineParser.CompareExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#logicExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogicExpr(EugineParser.LogicExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#logicExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogicExpr(EugineParser.LogicExprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#expr}.
 	 * @param ctx the parse tree
 	 */

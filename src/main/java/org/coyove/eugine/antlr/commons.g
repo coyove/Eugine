@@ -18,8 +18,8 @@ Double
     : ([0-9]+ '.' [0-9]+ | ([0-9]+ '.' [0-9]+ [eE] [\+\-]? [0-9]+))
     ;
 
-NEWLINE:'\r'? '\n' -> skip  ;   // return newlines to parser (end-statement signal)
-WS: [ \t]+ -> skip ;            // toss out whitespace
+NEWLINE:'\r'? '\n' -> skip  ;
+WS: [ \t]+ -> skip ;
 Semi
     : ';' 
     ;
@@ -28,7 +28,17 @@ Identifier
     : (LETTER | '_')(LETTER | '_' | [0-9])* '...'?
     ;
 
-LETTER: ('A'..'Z' | 'a' .. 'z');
+LETTER: ('A'..'Z' | 'a'..'z');
+
+BlockComment
+    :   '/*' .*? '*/'
+        -> skip
+    ;
+
+LineComment
+    :   '//' ~[\r\n]*
+        -> skip
+    ;
 
 RawString
     :   '@"' (~'"' | '""')* '"'
