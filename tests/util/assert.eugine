@@ -1,32 +1,27 @@
-def test (a, x...) "zz" =
-{
-	println("hello world", x);
-};
+(def _debug () = {
+	var failed_tests = []
+	var passed_tests = []
 
-def zzz (a) = a; 
-
-def test_struct (b) = {
-	def this.hello (a) = {
-		println("hello ",b, " and ",a)
+	def this.static_assert (stmts...) = {
+		for stmts do (s) => 
+			if !s[0] 
+				exit(s[1] + "failed");
 	}
+})()
 
-	this
-}
+// def zzz () = {
+// 	var this.list = []
+// 	this
+// }
 
-def tester (a) = 
-	if a == 1 
-		println("one")
-	else if a == 2 
-		println("two")
-	else {
-		println("unknown");
-	}
+// var test1 = clone zzz()
+// test1.list += "zzz"
+// test1.list += 1
 
-def _static_assert (stmt...) = {
-	for stmt do (s) => if !s[0] exit(s[1]);
-}
+// println(test1.list)
 
-var p1 = clone test_struct("wy")
-var p2 = clone test_struct("zjg")
-p1.hello("zzz")
-p2.hello("zzz")
+// var test2 = clone zzz()
+// test2.list += "qwe"
+// test2.list += 2
+
+// println(test2.list)

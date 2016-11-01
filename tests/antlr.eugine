@@ -14,4 +14,5 @@ var json = {
 	}
 };
 
-println(json, json.zzz, json.zzz.zzz2);
+y+=1
+println(y)

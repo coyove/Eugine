@@ -55,10 +55,18 @@ enterStmt returns [SExpression v]
     ;
 
 declareStmt returns [SExpression v]
-    : Var Identifier '=' expr 
+    : Var Identifier ('=' Right=expr)?
         {
-            $v = new SESet(new SString($Identifier.text), $expr.v, 
-                SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
+            $v = new SESet(new SString($Identifier.text), 
+                $Right.v == null ? new SNull() : $Right.v, SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
+        }
+    | Var Get=expr '=' Right=expr 
+        {
+            if ($Get.v instanceof SEGet) {
+                $v = new SESet($Get.v, $Right.v, SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
+            } else {
+                $v = new SNull();
+            }
         }
     ;
 
@@ -248,6 +256,13 @@ expr returns [SExpression v]
     | Subject=expr '=' Value=expr
         {
             $v = new SESet($Subject.v, $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
+        }
+    | Subject=expr Op=('+'|'-'|'*'|'/'|'%') '=' Value=expr
+        {
+            $v = new SESet($Subject.v, 
+                SKeywordsANTLR.KeywordsLookup.get($Op.text).call($Op, 
+                    org.coyove.eugine.util.List.build($Subject.v, $Value.v)), 
+                SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
         }
     | Clone Subject=expr
         {
