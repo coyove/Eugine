@@ -100,6 +100,11 @@ public class SKeywordsANTLR {
                         return new SELogic(new Atom(tok), arguments, SELogic.LOGIC.OR);
                     }
                 });
+                put("!", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SELogic(new Atom(tok), arguments, SELogic.LOGIC.NOT);
+                    }
+                });
                 put("reverse", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> arguments) {
                         return new SEReverse(new Atom(tok), arguments);
@@ -108,6 +113,11 @@ public class SKeywordsANTLR {
                 put("irange", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> arguments) {
                         return new SEIRange(new Atom(tok), arguments);
+                    }
+                });
+                put("exit", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEExit(new Atom(tok), arguments);
                     }
                 });
             }};

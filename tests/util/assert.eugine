@@ -1,0 +1,32 @@
+def test (a, x...) "zz" =
+{
+	println("hello world", x);
+};
+
+def zzz (a) = a; 
+
+def test_struct (b) = {
+	def this.hello (a) = {
+		println("hello ",b, " and ",a)
+	}
+
+	this
+}
+
+def tester (a) = 
+	if a == 1 
+		println("one")
+	else if a == 2 
+		println("two")
+	else {
+		println("unknown");
+	}
+
+def _static_assert (stmt...) = {
+	for stmt do (s) => if !s[0] exit(s[1]);
+}
+
+var p1 = clone test_struct("wy")
+var p2 = clone test_struct("zjg")
+p1.hello("zzz")
+p2.hello("zzz")

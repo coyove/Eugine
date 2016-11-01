@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.coyove.eugine.util.ANTLRHelper;
 import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.Utils;
@@ -21,15 +22,18 @@ public class EugineImportListener extends EugineBaseListener {
         super.enterImportStmt(ctx);
 
         Token sourceToken = ctx.getStop();
+        int tt = sourceToken.getType();
+
         String source = sourceToken.getTokenSource().getSourceName();
+        String importPath = "";
+
+        for (TerminalNode terminalNode : ctx.getTokens(tt)) {
+            importPath += "/" + terminalNode.getSymbol().getText();
+        }
 
         CommonTokenStream tokens = ANTLRHelper.loadFile(Utils.getDirectoryName(source) +
-                sourceToken.getText() + ".eugine");
+                importPath.substring(1) + ".eugine");
 
-//        EugineParser parser = new EugineParser(tokens);
-//        EugineParser.ProgContext pc = parser.prog();
-//
-//        ctx.getParent().getParent().children.add(1, pc);
         EugineParser parser = new EugineParser(tokens);
         EugineParser.ProgContext pc = parser.prog();
 

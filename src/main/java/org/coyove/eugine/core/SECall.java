@@ -177,14 +177,14 @@ public class SECall extends SExpression {
             // TODO: newEnv.put("~parent", new SDict(closure.outerEnv));
             newEnv.put("~atom", new SObject(headAtom));
 
-            if (!newEnv.containsKey("~this")) {
-                if (closure.refer instanceof SClosure) {
-                    SClosure refer = ((SClosure) closure.refer);
-                    newEnv.put("~this", refer);
-                    newEnv.put("~proto", refer.proto);
-                } else {
-                    newEnv.put("~this", closure);
-                }
+            if (closure.refer instanceof SClosure) {
+                SClosure refer = ((SClosure) closure.refer);
+                newEnv.put("~this", refer);
+                newEnv.put("this", refer);
+                newEnv.put("~proto", refer.proto);
+            } else {
+                newEnv.put("~this", closure);
+                newEnv.put("this", closure);
             }
 
             if (closure.outerEnv != null) {

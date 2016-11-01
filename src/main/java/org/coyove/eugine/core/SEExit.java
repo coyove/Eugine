@@ -13,6 +13,12 @@ public class SEExit extends SExpression {
 
     public SEExit() {}
 
+    public SEExit(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+
+        argument = args.head();
+    }
+
     public SEExit(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

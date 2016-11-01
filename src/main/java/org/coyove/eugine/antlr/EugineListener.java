@@ -68,15 +68,15 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitImportStmt(EugineParser.ImportStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link EugineParser#ifStmt}.
+	 * Enter a parse tree produced by {@link EugineParser#enterStmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterIfStmt(EugineParser.IfStmtContext ctx);
+	void enterEnterStmt(EugineParser.EnterStmtContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link EugineParser#ifStmt}.
+	 * Exit a parse tree produced by {@link EugineParser#enterStmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitIfStmt(EugineParser.IfStmtContext ctx);
+	void exitEnterStmt(EugineParser.EnterStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#declareStmt}.
 	 * @param ctx the parse tree
@@ -188,15 +188,15 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitTopExpr(EugineParser.TopExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link EugineParser#inverseExpr}.
+	 * Enter a parse tree produced by {@link EugineParser#unaryExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterInverseExpr(EugineParser.InverseExprContext ctx);
+	void enterUnaryExpr(EugineParser.UnaryExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link EugineParser#inverseExpr}.
+	 * Exit a parse tree produced by {@link EugineParser#unaryExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitInverseExpr(EugineParser.InverseExprContext ctx);
+	void exitUnaryExpr(EugineParser.UnaryExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#multiplyExpr}.
 	 * @param ctx the parse tree

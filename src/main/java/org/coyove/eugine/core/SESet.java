@@ -97,7 +97,9 @@ public class SESet extends SExpression {
                 }
             }
 
-            if (n.refer instanceof SDict) {
+            if (n.refer instanceof String) {
+                env.put(n.refer.toString(), ret);
+            } else if (n.refer instanceof SDict) {
                 ((SDict) n.refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
             } else if (n.refer instanceof SList) {
                 ((SList) n.refer).<List<SValue>>get().set(n.refIndex, ret);

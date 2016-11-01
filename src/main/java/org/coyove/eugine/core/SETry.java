@@ -13,8 +13,17 @@ public class SETry extends SExpression {
     private SExpression mainBody;
     private SExpression catchBody = null;
     private SExpression finallyBody = null;
+    private String exName;
 
     public SETry() {}
+
+    public SETry(Atom ha, SExpression m, SExpression c, SExpression f, String e) {
+        headAtom = ha;
+        mainBody = m;
+        catchBody = c;
+        finallyBody = f;
+        exName = e;
+    }
 
     public SETry(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
@@ -31,7 +40,7 @@ public class SETry extends SExpression {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
-            env.put("~ex", new SString(ex.toString()));
+            env.putVar(exName == null ? "~ex" : exName, new SString(ex.toString()));
             if (this.catchBody != null) {
                 this.catchBody.evaluate(env);
             }
@@ -50,6 +59,7 @@ public class SETry extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.mainBody = this.mainBody.deepClone();
+        ret.exName = this.exName;
 
         if (this.catchBody != null) {
             ret.catchBody = this.catchBody.deepClone();

@@ -34,6 +34,12 @@ public class SELambda extends SExpression {
     public SELambda() {
     }
 
+    public SELambda(Atom ha, List<String> args, List<SExpression> b) {
+        headAtom = ha;
+        arguments = args;
+        body = b;
+    }
+
     public SELambda(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 

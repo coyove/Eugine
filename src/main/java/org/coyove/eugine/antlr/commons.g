@@ -5,9 +5,13 @@ Def: 'def';
 For: ('for' | 'forr');
 If: 'if';
 Else: 'else';
-
+Enter: 'enter';
+Catch: 'catch';
+Clone: 'clone';
+Do: 'do';
 Add : '+' ;
 Sub : '-' ;
+Not: '!';
 AryOp: ('-'|'*'|'/'|'%'|'=='|'!='|'>'|'<'|'>='|'<=') ;
 
 Integer
@@ -23,12 +27,14 @@ WS: [ \t]+ -> skip ;
 Semi
     : ';' 
     ;
-
+    
 Identifier 
-    : (LETTER | '_')(LETTER | '_' | [0-9])* '...'?
+    : (Letter | '_')(Letter | '_' | [0-9])* '...'?
     ;
 
-LETTER: ('A'..'Z' | 'a'..'z');
+Letter
+	: ('A'..'Z' | 'a'..'z')
+	;
 
 BlockComment
     :   '/*' .*? '*/'

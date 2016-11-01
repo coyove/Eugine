@@ -34,11 +34,14 @@ public class SEVariable extends SExpression {
 
                 SValue tmp = new SNull(true);
                 env.put(varName, tmp);
+                tmp.refer = varName;
                 return tmp;
             }
         }
 
-        return env.get(varName);
+        SValue tmp = env.get(varName);
+        tmp.refer = varName;
+        return tmp;
     }
 
     @Override

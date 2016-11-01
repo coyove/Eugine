@@ -14,6 +14,11 @@ public class SEClone extends SExpression {
 
     public SEClone() {}
 
+    public SEClone(Atom ha, SExpression sub) {
+        headAtom = ha;
+        varName = sub;
+    }
+
     public SEClone(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

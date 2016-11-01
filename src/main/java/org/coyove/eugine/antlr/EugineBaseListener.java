@@ -86,13 +86,13 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIfStmt(EugineParser.IfStmtContext ctx) { }
+	@Override public void enterEnterStmt(EugineParser.EnterStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIfStmt(EugineParser.IfStmtContext ctx) { }
+	@Override public void exitEnterStmt(EugineParser.EnterStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -230,13 +230,13 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInverseExpr(EugineParser.InverseExprContext ctx) { }
+	@Override public void enterUnaryExpr(EugineParser.UnaryExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInverseExpr(EugineParser.InverseExprContext ctx) { }
+	@Override public void exitUnaryExpr(EugineParser.UnaryExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
