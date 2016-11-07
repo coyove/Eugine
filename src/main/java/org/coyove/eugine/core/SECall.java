@@ -106,8 +106,8 @@ public class SECall extends SExpression {
 
             ret = continueState.TAIL_CALL;
 
-            for (SECond.Branch b : cond.branches) {
-                if (b.recv.evaluate(env).get().equals(tester)) {
+            for (Branch b : cond.branches) {
+                if (SECond.compare(b.recv.evaluate(env).get(), tester)) {
                     retCls = new SClosure(env, b.body);
                     flag = true;
                     break;
@@ -116,7 +116,7 @@ public class SECall extends SExpression {
 
             if (!flag) {
                 if (cond.defaultBranch != null) {
-                    retCls = new SClosure(env, cond.defaultBranch);
+                    retCls = new SClosure(env, cond.defaultBranch.body);
                 } else {
                     ret = continueState.FALSE_NULL;
                 }
@@ -181,6 +181,7 @@ public class SECall extends SExpression {
                 SClosure refer = ((SClosure) closure.refer);
                 newEnv.put("~this", refer);
                 newEnv.put("this", refer);
+                newEnv.put("_this", closure);
                 newEnv.put("~proto", refer.proto);
             } else {
                 newEnv.put("~this", closure);

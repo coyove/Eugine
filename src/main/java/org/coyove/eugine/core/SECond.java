@@ -9,41 +9,48 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SECond extends SExpression {
-    public class Branch implements java.io.Serializable {
-        public SExpression recv;
-        public List<SExpression> body;
-    }
-
     public SExpression condition;
     public List<Branch> branches;
-    public List<SExpression> defaultBranch = null;
+    public Branch defaultBranch = null;
 
     public SECond() {}
 
+    public SECond(Atom ha, SExpression condition, List<Branch> branches, Branch db) {
+        headAtom = ha;
+
+        this.condition = condition;
+        this.branches = branches;
+        this.defaultBranch = db;
+    }
+
     public SECond(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
+        throw new VMException(9999, "not implemented", ha);
+//        condition = SExpression.cast(c.atoms.pop());
+//        branches = new List<Branch>();
+//
+//        for (Base a : c.atoms) {
+//            Compound b = (Compound) a;
+//            if (b == null || b.atoms.size() < 2)
+//                throw new VMException(2002, "invalid branch definition", ha);
+//
+//            Base cond = b.atoms.pop();
+//
+//            if (cond instanceof Atom && ((Atom) cond).token.type == Token.TokenType.ATOMIC &&
+//                    ((Atom) cond).token.value.toString().equals("_")) {
+//                defaultBranch = SExpression.castPlain(b);
+//            } else {
+//                Branch n = new Branch();
+//                n.recv = SExpression.cast(cond);
+//                n.body = SExpression.castPlain(b);
+//
+//                branches.add(n);
+//            }
+//        }
+    }
 
-        condition = SExpression.cast(c.atoms.pop());
-        branches = new List<Branch>();
-
-        for (Base a : c.atoms) {
-            Compound b = (Compound) a;
-            if (b == null || b.atoms.size() < 2)
-                throw new VMException(2002, "invalid branch definition", ha);
-
-            Base cond = b.atoms.pop();
-
-            if (cond instanceof Atom && ((Atom) cond).token.type == Token.TokenType.ATOMIC &&
-                    ((Atom) cond).token.value.toString().equals("_")) {
-                defaultBranch = SExpression.castPlain(b);
-            } else {
-                Branch n = new Branch();
-                n.recv = SExpression.cast(cond);
-                n.body = SExpression.castPlain(b);
-
-                branches.add(n);
-            }
-        }
+    public static boolean compare(Object left, Object right) {
+        return (left == null && right == null) || left.equals(right);
     }
 
     @Override
@@ -52,7 +59,8 @@ public class SECond extends SExpression {
         SValue ret = new SNull();
 
         for (Branch b : branches) {
-            if (b.recv.evaluate(env).get().equals(cond)) {
+            Object tester = b.recv.evaluate(env).get();
+            if (compare(cond, tester)) {
                 for (SExpression e : b.body) {
                     ret = e.evaluate(env);
                 }
@@ -61,7 +69,7 @@ public class SECond extends SExpression {
         }
 
         if (defaultBranch != null) {
-            for (SExpression e : defaultBranch) {
+            for (SExpression e : defaultBranch.body) {
                 ret = e.evaluate(env);
             }
             return ret;
@@ -78,7 +86,8 @@ public class SECond extends SExpression {
         ret.condition = this.condition.deepClone();
 
         if (this.defaultBranch != null) {
-            ret.defaultBranch = List.deepClone(this.defaultBranch);
+            ret.defaultBranch = new Branch();
+            ret.defaultBranch.body = List.deepClone(defaultBranch.body);
         }
 
         ret.branches = new List<Branch>(this.branches.size());

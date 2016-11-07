@@ -138,6 +138,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitCallStmt(EugineParser.CallStmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#switchStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitchStmt(EugineParser.SwitchStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#switchStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitchStmt(EugineParser.SwitchStmtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#dict}.
 	 * @param ctx the parse tree
 	 */
@@ -237,6 +247,16 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLogicExpr(EugineParser.LogicExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#assignExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAssignExpr(EugineParser.AssignExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#assignExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAssignExpr(EugineParser.AssignExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#expr}.
 	 * @param ctx the parse tree

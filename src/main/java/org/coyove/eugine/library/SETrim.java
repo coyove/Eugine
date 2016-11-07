@@ -16,6 +16,12 @@ public class SETrim extends SExpression {
 
     public SETrim() {}
 
+    public SETrim(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+
+        argument = args.head();
+    }
+
     public SETrim(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

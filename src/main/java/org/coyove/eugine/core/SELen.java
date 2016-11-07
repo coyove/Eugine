@@ -13,6 +13,12 @@ public class SELen extends SExpression {
 
     public SELen() {}
 
+    public SELen(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+
+        argument = args.head();
+    }
+
     public SELen(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

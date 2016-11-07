@@ -1,10 +1,12 @@
 package org.coyove.eugine.value;
 
+import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.*;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -29,7 +31,7 @@ public class SClosure extends SValue {
 
     public SClosure(ExecEnvironment env, List<String> args, List<SExpression> b, String description) {
         this(env, args, b);
-        extra.put("~doc", new SString(description));
+        extra.put("__doc__", new SString(description));
     }
 
     public SClosure(ExecEnvironment env, SExpression single) {
@@ -72,14 +74,16 @@ public class SClosure extends SValue {
         SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
-//        if (this.extra.containsKey("~init")) {
-//            ret.extra.putVar("~init", this.extra.get("~init").clone());
-//        }
-
         ret.transparent = this.transparent;
         ret.proto = this;
 
         SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + StringUtils.join(arguments.toArray(), ",") + ") => { " +
+                body.size() + " }";
     }
 }

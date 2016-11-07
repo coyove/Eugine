@@ -30,6 +30,20 @@ public class SEFile extends SExpression {
     public SEFile() {
     }
 
+    public SEFile(Atom ha, List<SExpression> args, OPERATION op) {
+        super(ha, args, op == OPERATION.OPEN_BINARY ||
+                op == OPERATION.OPEN_LINES ||
+                op == OPERATION.OPEN_TEXT ||
+                op == OPERATION.EXISTS ? 1 : 2);
+
+        filename = args.get(0);
+        if (args.size() == 2) {
+            data = args.get(1);
+        }
+
+        fileOp = op;
+    }
+
     public SEFile(Atom ha, Compound c, OPERATION op) throws VMException {
         super(ha, c, op == OPERATION.OPEN_BINARY ||
                 op == OPERATION.OPEN_LINES ||
@@ -87,9 +101,11 @@ public class SEFile extends SExpression {
                         Files.write(path, ((byte[]) data.get()), oo);
                     } else if (data instanceof SList) {
                         StringBuilder sb = new StringBuilder();
-                        for (SValue v : data.<List<SValue>>get()) {
-                            if (v instanceof SString) {
-                                sb.append(v.<String>get() + "\n");
+                        for (SExpression v : data.<List<SExpression>>get()) {
+                            SValue value = v.evaluate(env);
+
+                            if (value instanceof SString) {
+                                sb.append(value.<String>get() + "\n");
                             }
                         }
                         Files.write(path, sb.toString().getBytes("utf-8"), oo);

@@ -4,6 +4,7 @@ Var: 'var';
 Def: 'def';
 For: ('for' | 'forr');
 If: 'if';
+Switch: 'switch';
 Else: 'else';
 Enter: 'enter';
 Catch: 'catch';

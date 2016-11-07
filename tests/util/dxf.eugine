@@ -1,0 +1,56 @@
+(def Dxf() = {
+	def this.translate_code_value_type(vt) = 
+		switch true do {
+			(0 <= vt && vt <= 9)		=> "String"
+			(10 <= vt && vt <= 39)		=> "Point3dDouble"
+			(40 <= vt && vt <= 59)		=> "Double"
+			(60 <= vt && vt <= 79)		=> "Int16"
+			(90 <= vt && vt <= 99)		=> "Int32"
+			(100 == vt)					=> "String"
+			(102 == vt)					=> "String"
+			(105 == vt)					=> "HexString"
+			(110 <= vt && vt <= 119) 	=> "Double"
+			(120 <= vt && vt <= 129) 	=> "Double"
+			(130 <= vt && vt <= 139) 	=> "Double"
+			(140 <= vt && vt <= 149) 	=> "ScalarDouble"
+			(160 <= vt && vt <= 169) 	=> "Int64"
+			(170 <= vt && vt <= 179) 	=> "Int16"
+			(210 <= vt && vt <= 239) 	=> "Double"
+			(270 <= vt && vt <= 289) 	=> "Int16"
+			(290 <= vt && vt <= 299) 	=> "Boolean"
+			(300 <= vt && vt <= 309) 	=> "Text"
+			(310 <= vt && vt <= 319) 	=> "HexStringVinaryChunk"
+			(320 <= vt && vt <= 329) 	=> "HexStringHandle"
+			(330 <= vt && vt <= 369) 	=> "HexStringObjectId"
+			(370 <= vt && vt <= 379) 	=> "Int16"
+			(380 <= vt && vt <= 389) 	=> "Int16"
+			(390 <= vt && vt <= 399) 	=> "HexStringHandle"
+			(400 <= vt && vt <= 409) 	=> "Int16"
+			(410 <= vt && vt <= 419) 	=> "String"
+			(420 <= vt && vt <= 429) 	=> "Int32"
+			(430 <= vt && vt <= 439) 	=> "String"
+			(440 <= vt && vt <= 449) 	=> "Int32"
+			(450 <= vt && vt <= 459) 	=> "Long"
+			(460 <= vt && vt <= 469) 	=> "Double"
+			(470 <= vt && vt <= 479) 	=> "String"
+			(480 <= vt && vt <= 481) 	=> "HexStringHandle"
+			(999 == vt) 				=> "Comment"
+			(1000 <= vt && vt <= 1009)	=> "String"
+			_							=> exit("unknown code")
+	}
+
+	def this.Point (x, y, z) = {
+		var _this.x = x
+		var _this.y = y
+		var _this.z = z
+	}
+
+	def this.EntityBase () = {
+		var layer_name = ""
+	}
+
+	var this.Line = clone this.EntityBase
+	var this.Line.thickness = 0
+	var this.Line.start
+	var this.Line.end
+})()

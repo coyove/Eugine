@@ -120,5 +120,115 @@ public class SKeywordsANTLR {
                         return new SEExit(new Atom(tok), arguments);
                     }
                 });
+                put("trim", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SETrim(new Atom(tok), arguments);
+                    }
+                });
+                put("len", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SELen(new Atom(tok), arguments);
+                    }
+                });
+                put("num", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SENum(new Atom(tok), arguments);
+                    }
+                });
+                put("read_file", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_TEXT);
+                    }
+                });
+                put("read_file_lines", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_LINES);
+                    }
+                });
+                put("read_file_binary", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_BINARY);
+                    }
+                });
+                put("sin", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SIN);
+                    }
+                });
+                put("cos", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.COS);
+                    }
+                });
+                put("tan", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.TAN);
+                    }
+                });
+                put("abs", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ABS);
+                    }
+                });
+                put("asin", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ASIN);
+                    }
+                });
+                put("acos", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ACOS);
+                    }
+                });
+                put("atan", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ATAN);
+                    }
+                });
+                put("sqrt", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SQRT);
+                    }
+                });
+                put("sgn", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SGN);
+                    }
+                });
+                put("pow", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.POW);
+                    }
+                });
+                put("time", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.TIME);
+                    }
+                });
+                put("utc_time", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.UTC_TIME);
+                    }
+                });
+                put("sha", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SHA);
+                    }
+                });
+                put("round", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ROUND);
+                    }
+                });
+                put("floor", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.FLOOR);
+                    }
+                });
+                put("random", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.RANDOM);
+                    }
+                });
             }};
 }

@@ -22,7 +22,8 @@ public class SESet extends SExpression {
 
     public SESet() {}
 
-    public SESet(SExpression name, SExpression value, DECLARE d, ACTION a) {
+    public SESet(Atom ha, SExpression name, SExpression value, DECLARE d, ACTION a) {
+        headAtom = ha;
         varName = name;
         varValue = value;
 

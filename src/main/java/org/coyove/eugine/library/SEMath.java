@@ -28,6 +28,17 @@ public class SEMath extends SExpression {
     public SEMath() {
     }
 
+    public SEMath(Atom ha, List<SExpression> args, OPERATION f) {
+        super(ha, args, 1);
+
+        argument = args.head();
+        if (args.size() > 1) {
+            argument2 = args.get(1);
+        }
+
+        func = f;
+    }
+
     public SEMath(Atom ha, Compound c, OPERATION f) throws VMException {
         super(ha, c, 1);
 

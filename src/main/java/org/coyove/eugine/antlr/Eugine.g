@@ -55,10 +55,26 @@ enterStmt returns [SExpression v]
     ;
 
 declareStmt returns [SExpression v]
-    : Var Identifier '=' expr 
+    : Var Identifier ('=' Value=expr)?
         {
-            $v = new SESet(new SString($Identifier.text), $expr.v, 
+            $v = new SESet(new Atom($Identifier), new SString($Identifier.text), 
+                $Value.start == null ? new SNull() : $Value.v, 
                 SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
+        }
+    | Var Subject=expr ('=' Value=expr)?
+        {
+            $v = new SESet(new Atom($Subject.start), $Subject.v, 
+                $Value.start == null ? new SNull() : $Value.v, 
+                SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
+        }
+    | Identifier '=' Value=expr
+        {
+            $v = new SESet(new Atom($Identifier),
+                new SString($Identifier.text), $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE); 
+        }
+    | Subject=expr '=' Value=expr
+        {
+            $v = new SESet(new Atom($Subject.start), $Subject.v, $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
         }
     ;
 
@@ -91,7 +107,7 @@ defineStmt returns [SExpression v]
         ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
         {
             if ($Get.v instanceof SEGet) {
-                $v = new SESet($Get.v,
+                $v = new SESet(new Atom($Def), $Get.v,
                     new SELambda(new Atom($Def), $definitionsList.v, $body),
                     SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
             } else {
@@ -117,6 +133,28 @@ callStmt returns [SExpression v]
             $v = new SECall(new SEVariable($Identifier.text), $argumentsList.v, new Atom($Identifier), null);
         }
     } 
+    ;
+
+switchStmt returns [SExpression v]
+    locals [ 
+        org.coyove.eugine.util.List<Branch> branches = new org.coyove.eugine.util.List<Branch>(),
+        Branch db = null
+    ]
+    : Switch Condition=expr Do '{' (Tester=expr '=>' Code=code {
+        Branch b = new Branch();
+        b.recv = $Tester.v;
+        b.body = new org.coyove.eugine.util.List<SExpression>();
+        b.body.add($Code.v);
+
+        if ($Tester.text.equals("_")) {
+            $db = b;
+        } else {
+            $branches.add(b);
+        }
+    })* '}'
+        {
+            $v = new SECond(new Atom($Switch), $Condition.v, $branches, $db);
+        }
     ;
 
 dict returns [SExpression v]
@@ -195,6 +233,20 @@ unaryExpr returns [SExpression v]
             $v = SKeywordsANTLR.KeywordsLookup.get($Not.text).call($Not, 
                 org.coyove.eugine.util.List.build($Right.v));
         }
+    | Left=unaryExpr Op=('++' | '--')
+        {
+            Atom ha = new Atom($Op);
+            if ($Op.text.equals("++")) {
+                $v = new SESet(ha, $Left.v, 
+                    new SEAdd(ha, org.coyove.eugine.util.List.build($Left.v, new SInteger(1)), false),
+                    SESet.DECLARE.SET, SESet.ACTION.MUTABLE);
+            } else {
+                $v = new SESet(ha, $Left.v, 
+                    new SEElemArith(ha, 
+                        org.coyove.eugine.util.List.build($Left.v, new SInteger(1)), SEElemArith.ACTION.SUBTRACT),
+                    SESet.DECLARE.SET, SESet.ACTION.MUTABLE);
+            }
+        }
     ;
 
 multiplyExpr returns [SExpression v]
@@ -238,17 +290,28 @@ logicExpr returns [SExpression v]
         }
     ;
 
+assignExpr returns [SExpression v]
+    :   Top=logicExpr { $v = $Top.v; }
+    |   Left=unaryExpr Op=('+=' | '-=' | '*=' | '/=') Right=assignExpr
+        {
+            Atom ha = new Atom($Op);
+            if ($Op.text.equals("+=")) {
+                $v = new SESet(ha, $Left.v, 
+                    new SEAdd(ha, org.coyove.eugine.util.List.build($Left.v, $Right.v), false),
+                    SESet.DECLARE.SET, SESet.ACTION.MUTABLE);
+            } else {
+                String text = $Op.text.substring(0, 1);
+                $v = new SESet(ha, $Left.v, 
+                    SKeywordsANTLR.KeywordsLookup.get(text).call($Op, 
+                        org.coyove.eugine.util.List.build($Left.v, $Right.v)),
+                    SESet.DECLARE.SET, SESet.ACTION.MUTABLE);
+            }
+        }
+    ;
+
 expr returns [SExpression v]
-    : logicExpr 
-        { $v = $logicExpr.v; }
-    | Identifier '=' Value=expr
-        {
-            $v = new SESet(new SString($Identifier.text), $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE); 
-        }
-    | Subject=expr '=' Value=expr
-        {
-            $v = new SESet($Subject.v, $Value.v, SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
-        }
+    : assignExpr
+        { $v = $assignExpr.v; }
     | Clone Subject=expr
         {
             $v = new SEClone(new Atom($Clone), $Subject.v);
@@ -275,6 +338,8 @@ expr returns [SExpression v]
         {
             $v = new SEIf(new Atom($If), $Condition.v, $True.v, $False.start == null ? null : $False.v);
         }
+    | switchStmt
+        { $v = $switchStmt.v; }
     | list
         { $v = $list.v; }
     | dict

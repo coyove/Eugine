@@ -1,17 +1,60 @@
-import util.assert;
+import util.dxf
 
-var x= 1.2e-4
-var y = 10
-var y=x*(y-2)
+var dxf_lines = read_file_lines(__path__ + "/jm.dxf")
+var line_idx = 1
+var sections = {};
+var current_section = null
 
+var _start = time(1)
+println("begin parsing")
 
+for line_idx < len(dxf_lines) do () => {
+	// var typeid = num(trim(dxf_lines[line_idx]))
+	
+	switch dxf_lines[line_idx] do {
+		"EOF" => line_idx += 2 // file ends, we done
 
-var json = {
-	"zzz": {
-		"zzz2": {
-			"zzz3": 3,
+		"SECTION" => {
+			line_idx += 2
+			current_section = dxf_lines[line_idx]
+			sections[current_section] = []
+			line_idx += 2
+		}
+
+		"ENDSEC" => {
+			line_idx += 2
+			current_section = null
+		}
+
+		_ => {
+			var line = dxf_lines[line_idx];
+
+			if current_section == null
+				exit("invalid op outside section: " + line + " at line " + line_idx)
+
+			if current_section == "ENTITIES" {
+				// switch line do {
+				// 	"LINE" => {
+				// 		var line = clone Dxf.Line
+				sections["ENTITIES"] += line
+
+						enter for true do () => {
+							line_idx++
+							if dxf_lines[line_idx] == "  0" {
+								line_idx++
+								exit(0)
+							}
+						}
+				// 	}
+
+				// 	_ => line_idx += 2
+				// }
+			} else {
+				sections[current_section] += line
+				line_idx += 2
+			}
 		}
 	}
-};
-
-println(json, json.zzz, json.zzz.zzz2);
+}
+println(time(1) - _start)
+println(sections)

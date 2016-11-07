@@ -66,6 +66,8 @@ public class SEPrint extends SExpression {
             } else {
                 ret = String.format("%1$s", re.underlying.toString());
             }
+        } else if (re instanceof SClosure) {
+            ret = re.toString();
         } else {
             ret = String.format("%1$s", re.underlying.toString());
         }

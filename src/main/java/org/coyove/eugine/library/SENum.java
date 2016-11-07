@@ -13,6 +13,12 @@ public class SENum extends SExpression {
 
     public SENum() {}
 
+    public SENum(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+
+        argument = args.head();
+    }
+
     public SENum(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

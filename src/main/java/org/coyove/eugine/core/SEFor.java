@@ -5,6 +5,8 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.HashMap;
+
 /**
  * Created by coyove on 2016/9/10.
  */
@@ -58,6 +60,16 @@ public class SEFor extends SExpression {
                 new VMException(2017, "invalid loop body", headAtom));
 
         SValue list_ = this.list.evaluate(env);
+
+        if (list_ instanceof SDict) {
+            HashMap<String, SExpression> m = ((SDict) list_).get();
+            List<SExpression> keys = new List<SExpression>();
+            for (String s : m.keySet()) {
+                keys.add(new SString(s));
+            }
+
+            list_ = new SList(keys);
+        }
 
         if (list_ instanceof SList) {
             List<SExpression> values = ((SList) list_).get();

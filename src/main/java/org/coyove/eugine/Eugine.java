@@ -44,7 +44,7 @@ public class Eugine implements Serializable {
 
     public SExpression loadString(String code) throws Exception {
         Parser p = new Parser();
-        environment.put("~source", new SString("<vm>"));
+        environment.put("__file__", new SString("<vm>"));
         return SExpression.cast(p.parse(code, "", "<vm>"));
     }
 
@@ -54,8 +54,8 @@ public class Eugine implements Serializable {
         String codeSource = p_.getFileName().toString();
         String codeFolder = filePath.substring(0, filePath.length() - codeSource.length());
 
-        environment.put("~path", new SString(codeFolder));
-        environment.put("~source", new SString(codeSource));
+        environment.put("__path__", new SString(codeFolder));
+        environment.put("__file__", new SString(codeSource));
 
         FileInputStream fileIn = new FileInputStream(filePath);
         ObjectInputStream in = new ObjectInputStream(fileIn);
@@ -74,8 +74,8 @@ public class Eugine implements Serializable {
         String codeFolder = filePath.substring(0, filePath.length() - codeSource.length());
 
         Parser p = new Parser();
-        environment.put("~path", new SString(codeFolder));
-        environment.put("~source", new SString(codeSource));
+        environment.put("__path__", new SString(codeFolder));
+        environment.put("__file__", new SString(codeSource));
 
         return SExpression.cast(p.parse(code, codeFolder, codeSource));
     }
