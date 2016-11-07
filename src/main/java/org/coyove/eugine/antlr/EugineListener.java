@@ -9,6 +9,7 @@ import org.coyove.eugine.core.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
+import org.apache.commons.lang3.ClassUtils;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -107,6 +108,16 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArgumentsList(EugineParser.ArgumentsListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#interopArgumentsList}.
+	 * @param ctx the parse tree
+	 */
+	void enterInteropArgumentsList(EugineParser.InteropArgumentsListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#interopArgumentsList}.
+	 * @param ctx the parse tree
+	 */
+	void exitInteropArgumentsList(EugineParser.InteropArgumentsListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#defineStmt}.
 	 * @param ctx the parse tree
@@ -257,6 +268,16 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAssignExpr(EugineParser.AssignExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#javaNewExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterJavaNewExpr(EugineParser.JavaNewExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#javaNewExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitJavaNewExpr(EugineParser.JavaNewExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#expr}.
 	 * @param ctx the parse tree

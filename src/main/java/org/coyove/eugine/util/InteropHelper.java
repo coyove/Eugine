@@ -10,11 +10,17 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by coyove on 2016/9/11.
  */
 public class InteropHelper {
+    public static HashMap<String, String> generalJavaTypes = new HashMap<String, String>() {{
+        put("String", "java.lang.String");
+        put("String[]", "java.lang.String[]");
+    }};
+
     public static SValue castJavaType(Object value) {
         if (value == null) {
             return new SNull();
@@ -40,6 +46,13 @@ public class InteropHelper {
                 ret.add(castJavaType(Array.get(value, i)));
 
             return new SList(ret);
+        } else if (value instanceof List<?>) {
+            List list = (List) value;
+            for (int i = 0; i < list.size(); i++) {
+                list.set(i, castJavaType(list.get(i)));
+            }
+
+            return new SList(list);
         }
 
         return new SObject(value);
@@ -150,9 +163,79 @@ public class InteropHelper {
         };
     }
 
+    public static Object[] buildArguments(List<String> defs, List<SExpression> args, ExecEnvironment env)
+            throws VMException {
+
+        List<Class> classes = new List<Class>();
+        List<Object> passArgs = new List<Object>();
+
+        boolean vararg = false;
+        int i = 0;
+        for (String clsName : defs) {
+            if (vararg) {
+                throw new VMException(4001, "vararg must be at the tail of the definition");
+            }
+
+            if (clsName.endsWith("...")) {
+                vararg = true;
+                clsName = clsName.substring(0, clsName.length() - 3) + "[]";
+            }
+
+            if (i >= args.size()) {
+                throw new VMException(4003, "not enough arguments");
+            }
+
+            try {
+                if (generalJavaTypes.containsKey(clsName)) {
+                    clsName = generalJavaTypes.get(clsName);
+                }
+
+                Class c = ClassUtils.getClass(clsName);
+                classes.add(c);
+
+                SValue value = args.get(i++).evaluate(env);
+                Object ret = InteropHelper.castSValue(value, c);
+
+                if (value instanceof SObject) {
+                    passArgs.add(value.get());
+                } else if (c.isArray()) {
+                    Object[] tmp = (Object[]) ret;
+                    int len = tmp.length;
+
+                    Class p = c.getComponentType();
+                    if (p == int.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Integer[].class)));
+                    } else if (p == double.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Double[].class)));
+                    } else if (p == float.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Float[].class)));
+                    } else if (p == long.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Long[].class)));
+                    } else if (p == byte.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Byte[].class)));
+                    } else if (p == short.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Short[].class)));
+                    } else if (p == char.class) {
+                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Character[].class)));
+                    } else {
+                        passArgs.add(Arrays.copyOf(tmp, len, c));
+                    }
+                } else {
+                    passArgs.add(ret);
+                }
+            } catch (ClassNotFoundException ex) {
+                throw new VMException(4004, "cannot find type '" + clsName + "'");
+            }
+        }
+
+        return new Object[]{
+                classes, passArgs
+        };
+    }
+
     public static SValue getField(Object obj, String field) throws VMException {
         try {
-            Field f = (obj instanceof Class ? (Class)obj : obj.getClass()).getDeclaredField(field);
+            Field f = (obj instanceof Class ? (Class) obj : obj.getClass()).getDeclaredField(field);
             f.setAccessible(true);
             return InteropHelper.castJavaType(f.get(obj));
         } catch (Exception e) {

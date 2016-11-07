@@ -9,6 +9,7 @@ import org.coyove.eugine.core.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
+import org.apache.commons.lang3.ClassUtils;
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -129,6 +130,18 @@ public class EugineBaseListener implements EugineListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArgumentsList(EugineParser.ArgumentsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInteropArgumentsList(EugineParser.InteropArgumentsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInteropArgumentsList(EugineParser.InteropArgumentsListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -309,6 +322,18 @@ public class EugineBaseListener implements EugineListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAssignExpr(EugineParser.AssignExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterJavaNewExpr(EugineParser.JavaNewExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitJavaNewExpr(EugineParser.JavaNewExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

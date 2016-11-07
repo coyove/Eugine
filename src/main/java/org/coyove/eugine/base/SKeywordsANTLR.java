@@ -230,5 +230,10 @@ public class SKeywordsANTLR {
                         return new SEMath(new Atom(tok), c, SEMath.OPERATION.RANDOM);
                     }
                 });
+                put("explode", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEExplode(new Atom(tok), c);
+                    }
+                });
             }};
 }

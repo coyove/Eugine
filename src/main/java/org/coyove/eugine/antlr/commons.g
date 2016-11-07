@@ -9,6 +9,8 @@ Else: 'else';
 Enter: 'enter';
 Catch: 'catch';
 Clone: 'clone';
+New: 'new';
+Static: 'static';
 Do: 'do';
 Add : '+' ;
 Sub : '-' ;
@@ -31,6 +33,10 @@ Semi
     
 Identifier 
     : (Letter | '_')(Letter | '_' | [0-9])* '...'?
+    ;
+
+JavaFullName
+    : Identifier ('\\' Identifier)* '[]'? '...'?
     ;
 
 Letter

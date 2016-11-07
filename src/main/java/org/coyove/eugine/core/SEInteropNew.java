@@ -13,17 +13,26 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class SEInteropNew extends SExpression {
     private SExpression subject;
-    private SExpression definition;
+    private List<String> definition;
     private List<SExpression> arguments;
 
     public SEInteropNew() {}
 
-    public SEInteropNew(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
+    public SEInteropNew(Atom ha, SExpression s, List<String> defs, List<SExpression> args) {
+        headAtom = ha;
 
-        subject = SExpression.cast(c.atoms.pop());
-        definition = SExpression.cast(c.atoms.pop());
-        arguments = SExpression.castPlain(c);
+        subject = s;
+        definition = defs;
+        arguments = args;
+    }
+
+    public SEInteropNew(Atom ha, Compound c) throws VMException {
+        throw new VMException(9999, "not implemented", ha);
+//        super(ha, c, 2);
+//
+//        subject = SExpression.cast(c.atoms.pop());
+//        definition = SExpression.cast(c.atoms.pop());
+//        arguments = SExpression.castPlain(c);
     }
 
     @Override
@@ -33,13 +42,9 @@ public class SEInteropNew extends SExpression {
         if (sub instanceof SNull)
             throw new VMException(2033, "null object found", headAtom);
 
-        List<SValue> args = SExpression.eval(arguments, env);
         Object[] ret;
-        SList definition = Utils.cast(this.definition.evaluate(env), SList.class,
-                new VMException(2034, "needs constructor's definition", headAtom));
-
         try {
-            ret = InteropHelper.formatDefinition(definition, args);
+            ret = InteropHelper.buildArguments(definition, arguments, env);
         } catch (VMException ex) {
             throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
@@ -69,7 +74,7 @@ public class SEInteropNew extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.subject = this.subject.deepClone();
-        ret.definition = this.definition.deepClone();
+        ret.definition = this.definition; // no need to clone
         ret.arguments = List.deepClone(this.arguments);
         return ret;
     }

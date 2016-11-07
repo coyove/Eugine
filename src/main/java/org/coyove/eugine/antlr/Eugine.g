@@ -12,13 +12,23 @@ import org.coyove.eugine.core.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
+import org.apache.commons.lang3.ClassUtils;
 }
 
 @parser::members {
+    public static SObject getClassByName(String classname, Token tok) {
+        try {
+            return new SObject(ClassUtils.getClass(classname));
+        } catch(Exception e) {
+            ErrorHandler.print(4056, "cannot initiate " + classname, new Atom(tok));
+            return null;
+        }
+    }
 }
 
 prog returns [SExpression v]
     : (block { $v = $block.v; } )+ 
+    | EOF       { $v = new SNull(); }
 ;
 
 code returns [SExpression v]
@@ -95,6 +105,24 @@ argumentsList returns [ org.coyove.eugine.util.List<SExpression> v =
     | '(' ')'
     ;
 
+interopArgumentsList returns [ 
+        org.coyove.eugine.util.List<SExpression> args = new org.coyove.eugine.util.List<SExpression>(),
+        org.coyove.eugine.util.List<String> defs = new org.coyove.eugine.util.List<String>() ]
+    : '(' 
+        (InitExpr=expr ':' InitDef=(JavaFullName | Identifier) ',' 
+            { 
+                $args.add($InitExpr.v);
+                $defs.add($InitDef.text.replace("\\", "."));
+            } )* 
+        LastExpr=expr ':' LastDef=(JavaFullName | Identifier)
+    ')'
+    {
+        $args.add($LastExpr.v);
+        $defs.add($LastDef.text.replace("\\", "."));
+    }
+    | '(' ')'
+    ;
+
 defineStmt returns [SExpression v]
     locals [ org.coyove.eugine.util.List<SExpression> body = new org.coyove.eugine.util.List<SExpression>(); ]
     : Def Identifier definitionsList Desc=(RawString | StringLiteral)? '='
@@ -132,7 +160,7 @@ callStmt returns [SExpression v]
         } else {
             $v = new SECall(new SEVariable($Identifier.text), $argumentsList.v, new Atom($Identifier), null);
         }
-    } 
+    }
     ;
 
 switchStmt returns [SExpression v]
@@ -191,6 +219,14 @@ topExpr returns [SExpression v]
         { $v = $Inner.v; }
     | callStmt
         { $v = $callStmt.v; }
+    | Called=topExpr Op=('::' | ':') Method=Identifier interopArgumentsList 
+        {
+            $v = new SEInteropMethod(new Atom($Called.start), $Called.v,
+                $Method.text, $interopArgumentsList.defs, $interopArgumentsList.args, 
+                $Op.text.equals("::") ? 
+                    SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE :
+                    SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
+        }
     | Called=topExpr argumentsList
         { $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null); }
     | lambdaStmt
@@ -309,9 +345,20 @@ assignExpr returns [SExpression v]
         }
     ;
 
+javaNewExpr returns [SExpression v]
+    : New JavaFullName interopArgumentsList
+        {
+            String classname = $JavaFullName.text.replace("\\", ".");
+            $v = new SEInteropNew(new Atom($New), getClassByName(classname, $New),
+                $interopArgumentsList.defs, $interopArgumentsList.args);
+        }
+    ;
+
 expr returns [SExpression v]
-    : assignExpr
-        { $v = $assignExpr.v; }
+    : assignExpr { $v = $assignExpr.v; }
+    | javaNewExpr { $v = $javaNewExpr.v; }
+    | Static JavaFullName
+        { $v = getClassByName($JavaFullName.text.replace("\\", "."), $Static); }
     | Clone Subject=expr
         {
             $v = new SEClone(new Atom($Clone), $Subject.v);

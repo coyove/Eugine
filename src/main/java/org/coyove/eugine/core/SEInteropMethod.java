@@ -13,8 +13,8 @@ import java.lang.reflect.Method;
  */
 public class SEInteropMethod extends SExpression {
     private SExpression subject;
-    private SExpression methodName;
-    private SExpression definition;
+    private String methodName;
+    private List<String> definition;
     private List<SExpression> arguments;
 
     private RETURN_TYPE type;
@@ -22,14 +22,26 @@ public class SEInteropMethod extends SExpression {
 
     public SEInteropMethod() {}
 
-    public SEInteropMethod(Atom ha, Compound c, RETURN_TYPE t) throws VMException {
-        super(ha, c, 3);
+    public SEInteropMethod(Atom ha, SExpression sub,
+            String m, List<String> defs, List<SExpression> args, RETURN_TYPE t) {
+        headAtom = ha;
 
-        subject = SExpression.cast(c.atoms.pop());
-        methodName = SExpression.cast(c.atoms.pop());
-        definition = SExpression.cast(c.atoms.pop());
-        arguments = SExpression.castPlain(c);
+        subject = sub;
+        methodName = m;
+        definition = defs;
+        arguments = args;
         type = t;
+    }
+
+    public SEInteropMethod(Atom ha, Compound c, RETURN_TYPE t) throws VMException {
+        throw new VMException(9999, "not implemented", ha);
+//        super(ha, c, 3);
+//
+//        subject = SExpression.cast(c.atoms.pop());
+//        methodName = SExpression.cast(c.atoms.pop());
+//        definition = SExpression.cast(c.atoms.pop());
+//        arguments = SExpression.castPlain(c);
+//        type = t;
     }
 
     @Override
@@ -39,17 +51,11 @@ public class SEInteropMethod extends SExpression {
         if (sub instanceof SNull)
             throw new VMException(2028, "null object found", headAtom);
 
-        SString mn = Utils.cast(methodName.evaluate(env), SString.class,
-                new VMException(2029, "method name must be string", headAtom));
-        String method = mn.get();
+        String method = methodName;
 
         Object[] ret;
-        List<SValue> args = SExpression.eval(arguments, env);
-        SList definition = Utils.cast(this.definition.evaluate(env), SList.class,
-                new VMException(2030, "needs " + method + "'s definition", headAtom));
-
         try {
-            ret = InteropHelper.formatDefinition(definition, args);
+            ret = InteropHelper.buildArguments(definition, arguments, env);
         } catch (VMException ex) {
             throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
@@ -86,8 +92,8 @@ public class SEInteropMethod extends SExpression {
         ret.tailCompound = this.tailCompound;
 
         ret.subject = this.subject.deepClone();
-        ret.methodName = this.methodName.deepClone();
-        ret.definition = this.definition.deepClone();
+        ret.methodName = this.methodName;
+        ret.definition = this.definition;
         ret.arguments = List.deepClone(this.arguments);
         ret.type = this.type;
         return ret;
