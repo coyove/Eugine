@@ -11,6 +11,7 @@ import org.coyove.eugine.util.*;
 public class SELambda extends SExpression {
     private List<SExpression> body;
     private List<String> arguments;
+    private String description;
 
     public static List<String> CompoundToArguments(Compound c, Atom pos) throws VMException {
         List<String> ret = new List<String>();
@@ -35,9 +36,14 @@ public class SELambda extends SExpression {
     }
 
     public SELambda(Atom ha, List<String> args, List<SExpression> b) {
+        this(ha, args, b, "");
+    }
+
+    public SELambda(Atom ha, List<String> args, List<SExpression> b, String d) {
         headAtom = ha;
         arguments = args;
         body = b;
+        description = d;
     }
 
     public SELambda(Atom ha, Compound c) throws VMException {
@@ -52,7 +58,7 @@ public class SELambda extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) {
-        SClosure cls = new SClosure(env, arguments, body);
+        SClosure cls = new SClosure(env, arguments, body, description);
         cls.immutable = true;
         return cls;
     }
@@ -64,6 +70,7 @@ public class SELambda extends SExpression {
         ret.tailCompound = this.tailCompound;
         ret.body = List.deepClone(this.body);
         ret.arguments = this.arguments;
+        ret.description = this.description;
 
         return ret;
     }

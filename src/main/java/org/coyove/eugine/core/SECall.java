@@ -27,7 +27,7 @@ public class SECall extends SExpression {
     public SECall(SExpression cls, List<SExpression> args, Atom ha, Compound c) {
         super(ha, c);
         closureObject = cls;
-        arguments = args;
+        arguments = args == null ? new List<SExpression>() : args;
     }
 
     public static boolean checkArgumentsCount(SClosure c, List<SValue> arguments) {

@@ -124,21 +124,44 @@ interopArgumentsList returns [
     ;
 
 defineStmt returns [SExpression v]
-    locals [ org.coyove.eugine.util.List<SExpression> body = new org.coyove.eugine.util.List<SExpression>(); ]
-    : Def Identifier definitionsList Desc=(RawString | StringLiteral)? '='
-        ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
-        {
-            $v = new SEDef(new Atom($Identifier), $Identifier.text, $definitionsList.v, 
-                $Desc == null ? "" : $Desc.text, $body);
-        }
-    | Def Get=expr definitionsList Desc=(RawString | StringLiteral)? '='
-        ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
-        {
-            if ($Get.v instanceof SEGet) {
-                $v = new SESet(new Atom($Def), $Get.v,
-                    new SELambda(new Atom($Def), $definitionsList.v, $body),
-                    SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
+    locals [ 
+        org.coyove.eugine.util.List<SExpression> body = new org.coyove.eugine.util.List<SExpression>(),
+        SExpression decorators = null
+    ]
+    : Def
+        (Decorator=expr argumentsList? { 
+            org.coyove.eugine.util.List<SExpression> args = $argumentsList.ctx == null ? null : $argumentsList.v;
+            if ($decorators == null) {
+                $decorators = new SECall($Decorator.v, args, new Atom($Decorator.start), null);
             } else {
+                $decorators = new SECall(
+                    new SECall($Decorator.v, args, new Atom($Decorator.start), null), args,
+                    new Atom($Decorator.start), null);
+            }
+        })*
+        (Identifier | Get=expr) 
+        Definition=definitionsList 
+        Description=(RawString | StringLiteral)? 
+        '='
+        ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
+        {
+            Atom a = $Identifier != null ? new Atom($Identifier) : new Atom($Get.start);
+            SExpression sub = $Identifier != null ? new SString($Identifier.text) : $Get.v;
+            String desc = $Description == null ? "" : $Description.text;
+
+            if ($Identifier != null || $Get.v instanceof SEGet) {
+                if ($decorators != null) {
+                    $v = new SESet(a, sub, new SELambda(a, $Definition.v, org.coyove.eugine.util.List.build(
+                        new SECall($decorators, org.coyove.eugine.util.List.build(
+                            new SELambda(a, $Definition.v, $body, desc)), 
+                            new Atom($Decorator.start), null)
+                    )), SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
+                } else {
+                    $v = new SESet(a, sub, new SELambda(a, $Definition.v, $body, desc), 
+                        SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
+                }
+            } else {
+                // error
                 $v = new SNull();
             }
         }

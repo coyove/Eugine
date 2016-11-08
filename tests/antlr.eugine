@@ -1,46 +1,56 @@
-def Point (x, y, z) = {
-	var this.x = x
-	var this.y = y
-	var this.z = z
-	this
+// def Point (x, y, z) = {
+// 	var this.x = x
+// 	var this.y = y
+// 	var this.z = z
+// 	this
+// }
+
+// def Face (points...) = {
+// 	var this.points = points
+// 	this
+// }
+
+// var dxfHelper = static org\coyove\dxf\Helper
+// var doc = dxfHelper::openDxf(__path__ + "/jm.dxf" : String)
+// var boundary = dxfHelper::getHatch(doc : org\kabeja\dxf\DXFDocument, "main_block" : String)
+
+// var points = []
+// for boundary do (point) => {
+// 	var x = point::getX()
+// 	var y = point::getY()
+// 	var p = clone Point(x, y, 0)
+// 	points += p
+// }
+
+// var extrude_length = 1000
+// var faces = [ (clone Face(explode(points))) ]
+
+// for 0..len(points)-1 do (i) => {
+// 	var p1 = points[i]
+// 	var p2 = points[i + 1]
+// 	var p3 = clone Point(p2.x, p2.y, -extrude_length)
+// 	var p4 = clone Point(p1.x, p1.y, -extrude_length)
+
+// 	println(p1.z, p2.z, p3.z, p4.z)
+
+// 	var f = (clone Face(p1, p2, p3, p4))
+// 	faces += f
+// }
+
+// for faces do (face) => {
+// 	print("[")
+// 	for face.points do (point) => {
+// 		print("[", point.x, ",", point.y, ",", point.z, "],")
+// 	}
+// 	println("],")
+// }
+
+def greatly (f) = (name) => {
+	f("mighty " + name)
 }
 
-def Face (points...) = {
-	var this.points = points
-	this
+def greatly hello(name) = {
+	println(name)
 }
 
-var dxfHelper = static org\coyove\dxf\Helper
-var doc = dxfHelper::openDxf(__path__ + "/jm.dxf" : String)
-var boundary = dxfHelper::getHatch(doc : org\kabeja\dxf\DXFDocument, "main_block" : String)
-
-var points = []
-for boundary do (point) => {
-	var x = point::getX()
-	var y = point::getY()
-	var p = clone Point(x, y, 0)
-	points += p
-}
-
-var extrude_length = 1000
-var faces = [ (clone Face(explode(points))) ]
-
-for 0..len(points)-1 do (i) => {
-	var p1 = points[i]
-	var p2 = points[i + 1]
-	var p3 = clone Point(p2.x, p2.y, -extrude_length)
-	var p4 = clone Point(p1.x, p1.y, -extrude_length)
-
-	println(p1.z, p2.z, p3.z, p4.z)
-
-	var f = (clone Face(p1, p2, p3, p4))
-	faces += f
-}
-
-for faces do (face) => {
-	print("[]ln.Vector{")
-	for face.points do (point) => {
-		print("ln.Vector{", point.x, ",", point.y, ",", point.z, "},")
-	}
-	println("},")
-}
+hello("zzz")
