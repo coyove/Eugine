@@ -45,12 +45,13 @@
 // 	println("],")
 // }
 
-def greatly (f) = (name) => {
-	f("mighty " + name)
+def greatly (code, f, name) => {
+	f(code + " " + name)
 }
 
-def greatly hello(name) = {
+def [greatly("mighty")] hello(name) => {
 	println(name)
 }
 
 hello("zzz")
+greatly((name) => println("haha"))(null)

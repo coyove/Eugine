@@ -129,7 +129,7 @@ defineStmt returns [SExpression v]
         SExpression decorators = null
     ]
     : Def
-        (Decorator=expr argumentsList? { 
+        ('[' Decorator=expr argumentsList? ']' { 
             org.coyove.eugine.util.List<SExpression> args = $argumentsList.ctx == null ? null : $argumentsList.v;
             if ($decorators == null) {
                 $decorators = new SECall($Decorator.v, args, new Atom($Decorator.start), null);
@@ -142,7 +142,7 @@ defineStmt returns [SExpression v]
         (Identifier | Get=expr) 
         Definition=definitionsList 
         Description=(RawString | StringLiteral)? 
-        '='
+        '=>'
         ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
         {
             Atom a = $Identifier != null ? new Atom($Identifier) : new Atom($Get.start);
@@ -151,11 +151,10 @@ defineStmt returns [SExpression v]
 
             if ($Identifier != null || $Get.v instanceof SEGet) {
                 if ($decorators != null) {
-                    $v = new SESet(a, sub, new SELambda(a, $Definition.v, org.coyove.eugine.util.List.build(
-                        new SECall($decorators, org.coyove.eugine.util.List.build(
+                    $v = new SESet(a, sub, new SECall($decorators, org.coyove.eugine.util.List.build(
                             new SELambda(a, $Definition.v, $body, desc)), 
-                            new Atom($Decorator.start), null)
-                    )), SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
+                            new Atom($Decorator.start), null), 
+                    SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
                 } else {
                     $v = new SESet(a, sub, new SELambda(a, $Definition.v, $body, desc), 
                         SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
@@ -240,8 +239,6 @@ value returns [SExpression v]
 topExpr returns [SExpression v]
     : '(' Inner=stmt ')'
         { $v = $Inner.v; }
-    | callStmt
-        { $v = $callStmt.v; }
     | Called=topExpr Op=('::' | ':') Method=Identifier interopArgumentsList 
         {
             $v = new SEInteropMethod(new Atom($Called.start), $Called.v,
@@ -251,7 +248,13 @@ topExpr returns [SExpression v]
                     SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
         }
     | Called=topExpr argumentsList
-        { $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null); }
+        { 
+            if (SKeywordsANTLR.KeywordsLookup.containsKey($Called.text)) {
+                $v = SKeywordsANTLR.KeywordsLookup.get($Called.text).call($Called.start, $argumentsList.v); 
+            } else {
+                $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null);
+            }
+        }
     | lambdaStmt
         { $v = $lambdaStmt.v; }
     | Subject=topExpr '[' Key=expr ']'
