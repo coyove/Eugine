@@ -15,8 +15,8 @@ import java.util.Collection;
  */
 public class Model {
     public static IfcDirection xDirection = new IfcDirection(new LIST<DOUBLE>() {{
-        add(new DOUBLE(1.0));
-        add(new DOUBLE(0));
+        add(new DOUBLE(0.5));
+        add(new DOUBLE(0.5));
         add(new DOUBLE(0));
     }});
 
@@ -41,12 +41,6 @@ public class Model {
 
         Collection<IfcWall> walls = model.getCollection(IfcWall.class);
         for (IfcWall wall : walls) {
-            for (IfcRepresentation r : wall.getRepresentation().getRepresentations()) {
-                for (IfcRepresentationItem item : r.getItems()) {
-
-                }
-            }
-
             IfcObjectPlacement op = new IfcLocalPlacement(((IfcLocalPlacement) wall.getObjectPlacement())
                     .getPlacementRelTo(), buildDefaultPlacementSpace(model, 100,0,0));
             model.addIfcObject(op);
@@ -57,6 +51,7 @@ public class Model {
                     wall.getRepresentation(),
                     wall.getTag()));
             break;
+
         }
 
         model.writeStepfile(new FileOutputStream("new.ifc"));

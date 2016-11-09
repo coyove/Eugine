@@ -61,7 +61,7 @@ hello("zzz")
 greatly((name) => println("haha"))(null)
 
 var ifcHelper = static org\coyove\ifc\Model
-var model = ifcHelper::load("C:/Users/coyove/Documents/Webvit/simple.ifc":String)
-println(model::getIfcObjectByID("1SkVeTQXb82fiQCRIasy9M":String))
+var model = ifcHelper::load("D:/BIM/floor.ifc":String)
+println(model::getIfcObjectByID("1ChGC1GGv2afWY9HfKxV2q":String))
 
 println(ifcHelper::newRandomGUID())
