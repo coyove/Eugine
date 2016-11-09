@@ -9,6 +9,7 @@ import org.coyove.eugine.value.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -53,6 +54,22 @@ public class InteropHelper {
             }
 
             return new SList(list);
+        } else if (value instanceof ArrayList<?>) {
+            ArrayList list = (ArrayList) value;
+            List<SExpression> ret = new List<SExpression>(list.size());
+
+            for (int i = 0; i < list.size(); i++) {
+                ret.add(castJavaType(list.get(i)));
+            }
+
+            return new SList(ret);
+        } else if (value instanceof HashMap) {
+            HashMap map = (HashMap) value;
+            for (Object o : map.keySet()) {
+                map.put(o, castJavaType(map.get(o)));
+            }
+
+            return new SDict(map);
         }
 
         return new SObject(value);

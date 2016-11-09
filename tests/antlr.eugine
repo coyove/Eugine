@@ -49,9 +49,19 @@ def greatly (code, f, name) => {
 	f(code + " " + name)
 }
 
-def [greatly("mighty")] hello(name) => {
+def prefix (f, name) => {
+	f("Mr. " + name)
+}
+
+def [greatly("mighty")] [prefix] hello(name) => {
 	println(name)
 }
 
 hello("zzz")
 greatly((name) => println("haha"))(null)
+
+var ifcHelper = static org\coyove\ifc\Model
+var model = ifcHelper::load("C:/Users/coyove/Documents/Webvit/simple.ifc":String)
+println(model::getIfcObjectByID("1SkVeTQXb82fiQCRIasy9M":String))
+
+println(ifcHelper::newRandomGUID())

@@ -126,18 +126,12 @@ interopArgumentsList returns [
 defineStmt returns [SExpression v]
     locals [ 
         org.coyove.eugine.util.List<SExpression> body = new org.coyove.eugine.util.List<SExpression>(),
-        SExpression decorators = null
+        org.coyove.eugine.util.List<SExpression> decorators = new org.coyove.eugine.util.List<SExpression>()
     ]
     : Def
         ('[' Decorator=expr argumentsList? ']' { 
-            org.coyove.eugine.util.List<SExpression> args = $argumentsList.ctx == null ? null : $argumentsList.v;
-            if ($decorators == null) {
-                $decorators = new SECall($Decorator.v, args, new Atom($Decorator.start), null);
-            } else {
-                $decorators = new SECall(
-                    new SECall($Decorator.v, args, new Atom($Decorator.start), null), args,
-                    new Atom($Decorator.start), null);
-            }
+            $decorators.add(new SECall($Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v, 
+                new Atom($Decorator.start), null));
         })*
         (Identifier | Get=expr) 
         Definition=definitionsList 
@@ -147,18 +141,14 @@ defineStmt returns [SExpression v]
         {
             Atom a = $Identifier != null ? new Atom($Identifier) : new Atom($Get.start);
             SExpression sub = $Identifier != null ? new SString($Identifier.text) : $Get.v;
-            String desc = $Description == null ? "" : $Description.text;
+            SExpression lambda = new SELambda(a, $Definition.v, $body, $Description == null ? "" : $Description.text);
 
             if ($Identifier != null || $Get.v instanceof SEGet) {
-                if ($decorators != null) {
-                    $v = new SESet(a, sub, new SECall($decorators, org.coyove.eugine.util.List.build(
-                            new SELambda(a, $Definition.v, $body, desc)), 
-                            new Atom($Decorator.start), null), 
-                    SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
-                } else {
-                    $v = new SESet(a, sub, new SELambda(a, $Definition.v, $body, desc), 
-                        SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
+                for (SExpression d : $decorators) {
+                    lambda = new SECall(d, org.coyove.eugine.util.List.build(lambda), a, null);
                 }
+                
+                $v = new SESet(a, sub, lambda, SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
             } else {
                 // error
                 $v = new SNull();

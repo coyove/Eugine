@@ -1038,7 +1038,7 @@ public class EugineParser extends Parser {
 	public static class DefineStmtContext extends ParserRuleContext {
 		public SExpression v;
 		public org.coyove.eugine.util.List<SExpression> body =  new org.coyove.eugine.util.List<SExpression>();
-		public SExpression decorators =  null;
+		public org.coyove.eugine.util.List<SExpression> decorators =  new org.coyove.eugine.util.List<SExpression>();
 		public ExprContext Decorator;
 		public ArgumentsListContext argumentsList;
 		public Token Identifier;
@@ -1118,14 +1118,8 @@ public class EugineParser extends Parser {
 					setState(213);
 					match(T__10);
 					 
-					            org.coyove.eugine.util.List<SExpression> args = ((DefineStmtContext)_localctx).argumentsList == null ? null : ((DefineStmtContext)_localctx).argumentsList.v;
-					            if (_localctx.decorators == null) {
-					                ((DefineStmtContext)_localctx).decorators =  new SECall(((DefineStmtContext)_localctx).Decorator.v, args, new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), null);
-					            } else {
-					                ((DefineStmtContext)_localctx).decorators =  new SECall(
-					                    new SECall(((DefineStmtContext)_localctx).Decorator.v, args, new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), null), args,
-					                    new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), null);
-					            }
+					            _localctx.decorators.add(new SECall(((DefineStmtContext)_localctx).Decorator.v, ((DefineStmtContext)_localctx).argumentsList == null ? null : ((DefineStmtContext)_localctx).argumentsList.v, 
+					                new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), null));
 					        
 					}
 					} 
@@ -1206,18 +1200,14 @@ public class EugineParser extends Parser {
 
 			            Atom a = ((DefineStmtContext)_localctx).Identifier != null ? new Atom(((DefineStmtContext)_localctx).Identifier) : new Atom((((DefineStmtContext)_localctx).Get!=null?(((DefineStmtContext)_localctx).Get.start):null));
 			            SExpression sub = ((DefineStmtContext)_localctx).Identifier != null ? new SString((((DefineStmtContext)_localctx).Identifier!=null?((DefineStmtContext)_localctx).Identifier.getText():null)) : ((DefineStmtContext)_localctx).Get.v;
-			            String desc = ((DefineStmtContext)_localctx).Description == null ? "" : (((DefineStmtContext)_localctx).Description!=null?((DefineStmtContext)_localctx).Description.getText():null);
+			            SExpression lambda = new SELambda(a, ((DefineStmtContext)_localctx).Definition.v, _localctx.body, ((DefineStmtContext)_localctx).Description == null ? "" : (((DefineStmtContext)_localctx).Description!=null?((DefineStmtContext)_localctx).Description.getText():null));
 
 			            if (((DefineStmtContext)_localctx).Identifier != null || ((DefineStmtContext)_localctx).Get.v instanceof SEGet) {
-			                if (_localctx.decorators != null) {
-			                    ((DefineStmtContext)_localctx).v =  new SESet(a, sub, new SECall(_localctx.decorators, org.coyove.eugine.util.List.build(
-			                            new SELambda(a, ((DefineStmtContext)_localctx).Definition.v, _localctx.body, desc)), 
-			                            new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), null), 
-			                    SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
-			                } else {
-			                    ((DefineStmtContext)_localctx).v =  new SESet(a, sub, new SELambda(a, ((DefineStmtContext)_localctx).Definition.v, _localctx.body, desc), 
-			                        SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
+			                for (SExpression d : _localctx.decorators) {
+			                    lambda = new SECall(d, org.coyove.eugine.util.List.build(lambda), a, null);
 			                }
+			                
+			                ((DefineStmtContext)_localctx).v =  new SESet(a, sub, lambda, SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
 			            } else {
 			                // error
 			                ((DefineStmtContext)_localctx).v =  new SNull();
