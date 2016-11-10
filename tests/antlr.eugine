@@ -45,23 +45,26 @@
 // 	println("],")
 // }
 
-def greatly (code, f, name) => {
-	f(code + " " + name)
+// var ifcHelper = static org\coyove\ifc\Model
+// var model = ifcHelper::load("C:/Users/coyove/Documents/Webvit/floor.ifc":String)
+
+// def modelHandler (model, f, x, args...) => {
+// 	var f.model = model
+// 	println(args)
+// }
+
+// def [modelHandler(model)] find(x, class) => {
+// 	println(2, x, class)
+// 	println(ifcHelper::getObjectsByType(this.model : ifc2x3javatoolbox\ifcmodel\IfcModel, class : String))	
+// }
+
+// hello("zzz")
+// greatly((name) => println("haha"))(null)
+
+// find("zzz", "IfcBuildingElementProxy
+
+def modelHandler (f, x, args...) => {
+	println(args)
 }
 
-def prefix (f, name) => {
-	f("Mr. " + name)
-}
-
-def [greatly("mighty")] [prefix] hello(name) => {
-	println(name)
-}
-
-hello("zzz")
-greatly((name) => println("haha"))(null)
-
-var ifcHelper = static org\coyove\ifc\Model
-var model = ifcHelper::load("D:/BIM/floor.ifc":String)
-println(model::getIfcObjectByID("1ChGC1GGv2afWY9HfKxV2q":String))
-
-println(ifcHelper::newRandomGUID())
+modelHandler(find)(1,2)

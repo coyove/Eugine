@@ -13,9 +13,9 @@ public class SEExplode extends SExpression {
 
     public SEExplode() {}
 
-    public SEExplode(Atom ha, List<SExpression> args) {
-        super(ha, args, 1);
-        list = args.head();
+    public SEExplode(Atom ha, SExpression args) {
+        headAtom = ha;
+        list = args;
     }
 
     public SEExplode(Atom ha, Compound c) throws VMException {

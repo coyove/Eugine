@@ -43,6 +43,13 @@ public class List<T> extends java.util.ArrayList<T> {
             return null;
     }
 
+    public T last() {
+        if (this.size() > 0)
+            return this.get(this.size() - 1);
+        else
+            return null;
+    }
+
     public List<T> skip(int count) {
         if (count > this.size()) {
             return new List<T>();

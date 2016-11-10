@@ -237,12 +237,19 @@ topExpr returns [SExpression v]
                     SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE :
                     SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
         }
-    | Called=topExpr argumentsList
+    | Called=topExpr (Vararg='...')? argumentsList
         { 
             if (SKeywordsANTLR.KeywordsLookup.containsKey($Called.text)) {
                 $v = SKeywordsANTLR.KeywordsLookup.get($Called.text).call($Called.start, $argumentsList.v); 
             } else {
-                $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null);
+                org.coyove.eugine.util.List<SExpression> args = $argumentsList.v;
+                if ($Vararg != null && args.size() > 0) {
+                    System.out.println(args);
+                    args.set(args.size() - 1, 
+                        new SEExplode(new Atom($Called.start), args.last()));
+                }
+                
+                $v = new SECall($Called.v, args, new Atom($Called.start), null);
             }
         }
     | lambdaStmt
@@ -339,6 +346,10 @@ logicExpr returns [SExpression v]
         {
             $v = SKeywordsANTLR.KeywordsLookup.get($Op.text).call($Op, 
                 org.coyove.eugine.util.List.build($Left.v, $Right.v));
+        }
+    | Left=logicExpr ':' JavaFullName
+        {
+            $v = new SEInteropCast(new Atom($JavaFullName), $Left.v, $JavaFullName.text);
         }
     ;
 

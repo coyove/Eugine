@@ -11,24 +11,29 @@ import org.coyove.eugine.util.*;
  */
 public class SEInteropCast extends SExpression {
     private SExpression subject;
-    private SExpression toType;
+    private String toType;
 
     public SEInteropCast() {}
 
-    public SEInteropCast(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
+    public SEInteropCast(Atom ha, SExpression s, String type) {
+        headAtom = ha;
+        subject = s;
+        toType = type;
+    }
 
-        toType = SExpression.cast(c.atoms.pop());
-        subject = SExpression.cast(c.atoms.pop());
+    public SEInteropCast(Atom ha, Compound c) throws VMException {
+        throw new VMException(9999, "not implemented", ha);
+//        super(ha, c, 2);
+//
+//        toType = SExpression.cast(c.atoms.pop());
+//        subject = SExpression.cast(c.atoms.pop());
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        SString toType = Utils.cast(this.toType.evaluate(env), SString.class,
-                new VMException(2027, "class name must be string", headAtom));
         SValue sub = subject.evaluate(env);
+        String className = InteropHelper.expandJavaCassName(toType);
 
-        String className = toType.get();
         try {
             Class tt = ClassUtils.getClass(className);
             return new SObject(tt.cast(sub.get()));
@@ -43,7 +48,7 @@ public class SEInteropCast extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.subject = this.subject.deepClone();
-        ret.toType = this.toType.deepClone();
+        ret.toType = this.toType;
         return ret;
     }
 }

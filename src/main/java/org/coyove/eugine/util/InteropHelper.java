@@ -9,9 +9,7 @@ import org.coyove.eugine.value.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Created by coyove on 2016/9/11.
@@ -21,6 +19,14 @@ public class InteropHelper {
         put("String", "java.lang.String");
         put("String[]", "java.lang.String[]");
     }};
+
+    public static String expandJavaCassName(String cls) {
+        if (generalJavaTypes.containsKey(cls)) {
+            return generalJavaTypes.get(cls);
+        } else {
+            return cls;
+        }
+    }
 
     public static SValue castJavaType(Object value) {
         if (value == null) {
@@ -47,19 +53,11 @@ public class InteropHelper {
                 ret.add(castJavaType(Array.get(value, i)));
 
             return new SList(ret);
-        } else if (value instanceof List<?>) {
-            List list = (List) value;
-            for (int i = 0; i < list.size(); i++) {
-                list.set(i, castJavaType(list.get(i)));
-            }
-
-            return new SList(list);
-        } else if (value instanceof ArrayList<?>) {
-            ArrayList list = (ArrayList) value;
+        } else if (value instanceof Collection) {
+            Collection list = (Collection) value;
             List<SExpression> ret = new List<SExpression>(list.size());
-
-            for (int i = 0; i < list.size(); i++) {
-                ret.add(castJavaType(list.get(i)));
+            for (Object o : list) {
+                ret.add(castJavaType(o));
             }
 
             return new SList(ret);
@@ -203,10 +201,7 @@ public class InteropHelper {
             }
 
             try {
-                if (generalJavaTypes.containsKey(clsName)) {
-                    clsName = generalJavaTypes.get(clsName);
-                }
-
+                clsName = expandJavaCassName(clsName);
                 Class c = ClassUtils.getClass(clsName);
                 classes.add(c);
 
