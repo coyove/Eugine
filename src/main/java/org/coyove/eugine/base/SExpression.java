@@ -45,12 +45,26 @@ public abstract class SExpression implements java.io.Serializable {
         List<SValue> ret = new List<SValue>();
         for (SExpression e : arguments) {
             if (e != null) {
-                SValue v = e.evaluate(env);
-                if (v instanceof SExploded) {
-                    ret.addAll(((SExploded) v).comps);
+                if (e instanceof SEVariable && ((SEVariable) e).varName.endsWith("...")) {
+                    String varName = ((SEVariable) e).varName;
+                    ((SEVariable) e).varName = varName.substring(0, varName.length() - 3);
+
+                    SValue v = e.evaluate(env);
+                    if (v instanceof SList) {
+                        ret.addAll(v.<List<SExpression>>get().cast(SValue.class));
+                    } else {
+                        throw new VMException(9998, "wrong vararg list");
+                    }
                 } else {
-                    ret.add(v);
+                    SValue v = e.evaluate(env);
+                    if (v instanceof SExploded) {
+                        ret.addAll(((SExploded) v).comps);
+                    } else {
+                        ret.add(v);
+                    }
                 }
+            } else {
+                throw new VMException(9998, "found null");
             }
         }
 

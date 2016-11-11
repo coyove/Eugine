@@ -9,7 +9,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class SEVariable extends SExpression {
-    private String varName;
+    public String varName;
 
     public SEVariable() {}
 

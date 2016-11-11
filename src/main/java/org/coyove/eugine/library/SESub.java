@@ -9,40 +9,46 @@ import org.coyove.eugine.util.*;
  * Created by zezhong on 2016/9/10.
  */
 public class SESub extends SExpression {
-    private List<SExpression> arguments;
+    private SExpression subject;
+    private SExpression start;
+    private SExpression end;
 
     public SESub() {}
 
-    public SESub(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
+    public SESub(Atom ha, SExpression sub, SExpression s, SExpression e) {
+        headAtom = ha;
+        start = s;
+        end = e;
+        subject = sub;
+    }
 
-        arguments = SExpression.castPlain(c);
+    public SESub(Atom ha, Compound c) throws VMException {
+        throw new VMException(9999, "not implemented", ha);
+//        super(ha, c, 2);
+//
+//        arguments = SExpression.castPlain(c);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        List<SValue> arguments = SExpression.eval(this.arguments, env);
-        SValue subObj = arguments.head();
+        SValue subObj = subject.evaluate(env);
 
         VMException ex = new VMException(3012, "start and end index must be integers", headAtom);
-        int arg1 = Utils.cast(arguments.get(1), SInteger.class, ex).<Long>get().intValue();
-        if (arg1 < 0) {
+        int start = Utils.cast(this.start.evaluate(env), SInteger.class, ex).<Long>get().intValue();
+        if (start < 0) {
             throw new VMException(3015, "start cannot be negative", headAtom);
         }
 
-        SInteger arg2 = null;
-
-        if (arguments.size() == 3)
-            arg2 = Utils.cast(arguments.get(2), SInteger.class, ex);
+        int end = this.end != null ? Utils.cast(this.end, SInteger.class, ex).<Long>get().intValue() : 0;
 
         if (subObj instanceof SString) {
             SString subStr = (SString) subObj;
 
-            if (arg2 == null) {
-                return new SString(subStr.<String>get().substring(arg1));
+            if (this.end == null) {
+                return new SString(subStr.<String>get().substring(start));
             } else {
                 try {
-                    return new SString(subStr.<String>get().substring(arg1, arg1 + arg2.<Long>get().intValue()));
+                    return new SString(subStr.<String>get().substring(start, end));
                 } catch (StringIndexOutOfBoundsException se) {
                     throw new VMException(3013, "string index out of range", headAtom);
                 }
@@ -50,10 +56,10 @@ public class SESub extends SExpression {
 
         } else if (subObj instanceof SList) {
             SList subList = (SList) subObj;
-            if (arg2 == null) {
-                return new SList(subList.<List<SExpression>>get().sub(arg1));
+            if (this.end == null) {
+                return new SList(subList.<List<SExpression>>get().sub(start));
             } else {
-                return new SList(subList.<List<SExpression>>get().sub(arg1, arg1 + arg2.<Long>get().intValue()));
+                return new SList(subList.<List<SExpression>>get().sub(start, end));
             }
         } else {
             throw new VMException(3014, "subject must be string or list", headAtom);
@@ -66,7 +72,11 @@ public class SESub extends SExpression {
         SESub ret = new SESub();
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
-        ret.arguments = List.deepClone(this.arguments);
+        ret.subject = this.subject.deepClone();
+        ret.start = this.start.deepClone();
+        if (this.end != null) {
+            ret.end = this.end.deepClone();
+        }
 
         return ret;
     }

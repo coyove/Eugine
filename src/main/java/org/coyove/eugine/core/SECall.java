@@ -30,14 +30,6 @@ public class SECall extends SExpression {
         arguments = args == null ? new List<SExpression>() : args;
     }
 
-    public static boolean checkArgumentsCount(SClosure c, List<SValue> arguments) {
-        int s = arguments.size();
-
-        return !(
-                c.argCount > s && !(c.argCount == s + 1 && c.arguments.get(s).endsWith("..."))
-        );
-    }
-
     public static ExecEnvironment prepareExecEnvironment(List<String> argNames, List<SValue> arguments) {
         ExecEnvironment newEnv = new ExecEnvironment();
 
@@ -155,7 +147,7 @@ public class SECall extends SExpression {
 
         while (true) {
 
-            if (!checkArgumentsCount(closure, arguments)) {
+            if (closure.arguments.size() > arguments.size()) {
 
                 List<String> argNames = closure.arguments.skip(arguments.size());
                 List<SExpression> newArgs = new List<SExpression>();

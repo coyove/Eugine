@@ -32,34 +32,7 @@ public class SEClone extends SExpression {
 
         if (n instanceof SClosure) {
             synchronized (n) {
-//                SValue ret = ((SClosure) n).getCopy();
                 SClosure cls = ((SClosure) n);
-//                ExecEnvironment extra = ((SClosure) ret).extra;
-
-                if (cls.extra.containsKey("~init")) {
-
-                    SClosure init = Utils.cast(cls.extra.get("~init"), SClosure.class);
-                    if (init == null)
-                        return cls.getCopy();
-
-                    List<SValue> arguments = SExpression.eval(this.arguments, env);
-
-                    if (!SECall.checkArgumentsCount(init, arguments))
-                        throw new VMException(2001, "not enough arguments to init", headAtom);
-
-                    ExecEnvironment newEnv = SECall.prepareExecEnvironment(init.arguments, arguments);
-
-                    // TODO: newEnv.put("~parent", new SDict(init.outerEnv));
-                    newEnv.put("~atom", new SObject(headAtom));
-                    newEnv.put("~this", cls.getCopy());
-
-                    newEnv.parentEnv = init.outerEnv;
-                    for (SExpression se : init.body)
-                        se.evaluate(newEnv);
-
-                    return newEnv.get("~this");
-                }
-
                 return cls.getCopy();
             }
         } else {

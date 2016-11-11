@@ -4,11 +4,8 @@ import ifc2x3javatoolbox.guidcompressor.GuidCompressor;
 import ifc2x3javatoolbox.ifc2x3tc1.*;
 import ifc2x3javatoolbox.ifcmodel.*;
 import org.apache.commons.lang3.ClassUtils;
-import org.coyove.eugine.util.ErrorHandler;
-import org.coyove.eugine.util.List;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Collection;
 
@@ -17,8 +14,8 @@ import java.util.Collection;
  */
 public class Model {
     public static IfcDirection xDirection = new IfcDirection(new LIST<DOUBLE>() {{
-        add(new DOUBLE(0.5));
-        add(new DOUBLE(0.5));
+        add(new DOUBLE(1.0));
+        add(new DOUBLE(0));
         add(new DOUBLE(0));
     }});
 
@@ -44,7 +41,7 @@ public class Model {
         Collection<IfcBuildingElementProxyType> walls = model.getCollection(IfcBuildingElementProxyType.class);
         for (IfcBuildingElementProxyType vol : walls) {
 //            IfcObjectPlacement op = new IfcLocalPlacement(((IfcLocalPlacement) wall.getObjectPlacement())
-//                    .getPlacementRelTo(), buildDefaultPlacementSpace(model, 100,0,0));
+//                    .getPlacementRelTo(), buildDefaultPlacement(model, 100,0,0));
 //            model.addIfcObject(op);
 //
 //            model.addIfcObject(new IfcWallStandardCase(newRandomGUID(), wall.getOwnerHistory(),
@@ -56,7 +53,7 @@ public class Model {
             LIST<IfcRepresentationMap> maps = vol.getRepresentationMaps();
 
             final IfcRepresentationMap map = (IfcRepresentationMap) maps.get(0).clone();
-            map.setMappingOrigin(buildDefaultPlacementSpace(model, 100, 0, 0));
+            map.setMappingOrigin(buildDefaultPlacement(model, 100, 0, 0));
             map.setMappedRepresentation(maps.get(0).getMappedRepresentation());
 
             for (IfcRepresentationItem iri : map.getMappedRepresentation().getItems()) {
@@ -90,7 +87,7 @@ public class Model {
             IfcProductRepresentation rep = proxy.getRepresentation();
 
 
-            IfcLocalPlacement pos = new IfcLocalPlacement(new IfcLocalPlacement(), buildDefaultPlacementSpace(model,
+            IfcLocalPlacement pos = new IfcLocalPlacement(new IfcLocalPlacement(), buildDefaultPlacement(model,
                     1000,0,0));
 
             model.addIfcObject(pos);
@@ -99,15 +96,29 @@ public class Model {
                     vol.getOwnerHistory(), new IfcLabel("vol2", true), new IfcText(),
                     new IfcLabel(), pos, rep, new IfcIdentifier(), proxy.getCompositionType());
 
-            model.addIfcObject(v);
-            model.addIfcObject(p);
+//            model.addIfcObject(v);
+//            model.addIfcObject(p);
             break;
-
         }
-
 
         model.writeStepfile(new FileOutputStream("new.ifc"));
         return model;
+    }
+
+    public static void createVolume(
+            IfcModel model,
+            IfcBuildingElementProxy ref,
+            String name,
+            String desc,
+            double x, double y, double z) {
+        IfcLocalPlacement pos = new IfcLocalPlacement(new IfcLocalPlacement(), buildDefaultPlacement(model,
+                x, y, z));
+        model.addIfcObject(pos);
+
+        model.addIfcObject(new IfcBuildingElementProxy(newRandomGUID(),
+                ref.getOwnerHistory(), new IfcLabel(name, true), new IfcText(desc, true),
+                new IfcLabel(), pos, ref.getRepresentation(),
+                new IfcIdentifier(), ref.getCompositionType()));
     }
 
     public static IfcGloballyUniqueId newRandomGUID() {
@@ -116,7 +127,7 @@ public class Model {
         return ret;
     }
 
-    public static IfcAxis2Placement3D buildDefaultPlacementSpace(IfcModel model, double x, double y, double z) {
+    public static IfcAxis2Placement3D buildDefaultPlacement(IfcModel model, double x, double y, double z) {
         LIST<IfcLengthMeasure> point = new LIST<IfcLengthMeasure>();
         point.add(new IfcLengthMeasure(x));
         point.add(new IfcLengthMeasure(y));

@@ -45,26 +45,61 @@
 // 	println("],")
 // }
 
-// var ifcHelper = static org\coyove\ifc\Model
-// var model = ifcHelper::load("C:/Users/coyove/Documents/Webvit/floor.ifc":String)
-
-// def modelHandler (model, f, x, args...) => {
-// 	var f.model = model
-// 	println(args)
-// }
-
-// def [modelHandler(model)] find(x, class) => {
-// 	println(2, x, class)
-// 	println(ifcHelper::getObjectsByType(this.model : ifc2x3javatoolbox\ifcmodel\IfcModel, class : String))	
-// }
-
-// hello("zzz")
-// greatly((name) => println("haha"))(null)
-
-// find("zzz", "IfcBuildingElementProxy
-
-def modelHandler (f, x, args...) => {
-	println(args)
+def struct (f, args...) => {
+	f(args...)
+	clone f
 }
 
-modelHandler(find)(1,2)
+def [struct] IfcModel (source) => {
+	var this.helper = static org\coyove\ifc\Model
+	var this.model = this.helper::load(source : String)
+
+	def this.find (class) => 
+		switch class[0] do {
+			"." => this.helper::getObjectsByType(this.model : ifc2x3javatoolbox\ifcmodel\IfcModel, class[1..]:String)
+			"#" => this.model::getIfcObjectByID(class[1..]:String)
+		}
+
+	def this.newGUID () => this.helper::newRandomGUID()
+
+	var __curUsingObj
+
+	def this.using (refObj, f) => (args...) => {
+		__curUsingObj = refObj
+		f(args...)
+	}
+
+	def this.grid_populate(h, v, hparts, vparts, f, args...) => {
+		f(args...)
+
+		var hstep = h / hparts
+		var vstep = v / vparts
+
+		for 0..hparts do (h) =>
+			for 0..vparts do (v) => {
+				this.helper::createVolume(
+					this.model : ifc2x3javatoolbox\ifcmodel\IfcModel,
+					__curUsingObj : ifc2x3javatoolbox\ifc2x3tc1\IfcBuildingElementProxy,
+					"p" + h + "-" + v : String,
+					"" : String,
+					h * hstep + args[0] : double,
+					v * vstep + args[1] : double,
+					args[2] : double
+				)
+			} 
+	}
+
+	def this.write(path) => {
+		this.model::writeStepfile((new java\io\FileOutputStream(path : String)) : java\io\OutputStream)
+	}
+}
+
+var model = IfcModel("src/main/java/org/coyove/ifc/floor.ifc")
+var volume = model.find(".IfcBuildingElementProxy")[0]
+
+def [model.grid_populate(100000, 100000, 10, 10)]  
+	[model.using(volume)]
+	generateAt (x, y, z) => null
+
+generateAt(0, 0, 10000)
+model.write("new.ifc")

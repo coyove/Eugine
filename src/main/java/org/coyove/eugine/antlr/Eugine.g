@@ -237,19 +237,12 @@ topExpr returns [SExpression v]
                     SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE :
                     SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
         }
-    | Called=topExpr (Vararg='...')? argumentsList
+    | Called=topExpr argumentsList
         { 
             if (SKeywordsANTLR.KeywordsLookup.containsKey($Called.text)) {
                 $v = SKeywordsANTLR.KeywordsLookup.get($Called.text).call($Called.start, $argumentsList.v); 
             } else {
-                org.coyove.eugine.util.List<SExpression> args = $argumentsList.v;
-                if ($Vararg != null && args.size() > 0) {
-                    System.out.println(args);
-                    args.set(args.size() - 1, 
-                        new SEExplode(new Atom($Called.start), args.last()));
-                }
-                
-                $v = new SECall($Called.v, args, new Atom($Called.start), null);
+                $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null);
             }
         }
     | lambdaStmt
@@ -257,6 +250,10 @@ topExpr returns [SExpression v]
     | Subject=topExpr '[' Key=expr ']'
         {
             $v = new SEGet(new Atom($Subject.start), $Subject.v, org.coyove.eugine.util.List.build($Key.v));
+        }
+    | Subject=topExpr '[' Start=expr ('..' | '...') (End=expr)? ']'
+        {
+            $v = new SESub(new Atom($Subject.start), $Subject.v, $Start.v, $End.ctx == null ? null : $End.v);
         }
     | Subject=topExpr '.' Identifier
         {
