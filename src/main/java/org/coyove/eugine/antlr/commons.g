@@ -1,6 +1,7 @@
 lexer grammar CommonLexerRules;
 
 Var: 'var';
+Const: 'const';
 Def: 'def';
 For: ('for' | 'forr');
 If: 'if';

@@ -65,17 +65,19 @@ enterStmt returns [SExpression v]
     ;
 
 declareStmt returns [SExpression v]
-    : Var Identifier ('=' Value=expr)?
+    : Action=(Var | Const) Identifier ('=' Value=expr)?
         {
             $v = new SESet(new Atom($Identifier), new SString($Identifier.text), 
                 $Value.start == null ? new SNull() : $Value.v, 
-                SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
+                SESet.DECLARE.DECLARE, 
+                $Action.text.equals("var") ? SESet.ACTION.MUTABLE : SESet.ACTION.IMMUTABLE);
         }
-    | Var Subject=expr ('=' Value=expr)?
+    | Action=(Var | Const) Subject=expr ('=' Value=expr)?
         {
             $v = new SESet(new Atom($Subject.start), $Subject.v, 
                 $Value.start == null ? new SNull() : $Value.v, 
-                SESet.DECLARE.SET, SESet.ACTION.MUTABLE);    
+                SESet.DECLARE.SET, 
+                $Action.text.equals("var") ? SESet.ACTION.MUTABLE : SESet.ACTION.IMMUTABLE);
         }
     | Identifier '=' Value=expr
         {

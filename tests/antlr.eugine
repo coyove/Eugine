@@ -99,7 +99,9 @@ var volume = model.find(".IfcBuildingElementProxy")[0]
 
 def [model.grid_populate(100000, 100000, 10, 10)]  
 	[model.using(volume)]
-	generateAt (x, y, z) => null
+	generateStrategy (x, y, z, baseHeight, height) => {
+		if baseHeight > 10000 exit("invalid base height")
+	}
 
-generateAt(0, 0, 10000)
+generateStrategy(0, 0, 10000, 0, 2500)
 model.write("new.ifc")
