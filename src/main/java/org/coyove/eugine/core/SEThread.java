@@ -30,6 +30,13 @@ public class SEThread extends SExpression {
 
     public SEThread() {}
 
+    public SEThread(Atom ha, SExpression c, List<SExpression> args) {
+        headAtom = ha;
+
+        closure = c;
+        arguments = args;
+    }
+
     public SEThread(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

@@ -135,17 +135,17 @@ public class SKeywordsANTLR {
                         return new SENum(new Atom(tok), arguments);
                     }
                 });
-                put("read_file", new CallableKeyword() {
+                put("readFile", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> arguments) {
                         return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_TEXT);
                     }
                 });
-                put("read_file_lines", new CallableKeyword() {
+                put("readLines", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> arguments) {
                         return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_LINES);
                     }
                 });
-                put("read_file_binary", new CallableKeyword() {
+                put("readBinary", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> arguments) {
                         return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_BINARY);
                     }
@@ -205,7 +205,7 @@ public class SKeywordsANTLR {
                         return new SEMath(new Atom(tok), c, SEMath.OPERATION.TIME);
                     }
                 });
-                put("utc_time", new CallableKeyword() {
+                put("utcTime", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.OPERATION.UTC_TIME);
                     }
@@ -228,6 +228,21 @@ public class SKeywordsANTLR {
                 put("random", new CallableKeyword() {
                     public SExpression call(Token tok, List<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.OPERATION.RANDOM);
+                    }
+                });
+                put("buffer", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEBytesBuffer(new Atom(tok), c);
+                    }
+                });
+                put("match", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SERegexMatch(new Atom(tok), c);
+                    }
+                });
+                put("split", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SESplit(new Atom(tok), c);
                     }
                 });
             }};

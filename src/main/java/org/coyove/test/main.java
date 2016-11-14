@@ -2,6 +2,7 @@ package org.coyove.test;
 
 import java.io.FileInputStream;
 import java.lang.System;
+import java.net.ServerSocket;
 import java.util.Iterator;
 
 import org.coyove.eugine.*;
@@ -55,7 +56,7 @@ public class main {
     public static void main(String[] args) {
         try {
             Eugine e = new Eugine();
-            System.out.println(ANTLRHelper.executeFile("./tests/antlr.eugine", e.environment));
+            System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
         } catch (Exception e) {
             e.printStackTrace();
         }

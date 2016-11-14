@@ -63,7 +63,7 @@ public class SEInteropNew extends SExpression {
         } catch (InvocationTargetException ie) {
             throw new VMException(2035, "error caused by the constructor: " + ie.getCause(), headAtom);
         } catch (Exception e) {
-            throw new VMException(2036, "invoking '" + cls.getSimpleName() + "' failed, " +
+            throw new VMException(2036, "creating '" + cls.getSimpleName() + "' failed, " +
                     e.getMessage(), headAtom);
         }
     }

@@ -10,7 +10,7 @@ import org.coyove.eugine.value.*;
  */
 public class SEClone extends SExpression {
     private SExpression varName;
-    private List<SExpression> arguments;
+//    private List<SExpression> arguments;
 
     public SEClone() {}
 
@@ -20,10 +20,11 @@ public class SEClone extends SExpression {
     }
 
     public SEClone(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-
-        varName = SExpression.cast(c.atoms.pop());
-        arguments = SExpression.castPlain(c);
+        throw new VMException(9999, "not implemented", ha);
+//        super(ha, c, 1);
+//
+//        varName = SExpression.cast(c.atoms.pop());
+//        arguments = SExpression.castPlain(c);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class SEClone extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.varName = this.varName.deepClone();
-        ret.arguments = List.deepClone(this.arguments);
+//        ret.arguments = List.deepClone(this.arguments);
         return ret;
     }
 }

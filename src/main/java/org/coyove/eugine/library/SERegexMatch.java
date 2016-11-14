@@ -18,6 +18,13 @@ public class SERegexMatch extends SExpression {
 
     public SERegexMatch() {}
 
+    public SERegexMatch(Atom ha, List<SExpression> args) {
+        super(ha, args, 2);
+
+        text = args.get(0);
+        regex = args.get(1);
+    }
+
     public SERegexMatch(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 

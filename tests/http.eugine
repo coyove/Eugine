@@ -1,0 +1,100 @@
+// (def Config() => {
+//     var this.port = 8080
+//     var this.socketReadTimeout = 5000
+// })()
+
+// (def Util() => {
+//     def this.struct (f, args...) => {
+//         f(args...)
+//         clone f
+//     }
+
+//     // def this.isEndOfStream (stream) => {
+//     //     var length = len(stream)
+//     //     (stream[length - 1] == "\n" && stream[length - 3] == "\n") &&
+//     //     (stream[length - 2] == "\r" && stream[length - 4] == "\r")
+//     // }
+
+//     def [this.struct] this.HTTPContext (socket) => {
+//         var responseSocket = socket
+//         // var responseStream = socket::getOutputStream()
+
+//         def this.close() => {
+//             // responseStream::close()
+//             // responseSocket::close()
+//             println(responseSocket)
+//         }
+
+//         // clone _this
+//     }
+// })()
+
+// def handle (client) => {
+//     client::setSoTimeout(Config.socketReadTimeout : int)
+//     var is = client::getInputStream()
+//     var context = Util.HTTPContext(client)
+
+//     enter {
+//     var buf = buffer(1024)
+//     var read = 0
+//     var totalRead = 0
+//     var rawRequest = ""
+//     var bodyLength = 0
+//     var headerLength = 0
+//     var totalLength = 0
+    
+//     enter for read != -1 do () => {
+//             totalRead += (read = is::read(buf : byte[]))
+//             var output = new java\lang\String (buf : byte[], 0 : int, read : int)
+//             rawRequest +. output
+
+//             var m = match(rawRequest, @"(?i)content-length:\s?(\d+)")
+//             if len(m) > 0
+//                 bodyLength = num(split(m[0].text, ":")[1]) // we found Content-Length header
+
+//             m = match(rawRequest, @"(\r\n\r\n)")
+//             if len(m) > 0
+//                 totalLength = (headerLength = m[0].end) + bodyLength // we reach the end of HTTP request headers
+
+//             !(totalLength == totalRead || Util.isEndOfStream(rawRequest))
+//     }
+//     catch (e)
+//         if rawRequest != "" println("timeout:\n", rawRequest)
+
+//     } do {
+//         println("end")
+//         is::close()
+//         context.close()
+//     }
+// }
+
+// var ss = new java\net\ServerSocket()
+// ss::bind(new java\net\InetSocketAddress("127.0.0.1" : String, Config.port : int) : java\net\SocketAddress)
+
+// println("listening on port ", Config.port)
+
+// for true do () => handle#(ss::accept())
+
+def struct (f, args...) => {
+    f(args...)
+    clone f
+}
+
+def [struct] HTTPContext (socket) => {
+    var responseSocket = socket
+    // var responseStream = socket::getOutputStream()
+
+    def this.close() => {
+        // responseStream::close()
+        // responseSocket::close()
+        println(responseSocket)
+    }
+
+    // clone _this
+}
+
+var h = HTTPContext("zzz")
+var h2 = HTTPContext("zzz2")
+var h3 = HTTPContext("zzz3")
+
+h2.close()

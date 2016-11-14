@@ -73,6 +73,10 @@ public class List<T> extends java.util.ArrayList<T> {
     }
 
     public static List<SExpression> deepClone(List<SExpression> src) throws VMException {
+        if (src == null) {
+            return null;
+        }
+
         List<SExpression> ret = new List<SExpression>(src.size());
 
         for (SExpression t : src) {

@@ -14,6 +14,13 @@ public class SESplit extends SExpression {
 
     public SESplit() {}
 
+    public SESplit(Atom ha, List<SExpression> args) {
+        super(ha, args, 2);
+
+        text = args.get(0);
+        delim = args.get(1);
+    }
+
     public SESplit(Atom ha, Compound c) throws VMException {
         super(ha, c, 2);
 

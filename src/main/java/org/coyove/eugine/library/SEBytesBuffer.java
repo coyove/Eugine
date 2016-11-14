@@ -15,6 +15,12 @@ public class SEBytesBuffer extends SExpression {
 
     public SEBytesBuffer() {}
 
+    public SEBytesBuffer(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+
+        src = args.head();
+    }
+
     public SEBytesBuffer(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
         src = SExpression.cast(c.atoms.pop());

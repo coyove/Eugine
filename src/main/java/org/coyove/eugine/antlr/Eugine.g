@@ -239,12 +239,16 @@ topExpr returns [SExpression v]
                     SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE :
                     SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
         }
-    | Called=topExpr argumentsList
-        { 
-            if (SKeywordsANTLR.KeywordsLookup.containsKey($Called.text)) {
-                $v = SKeywordsANTLR.KeywordsLookup.get($Called.text).call($Called.start, $argumentsList.v); 
+    | Called=topExpr Go='#'? argumentsList
+        {
+            if ($Go != null) {
+                $v = new SEThread(new Atom($Go), $Called.v, $argumentsList.v);
             } else {
-                $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null);
+                if (SKeywordsANTLR.KeywordsLookup.containsKey($Called.text)) {
+                    $v = SKeywordsANTLR.KeywordsLookup.get($Called.text).call($Called.start, $argumentsList.v); 
+                } else {
+                    $v = new SECall($Called.v, $argumentsList.v, new Atom($Called.start), null);
+                }
             }
         }
     | lambdaStmt
