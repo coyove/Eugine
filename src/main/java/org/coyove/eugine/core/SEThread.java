@@ -20,7 +20,7 @@ public class SEThread extends SExpression {
             try {
                 (new SECall(closure, arguments, headAtom, tailCompound)).evaluate(env);
             } catch (VMException ex) {
-                System.out.println("THREAD: " + ex.getMessage());
+                ErrorHandler.print(ex);
             }
         }
     }

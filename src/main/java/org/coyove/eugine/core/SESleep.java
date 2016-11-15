@@ -13,6 +13,12 @@ public class SESleep extends SExpression {
 
     public SESleep() {}
 
+    public SESleep(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
+
+        time = args.head();
+    }
+
     public SESleep(Atom ha, Compound c) throws VMException {
         super(ha, c, 1);
 

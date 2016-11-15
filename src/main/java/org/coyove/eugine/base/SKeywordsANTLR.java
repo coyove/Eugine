@@ -245,5 +245,10 @@ public class SKeywordsANTLR {
                         return new SESplit(new Atom(tok), c);
                     }
                 });
+                put("sleep", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SESleep(new Atom(tok), c);
+                    }
+                });
             }};
 }

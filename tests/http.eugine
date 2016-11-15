@@ -80,21 +80,39 @@ def struct (f, args...) => {
     clone f
 }
 
-def [struct] HTTPContext (socket) => {
-    var responseSocket = socket
-    // var responseStream = socket::getOutputStream()
+// def [struct] HTTPContext (socket) => {
+//     var responseSocket = socket
+//     // var responseStream = socket::getOutputStream()
 
-    def this.close() => {
-        // responseStream::close()
-        // responseSocket::close()
-        println(responseSocket)
-    }
+//     def this.close() => {
+//         // responseStream::close()
+//         // responseSocket::close()
+//         println(responseSocket)
+//     }
 
-    // clone _this
+//     // clone _this
+// }
+
+// var h = HTTPContext("zzz")
+// var h2 = HTTPContext("zzz2")
+// var h3 = HTTPContext("zzz3")
+
+// h2.close()
+
+var __mt__
+var _zzz = -1
+
+def [struct] zzz(a) => {
+    var b = a
+
+    def this.print() => println(b)
 }
 
-var h = HTTPContext("zzz")
-var h2 = HTTPContext("zzz2")
-var h3 = HTTPContext("zzz3")
+for 0..500 do (i) => ((i) => {
+    zzz(i).print()
+    _zzz = i
+})#(i)
 
-h2.close()
+    sleep(3000)
+
+println(_zzz)

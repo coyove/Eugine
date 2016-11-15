@@ -20,9 +20,9 @@ public class SDict extends SValue {
     }
 
     @Override
-    public SValue clone()
-    {
-        HashMap<String, SExpression> dict = (HashMap<String, SExpression>)underlying;
+    @SuppressWarnings("unchecked")
+    public SValue clone() {
+        HashMap<String, SExpression> dict = (HashMap<String, SExpression>) underlying;
         HashMap<String, SExpression> n = new HashMap<String, SExpression>();
 
         try {

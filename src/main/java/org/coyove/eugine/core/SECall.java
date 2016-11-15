@@ -166,17 +166,14 @@ public class SECall extends SExpression {
             }
 
             ExecEnvironment newEnv = prepareExecEnvironment(closure.arguments, arguments);
-            // TODO: newEnv.put("~parent", new SDict(closure.outerEnv));
-            newEnv.put("~atom", new SObject(headAtom));
+            newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
+            newEnv.put("__atom__", new SObject(headAtom));
 
             if (closure.refer instanceof SClosure) {
                 SClosure refer = ((SClosure) closure.refer);
-                newEnv.put("~this", refer);
                 newEnv.put("this", refer);
-                newEnv.put("_this", closure);
-                newEnv.put("~proto", refer.proto);
+                newEnv.put("__this__", closure);
             } else {
-                newEnv.put("~this", closure);
                 newEnv.put("this", closure);
             }
 
@@ -184,9 +181,9 @@ public class SECall extends SExpression {
                 if (closure.transparent) {
                     newEnv = closure.outerEnv; //.cloneClosureAndConstOnly();
                 } else {
-                    // closure.outerEnv.cloneClosureAndConstInto(newEnv);
-                    newEnv.parentEnv = closure.outerEnv.cloneClosureAndConstOnly();
+                    newEnv.parentEnv = closure.outerEnv; //.cloneClosureAndConstOnly();
                 }
+                newEnv.overlay = closure.outerEnv.overlay;
             }
 
             SValue ret = new SNull();
@@ -209,8 +206,9 @@ public class SECall extends SExpression {
                 ret = se.evaluate(newEnv);
             }
 
-            if (flag)
+            if (flag) {
                 continue;
+            }
 
             return ret;
         }

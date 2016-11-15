@@ -1,5 +1,6 @@
 package org.coyove.eugine.util;
 
+import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.value.SClosure;
 
@@ -52,7 +53,7 @@ public class ExecEnvironment extends HashMap<String, SValue> {
                 strict = true;
             }
 
-            if (key.equalsIgnoreCase("~mt")) {
+            if (key.equalsIgnoreCase("__mt__")) {
                 overlay = true;
             }
             // TODO
@@ -68,7 +69,10 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     public ExecEnvironment clone() {
         ExecEnvironment ret = new ExecEnvironment();// (ExecEnvironment) super.clone();
         for (String s : super.keySet()) {
-            ret.putVar(s, super.get(s).clone());
+            SValue v = super.get(s);
+            if (v != null) {
+                ret.putVar(s, v.clone());
+            }
         }
 
         if (this.parentEnv != null) {
