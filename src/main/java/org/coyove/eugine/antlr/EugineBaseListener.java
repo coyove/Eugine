@@ -99,6 +99,18 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSyncStmt(EugineParser.SyncStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSyncStmt(EugineParser.SyncStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclareStmt(EugineParser.DeclareStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -322,18 +334,6 @@ public class EugineBaseListener implements EugineListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAssignExpr(EugineParser.AssignExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterJavaNewExpr(EugineParser.JavaNewExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitJavaNewExpr(EugineParser.JavaNewExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -25,13 +25,6 @@ public class SERegexMatch extends SExpression {
         regex = args.get(1);
     }
 
-    public SERegexMatch(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
-
-        text = SExpression.cast(c.atoms.pop());
-        regex = SExpression.cast(c.atoms.pop());
-    }
-
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         String text = Utils.cast(this.text.evaluate(env), SString.class,

@@ -18,12 +18,12 @@ public class SEReplace extends SExpression {
 
     public SEReplace() {}
 
-    public SEReplace(Atom ha, Compound c, OPERATION o) throws VMException {
-        super(ha, c, 3);
+    public SEReplace(Atom ha, List<SExpression> args, OPERATION o) {
+        super(ha, args, 3);
 
-        text = SExpression.cast(c.atoms.pop());
-        oldText = SExpression.cast(c.atoms.pop());
-        newText = SExpression.cast(c.atoms.pop());
+        text = args.get(0);
+        oldText = args.get(1);
+        newText = args.get(2);
         op = o;
     }
 

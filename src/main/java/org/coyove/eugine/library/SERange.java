@@ -15,9 +15,8 @@ public class SERange extends SExpression {
 
     public SERange() {}
 
-    public SERange(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
-        List<SExpression> args = SExpression.castPlain(c);
+    public SERange(Atom ha, List<SExpression> args) {
+        super(ha, args, 2);
 
         if (args.size() == 2) {
             start = args.get(0);
@@ -37,12 +36,22 @@ public class SERange extends SExpression {
         SValue end = this.end.evaluate(env);
         List<SExpression> ret = new List<SExpression>();
 
-        if (start instanceof SInteger && interval instanceof SInteger && end instanceof SInteger) {
-            for (Long i = start.get(); i < end.<Long>get(); i += interval.<Long>get())
-                ret.add(new SInteger(i));
+        if (start instanceof SInteger && interval instanceof SInteger) {
+            Long interval_ = interval.<Long>get();
+
+            if (interval_ == 0) {
+                for (Long i = 0l; i < start.<Long>get(); i ++) {
+                    ret.add(end);
+                }
+            } else if (end instanceof SInteger) {
+                for (Long i = start.get(); i < end.<Long>get(); i += interval_) {
+                    ret.add(new SInteger(i));
+                }
+            }
         } else if (start instanceof SDouble && interval instanceof SDouble && end instanceof SDouble) {
-            for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get())
+            for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get()) {
                 ret.add(new SDouble(i));
+            }
         } else {
             throw new VMException(3009, "needs integers or doubles", headAtom);
         }

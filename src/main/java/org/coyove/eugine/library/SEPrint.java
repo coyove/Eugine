@@ -28,13 +28,6 @@ public class SEPrint extends SExpression {
         delim = d;
     }
 
-    public SEPrint(Atom ha, Compound c, String d) throws VMException {
-        super(ha, c, 1);
-        delim = d;
-
-        arguments = SExpression.castPlain(c);
-    }
-
     private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws VMException {
         String ret = "";
         if (re instanceof SList) {

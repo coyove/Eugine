@@ -1,10 +1,10 @@
 package org.coyove.eugine.base;
 
+import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.core.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
-import org.coyove.eugine.parser.Compound;
-import org.coyove.eugine.util.VMException;
+import org.coyove.eugine.util.List;
 
 import java.util.HashMap;
 
@@ -13,557 +13,345 @@ import java.util.HashMap;
  */
 public class SKeywords {
     public interface CallableKeyword {
-        SExpression call(Atom ha, Compound c) throws VMException;
+        SExpression call(Token tok, List<SExpression> arguments);
     }
 
-    public static HashMap<String, CallableKeyword> KeywordsLookup =
+    public static HashMap<String, CallableKeyword> Lookup =
             new HashMap<String, CallableKeyword>() {{
-                put("exit", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEExit(ha, c);
-                    }
-                });
-                put("type", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEType(ha, c, SEType.TYPE.TYPE);
-                    }
-                });
-                put("addressof", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEType(ha, c, SEType.TYPE.ADDR);
-                    }
-                });
-
-                put("chain", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEChain(ha, c);
-                    }
-                });
-                put("sync", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESync(ha, c);
-                    }
-                });
-                put("->", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEChain(ha, c);
-                    }
-                });
-                put("eval", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEEval(ha, c);
-                    }
-                });
                 put("print", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEPrint(ha, c, "");
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEPrint(new Atom(tok), arguments, "");
                     }
                 });
                 put("println", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEPrint(ha, c, "\n");
-                    }
-                });
-                put("set", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESet(ha, c, SESet.DECLARE.SET, SESet.ACTION.MUTABLE);
-                    }
-                });
-                put("var", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESet(ha, c, SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
-                    }
-                });
-                put("const", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESet(ha, c, SESet.DECLARE.DECLARE, SESet.ACTION.IMMUTABLE);
-                    }
-                });
-                put("=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESet(ha, c, SESet.DECLARE.SET, SESet.ACTION.MUTABLE);
-                    }
-                });
-                put(":=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESet(ha, c, SESet.DECLARE.DECLARE, SESet.ACTION.MUTABLE);
-                    }
-                });
-                put("clone", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEClone(ha, c);
-                    }
-                });
-                put("get", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c, false);
-                    }
-                });
-                put(":", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c, false);
-                    }
-                });
-                put("::", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEGet(ha, c, true);
-                    }
-                });
-                put("list", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEList(ha, c);
-                    }
-                });
-                put("dict", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEDict(ha, c);
-                    }
-                });
-                put("explode", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEExplode(ha, c);
-                    }
-                });
-                put("lambda", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELambda(ha, c);
-                    }
-                });
-                put("=>", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELambda(ha, c);
-                    }
-                });
-                put("def", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEDef(ha, c);
-                    }
-                });
-                put("if", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEIf(ha, c);
-                    }
-                });
-                put("cond", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECond(ha, c);
-                    }
-                });
-                put("loop", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFor(ha, c, SEFor.DIRECTION.ASC);
-                    }
-                });
-                put("roop", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFor(ha, c, SEFor.DIRECTION.DESC);
-                    }
-                });
-
-                put("==", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, "==");
-                    }
-                });
-                put("eq", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, "==");
-                    }
-                });
-                put("!=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, "!=");
-                    }
-                });
-                put("neq", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, "!=");
-                    }
-                });
-                put(">", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, ">");
-                    }
-                });
-                put("<", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, "<");
-                    }
-                });
-                put(">=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, ">=");
-                    }
-                });
-                put("<=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SECompare(ha, c, "<=");
-                    }
-                });
-
-                put("+", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEAdd(ha, c, false);
-                    }
-                });
-                put("+.", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEAdd(ha, c, true);
-                    }
-                });
-                put("-", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEElemArith(ha, c, SEElemArith.ACTION.SUBTRACT);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEPrint(new Atom(tok), arguments, "\n");
                     }
                 });
                 put("*", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEElemArith(ha, c, SEElemArith.ACTION.MULTIPLY);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PMath(new Atom(tok), arguments, PMath.ACTION.MULTIPLY);
+                    }
+                });
+                put("-", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PMath(new Atom(tok), arguments, PMath.ACTION.SUBTRACT);
                     }
                 });
                 put("/", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEElemArith(ha, c, SEElemArith.ACTION.DIVIDE);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PMath(new Atom(tok), arguments, PMath.ACTION.DIVIDE);
                     }
                 });
                 put("%", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEElemArith(ha, c, SEElemArith.ACTION.MODULAR);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PMath(new Atom(tok), arguments, PMath.ACTION.MODULAR);
                     }
                 });
-
-                put("+=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESelfOp(ha, c, "+");
+                put("+", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PAdd(new Atom(tok), arguments, false);
                     }
                 });
-                put("-=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESelfOp(ha, c, "-");
+                put("+>", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PAdd(new Atom(tok), arguments, true);
                     }
                 });
-                put("*=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESelfOp(ha, c, "*");
+                put("==", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PCompare(new Atom(tok), arguments, "==");
                     }
                 });
-                put("/=", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESelfOp(ha, c, "/");
+                put("!=", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PCompare(new Atom(tok), arguments, "!=");
                     }
                 });
-
-                put("++", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEIncDec(ha, c, true);
+                put(">", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PCompare(new Atom(tok), arguments, ">");
                     }
                 });
-                put("--", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEIncDec(ha, c, false);
+                put("<", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PCompare(new Atom(tok), arguments, "<");
                     }
                 });
-
+                put("<=", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PCompare(new Atom(tok), arguments, "<=");
+                    }
+                });
+                put(">=", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PCompare(new Atom(tok), arguments, ">=");
+                    }
+                });
                 put("&&", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELogic(ha, c, SELogic.LOGIC.AND);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PLogic(new Atom(tok), arguments, PLogic.LOGIC.AND);
                     }
                 });
                 put("||", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELogic(ha, c, SELogic.LOGIC.OR);
-                    }
-                });
-                put("and", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELogic(ha, c, SELogic.LOGIC.AND);
-                    }
-                });
-                put("or", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELogic(ha, c, SELogic.LOGIC.OR);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PLogic(new Atom(tok), arguments, PLogic.LOGIC.OR);
                     }
                 });
                 put("!", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELogic(ha, c, SELogic.LOGIC.NOT);
-                    }
-                });
-                put("not", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELogic(ha, c, SELogic.LOGIC.NOT);
-                    }
-                });
-
-                put("keys", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEKeys(ha, c);
-                    }
-                });
-                put("len", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SELen(ha, c);
-                    }
-                });
-                put("del", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEDel(ha, c);
-                    }
-                });
-
-                put("sin", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.SIN);
-                    }
-                });
-                put("cos", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.COS);
-                    }
-                });
-                put("tan", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.TAN);
-                    }
-                });
-                put("abs", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.ABS);
-                    }
-                });
-                put("asin", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.ASIN);
-                    }
-                });
-                put("acos", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.ACOS);
-                    }
-                });
-                put("atan", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.ATAN);
-                    }
-                });
-                put("sqrt", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.SQRT);
-                    }
-                });
-                put("sgn", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.SGN);
-                    }
-                });
-                put("pow", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.POW);
-                    }
-                });
-                put("time", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.TIME);
-                    }
-                });
-                put("utc-time", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.UTC_TIME);
-                    }
-                });
-                put("sha", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.SHA);
-                    }
-                });
-                put("round", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.ROUND);
-                    }
-                });
-                put("floor", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.FLOOR);
-                    }
-                });
-                put("random", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEMath(ha, c, SEMath.OPERATION.RANDOM);
-                    }
-                });
-
-                put("range", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SERange(ha, c);
-                    }
-                });
-                put("head", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEListOp(ha, c, SEListOp.OPERATION.HEAD);
-                    }
-                });
-                put("tail", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEListOp(ha, c, SEListOp.OPERATION.TAIL);
-                    }
-                });
-                put("init", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEListOp(ha, c, SEListOp.OPERATION.INIT);
-                    }
-                });
-                put("last", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEListOp(ha, c, SEListOp.OPERATION.LAST);
-                    }
-                });
-                put("insert", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEListOp(ha, c, SEListOp.OPERATION.INSERT);
-                    }
-                });
-                put("sort", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEListOp(ha, c, SEListOp.OPERATION.SORT);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PLogic(new Atom(tok), arguments, PLogic.LOGIC.NOT);
                     }
                 });
                 put("reverse", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEReverse(ha, c);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEReverse(new Atom(tok), arguments);
                     }
                 });
-                put("sub", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESub(ha, c);
+                put("irange", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new PIRange(new Atom(tok), arguments);
                     }
                 });
-
-                put("split", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESplit(ha, c);
+                put("range", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SERange(new Atom(tok), arguments);
                     }
                 });
-                put("replace", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEReplace(ha, c, SEReplace.OPERATION.NORMAL);
-                    }
-                });
-                put("re-place", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEReplace(ha, c, SEReplace.OPERATION.REGEX);
+                put("exit", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEExit(new Atom(tok), arguments);
                     }
                 });
                 put("trim", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SETrim(ha, c);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SETrim(new Atom(tok), arguments);
                     }
                 });
-                put("instr", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInStr(ha, c);
-                    }
-                });
-                put("match", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SERegexMatch(ha, c);
-                    }
-                });
-                put("asc", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEChar(ha, c, SEChar.CONVERT.ASC);
-                    }
-                });
-                put("chr", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEChar(ha, c, SEChar.CONVERT.CHR);
-                    }
-                });
-                put("str", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEStr(ha, c);
+                put("len", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SELen(new Atom(tok), arguments);
                     }
                 });
                 put("num", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SENum(ha, c);
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SENum(new Atom(tok), arguments);
                     }
                 });
-                put("read-file", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_TEXT);
+                put("str", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEStr(new Atom(tok), arguments);
                     }
                 });
-                put("read-file-binary", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_BINARY);
+                put("keys", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEKeys(new Atom(tok), arguments);
                     }
                 });
-                put("read-file-lines", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFile(ha, c, SEFile.OPERATION.OPEN_LINES);
+                put("del", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEDel(new Atom(tok), arguments);
                     }
                 });
-                put("write-file", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFile(ha, c, SEFile.OPERATION.WRITE);
+                put("File.read", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_TEXT);
                     }
                 });
-                put("append-file", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFile(ha, c, SEFile.OPERATION.APPEND);
+                put("File.readLines", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_LINES);
                     }
                 });
-                put("file-exists", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEFile(ha, c, SEFile.OPERATION.EXISTS);
+                put("File.readBinary", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_BINARY);
                     }
                 });
-
-                put(".", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropMethod(ha, c, SEInteropMethod.RETURN_TYPE.CAST_TO_SVALUE);
+                put("File.write", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.WRITE);
                     }
                 });
-                put("call", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropMethod(ha, c, SEInteropMethod.RETURN_TYPE.DIRECT_RETURN);
+                put("File.append", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.APPEND);
                     }
                 });
-                put("cls", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropClass(ha, c);
+                put("File.exists", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.EXISTS);
                     }
                 });
-                put("cast", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropCast(ha, c);
+                put("Math.sin", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SIN);
                     }
                 });
-                put("new", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEInteropNew(ha, c);
+                put("Math.cos", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.COS);
                     }
                 });
-
-                put("go", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEThread(ha, c);
+                put("Math.tan", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.TAN);
+                    }
+                });
+                put("Math.abs", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ABS);
+                    }
+                });
+                put("Math.asin", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ASIN);
+                    }
+                });
+                put("Math.acos", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ACOS);
+                    }
+                });
+                put("Math.atan", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ATAN);
+                    }
+                });
+                put("Math.sqrt", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SQRT);
+                    }
+                });
+                put("Math.sgn", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SGN);
+                    }
+                });
+                put("Math.pow", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.POW);
+                    }
+                });
+                put("Time.unix", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.TIME);
+                    }
+                });
+                put("Time.utcFormat", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.UTC_TIME);
+                    }
+                });
+                put("Math.round", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ROUND);
+                    }
+                });
+                put("Math.floor", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.FLOOR);
+                    }
+                });
+                put("Math.random", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.RANDOM);
+                    }
+                });
+                put("buffer", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEBytesBuffer(new Atom(tok), c);
+                    }
+                });
+                put("String.match", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SERegexMatch(new Atom(tok), c);
+                    }
+                });
+                put("String.split", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SESplit(new Atom(tok), c);
+                    }
+                });
+                put("String.replace", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEReplace(new Atom(tok), c, SEReplace.OPERATION.NORMAL);
+                    }
+                });
+                put("String.regexReplace", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEReplace(new Atom(tok), c, SEReplace.OPERATION.REGEX);
                     }
                 });
                 put("sleep", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SESleep(ha, c);
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SESleep(new Atom(tok), c);
                     }
                 });
-                put("try", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SETry(ha, c);
+                put("contains", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEContains(new Atom(tok), c);
                     }
                 });
 
-                put("buffer", new CallableKeyword() {
-                    public SExpression call(Atom ha, Compound c) throws VMException {
-                        return new SEBytesBuffer(ha, c);
+                put("Digest.SHA1", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.SHA1, SEDigest.RETURN.BYTES);
+                    }
+                });
+                put("Digest.SHA256", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.SHA256, SEDigest.RETURN.BYTES);
+                    }
+                });
+                put("Digest.MD5", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.MD5, SEDigest.RETURN.BYTES);
+                    }
+                });
+                put("Digest.hexSHA1", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.SHA1, SEDigest.RETURN.STRING);
+                    }
+                });
+                put("Digest.hexSHA256", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.SHA256, SEDigest.RETURN.STRING);
+                    }
+                });
+                put("Digest.hexMD5", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.MD5, SEDigest.RETURN.STRING);
+                    }
+                });
+                put("List.headOf", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.HEAD);
+                    }
+                });
+                put("List.tailOf", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.TAIL);
+                    }
+                });
+                put("List.initOf", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INIT);
+                    }
+                });
+                put("List.lastOf", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.LAST);
+                    }
+                });
+                put("List.sort", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.SORT);
+                    }
+                });
+                put("List.insert", new CallableKeyword() {
+                    public SExpression call(Token tok, List<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INSERT);
                     }
                 });
             }};

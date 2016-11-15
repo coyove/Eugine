@@ -15,10 +15,10 @@ public class SEStr extends SExpression {
 
     public SEStr() {}
 
-    public SEStr(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
+    public SEStr(Atom ha, List<SExpression> args) {
+        super(ha, args, 1);
 
-        argument = SExpression.cast(c.atoms.pop());
+        argument = args.head();
     }
 
     private SValue convert(SValue arg, ExecEnvironment env) throws VMException {

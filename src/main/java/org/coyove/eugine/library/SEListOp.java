@@ -25,15 +25,15 @@ public class SEListOp extends SExpression {
 
     public SEListOp() {}
 
-    public SEListOp(Atom ha, Compound c, OPERATION o) throws VMException {
-        super(ha, c, o == OPERATION.INSERT ? 3 : 1);
+    public SEListOp(Atom ha, List<SExpression> args, OPERATION o) {
+        super(ha, args, o == OPERATION.INSERT ? 3 : 1);
 
-        list = SExpression.cast(c.atoms.pop());
+        list = args.head();
         op = o;
 
         if (o == OPERATION.INSERT) {
-            pos = SExpression.cast(c.atoms.pop());
-            value = SExpression.cast(c.atoms.pop());
+            pos = args.get(1);
+            value = args.get(2);
         }
     }
 
@@ -91,8 +91,8 @@ public class SEListOp extends SExpression {
 
                     Arrays.sort(values, new Comparator<SClosure>() {
                         public int compare(SClosure o1, SClosure o2) {
-                            SValue v1 = o1.extra.get("~comparator");
-                            SValue v2 = o2.extra.get("~comparator");
+                            SValue v1 = o1.extra.get("__comparator__");
+                            SValue v2 = o2.extra.get("__comparator__");
 
                             if (v1 == null || v2 == null) {
                                 return 0;

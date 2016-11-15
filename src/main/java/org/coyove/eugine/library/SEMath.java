@@ -23,7 +23,7 @@ public class SEMath extends SExpression {
     private OPERATION func;
 
     public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN,
-        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, UTC_TIME, SHA, POW}
+        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, UTC_TIME, POW}
 
     public SEMath() {
     }
@@ -35,16 +35,6 @@ public class SEMath extends SExpression {
         if (args.size() > 1) {
             argument2 = args.get(1);
         }
-
-        func = f;
-    }
-
-    public SEMath(Atom ha, Compound c, OPERATION f) throws VMException {
-        super(ha, c, 1);
-
-        argument = SExpression.cast(c.atoms.pop());
-        if (c.atoms.size() > 0)
-            argument2 = SExpression.cast(c.atoms.pop());
 
         func = f;
     }
@@ -92,19 +82,6 @@ public class SEMath extends SExpression {
             case UTC_TIME:
                 return new SString(DateFormatUtils.formatUTC((long) n,
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
-            case SHA:
-                try {
-                    MessageDigest md = MessageDigest.getInstance(
-                            String.format("SHA-%d", ((int) n)));
-                    String text = Utils.cast(argument2.evaluate(env), SString.class).get();
-                    if (text != null) {
-                        return new SString(Utils.bytesToHexString(md.digest(text.getBytes("UTF-8"))));
-                    } else {
-                        return new SNull();
-                    }
-                } catch (Exception ex) {
-                    return new SNull();
-                }
             default:
                 throw new VMException(3007, "not implemented", headAtom);
         }

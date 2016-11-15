@@ -14,40 +14,41 @@ import java.util.Collections;
 public class SClosure extends SValue {
     public ExecEnvironment outerEnv;
     public List<String> arguments;
-    public int argCount;
+    public List<Boolean> passByValue;
     public List<SExpression> body;
     public ExecEnvironment extra;
     public SClosure proto;
     public boolean transparent = false;
 
-    public SClosure(ExecEnvironment env, List<String> args, List<SExpression> b) {
+    public SClosure(ExecEnvironment env, List<String> args, List<Boolean> pass, List<SExpression> b) {
         super(b);
         outerEnv = env;
         arguments = args;
-        argCount = args.size();
+        passByValue = pass;
         body = b;
         extra = new ExecEnvironment();
     }
 
-    public SClosure(ExecEnvironment env, List<String> args, List<SExpression> b, String description) {
-        this(env, args, b);
+    public SClosure(ExecEnvironment env, List<String> args, List<Boolean> pass,
+                    List<SExpression> b, String description) {
+        this(env, args, pass, b);
         extra.put("__doc__", new SString(description));
     }
 
     public SClosure(ExecEnvironment env, SExpression single) {
-        List<SExpression> body_ = new List<SExpression>();
-        body_.add(single);
-
         outerEnv = env;
         arguments = new List<String>();
-        argCount = 0;
-        body = body_;
+        passByValue = new List<Boolean>();
+
+        body = new List<SExpression>();
+        body.add(single);
+
         extra = new ExecEnvironment();
         transparent = true;
     }
 
     public SClosure(ExecEnvironment env, List<SExpression> multi) {
-        this(env, new List<String>(), multi);
+        this(env, new List<String>(), new List<Boolean>(), multi);
         transparent = true;
     }
 
@@ -55,7 +56,7 @@ public class SClosure extends SValue {
     @Override
     public SValue clone() {
         try {
-            SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
+            SClosure ret = new SClosure(outerEnv, arguments, passByValue, List.deepClone(body));
 
             ret.extra = this.extra.clone();
             ret.proto = this.proto;
@@ -64,14 +65,13 @@ public class SClosure extends SValue {
             SValue.copyAttributes(ret, this);
             return ret;
         } catch (VMException ex) {
-            // this shouldn't happen
-            ex.printStackTrace();
+            ErrorHandler.print(ex);
             return this;
         }
     }
 
     public SValue getCopy() throws VMException {
-        SClosure ret = new SClosure(outerEnv, arguments, List.deepClone(body));
+        SClosure ret = new SClosure(outerEnv, arguments, passByValue, List.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
         ret.transparent = this.transparent;
@@ -83,7 +83,7 @@ public class SClosure extends SValue {
 
     @Override
     public String toString() {
-        return "(" + StringUtils.join(arguments.toArray(), ",") + ") => { " +
-                body.size() + " }";
+        return "(" + StringUtils.join(arguments.toArray(), ",") + ") => {" +
+                body.size() + "}";
     }
 }

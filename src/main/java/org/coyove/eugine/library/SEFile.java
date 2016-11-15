@@ -67,7 +67,7 @@ public class SEFile extends SExpression {
             throw new VMException(3029, "filename must be string", headAtom);
         }
 
-        if (argCount == 2) {
+        if (this.data != null) {
             data = this.data.evaluate(env);
         }
 

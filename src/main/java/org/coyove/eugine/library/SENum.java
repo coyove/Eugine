@@ -19,12 +19,6 @@ public class SENum extends SExpression {
         argument = args.head();
     }
 
-    public SENum(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-
-        argument = SExpression.cast(c.atoms.pop());
-    }
-
     private SValue convert(SValue arg, ExecEnvironment env) throws VMException {
         if (arg instanceof SString) {
             String str = arg.get();

@@ -21,13 +21,6 @@ public class SESplit extends SExpression {
         delim = args.get(1);
     }
 
-    public SESplit(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
-
-        text = SExpression.cast(c.atoms.pop());
-        delim = SExpression.cast(c.atoms.pop());
-    }
-
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SString text = Utils.cast(this.text.evaluate(env), SString.class,

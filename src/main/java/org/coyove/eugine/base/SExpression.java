@@ -1,6 +1,5 @@
 package org.coyove.eugine.base;
 
-import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
@@ -45,8 +44,8 @@ public abstract class SExpression implements java.io.Serializable {
         List<SValue> ret = new List<SValue>();
         for (SExpression e : arguments) {
             if (e != null) {
-                if (e instanceof SEVariable && ((SEVariable) e).varName.endsWith("...")) {
-                    String varName = ((SEVariable) e).varName;
+                if (e instanceof PVariable && ((PVariable) e).varName.endsWith("...")) {
+                    String varName = ((PVariable) e).varName;
                     varName = varName.substring(0, varName.length() - 3);
 
                     if (!env.containsKey(varName)) {
@@ -104,48 +103,12 @@ public abstract class SExpression implements java.io.Serializable {
         } else if (e.token.type == Token.TokenType.SEXPRESSION) {
             return (SExpression) e.token.value;
         } else {
-            return new SEVariable((String) e.token.value, e, null);
+            return new PVariable((String) e.token.value, e, null);
         }
     }
 
     public static SExpression cast(Compound c) throws VMException {
-        if (c.atoms.size() == 0)
-            return new SEList(null, c);
-
-        Base head_ = c.atoms.pop();
-
-        if (head_ instanceof Compound) {
-            if (c.atoms.size() == 0) {
-                return SExpression.cast(head_);
-            } else {
-                Base first = head_;
-                while (first instanceof Compound)
-                    first = ((Compound) first).atoms.head();
-
-                return new SECall(SExpression.cast(head_), castPlain(c), (Atom) first, c);
-            }
-        }
-
-        Atom head = (Atom) head_;
-
-        if (head.token.type == Token.TokenType.ATOMIC) {
-            String tvalue = (String) head.token.value;
-
-            if (SKeywords.KeywordsLookup.containsKey(tvalue))
-                return SKeywords.KeywordsLookup.get(tvalue).call(head, c);
-
-            if (c.atoms.size() == 0) {
-                // TODO
-                return new SEVariable(tvalue, head, c);
-            } else {
-                return new SECall(head, c);
-            }
-
-        } else {
-            // if (head.token.type == Token.TokenType.STRING || head.token.type == Token.TokenType.NUMBER) {
-            c.atoms.add(0, head);
-            return new SEList(head, c);
-        }
+        throw new VMException(10000, "deprecated", ((Atom) c.atoms.head()));
     }
 
     public SValue execute(ExecEnvironment env) throws VMException {

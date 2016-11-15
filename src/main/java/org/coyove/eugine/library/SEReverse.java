@@ -21,11 +21,6 @@ public class SEReverse extends SExpression {
         list = args.head();
     }
 
-    public SEReverse(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-        list = SExpression.cast(c.atoms.pop());
-    }
-
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue subject = this.list.evaluate(env);

@@ -74,45 +74,32 @@
 // println("listening on port ", Config.port)
 
 // for true do () => handle#(ss::accept())
+println(str(Digest.MD5("zzz")))
+
+var res = []
+var _zzz = -1
 
 def struct (f, args...) => {
-    f(args...)
-    clone f
-}
-
-// def [struct] HTTPContext (socket) => {
-//     var responseSocket = socket
-//     // var responseStream = socket::getOutputStream()
-
-//     def this.close() => {
-//         // responseStream::close()
-//         // responseSocket::close()
-//         println(responseSocket)
-//     }
-
-//     // clone _this
-// }
-
-// var h = HTTPContext("zzz")
-// var h2 = HTTPContext("zzz2")
-// var h3 = HTTPContext("zzz3")
-
-// h2.close()
-
-var __mt__
-var _zzz = -1
+        f(args...)
+        clone f
+    }
 
 def [struct] zzz(a) => {
     var b = a
 
-    def this.print() => println(b)
+    def this.print() => sync res +> b
 }
 
-for 0..500 do (i) => ((i) => {
+for 0..5000 do (i) => ((i) => {
     zzz(i).print()
-    _zzz = i
 })#(i)
 
-    sleep(3000)
+sleep(2000)
 
-println(_zzz)
+var tmp = {}
+for res do (r) => tmp[r] = true
+res = []
+
+for tmp do (k) => res +> k
+
+println(range(1,0, zzz(1)))

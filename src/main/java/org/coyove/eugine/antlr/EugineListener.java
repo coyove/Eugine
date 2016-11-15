@@ -79,6 +79,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitEnterStmt(EugineParser.EnterStmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#syncStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterSyncStmt(EugineParser.SyncStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#syncStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitSyncStmt(EugineParser.SyncStmtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#declareStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -268,16 +278,6 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAssignExpr(EugineParser.AssignExprContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link EugineParser#javaNewExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterJavaNewExpr(EugineParser.JavaNewExprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link EugineParser#javaNewExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitJavaNewExpr(EugineParser.JavaNewExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#expr}.
 	 * @param ctx the parse tree

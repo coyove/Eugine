@@ -21,11 +21,6 @@ public class SEBytesBuffer extends SExpression {
         src = args.head();
     }
 
-    public SEBytesBuffer(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-        src = SExpression.cast(c.atoms.pop());
-    }
-
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue src =this.src.evaluate(env);
