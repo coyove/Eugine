@@ -13,7 +13,7 @@ public class SESleep extends SExpression {
 
     public SESleep() {}
 
-    public SESleep(Atom ha, List<SExpression> args) {
+    public SESleep(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         time = args.head();

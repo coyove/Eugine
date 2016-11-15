@@ -5,8 +5,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.util.Formatter;
-
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -15,7 +13,7 @@ public class SEStr extends SExpression {
 
     public SEStr() {}
 
-    public SEStr(Atom ha, List<SExpression> args) {
+    public SEStr(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         argument = args.head();
@@ -27,8 +25,8 @@ public class SEStr extends SExpression {
         } else if (arg instanceof SNull) {
             return new SString("null");
         } else if (arg instanceof SList) {
-            List<SExpression> ret = new List<SExpression>();
-            for (SExpression v : arg.<List<SExpression>>get())
+            ListEx<SExpression> ret = new ListEx<SExpression>();
+            for (SExpression v : arg.<ListEx<SExpression>>get())
                 ret.add(convert(v.evaluate(env), env));
 
             return new SList(ret);

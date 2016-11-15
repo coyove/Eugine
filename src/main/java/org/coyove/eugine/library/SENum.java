@@ -13,7 +13,7 @@ public class SENum extends SExpression {
 
     public SENum() {}
 
-    public SENum(Atom ha, List<SExpression> args) {
+    public SENum(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         argument = args.head();
@@ -37,8 +37,8 @@ public class SENum extends SExpression {
         } else if (arg instanceof SNull) {
             return new SNull();
         } else if (arg instanceof SList) {
-            List<SExpression> ret = new List<SExpression>();
-            for (SExpression v : arg.<List<SExpression>>get())
+            ListEx<SExpression> ret = new ListEx<SExpression>();
+            for (SExpression v : arg.<ListEx<SExpression>>get())
                 ret.add(convert(v.evaluate(env), env));
 
             return new SList(ret);

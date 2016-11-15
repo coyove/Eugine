@@ -12,14 +12,14 @@ import java.math.MathContext;
  * Created by coyove on 2016/9/10.
  */
 public class PMath extends SExpression {
-    private List<SExpression> values;
+    private ListEx<SExpression> values;
     private ACTION action;
 
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
 
     public PMath() {}
 
-    public PMath(Atom ha, List<SExpression> args, ACTION a) {
+    public PMath(Atom ha, ListEx<SExpression> args, ACTION a) {
         super(ha, args, 1);
 
         action = a;
@@ -35,7 +35,7 @@ public class PMath extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        List<SValue> results = SExpression.eval(values, env);
+        ListEx<SValue> results = SExpression.eval(values, env);
         SValue lead = results.head();
 
         if (lead instanceof SDouble || lead instanceof SInteger) {
@@ -85,7 +85,7 @@ public class PMath extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.action = this.action;
-        ret.values = List.deepClone(this.values);
+        ret.values = ListEx.deepClone(this.values);
 
         return ret;
     }

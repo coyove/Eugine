@@ -22,7 +22,7 @@ public class SEDigest extends SExpression {
     public SEDigest() {
     }
 
-    public SEDigest(Atom ha, List<SExpression> args, ALGORITHM f, RETURN r) {
+    public SEDigest(Atom ha, ListEx<SExpression> args, ALGORITHM f, RETURN r) {
         super(ha, args, 1);
 
         argument = args.head();

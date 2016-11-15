@@ -7,11 +7,11 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class SExploded extends SValue {
-    public List<SValue> comps;
+    public ListEx<SValue> comps;
 
-    public SExploded(List<SValue> list) {
+    public SExploded(ListEx<SValue> list) {
         super(list);
-        comps = (List<SValue>) list.clone();
+        comps = (ListEx<SValue>) list.clone();
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.coyove.eugine.parser;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.coyove.eugine.util.*;
 
@@ -40,7 +39,7 @@ public class Parser {
 
         basePath = path;
 
-        List<Token> tokens = new List<Token>();
+        ListEx<Token> tokens = new ListEx<Token>();
 
         Matcher m = reString.matcher(text);
         LineFinder finder = new LineFinder(text);
@@ -113,7 +112,7 @@ public class Parser {
         return chain;
     }
 
-    private Base parseNext(List<Token> tokens) throws VMException {
+    private Base parseNext(ListEx<Token> tokens) throws VMException {
         Token token = tokens.pop();
         if (token == null)
             return null;
@@ -175,7 +174,7 @@ public class Parser {
                         Parser p = new Parser();
                         p.macros = macros;
                         Compound inc = p.parse(new String(Files.readAllBytes(p_)), codeFolder, codeSource);
-                        comp.atoms = new List<Base>();
+                        comp.atoms = new ListEx<Base>();
                         comp.atoms.add(inc);
                     } catch (Exception ex) {
                         throw new VMException(1100, "failed to include '" + codePath + "', " + ex.getMessage(),

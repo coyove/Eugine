@@ -12,18 +12,18 @@ import java.math.BigDecimal;
  */
 public class PCompare extends SExpression {
     private String action;
-    private List<SExpression> values;
+    private ListEx<SExpression> values;
 
     public PCompare() {}
 
-    public PCompare(Atom ha, List<SExpression> args, String a) {
+    public PCompare(Atom ha, ListEx<SExpression> args, String a) {
         super(ha, args, 1);
 
         action = a;
         values = args;
     }
 
-    private boolean compareNumber(List<SValue> nums, int ...signs) throws VMException {
+    private boolean compareNumber(ListEx<SValue> nums, int ...signs) throws VMException {
         BigDecimal first = Utils.getNumber(nums.head(), headAtom);
 
         for (int i = 1; i < nums.size(); i++) {
@@ -41,7 +41,7 @@ public class PCompare extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        List<SValue> results = SExpression.eval(values, env);
+        ListEx<SValue> results = SExpression.eval(values, env);
 
         if (action.equals("==") || action.equals("!=")) {
             Object first = results.head().get();
@@ -86,7 +86,7 @@ public class PCompare extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.action = this.action;
-        ret.values = List.deepClone(this.values);
+        ret.values = ListEx.deepClone(this.values);
 
         return ret;
     }

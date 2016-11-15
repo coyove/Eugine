@@ -1,6 +1,5 @@
 package org.coyove.eugine.library;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
@@ -8,7 +7,6 @@ import org.coyove.eugine.util.*;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -25,7 +23,7 @@ public class SEListOp extends SExpression {
 
     public SEListOp() {}
 
-    public SEListOp(Atom ha, List<SExpression> args, OPERATION o) {
+    public SEListOp(Atom ha, ListEx<SExpression> args, OPERATION o) {
         super(ha, args, o == OPERATION.INSERT ? 3 : 1);
 
         list = args.head();
@@ -42,7 +40,7 @@ public class SEListOp extends SExpression {
         SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
                 new VMException(3005, "subject must be list", headAtom));
 
-        List<SExpression> list = listObj.get();
+        ListEx<SExpression> list = listObj.get();
         switch (op) {
             case HEAD:
                 return list.size() > 0 ? list.head().evaluate(env) : new SNull();
@@ -67,7 +65,7 @@ public class SEListOp extends SExpression {
                 }
 
                 if (list.head() instanceof SInteger) {
-                    List<Long> arr = new List<Long>(list.size());
+                    ListEx<Long> arr = new ListEx<Long>(list.size());
                     for (int i = 0; i < list.size(); i++) {
                         arr.add(list.get(i).evaluate(env).<Long>get());
                     }
@@ -77,7 +75,7 @@ public class SEListOp extends SExpression {
                         list.set(i, new SInteger(arr.get(i)));
                     }
                 } else if (list.head() instanceof SDouble) {
-                    List<Double> arr = new List<Double>(list.size());
+                    ListEx<Double> arr = new ListEx<Double>(list.size());
                     for (int i = 0; i < list.size(); i++) {
                         arr.add(list.get(i).evaluate(env).<Double>get());
                     }

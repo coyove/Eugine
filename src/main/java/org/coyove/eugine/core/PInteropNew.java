@@ -13,12 +13,12 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class PInteropNew extends SExpression {
     private SExpression subject;
-    private List<String> definition;
-    private List<SExpression> arguments;
+    private ListEx<String> definition;
+    private ListEx<SExpression> arguments;
 
     public PInteropNew() {}
 
-    public PInteropNew(Atom ha, SExpression s, List<String> defs, List<SExpression> args) {
+    public PInteropNew(Atom ha, SExpression s, ListEx<String> defs, ListEx<SExpression> args) {
         headAtom = ha;
 
         subject = s;
@@ -40,8 +40,8 @@ public class PInteropNew extends SExpression {
             throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
 
-        List<Class> classes = (List<Class>)ret[0];
-        List<Object> passArgs = (List<Object>)ret[1];
+        ListEx<Class> classes = (ListEx<Class>)ret[0];
+        ListEx<Object> passArgs = (ListEx<Object>)ret[1];
 
         Object obj = sub.get();
         Class cls = ((obj instanceof Class) ? ((Class) obj) : obj.getClass());
@@ -66,7 +66,7 @@ public class PInteropNew extends SExpression {
         ret.tailCompound = this.tailCompound;
         ret.subject = this.subject.deepClone();
         ret.definition = this.definition; // no need to clone
-        ret.arguments = List.deepClone(this.arguments);
+        ret.arguments = ListEx.deepClone(this.arguments);
         return ret;
     }
 }

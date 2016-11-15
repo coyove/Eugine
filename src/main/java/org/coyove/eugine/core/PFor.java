@@ -55,7 +55,7 @@ public class PFor extends SExpression {
 
         if (list_ instanceof SDict) {
             HashMap<String, SExpression> m = ((SDict) list_).get();
-            List<SExpression> keys = new List<SExpression>();
+            ListEx<SExpression> keys = new ListEx<SExpression>();
             for (String s : m.keySet()) {
                 keys.add(new SString(s));
             }
@@ -64,7 +64,7 @@ public class PFor extends SExpression {
         }
 
         if (list_ instanceof SList) {
-            List<SExpression> values = ((SList) list_).get();
+            ListEx<SExpression> values = ((SList) list_).get();
 
             if (direction == DIRECTION.ASC) {
                 for (int i = 0; i < values.size(); i++) {

@@ -15,7 +15,7 @@ public class SEKeys extends SExpression {
 
     public SEKeys() {}
 
-    public SEKeys(Atom ha, List<SExpression> args) {
+    public SEKeys(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
         dict = args.head();
     }
@@ -24,7 +24,7 @@ public class SEKeys extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws VMException {
 
         SValue dict = this.dict.evaluate(env);
-        List<SExpression> ret = new List<SExpression>();
+        ListEx<SExpression> ret = new ListEx<SExpression>();
         if (dict instanceof SDict) {
             for (String k : dict.<HashMap<String, SExpression>>get().keySet()) {
                 ret.add(new SString(k));

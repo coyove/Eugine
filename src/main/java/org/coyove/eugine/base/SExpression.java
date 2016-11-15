@@ -26,7 +26,7 @@ public abstract class SExpression implements java.io.Serializable {
             throw new VMException(2000, "not enough arguments", ha);
     }
 
-    public SExpression(Atom ha, List<SExpression> args, int count) {
+    public SExpression(Atom ha, ListEx<SExpression> args, int count) {
         headAtom = ha;
 
         if (args.size() < count) {
@@ -39,9 +39,9 @@ public abstract class SExpression implements java.io.Serializable {
 
     public abstract SValue evaluate(ExecEnvironment env) throws VMException;
 
-    public static List<SValue> eval(List<SExpression> arguments, ExecEnvironment env) throws VMException {
+    public static ListEx<SValue> eval(ListEx<SExpression> arguments, ExecEnvironment env) throws VMException {
 
-        List<SValue> ret = new List<SValue>();
+        ListEx<SValue> ret = new ListEx<SValue>();
         for (SExpression e : arguments) {
             if (e != null) {
                 if (e instanceof PVariable && ((PVariable) e).varName.endsWith("...")) {
@@ -55,7 +55,7 @@ public abstract class SExpression implements java.io.Serializable {
                     SValue v = env.get(varName);
 
                     if (v instanceof SList) {
-                        ret.addAll(v.<List<SExpression>>get().cast(SValue.class));
+                        ret.addAll(v.<ListEx<SExpression>>get().cast(SValue.class));
                     } else {
                         throw new VMException(9998, "wrong vararg list");
                     }
@@ -75,8 +75,8 @@ public abstract class SExpression implements java.io.Serializable {
         return ret;
     }
 
-    public static List<SExpression> castPlain(Compound c) throws VMException {
-        List<SExpression> arguments = new List<SExpression>();
+    public static ListEx<SExpression> castPlain(Compound c) throws VMException {
+        ListEx<SExpression> arguments = new ListEx<SExpression>();
         for (Base a : c.atoms)
             arguments.add(SExpression.cast(a));
 

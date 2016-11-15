@@ -1,13 +1,11 @@
 package org.coyove.eugine.library;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
@@ -28,7 +26,7 @@ public class SEMath extends SExpression {
     public SEMath() {
     }
 
-    public SEMath(Atom ha, List<SExpression> args, OPERATION f) {
+    public SEMath(Atom ha, ListEx<SExpression> args, OPERATION f) {
         super(ha, args, 1);
 
         argument = args.head();

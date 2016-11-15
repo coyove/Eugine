@@ -103,7 +103,7 @@ public class PSet extends SExpression {
             } else if (n.refer instanceof SDict) {
                 ((SDict) n.refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
             } else if (n.refer instanceof SList) {
-                ((SList) n.refer).<List<SValue>>get().set(n.refIndex, ret);
+                ((SList) n.refer).<ListEx<SValue>>get().set(n.refIndex, ret);
             } else {
                 try {
                     if (n.refer instanceof SObject) {

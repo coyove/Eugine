@@ -10,12 +10,12 @@ import org.coyove.eugine.util.*;
  */
 public class PCond extends SExpression {
     public SExpression condition;
-    public List<Branch> branches;
+    public ListEx<Branch> branches;
     public Branch defaultBranch = null;
 
     public PCond() {}
 
-    public PCond(Atom ha, SExpression condition, List<Branch> branches, Branch db) {
+    public PCond(Atom ha, SExpression condition, ListEx<Branch> branches, Branch db) {
         headAtom = ha;
 
         this.condition = condition;
@@ -27,7 +27,7 @@ public class PCond extends SExpression {
         super(ha, c, 2);
         throw new VMException(9999, "not implemented", ha);
 //        condition = SExpression.cast(c.atoms.pop());
-//        branches = new List<Branch>();
+//        branches = new ListEx<Branch>();
 //
 //        for (Base a : c.atoms) {
 //            Compound b = (Compound) a;
@@ -87,14 +87,14 @@ public class PCond extends SExpression {
 
         if (this.defaultBranch != null) {
             ret.defaultBranch = new Branch();
-            ret.defaultBranch.body = List.deepClone(defaultBranch.body);
+            ret.defaultBranch.body = ListEx.deepClone(defaultBranch.body);
         }
 
-        ret.branches = new List<Branch>(this.branches.size());
+        ret.branches = new ListEx<Branch>(this.branches.size());
         for (Branch branch : this.branches) {
             Branch n = new Branch();
             n.recv = branch.recv.deepClone();
-            n.body = List.deepClone(branch.body);
+            n.body = ListEx.deepClone(branch.body);
 
             ret.branches.add(n);
         }

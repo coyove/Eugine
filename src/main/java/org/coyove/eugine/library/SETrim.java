@@ -6,8 +6,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.util.Formatter;
-
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -16,16 +14,10 @@ public class SETrim extends SExpression {
 
     public SETrim() {}
 
-    public SETrim(Atom ha, List<SExpression> args) {
+    public SETrim(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         argument = args.head();
-    }
-
-    public SETrim(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-
-        argument = SExpression.cast(c.atoms.pop());
     }
 
     @Override

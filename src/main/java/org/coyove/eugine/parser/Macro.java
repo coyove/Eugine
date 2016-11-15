@@ -1,6 +1,6 @@
 package org.coyove.eugine.parser;
 
-import org.coyove.eugine.util.List;
+import org.coyove.eugine.util.ListEx;
 import org.coyove.eugine.util.VMException;
 
 import java.util.HashMap;
@@ -10,11 +10,11 @@ import java.util.HashMap;
  */
 public class Macro {
     public String macroName;
-    public List<String> macroArgs;
+    public ListEx<String> macroArgs;
     public Base macroBody;
 
     private class ReplacePair extends HashMap<String, Base> {
-        public List<Base> tails;
+        public ListEx<Base> tails;
     }
 
     public Macro(Compound macro) throws VMException {
@@ -34,7 +34,7 @@ public class Macro {
             throw new VMException(1203, "macro name must be a string atom", headAtom);
 
         macroName = ((Atom) n).token.value.toString();
-        macroArgs = new List<String>();
+        macroArgs = new ListEx<String>();
 
         for (Base a : header.atoms.skip(1)) {
             if (a instanceof Compound || ((Atom) a).token.type != Token.TokenType.ATOMIC)
@@ -60,8 +60,8 @@ public class Macro {
                 cands.put(arg, src.atoms.pop());
             } else {
                 cands.put(arg, null);
-                cands.tails = new List<Base>();
-                cands.tails.addAll((List<Base>)src.atoms.clone());
+                cands.tails = new ListEx<Base>();
+                cands.tails.addAll((ListEx<Base>)src.atoms.clone());
                 src.atoms.clear();
                 break;
             }
@@ -80,7 +80,7 @@ public class Macro {
                 return body;
             }
         } else {
-            List<Base> atoms = ((Compound) body).atoms;
+            ListEx<Base> atoms = ((Compound) body).atoms;
             int i = 0;
             while (i < atoms.size()) {
                 if (atoms.get(i) instanceof Atom) {

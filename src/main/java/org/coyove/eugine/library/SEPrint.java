@@ -15,13 +15,13 @@ import java.util.Set;
  * Created by coyove on 2016/9/9.
  */
 public class SEPrint extends SExpression {
-    private List<SExpression> arguments;
+    private ListEx<SExpression> arguments;
     private String delim;
 
     public SEPrint() {
     }
 
-    public SEPrint(Atom ha, List<SExpression> args, String d) {
+    public SEPrint(Atom ha, ListEx<SExpression> args, String d) {
         super(ha, args, 1);
 
         arguments = args;
@@ -31,7 +31,7 @@ public class SEPrint extends SExpression {
     private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws VMException {
         String ret = "";
         if (re instanceof SList) {
-            List<SExpression> lv = re.get();
+            ListEx<SExpression> lv = re.get();
             String[] values = new String[lv.size()];
 
             for (int i = 0; i < lv.size(); i++) {
@@ -87,7 +87,7 @@ public class SEPrint extends SExpression {
         ret.tailCompound = this.tailCompound;
 
         ret.delim = this.delim;
-        ret.arguments = List.deepClone(this.arguments);
+        ret.arguments = ListEx.deepClone(this.arguments);
 
         return ret;
     }

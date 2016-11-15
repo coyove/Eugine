@@ -11,12 +11,12 @@ import java.math.BigDecimal;
  * Created by coyove on 2016/9/10.
  */
 public class PAdd extends SExpression {
-    private List<SExpression> values;
+    private ListEx<SExpression> values;
     private boolean self = false;
 
     public PAdd() {}
 
-    public PAdd(Atom ha, List<SExpression> args, boolean s) {
+    public PAdd(Atom ha, ListEx<SExpression> args, boolean s) {
         super(ha, args, 1);
 
         values = args;
@@ -32,7 +32,7 @@ public class PAdd extends SExpression {
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        List<SValue> results = SExpression.eval(values, env);
+        ListEx<SValue> results = SExpression.eval(values, env);
         SValue lead = results.head();
 
         if (lead instanceof SString) {
@@ -78,7 +78,7 @@ public class PAdd extends SExpression {
         }
 
         if (lead instanceof SList) {
-            List<SExpression> list;
+            ListEx<SExpression> list;
             if (self) {
                 list = lead.get();
                 if (lead.immutable) {
@@ -88,7 +88,7 @@ public class PAdd extends SExpression {
                 list.addAll(results.skip(1));
                 return new SNull();
             } else {
-                list = (List<SExpression>) lead.<List<SExpression>>get().clone();
+                list = (ListEx<SExpression>) lead.<ListEx<SExpression>>get().clone();
                 list.addAll(results.skip(1));
                 return new SList(list);
             }
@@ -102,7 +102,7 @@ public class PAdd extends SExpression {
         PAdd ret = new PAdd();
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
-        ret.values = List.deepClone(values);
+        ret.values = ListEx.deepClone(values);
         ret.self = this.self;
         return ret;
     }

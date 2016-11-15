@@ -56,7 +56,7 @@ public class PGet extends SExpression {
             SInteger index = Utils.cast(sk, SInteger.class,
                     new VMException(2020, "list index must be integer", headAtom));
 
-            List<SExpression> l = dict.get();
+            ListEx<SExpression> l = dict.get();
             Long idx = index.get();
 
             if (idx >= l.size() || idx < 0)

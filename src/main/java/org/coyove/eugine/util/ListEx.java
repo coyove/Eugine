@@ -1,27 +1,26 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SExpression;
-import org.coyove.eugine.base.SValue;
 
 import java.util.Collection;
 
 /**
  * Created by coyove on 2016/9/9.
  */
-public class List<T> extends java.util.ArrayList<T> {
-    public List(int cap) {
+public class ListEx<T> extends java.util.ArrayList<T> {
+    public ListEx(int cap) {
         super(cap < 0 ? 0 : cap);
     }
 
-    public List(Collection<? extends T> list) {
+    public ListEx(Collection<? extends T> list) {
         super(list);
     }
 
-    public List() {
+    public ListEx() {
     }
 
-    public static <TV>List build(TV... values) {
-        List<TV> ret = new List<TV>(values.length);
+    public static <TV>ListEx build(TV... values) {
+        ListEx<TV> ret = new ListEx<TV>(values.length);
         for (int i = 0; i < values.length; i++) {
             ret.add(values[i]);
         }
@@ -50,34 +49,34 @@ public class List<T> extends java.util.ArrayList<T> {
             return null;
     }
 
-    public List<T> skip(int count) {
+    public ListEx<T> skip(int count) {
         if (count > this.size()) {
-            return new List<T>();
+            return new ListEx<T>();
         } else {
-            return new List<T>(this.subList(count, this.size()));
+            return new ListEx<T>(this.subList(count, this.size()));
         }
     }
 
-    public List<T> sub(int start, int end) {
+    public ListEx<T> sub(int start, int end) {
         if (start > this.size()) {
-            return new List<T>();
+            return new ListEx<T>();
         } else if (end > this.size()) {
-            return new List<T>(this.subList(start, this.size()));
+            return new ListEx<T>(this.subList(start, this.size()));
         } else {
-            return new List<T>(this.subList(start, end));
+            return new ListEx<T>(this.subList(start, end));
         }
     }
 
-    public List<T> sub(int start) {
+    public ListEx<T> sub(int start) {
         return sub(start, this.size());
     }
 
-    public static List<SExpression> deepClone(List<SExpression> src) throws VMException {
+    public static ListEx<SExpression> deepClone(ListEx<SExpression> src) throws VMException {
         if (src == null) {
             return null;
         }
 
-        List<SExpression> ret = new List<SExpression>(src.size());
+        ListEx<SExpression> ret = new ListEx<SExpression>(src.size());
 
         for (SExpression t : src) {
             ret.add(t.deepClone());
@@ -85,17 +84,8 @@ public class List<T> extends java.util.ArrayList<T> {
         return ret;
     }
 
-    public static List<String> deepCloneString(List<String> src) throws VMException {
-        List<String> ret = new List<String>(src.size());
-
-        for (String t : src) {
-            ret.add(t);
-        }
-        return ret;
-    }
-
-    public <T> List<T> cast(Class<T> c) {
-        List<T> ret = new List<T>(super.size());
+    public <T> ListEx<T> cast(Class<T> c) {
+        ListEx<T> ret = new ListEx<T>(super.size());
         for (int i = 0; i < super.size(); i++) {
             ret.add((T) super.get(i));
         }

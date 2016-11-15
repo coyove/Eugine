@@ -9,14 +9,14 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class PLogic extends SExpression {
-    private List<SExpression> values;
+    private ListEx<SExpression> values;
 
     private LOGIC log;
     public enum LOGIC {AND, OR, NOT}
 
     public PLogic() {}
 
-    public PLogic(Atom ha, List<SExpression> args, LOGIC a) {
+    public PLogic(Atom ha, ListEx<SExpression> args, LOGIC a) {
         super(ha, args, 1);
 
         log = a;
@@ -32,7 +32,7 @@ public class PLogic extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
-        List<SValue> results = SExpression.eval(values, env);
+        ListEx<SValue> results = SExpression.eval(values, env);
         VMException ex = new VMException(2041, "non-boolean found", headAtom);
 
         SBool lead = Utils.cast(results.head(), SBool.class, ex);
@@ -74,7 +74,7 @@ public class PLogic extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.log = this.log;
-        ret.values = List.deepClone(this.values);
+        ret.values = ListEx.deepClone(this.values);
 
         return ret;
     }

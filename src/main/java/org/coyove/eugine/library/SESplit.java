@@ -14,7 +14,7 @@ public class SESplit extends SExpression {
 
     public SESplit() {}
 
-    public SESplit(Atom ha, List<SExpression> args) {
+    public SESplit(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
         text = args.get(0);
@@ -29,7 +29,7 @@ public class SESplit extends SExpression {
         SString delim = Utils.cast(this.delim.evaluate(env), SString.class,
                 new VMException(3011, "delimiter must be string", headAtom));
 
-        List<SExpression> ret = new List<SExpression>();
+        ListEx<SExpression> ret = new ListEx<SExpression>();
         for (String s : text.<String>get().split(delim.<String>get())) {
             ret.add(new SString(s));
         }

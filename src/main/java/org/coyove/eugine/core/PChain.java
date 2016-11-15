@@ -9,15 +9,14 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class PChain extends SExpression {
-    public List<SExpression> expressions;
+    public ListEx<SExpression> expressions;
 
     public PChain() {
-        expressions = new List<SExpression>();
+        expressions = new ListEx<SExpression>();
     }
 
-    public PChain(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        expressions = SExpression.castPlain(c);
+    public PChain(ListEx<SExpression> e) {
+        expressions = e;
     }
 
     @Override
@@ -33,9 +32,7 @@ public class PChain extends SExpression {
     @Override
     public SExpression deepClone() throws VMException {
         PChain ret = new PChain();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
-        ret.expressions = List.deepClone(this.expressions);
+        ret.expressions = ListEx.deepClone(this.expressions);
         return ret;
     }
 }

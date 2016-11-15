@@ -5,22 +5,19 @@ import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.*;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-
 /**
  * Created by coyove on 2016/9/9.
  */
 public class SClosure extends SValue {
     public ExecEnvironment outerEnv;
-    public List<String> arguments;
-    public List<Boolean> passByValue;
-    public List<SExpression> body;
+    public ListEx<String> arguments;
+    public ListEx<Boolean> passByValue;
+    public ListEx<SExpression> body;
     public ExecEnvironment extra;
     public SClosure proto;
     public boolean transparent = false;
 
-    public SClosure(ExecEnvironment env, List<String> args, List<Boolean> pass, List<SExpression> b) {
+    public SClosure(ExecEnvironment env, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
         super(b);
         outerEnv = env;
         arguments = args;
@@ -29,26 +26,26 @@ public class SClosure extends SValue {
         extra = new ExecEnvironment();
     }
 
-    public SClosure(ExecEnvironment env, List<String> args, List<Boolean> pass,
-                    List<SExpression> b, String description) {
+    public SClosure(ExecEnvironment env, ListEx<String> args, ListEx<Boolean> pass,
+                    ListEx<SExpression> b, String description) {
         this(env, args, pass, b);
         extra.put("__doc__", new SString(description));
     }
 
     public SClosure(ExecEnvironment env, SExpression single) {
         outerEnv = env;
-        arguments = new List<String>();
-        passByValue = new List<Boolean>();
+        arguments = new ListEx<String>();
+        passByValue = new ListEx<Boolean>();
 
-        body = new List<SExpression>();
+        body = new ListEx<SExpression>();
         body.add(single);
 
         extra = new ExecEnvironment();
         transparent = true;
     }
 
-    public SClosure(ExecEnvironment env, List<SExpression> multi) {
-        this(env, new List<String>(), new List<Boolean>(), multi);
+    public SClosure(ExecEnvironment env, ListEx<SExpression> multi) {
+        this(env, new ListEx<String>(), new ListEx<Boolean>(), multi);
         transparent = true;
     }
 
@@ -56,7 +53,7 @@ public class SClosure extends SValue {
     @Override
     public SValue clone() {
         try {
-            SClosure ret = new SClosure(outerEnv, arguments, passByValue, List.deepClone(body));
+            SClosure ret = new SClosure(outerEnv, arguments, passByValue, ListEx.deepClone(body));
 
             ret.extra = this.extra.clone();
             ret.proto = this.proto;
@@ -71,7 +68,7 @@ public class SClosure extends SValue {
     }
 
     public SValue getCopy() throws VMException {
-        SClosure ret = new SClosure(outerEnv, arguments, passByValue, List.deepClone(body));
+        SClosure ret = new SClosure(outerEnv, arguments, passByValue, ListEx.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
         ret.transparent = this.transparent;

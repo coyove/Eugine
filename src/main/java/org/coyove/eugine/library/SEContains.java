@@ -17,7 +17,7 @@ public class SEContains extends SExpression {
 
     public SEContains() {}
 
-    public SEContains(Atom ha, List<SExpression> args) {
+    public SEContains(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
         map = args.get(0);

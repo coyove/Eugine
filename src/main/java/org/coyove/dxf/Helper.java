@@ -1,6 +1,6 @@
 package org.coyove.dxf;
 
-import org.coyove.eugine.util.List;
+import org.coyove.eugine.util.ListEx;
 import org.kabeja.dxf.DXFArc;
 import org.kabeja.dxf.DXFDocument;
 import org.kabeja.dxf.DXFHatch;
@@ -28,9 +28,9 @@ public class Helper {
         }
     }
 
-    public static List<Point> getHatch(DXFDocument doc, String blockName) {
+    public static ListEx<Point> getHatch(DXFDocument doc, String blockName) {
         Iterator entity = doc.getDXFBlock(blockName).getDXFEntitiesIterator();
-        List<Point> points = new List<Point>();
+        ListEx<Point> points = new ListEx<Point>();
 
         while (entity.hasNext()) {
             Object e = entity.next();

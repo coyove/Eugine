@@ -15,7 +15,7 @@ public class SEBytesBuffer extends SExpression {
 
     public SEBytesBuffer() {}
 
-    public SEBytesBuffer(Atom ha, List<SExpression> args) {
+    public SEBytesBuffer(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         src = args.head();

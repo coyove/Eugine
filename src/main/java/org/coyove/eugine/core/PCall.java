@@ -13,7 +13,7 @@ public class PCall extends SExpression {
     private String closureName;
     private SExpression closureObject = null;
 
-    private List<SExpression> arguments;
+    private ListEx<SExpression> arguments;
     private enum continueState { CONTINUE, TAIL_CALL, FALSE_NULL }
 
     public PCall() {}
@@ -24,15 +24,15 @@ public class PCall extends SExpression {
         arguments = SExpression.castPlain(c);
     }
 
-    public PCall(SExpression cls, List<SExpression> args, Atom ha, Compound c) {
+    public PCall(SExpression cls, ListEx<SExpression> args, Atom ha, Compound c) {
         super(ha, c);
         closureObject = cls;
-        arguments = args == null ? new List<SExpression>() : args;
+        arguments = args == null ? new ListEx<SExpression>() : args;
     }
 
-    public static ExecEnvironment prepareEE(SClosure cls, List<SValue> arguments) throws VMException {
-        List<String> argNames = cls.arguments;
-        List<Boolean> passByValue = cls.passByValue;
+    public static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws VMException {
+        ListEx<String> argNames = cls.arguments;
+        ListEx<Boolean> passByValue = cls.passByValue;
         ExecEnvironment newEnv = new ExecEnvironment();
 
         for (int i = 0; i < argNames.size(); i++) {
@@ -41,7 +41,7 @@ public class PCall extends SExpression {
             if (argName.length() > 3 && argName.endsWith("...")) {
                 argName = argName.substring(0, argName.length() - 3);
                 if (passByValue.get(i)) {
-                    newEnv.put(argName, new SList(List.deepClone(arguments.skip(i).cast(SExpression.class))));
+                    newEnv.put(argName, new SList(ListEx.deepClone(arguments.skip(i).cast(SExpression.class))));
                 } else {
                     newEnv.put(argName, new SList(arguments.skip(i).cast(SExpression.class)));
                 }
@@ -75,9 +75,9 @@ public class PCall extends SExpression {
         return closure;
     }
 
-    public Triple<SClosure, List<SValue>, continueState>
+    public Triple<SClosure, ListEx<SValue>, continueState>
     getContinue(SExpression se, ExecEnvironment env) throws VMException {
-        List<SValue> retArgs = new List<SValue>();
+        ListEx<SValue> retArgs = new ListEx<SValue>();
         SClosure retCls = null;
         continueState ret = continueState.CONTINUE;
 
@@ -139,7 +139,7 @@ public class PCall extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws VMException {
         SValue closure_ = getClosure(env);
-        List<SValue> arguments = SExpression.eval(this.arguments, env);
+        ListEx<SValue> arguments = SExpression.eval(this.arguments, env);
         SClosure closure;
 
         if (closure_ instanceof SClosure) {
@@ -152,9 +152,9 @@ public class PCall extends SExpression {
 
             if (closure.arguments.size() > arguments.size()) {
 
-                List<String> argNames = closure.arguments.skip(arguments.size());
-                List<Boolean> passByValue = closure.passByValue.skip(arguments.size());
-                List<SExpression> newArgs = new List<SExpression>();
+                ListEx<String> argNames = closure.arguments.skip(arguments.size());
+                ListEx<Boolean> passByValue = closure.passByValue.skip(arguments.size());
+                ListEx<SExpression> newArgs = new ListEx<SExpression>();
 
                 for (SValue v : arguments)
                     newArgs.add(v);
@@ -163,7 +163,7 @@ public class PCall extends SExpression {
                     newArgs.add(new PVariable(a, headAtom, tailCompound));
 
                 PCall newBody = new PCall(closure, newArgs, headAtom, tailCompound);
-                List<SExpression> body = new List<SExpression>();
+                ListEx<SExpression> body = new ListEx<SExpression>();
                 body.add(newBody);
 
                 return new SClosure(env, argNames, passByValue, body);
@@ -196,7 +196,7 @@ public class PCall extends SExpression {
             for (int i = 0; i < closure.body.size(); i++) {
                 SExpression se = closure.body.get(i);
                 if (i == closure.body.size() - 1) {
-                    Triple<SClosure, List<SValue>, continueState> tail = getContinue(se, newEnv);
+                    Triple<SClosure, ListEx<SValue>, continueState> tail = getContinue(se, newEnv);
                     if (tail.getRight() == continueState.TAIL_CALL) {
                         closure = tail.getLeft();
                         arguments = tail.getMiddle();
@@ -225,7 +225,7 @@ public class PCall extends SExpression {
         ret.tailCompound = this.tailCompound;
 
         ret.closureName = this.closureName;
-        ret.arguments = List.deepClone(this.arguments);
+        ret.arguments = ListEx.deepClone(this.arguments);
 
         if (this.closureObject != null) {
             ret.closureObject = this.closureObject.deepClone();

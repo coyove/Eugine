@@ -7,7 +7,7 @@ import org.coyove.eugine.base.SExpression;
  */
 public class Branch implements java.io.Serializable {
     public SExpression recv;
-    public List<SExpression> body = new List<SExpression>();
+    public ListEx<SExpression> body = new ListEx<SExpression>();
 
     public void set(Branch n) {
         recv = n.recv;

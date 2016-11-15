@@ -10,7 +10,7 @@ import org.coyove.eugine.value.*;
  */
 public class PClone extends SExpression {
     private SExpression varName;
-//    private List<SExpression> arguments;
+//    private ListEx<SExpression> arguments;
 
     public PClone() {}
 
@@ -47,7 +47,7 @@ public class PClone extends SExpression {
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
         ret.varName = this.varName.deepClone();
-//        ret.arguments = List.deepClone(this.arguments);
+//        ret.arguments = ListEx.deepClone(this.arguments);
         return ret;
     }
 }

@@ -16,7 +16,7 @@ public class SEDel extends SExpression {
 
     public SEDel() {}
 
-    public SEDel(Atom ha, List<SExpression> args) {
+    public SEDel(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
         host = args.get(0);
@@ -32,7 +32,7 @@ public class SEDel extends SExpression {
             if (subObj.immutable)
                 throw new VMException(2006, "list is immutable", headAtom);
 
-            List<SValue> subList = subObj.get();
+            ListEx<SValue> subList = subObj.get();
             int i = idx.<Long>get().intValue();
             if (i < 0 || i >= subList.size())
                 throw new VMException(2007, "index out of range", headAtom);

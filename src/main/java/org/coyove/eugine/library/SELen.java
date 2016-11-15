@@ -13,16 +13,10 @@ public class SELen extends SExpression {
 
     public SELen() {}
 
-    public SELen(Atom ha, List<SExpression> args) {
+    public SELen(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         argument = args.head();
-    }
-
-    public SELen(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-
-        argument = SExpression.cast(c.atoms.pop());
     }
 
     @Override
@@ -32,7 +26,7 @@ public class SELen extends SExpression {
         if (obj instanceof SString) {
             return new SInteger((long) obj.<String>get().length());
         } else if (obj instanceof SList) {
-            return new SInteger((long) obj.<List<SValue>>get().size());
+            return new SInteger((long) obj.<ListEx<SValue>>get().size());
         } else {
             if (obj.get() instanceof byte[]) {
                 byte[] buf = obj.get();

@@ -57,9 +57,9 @@ public class PSub extends SExpression {
         } else if (subObj instanceof SList) {
             SList subList = (SList) subObj;
             if (this.end == null) {
-                return new SList(subList.<List<SExpression>>get().sub(start));
+                return new SList(subList.<ListEx<SExpression>>get().sub(start));
             } else {
-                return new SList(subList.<List<SExpression>>get().sub(start, end));
+                return new SList(subList.<ListEx<SExpression>>get().sub(start, end));
             }
         } else {
             throw new VMException(3014, "subject must be string or list", headAtom);

@@ -1,6 +1,5 @@
 package org.coyove.eugine.library;
 
-import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
@@ -12,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Formatter;
 
 /**
  * Created by zezhong on 2016/9/10.
@@ -30,7 +28,7 @@ public class SEFile extends SExpression {
     public SEFile() {
     }
 
-    public SEFile(Atom ha, List<SExpression> args, OPERATION op) {
+    public SEFile(Atom ha, ListEx<SExpression> args, OPERATION op) {
         super(ha, args, op == OPERATION.OPEN_BINARY ||
                 op == OPERATION.OPEN_LINES ||
                 op == OPERATION.OPEN_TEXT ||
@@ -80,7 +78,7 @@ public class SEFile extends SExpression {
                     return new SObject(Files.readAllBytes(path));
                 case OPEN_LINES:
                     java.util.List<String> lines = Files.readAllLines(path, Charset.forName("UTF-8"));
-                    List<SExpression> ret = new List<SExpression>(lines.size());
+                    ListEx<SExpression> ret = new ListEx<SExpression>(lines.size());
                     for (String line : lines) {
                         ret.add(new SString(line));
                     }
@@ -101,7 +99,7 @@ public class SEFile extends SExpression {
                         Files.write(path, ((byte[]) data.get()), oo);
                     } else if (data instanceof SList) {
                         StringBuilder sb = new StringBuilder();
-                        for (SExpression v : data.<List<SExpression>>get()) {
+                        for (SExpression v : data.<ListEx<SExpression>>get()) {
                             SValue value = v.evaluate(env);
 
                             if (value instanceof SString) {

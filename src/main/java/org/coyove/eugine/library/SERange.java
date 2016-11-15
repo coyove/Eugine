@@ -15,7 +15,7 @@ public class SERange extends SExpression {
 
     public SERange() {}
 
-    public SERange(Atom ha, List<SExpression> args) {
+    public SERange(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
         if (args.size() == 2) {
@@ -34,7 +34,7 @@ public class SERange extends SExpression {
         SValue start = this.start.evaluate(env);
         SValue interval = this.interval.evaluate(env);
         SValue end = this.end.evaluate(env);
-        List<SExpression> ret = new List<SExpression>();
+        ListEx<SExpression> ret = new ListEx<SExpression>();
 
         if (start instanceof SInteger && interval instanceof SInteger) {
             Long interval_ = interval.<Long>get();

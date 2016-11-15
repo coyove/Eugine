@@ -11,7 +11,7 @@ import org.coyove.eugine.util.*;
 public class PThread extends SExpression {
     private class GoTask implements Runnable {
         public SExpression closure;
-        public List<SExpression> arguments;
+        public ListEx<SExpression> arguments;
         public Atom headAtom;
         public Compound tailCompound;
         public ExecEnvironment env;
@@ -26,11 +26,11 @@ public class PThread extends SExpression {
     }
 
     private SExpression closure;
-    private List<SExpression> arguments;
+    private ListEx<SExpression> arguments;
 
     public PThread() {}
 
-    public PThread(Atom ha, SExpression c, List<SExpression> args) {
+    public PThread(Atom ha, SExpression c, ListEx<SExpression> args) {
         headAtom = ha;
 
         closure = c;
@@ -65,7 +65,7 @@ public class PThread extends SExpression {
 
         // note here closure is not SClosure
         ret.closure = this.closure.deepClone();
-        ret.arguments = List.deepClone(this.arguments);
+        ret.arguments = ListEx.deepClone(this.arguments);
 
         return ret;
     }

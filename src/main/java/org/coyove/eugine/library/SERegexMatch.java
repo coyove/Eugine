@@ -18,7 +18,7 @@ public class SERegexMatch extends SExpression {
 
     public SERegexMatch() {}
 
-    public SERegexMatch(Atom ha, List<SExpression> args) {
+    public SERegexMatch(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
         text = args.get(0);
@@ -35,7 +35,7 @@ public class SERegexMatch extends SExpression {
 
         Matcher m = Pattern.compile(regex).matcher(text);
 
-        List<SExpression> ret = new List<SExpression>();
+        ListEx<SExpression> ret = new ListEx<SExpression>();
         while (m.find()) {
             HashMap<String, SExpression> mapMatch = new HashMap<String, SExpression>();
             int i = 0;

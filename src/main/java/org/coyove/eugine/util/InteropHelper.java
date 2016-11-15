@@ -48,14 +48,14 @@ public class InteropHelper {
         } else if (value instanceof Boolean) {
             return new SBool((Boolean) value);
         } else if (value.getClass().isArray()) {
-            List<SExpression> ret = new List<SExpression>();
+            ListEx<SExpression> ret = new ListEx<SExpression>();
             for (int i = 0; i < Array.getLength(value); i++)
                 ret.add(castJavaType(Array.get(value, i)));
 
             return new SList(ret);
         } else if (value instanceof Collection) {
             Collection list = (Collection) value;
-            List<SExpression> ret = new List<SExpression>(list.size());
+            ListEx<SExpression> ret = new ListEx<SExpression>(list.size());
             for (Object o : list) {
                 ret.add(castJavaType(o));
             }
@@ -97,8 +97,8 @@ public class InteropHelper {
                 return obj.get();
             }
         } else if (obj instanceof SList) {
-            List<SValue> list = obj.get();
-            List<Object> ret = new List<Object>();
+            ListEx<SValue> list = obj.get();
+            ListEx<Object> ret = new ListEx<Object>();
 
             for (SValue value : list) {
                 ret.add(castSValue(value, c.getComponentType()));
@@ -109,14 +109,14 @@ public class InteropHelper {
         }
     }
 
-    public static Object[] formatDefinition(SList definition, List<SValue> args) throws VMException {
+    public static Object[] formatDefinition(SList definition, ListEx<SValue> args) throws VMException {
 
-        List<Class> classes = new List<Class>();
-        List<Object> passArgs = new List<Object>();
+        ListEx<Class> classes = new ListEx<Class>();
+        ListEx<Object> passArgs = new ListEx<Object>();
 
         boolean vararg = false;
         int i = 0;
-        for (SValue def : definition.<List<SValue>>get()) {
+        for (SValue def : definition.<ListEx<SValue>>get()) {
             if (vararg)
                 throw new VMException(4001, "vararg must be at the tail of the definition");
 
@@ -178,11 +178,11 @@ public class InteropHelper {
         };
     }
 
-    public static Object[] buildArguments(List<String> defs, List<SExpression> args, ExecEnvironment env)
+    public static Object[] buildArguments(ListEx<String> defs, ListEx<SExpression> args, ExecEnvironment env)
             throws VMException {
 
-        List<Class> classes = new List<Class>();
-        List<Object> passArgs = new List<Object>();
+        ListEx<Class> classes = new ListEx<Class>();
+        ListEx<Object> passArgs = new ListEx<Object>();
 
         boolean vararg = false;
         int i = 0;

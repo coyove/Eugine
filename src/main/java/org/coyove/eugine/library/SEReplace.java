@@ -18,7 +18,7 @@ public class SEReplace extends SExpression {
 
     public SEReplace() {}
 
-    public SEReplace(Atom ha, List<SExpression> args, OPERATION o) {
+    public SEReplace(Atom ha, ListEx<SExpression> args, OPERATION o) {
         super(ha, args, 3);
 
         text = args.get(0);

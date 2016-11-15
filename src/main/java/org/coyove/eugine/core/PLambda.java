@@ -9,13 +9,13 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class PLambda extends SExpression {
-    private List<SExpression> body;
-    private List<String> arguments;
-    private List<Boolean> passByValue;
+    private ListEx<SExpression> body;
+    private ListEx<String> arguments;
+    private ListEx<Boolean> passByValue;
     private String description;
 
-    public static List<String> CompoundToArguments(Compound c, Atom pos) throws VMException {
-        List<String> ret = new List<String>();
+    public static ListEx<String> CompoundToArguments(Compound c, Atom pos) throws VMException {
+        ListEx<String> ret = new ListEx<String>();
 
         for (int i = 0; i < c.atoms.size(); i++) {
             Base a = c.atoms.get(i);
@@ -36,11 +36,11 @@ public class PLambda extends SExpression {
     public PLambda() {
     }
 
-    public PLambda(Atom ha, List<String> args, List<Boolean> pass, List<SExpression> b) {
+    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
         this(ha, args, pass, b, "");
     }
 
-    public PLambda(Atom ha, List<String> args, List<Boolean> pass, List<SExpression> b, String d) {
+    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b, String d) {
         headAtom = ha;
         arguments = args;
         body = b;
@@ -70,7 +70,7 @@ public class PLambda extends SExpression {
         PLambda ret = new PLambda();
         ret.headAtom = this.headAtom;
         ret.tailCompound = this.tailCompound;
-        ret.body = List.deepClone(this.body);
+        ret.body = ListEx.deepClone(this.body);
         ret.arguments = this.arguments;
         ret.passByValue = this.passByValue;
         ret.description = this.description;

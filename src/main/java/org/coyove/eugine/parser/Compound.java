@@ -6,11 +6,11 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class Compound extends Base {
-    public List<Base> atoms = new List<Base>();
+    public ListEx<Base> atoms = new ListEx<Base>();
 
     public Compound() {}
 
-    public Compound(List<Base> a) {
+    public Compound(ListEx<Base> a) {
         atoms = a;
     }
 

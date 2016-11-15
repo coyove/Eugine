@@ -15,7 +15,7 @@ public class PIRange extends SExpression {
 
     public PIRange() {}
 
-    public PIRange(Atom ha, List<SExpression> args) {
+    public PIRange(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 3);
 
         start = args.get(0);

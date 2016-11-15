@@ -14,8 +14,8 @@ import java.lang.reflect.Method;
 public class PInteropCall extends SExpression {
     private SExpression subject;
     private String methodName;
-    private List<String> definition;
-    private List<SExpression> arguments;
+    private ListEx<String> definition;
+    private ListEx<SExpression> arguments;
 
     private RETURN_TYPE type;
     public enum RETURN_TYPE { DIRECT_RETURN, CAST_TO_SVALUE }
@@ -23,7 +23,7 @@ public class PInteropCall extends SExpression {
     public PInteropCall() {}
 
     public PInteropCall(Atom ha, SExpression sub,
-                        String m, List<String> defs, List<SExpression> args, RETURN_TYPE t) {
+                        String m, ListEx<String> defs, ListEx<SExpression> args, RETURN_TYPE t) {
         headAtom = ha;
 
         subject = sub;
@@ -53,8 +53,8 @@ public class PInteropCall extends SExpression {
             throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
         }
 
-        List<Class> classes = (List<Class>)ret[0];
-        List<Object> passArgs = (List<Object>)ret[1];
+        ListEx<Class> classes = (ListEx<Class>)ret[0];
+        ListEx<Object> passArgs = (ListEx<Object>)ret[1];
 
         try {
             Object obj = sub.get();
@@ -87,7 +87,7 @@ public class PInteropCall extends SExpression {
         ret.subject = this.subject.deepClone();
         ret.methodName = this.methodName;
         ret.definition = this.definition;
-        ret.arguments = List.deepClone(this.arguments);
+        ret.arguments = ListEx.deepClone(this.arguments);
         ret.type = this.type;
         return ret;
     }
