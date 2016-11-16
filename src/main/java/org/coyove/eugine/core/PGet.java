@@ -41,7 +41,7 @@ public class PGet extends SExpression {
                 throw new EgException(2019, "invalid dict key: " + sk, atom);
             }
 
-            HashMap<String, SExpression> d = dict.get();
+            HashMap<String, SValue> d = dict.get();
 
             if (!d.containsKey(k)) {
                 d.put(k, new SNull());
@@ -86,13 +86,25 @@ public class PGet extends SExpression {
                     new EgException(2024, "closure field must be string", atom));
 
             String k = key.get();
-            SValue ret = ((SClosure) dict).extra.containsKey(k) ?
-                    ((SClosure) dict).extra.get(k) : new SNull();
 
-            ret.refer = dict;
-            ret.refKey = k;
+            if (k.equals("__extra__")) {
+                HashMap<String, SValue> ret = new HashMap<String, SValue>();
+                for (String s : ((SClosure) dict).extra.keySet()) {
+                    ret.put(s, ((SClosure) dict).extra.get(s));
+                }
 
-            return ret;
+                return new SDict(ret);
+            } else if (k.equals("__doc__")) {
+                return new SString(((SClosure) dict).doc);
+            } else {
+                SValue ret = ((SClosure) dict).extra.containsKey(k) ?
+                        ((SClosure) dict).extra.get(k) : new SNull();
+
+                ret.refer = dict;
+                ret.refKey = k;
+
+                return ret;
+            }
         } else if (dict instanceof SObject) {
             SString fn = Utils.cast(sk, SString.class,
                     new EgException(2025, "object field must be string", atom));

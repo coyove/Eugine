@@ -1,3 +1,6 @@
+import Util
+import HttpServer
+
 var rssCache = {}
 
 (def Config() => {
@@ -5,225 +8,17 @@ var rssCache = {}
     var this.socketReadTimeout = 5000
 })()
 
-(def Util() => {
-    var javaURLDecoder = static java\net\URLDecoder
-    var javaURLEncoder = static java\net\URLEncoder
-    var thisUtil = this
+println("listening on port ", Config.port)
+var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
 
-    def encodeURI (text) => 
-        javaURLEncoder::encode(text : String, "utf-8" : String)
-
-    def decodeURI (text) => 
-        javaURLDecoder::decode(text : String, "utf-8" : String)
-
-    def this.struct (f, args...) => {
-        f(args...)
-        clone f
-    }
-
-    def this.isEndOfStream (stream) => {
-        var length = len(stream);
-
-        (stream[length - 1] == "\n" && stream[length - 3] == "\n") &&
-        (stream[length - 2] == "\r" && stream[length - 4] == "\r")
-    }
-
-    def this.getRss (url) => {
-        var now = Time.unix(1)
-        
-        if contains(rssCache, url) && (rssCache[url].updated - now < 60000) {
-            println("cache hit: ", url)
-            rssCache[url].rss
-        } else {
-            var obj = new java\net\URL(url : String)
-            var conn = obj::openConnection()
-            var br = new java\io\BufferedReader(
-                new java\io\InputStreamReader(conn:>getInputStream() : java\io\InputStream) : java\io\Reader)
-
-            var inputLine = ""
-            var response = new java\lang\StringBuffer()
-
-            for (inputLine = br::readLine()) != null do () =>
-                response:>append(inputLine : String)
-
-            br:>close()
-            var rss = response::toString()
-
-            rssCache[url] = { updated: Time.unix(1), rss : rss }
-
-            rss
-        }
-    }
-
-    def [this.struct] this.HttpContext (socket) => {
-        var responseSocket = socket
-        var responseStream = socket::getOutputStream()
-
-        var this.headers = {}
-
-        def this.parsePostBody () => {
-            var this.postParams = parsePairs(this.data, "&")
-            var parts = String.split(this.route, "\\?")
-
-            if len(parts) == 2 {
-                var tmp = parsePairs(parts[1], "&")
-                for tmp do (k) => 
-                    this.postParams[k] = tmp[k]
-
-                this.route = parts[0]
-            }
-        }
-
-        def parsePairs (text, delim) => {
-            var pairs = String.split(text, delim)
-            var ret = {}
-
-            for pairs do (pair) => {
-                var kv = String.split(pair, "=")
-                if len(kv) == 2 {
-                    ret[String.trim(kv[0])] = decodeURI(String.trim(kv[1]))
-                }
-            }
-
-            ret
-        }
-
-        def this.writeCommon(status, ctype) => {
-            switch status do {
-                404 => this.write("HTTP/1.1 404 Not Found\r\n")
-                403 => this.write("HTTP/1.1 403 Forbidden\r\n")
-                400 => this.write("HTTP/1.1 400 Bad Request\r\n")
-                302 => this.write("HTTP/1.1 302 Found\r\n")
-                301 => this.write("HTTP/1.1 301 Moved Permanently\r\n")
-                _   => this.write("HTTP/1.1 200 OK\r\n")
-            }
-
-            switch ctype do {
-                "css"   => this.writeHeader("Content-Type", "text/css; charset=utf-8")
-                "js"    => this.writeHeader("Content-Type", "application/x-javascript; charset=utf-8")
-                "plain" => this.writeHeader("Content-Type", "text/plain; charset=utf-8")
-                "html"  => this.writeHeader("Content-Type", "text/html; charset=utf-8")
-                "png"   => this.writeHeader("Content-Type", "image/png")
-                "jpg"   => this.writeHeader("Content-Type", "image/jpg")
-                _       => this.writeHeader("Content-Type", "application/octet-stream")
-            }
-        }
-
-        def this.writeHeader (key, value) =>
-            this.writeBytes(buffer(key + ": " + value + "\r\n"))
-
-        def this.write(text...) => {
-            var tmp = clone ""
-            for text do (t) => tmp <+ t
-
-            this.writeBytes(buffer(tmp))
-        }
-
-        def this.writeBytes(bytes) =>
-            if !responseSocket::isClosed()
-                responseStream:>write(bytes : byte[])
-
-        def this.close() => {
-            responseStream:>close()
-            responseSocket:>close()
-        }
-    }
-})()
-
-def handle (client) => {
-    client::setSoTimeout(Config.socketReadTimeout : int)
-    var is = client::getInputStream()
-    var context = Util.HttpContext(client)
-
-    enter {
-    var buf  = buffer(1024)
-    var read = 0
-    var totalRead    = 0
-    var rawRequest   = ""
-    var bodyLength   = 0
-    var headerLength = 0
-    var totalLength  = 0
-    
-    enter for read != -1 do () => {
-        totalRead += (read = is::read(buf : byte[]))
-        var output = new java\lang\String(buf : byte[], 0 : int, read : int)
-        rawRequest <+ output
-
-        var m = String.match(rawRequest, @"(?i)content-length:\s?(\d+)")
-        if len(m) > 0
-            bodyLength = num(String.split(m[0].text, ":")[1]) // we found Content-Length header
-
-        m = String.match(rawRequest, @"(\r\n\r\n)")
-        if len(m) > 0
-            totalLength = (headerLength = m[0].end) + bodyLength // we reach the end of HTTP request headers
-
-        !(totalLength == totalRead || Util.isEndOfStream(rawRequest))
-    }
-    catch (e)
-        if rawRequest != "" 
-            println("timeout:\n", e, "\n", rawRequest)
-
-    var requests = String.split(rawRequest, "\r\n")
-    for requests do (request) => {
-        var parts = String.split(request, " ")
-        var p = null
-
-        if len(parts) > 1
-            switch p = parts[0]::toLowerCase() do {
-                "get" =>
-                    var context.route = parts[1], context.action = "get"
-
-                "post" =>
-                    var context.route = parts[1], context.action = "post"   
-
-                "cookie" =>
-                    var context.rawCookie = request[7..]
-
-                _ =>
-                    context.headers[String.replace(p, ":", "")] = String.trim(request[len(parts[0])..])
-            }
-    }
-
-    var context.data = rawRequest[headerLength..]
-    context.parsePostBody()
-
-    // (var p-ct [[http-context::headers : "content-type"] != "application/x-www-form-urlencoded"])
-
-    // (if (and [http-context::action == "post"] p-ct)
-    //     (HTTP-Handler::forbidden http-context)
-    //     (dispatcher http-context)
-    // )
+server.addRouter("GET", "_/", (context) => {
     context.writeCommon(200, "html")
     context.write("\r\n")
     for context.postParams do (k) =>
         context.write(k, "=", context.postParams[k], "<br>")
+})
+server.start()
 
-    } 
-    catch(e) {
-        println(e)
-    }
-    do {
-        is::close()
-        context.close()
-    }
-}
-
-var ss = new java\net\ServerSocket()
-ss::bind(new java\net\InetSocketAddress("127.0.0.1" : String, Config.port : int) : java\net\SocketAddress)
-
-println("listening on port ", Config.port)
-
-println(rssCache)
-println(Util.getRss("http://share.dmhy.org/topics/rss/sort_id/2/rss.xml"))
-println(rssCache)
-println(Util.getRss("http://share.dmhy.org/topics/rss/sort_id/2/rss.xml"))
-
-for true do () => {
-    var client = ss::accept()
-    handle#(client)
-
-    // handle#(ss::accept()) is wrong and will cause GC overhead because it continously create new thread without being blocked
-}
 // println(str(Digest.MD5("zzz")))
 
 // var res = []

@@ -40,7 +40,7 @@ public class SEListOp extends SExpression {
         SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
                 new EgException(3005, "subject must be list", atom));
 
-        ListEx<SExpression> list = listObj.get();
+        ListEx<SValue> list = listObj.get();
         switch (op) {
             case HEAD:
                 return list.size() > 0 ? list.head().evaluate(env) : new SNull();

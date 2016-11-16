@@ -24,9 +24,9 @@ public class SEKeys extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
 
         SValue dict = this.dict.evaluate(env);
-        ListEx<SExpression> ret = new ListEx<SExpression>();
+        ListEx<SValue> ret = new ListEx<SValue>();
         if (dict instanceof SDict) {
-            for (String k : dict.<HashMap<String, SExpression>>get().keySet()) {
+            for (String k : dict.<HashMap<String, SValue>>get().keySet()) {
                 ret.add(new SString(k));
             }
         } else if (dict instanceof SClosure) {

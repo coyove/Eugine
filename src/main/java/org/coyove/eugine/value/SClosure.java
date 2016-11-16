@@ -15,6 +15,7 @@ public class SClosure extends SValue {
     public ListEx<SExpression> body;
     public ExecEnvironment extra;
     public SClosure proto;
+    public String doc = "";
     public boolean transparent = false;
 
     public SClosure(ExecEnvironment env, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
@@ -57,6 +58,7 @@ public class SClosure extends SValue {
 
             ret.extra = this.extra.clone();
             ret.proto = this.proto;
+            ret.doc = this.doc;
             ret.transparent = this.transparent;
 
             SValue.copyAttributes(ret, this);
@@ -72,6 +74,7 @@ public class SClosure extends SValue {
 
         ret.extra.parentEnv = this.extra;
         ret.transparent = this.transparent;
+        ret.doc = this.doc;
         ret.proto = this;
 
         SValue.copyAttributes(ret, this);

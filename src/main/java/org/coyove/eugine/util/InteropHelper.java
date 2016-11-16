@@ -48,14 +48,14 @@ public class InteropHelper {
         } else if (value instanceof Boolean) {
             return new SBool((Boolean) value);
         } else if (value.getClass().isArray()) {
-            ListEx<SExpression> ret = new ListEx<SExpression>();
+            ListEx<SValue> ret = new ListEx<SValue>();
             for (int i = 0; i < Array.getLength(value); i++)
                 ret.add(castJavaType(Array.get(value, i)));
 
             return new SList(ret);
         } else if (value instanceof Collection) {
             Collection list = (Collection) value;
-            ListEx<SExpression> ret = new ListEx<SExpression>(list.size());
+            ListEx<SValue> ret = new ListEx<SValue>(list.size());
             for (Object o : list) {
                 ret.add(castJavaType(o));
             }

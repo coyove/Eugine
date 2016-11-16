@@ -31,7 +31,7 @@ public class SEContains extends SExpression {
 
         SValue sub = this.map.evaluate(env);
         if (sub instanceof SDict) {
-            HashMap<String, SExpression> map = sub.get();
+            HashMap<String, SValue> map = sub.get();
             return new SBool(map.containsKey(key));
         } else if (sub instanceof SString) {
             String text = sub.get();

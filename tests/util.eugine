@@ -1,115 +1,57 @@
-; (~define (:== ~field ~body) [(: ~this ~field) := ~body])
-(~define (for ~i ~= ~start to ~end do ~body...) (loop (range ~start ~end) [(~i) => { ~body... }]))
-(~define (assert-timing ~ops...) {
-    (var assert.start (time 1))
-    (assert ~ops... " -- takes " [(time 1) - assert.start] "ms")
-})
+(def Util() => {
+    var javaURLDecoder = static java\net\URLDecoder
+    var javaURLEncoder = static java\net\URLEncoder
+    var thisUtil = this
 
-(def join-list (l d) (
-	(if [(len l) == 0]
-		""
-		[[(head l) + d] + (join-list (tail l) d)]
-	)
-))
+    def this.encodeURI (text) => 
+        javaURLEncoder::encode(text : String, "utf-8" : String)
 
-(def join (l d) (->
-	[ret = ""]
-	(loop (range 0 (len l)) [(i) => (
-		[ret += (+ [l : i] d)]
-	)])
-	(ret)
-))
+    def this.decodeURI (text) => 
+        javaURLDecoder::decode(text : String, "utf-8" : String)
 
-(var assertions.total 0)
-(var assertions.passed 0)
-(var assertions.failed 0)
+    def this.startsWith (text, prefix) =>
+        if len(text) < len(prefix)
+            false
+        else 
+            text[0..len(prefix)] == prefix
 
-(def assert (result msg...) (->
-	(++ assertions.total)
-	(if result 
-		{(println "  [Passed] " (explode msg)) (++ assertions.passed)}
-		(-> 
-			(var token [~atom : @token])
-			(println "  [------] " (explode msg) " failed, File: " [token : @source] ", Line: " 
-				(+ [token : @line] 1) ":" [token : @lineIndex])
-			(++ assertions.failed)
-		)
-	)
-))
+    def this.struct (f, args...) => {
+        f(args...)
+        clone f
+    }
 
-(def read-from-console ()
-    [[(cls @java.lang.System) . @console ()] . @readLine ()]
-)
+    def this.isEndOfStream (stream) => {
+        var length = len(stream);
 
-(def deep-compare-list (list-1 list-2) 
-	"this function tests if two lists are equal"
-	(->
-	(if [[(type list-1) != "List"] or [(type list-2) != "List"]] 
-		[list-1 == list-2] 
-		(->
-			[llen = (len list-1)]
-			(if [llen != (len list-2)] (#f) (
-				(if [llen == 0] (#t) (->
-					[ret = #t]
-					(loop (range 0 llen) [(i) => 
-						[ret = (deep-compare-list [list-1 : i] [list-2 : i])]
-					])
-					ret ; return ret
-				)) ; end if
-			)) ; end if
-		)
-	) ; end if
-))
+        (stream[length - 1] == "\n" && stream[length - 3] == "\n") &&
+        (stream[length - 2] == "\r" && stream[length - 4] == "\r")
+    }
 
-[map := [(f lst) => (->
-	(loop (range 0 (len lst)) [(i) => (
-		[[lst : i] = (f [lst : i])]
-	)])
-	lst
-)]]
+    def this.getRss (url) => {
+        var now = Time.unix(1)
+        var ret = ""
+        
+        enter if contains(rssCache, url) && (now - rssCache[url].updated < 2000) {
+            println("cache hit: ", url)
+            ret = rssCache[url].rss
+        } else {
+            var obj = new java\net\URL(url : String)
+            var conn = obj::openConnection()
 
-[filter = [(op lst) => (->
-	[ret = (list)]
-	(loop lst [(e) => (if (op e) [ret += e])])
-	ret ; return
-)]]
+            // error when url is invalid
+            var br = new java\io\BufferedReader(
+                new java\io\InputStreamReader(conn:>getInputStream(): java\io\InputStream): java\io\Reader)
 
-[random-list = [(n) => (->
-	[nums = (range 0 n)]
-	[ret = (list)]
+            var inputLine = "", response = new java\lang\StringBuffer()
 
-	(loop [(len nums) > 0] [() => (->
-		[idx = (floor [(random 0) * (len nums)])]
-		[ret += [nums : idx]]
-		(del nums idx)
-	)])
+            for (inputLine = br::readLine()) != null do () =>
+                response:>append(inputLine : String)
 
-	ret
-)]]
+            br:>close()
+            var rss = response::toString()
 
-;; never use this, it's experimental and fxxking slow, its existence only prove that ~parent is working
-[pop := [(lst) => (if [(len lst) == 0] null
-	(->
-		[t := ""]
-		(loop (keys ~parent) [(k) => (if [[~parent : k] == lst] (-> [t = k] #f))])
-		(println t)
-
-		[ret = (head lst)]
-		[[~parent : t] = (tail lst)] ;; (del lst 0)
-		;(.net-static-method (unsafe lst) "RemoveAt" ("System.Int32" 0))
-		ret
-	)
-)]]
-
-
-; (def Stack () "this is a stack" {})
-; [[Stack : @_list] := (list)]
-; [[Stack : @push] := [(elem) => [[~this : @_list] += elem]]]
-; [[Stack : @pop] := [() => {
-; 	(var lst [~this : @_list])
-
-; 	(if [(len lst) == 0] (exit "empty to pop") (del lst (- (len lst) 1)))
-; }]]
-
-; [[Stack : @top] := [() => (last [~this : @_list])]]
-; [[Stack : @size] := [() => (len [~this : @_list])]]
+            rssCache[url] = { updated: Time.unix(1), rss : rss }
+            ret = rss
+        } do ret
+    }
+})()

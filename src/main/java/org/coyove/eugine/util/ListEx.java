@@ -1,6 +1,7 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SExpression;
+import org.coyove.eugine.base.SValue;
 
 import java.util.Collection;
 
@@ -71,15 +72,16 @@ public class ListEx<T> extends java.util.ArrayList<T> {
         return sub(start, this.size());
     }
 
-    public static ListEx<SExpression> deepClone(ListEx<SExpression> src) throws EgException {
+    @SuppressWarnings("unchecked")
+    public static <T> ListEx<T> deepClone(ListEx<T> src) throws EgException {
         if (src == null) {
             return null;
         }
 
-        ListEx<SExpression> ret = new ListEx<SExpression>(src.size());
+        ListEx<T> ret = new ListEx<T>(src.size());
 
-        for (SExpression t : src) {
-            ret.add(t.deepClone());
+        for (T t : src) {
+            ret.add(((T) ((SExpression) t).deepClone()));
         }
         return ret;
     }

@@ -217,12 +217,15 @@ switchStmt returns [SExpression v]
         }
     ;
 
-dict returns [SExpression v]
-    locals [ HashMap<String, SExpression> ret = new HashMap<String, SExpression>(); ]
-    : '{' pair { $ret.put($pair.k, $pair.v); } (',' pair { $ret.put($pair.k, $pair.v); } )* ','? '}'
-        { $v = new SDict($ret); }
+dict returns [PDict v = new PDict()]
+    : '{' pair { 
+            $v.keys.add($pair.k); 
+            $v.values.add($pair.v);
+        } (',' pair { 
+            $v.keys.add($pair.k); 
+            $v.values.add($pair.v);
+        } )* ','? '}'
     | '{' '}'
-        { $v = new SDict($ret); }
     ;
 
 pair returns [String k, SExpression v]
@@ -232,12 +235,9 @@ pair returns [String k, SExpression v]
         { $k = $Key.text; $v = $Value.v; }
     ;
 
-list returns [SExpression v]
-    locals [ ListEx<SExpression> ret = new ListEx<SExpression>(); ]
-    : '[' (value { $ret.add($value.v); }) (',' value { $ret.add($value.v); } )* ']'
-        { $v = new SList($ret); }
+list returns [PList v = new PList()]
+    : '[' (value { $v.values.add($value.v); }) (',' value { $v.values.add($value.v); } )* ']'
     | '[' ']'
-        { $v = new SList($ret); }
     ;
 
 value returns [SExpression v]

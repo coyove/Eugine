@@ -34,7 +34,7 @@ public class PSub extends SExpression {
             throw new EgException(3015, "start cannot be negative", atom);
         }
 
-        int end = this.end != null ? Utils.cast(this.end, SInteger.class, ex).<Long>get().intValue() : 0;
+        int end = this.end != null ? Utils.cast(this.end.evaluate(env), SInteger.class, ex).<Long>get().intValue() : 0;
 
         if (subObj instanceof SString) {
             SString subStr = (SString) subObj;
@@ -52,9 +52,9 @@ public class PSub extends SExpression {
         } else if (subObj instanceof SList) {
             SList subList = (SList) subObj;
             if (this.end == null) {
-                return new SList(subList.<ListEx<SExpression>>get().sub(start));
+                return new SList(subList.<ListEx<SValue>>get().sub(start));
             } else {
-                return new SList(subList.<ListEx<SExpression>>get().sub(start, end));
+                return new SList(subList.<ListEx<SValue>>get().sub(start, end));
             }
         } else if (subObj.underlying instanceof byte[]) {
             byte[] buf = (byte[]) subObj.underlying;

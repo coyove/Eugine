@@ -44,7 +44,7 @@ public class EugineImportListener extends EugineBaseListener {
 
         } else {
             ANTLRHelper.executeFile(Utils.getDirectoryName(source) +
-                    StringUtils.join(importPath, "/").substring(1) + ".eugine", this.env);
+                    StringUtils.join(importPath, "/") + ".eugine", this.env);
         }
     }
 }

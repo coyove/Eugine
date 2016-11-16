@@ -27,13 +27,13 @@ public class PFor extends SExpression {
         direction = dir;
     }
 
-    private SValue execLoop(SClosure body, SValue v, Long idx) throws EgException {
+    private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
         ExecEnvironment newEnv = new ExecEnvironment();
         if (body.arguments.size() >= 1)
             newEnv.put(body.arguments.head(), v);
 
         if (body.arguments.size() == 2)
-            newEnv.put(body.arguments.get(1), new SInteger(idx));
+            newEnv.put(body.arguments.get(1), idx);
 
         newEnv.parentEnv = body.outerEnv;
         SValue ret = new SNull();
@@ -53,11 +53,11 @@ public class PFor extends SExpression {
         SValue list_ = this.list.evaluate(env);
 
         if (list_ instanceof SDict) {
-            HashMap<String, SExpression> m = ((SDict) list_).get();
+            HashMap<String, SValue> m = ((SDict) list_).get();
             long i = 0;
 
             for (String s : m.keySet()) {
-                SValue ret = execLoop(body, new SString(s), i++);
+                SValue ret = execLoop(body, new SString(s), m.get(s));
                 if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                     break;
             }
@@ -66,13 +66,13 @@ public class PFor extends SExpression {
 
             if (direction == DIRECTION.ASC) {
                 for (int i = 0; i < values.size(); i++) {
-                    SValue ret = execLoop(body, values.get(i).evaluate(env), (long) i);
+                    SValue ret = execLoop(body, values.get(i).evaluate(env), new SInteger((long) i));
                     if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                         break;
                 }
             } else {
                 for (int i = values.size() - 1; i >= 0; i--) {
-                    SValue ret = execLoop(body, values.get(i).evaluate(env), (long) i);
+                    SValue ret = execLoop(body, values.get(i).evaluate(env), new SInteger((long) i));
                     if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                         break;
                 }
@@ -80,7 +80,7 @@ public class PFor extends SExpression {
         } else if (list_ instanceof SBool) {
             Long i = (long) 0;
             while (this.list.evaluate(env).<Boolean>get()) {
-                SValue ret = execLoop(body, new SNull(), i++);
+                SValue ret = execLoop(body, new SNull(), new SInteger(i++));
                 if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                     break;
             }
@@ -89,7 +89,7 @@ public class PFor extends SExpression {
             Long i = r.start;
 
             while (i < r.end) {
-                SValue ret = execLoop(body, new SInteger(i), i);
+                SValue ret = execLoop(body, new SInteger(i), new SInteger(i));
                 i += r.interval;
                 if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                     break;

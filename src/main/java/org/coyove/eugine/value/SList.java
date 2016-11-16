@@ -8,29 +8,24 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class SList extends SValue {
-    public SList(ListEx<SExpression> list) {
+    public SList(ListEx<SValue> list) {
         super(list);
     }
 
-    public SList(ListEx<SExpression> list, boolean imm) {
+    public SList(ListEx<SValue> list, boolean imm) {
         super(list, imm);
     }
 
     @Override
     public SValue clone() {
-        ListEx<SExpression> origin = (ListEx<SExpression>) this.underlying;
-        ListEx<SExpression> n = new ListEx<SExpression>(origin.size());
+        ListEx<SValue> origin = this.get();
+        ListEx<SValue> n = new ListEx<SValue>(origin.size());
 
-        try {
-            for (SExpression t : origin) {
-                n.add(t.deepClone());
-            }
-        } catch (EgException ex) {
-            ErrorHandler.print(ex);
+        for (SValue t : origin) {
+            n.add(t.clone());
         }
 
         SList ret = new SList(n);
-
         SValue.copyAttributes(ret, this);
         return ret;
     }

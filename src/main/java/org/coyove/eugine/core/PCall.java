@@ -37,9 +37,9 @@ public class PCall extends SExpression {
             if (argName.length() > 3 && argName.endsWith("...")) {
                 argName = argName.substring(0, argName.length() - 3);
                 if (passByValue.get(i)) {
-                    newEnv.put(argName, new SList(ListEx.deepClone(arguments.skip(i).cast(SExpression.class))));
+                    newEnv.put(argName, new SList(ListEx.deepClone(arguments.skip(i))));
                 } else {
-                    newEnv.put(argName, new SList(arguments.skip(i).cast(SExpression.class)));
+                    newEnv.put(argName, new SList(arguments.skip(i)));
                 }
                 break;
             } else {

@@ -72,7 +72,7 @@ public class PAdd extends SExpression {
         }
 
         if (lead instanceof SList) {
-            ListEx<SExpression> list;
+            ListEx<SValue> list;
             if (self) {
                 list = lead.get();
                 if (lead.immutable) {
@@ -82,7 +82,7 @@ public class PAdd extends SExpression {
                 list.addAll(results.skip(1));
                 return new SNull();
             } else {
-                list = (ListEx<SExpression>) lead.<ListEx<SExpression>>get().clone();
+                list = (ListEx<SValue>) lead.<ListEx<SValue>>get().clone();
                 list.addAll(results.skip(1));
                 return new SList(list);
             }

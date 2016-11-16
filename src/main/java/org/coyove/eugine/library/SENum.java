@@ -37,9 +37,12 @@ public class SENum extends SExpression {
         } else if (arg instanceof SNull) {
             return new SNull();
         } else if (arg instanceof SList) {
-            ListEx<SExpression> ret = new ListEx<SExpression>();
-            for (SExpression v : arg.<ListEx<SExpression>>get())
+            ListEx<SValue> list = arg.get();
+            ListEx<SValue> ret = new ListEx<SValue>(list.size());
+            
+            for (SValue v : list) {
                 ret.add(convert(v.evaluate(env), env));
+            }
 
             return new SList(ret);
         } else if (arg instanceof SInteger) {

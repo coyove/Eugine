@@ -26,12 +26,12 @@ public class SEReverse extends SExpression {
         SValue subject = this.list.evaluate(env);
 
         if (subject instanceof SList) {
-            ListEx<SExpression> l = subject.get();
-            Object[] objs = l.toArray(new SExpression[l.size()]);
+            ListEx<SValue> l = subject.get();
+            Object[] objs = l.toArray(new SValue[l.size()]);
 
             ArrayUtils.reverse(objs);
-            ListEx<SExpression> ret = new ListEx<SExpression>(
-                    Arrays.asList(Arrays.copyOf(objs, objs.length, SExpression[].class)));
+            ListEx<SValue> ret = new ListEx<SValue>(
+                    Arrays.asList(Arrays.copyOf(objs, objs.length, SValue[].class)));
             return new SList(ret);
         } else if (subject instanceof SInteger) {
             return new SInteger(-subject.<Long>get());

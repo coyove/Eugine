@@ -25,9 +25,9 @@ public class SEStr extends SExpression {
         } else if (arg instanceof SNull) {
             return new SString("null");
         } else if (arg instanceof SList) {
-            ListEx<SExpression> ret = new ListEx<SExpression>();
-            for (SExpression v : arg.<ListEx<SExpression>>get())
-                ret.add(convert(v.evaluate(env), env));
+            ListEx<SValue> ret = new ListEx<SValue>();
+            for (SValue v : arg.<ListEx<SValue>>get())
+                ret.add(convert(v, env));
 
             return new SList(ret);
         } else {

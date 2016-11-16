@@ -40,7 +40,7 @@ public class SEPrint extends SExpression {
 
             ret += "[" + StringUtils.join(values, ", ") + "]";
         } else if (re instanceof SDict) {
-            HashMap<String, SExpression> map = re.get();
+            HashMap<String, SValue> map = re.get();
             Set<String> keys = map.keySet();
             String[] values = new String[keys.size()];
             int i = 0;

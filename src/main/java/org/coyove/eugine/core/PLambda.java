@@ -33,6 +33,7 @@ public class PLambda extends SExpression {
     public SValue evaluate(ExecEnvironment env) {
         SClosure cls = new SClosure(env, arguments, passByValue, body, description);
         cls.immutable = true;
+        cls.doc = description;
         return cls;
     }
 
