@@ -4,9 +4,13 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.coyove.eugine.util.ANTLRHelper;
-import org.coyove.eugine.util.ExecEnvironment;
-import org.coyove.eugine.util.Utils;
+import org.apache.commons.lang3.StringUtils;
+import org.coyove.eugine.base.SKeywords;
+import org.coyove.eugine.parser.Atom;
+import org.coyove.eugine.pm.Exportable;
+import org.coyove.eugine.util.*;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by coyove on 2016/10/30.
@@ -22,13 +26,25 @@ public class EugineImportListener extends EugineBaseListener {
         int tt = sourceToken.getType();
 
         String source = sourceToken.getTokenSource().getSourceName();
-        String importPath = "";
+        ListEx<String> importPath = new ListEx<String>();
 
         for (TerminalNode terminalNode : ctx.getTokens(tt)) {
-            importPath += "/" + terminalNode.getSymbol().getText();
+            importPath.add(terminalNode.getSymbol().getText());
         }
 
-        ANTLRHelper.executeFile(Utils.getDirectoryName(source) +
-                importPath.substring(1) + ".eugine", this.env);
+        if (importPath.head().equals("_")) {
+            String classname = StringUtils.join(importPath.skip(1), ".") + ".EgExport";
+            try {
+                Class cls = Class.forName(classname);
+                Exportable export = ((Exportable) cls.newInstance());
+                export.export(SKeywords.Lookup);
+            } catch (Exception e) {
+                ErrorHandler.print(9089, "error when importing " + classname + ": " + e, new Atom(sourceToken));
+            }
+
+        } else {
+            ANTLRHelper.executeFile(Utils.getDirectoryName(source) +
+                    StringUtils.join(importPath, "/").substring(1) + ".eugine", this.env);
+        }
     }
 }

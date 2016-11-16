@@ -26,12 +26,12 @@ public class SERegexMatch extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         String text = Utils.cast(this.text.evaluate(env), SString.class,
-                new VMException(3010, "subject must be string", headAtom)).get();
+                new EgException(3010, "subject must be string", atom)).get();
 
         String regex = Utils.cast(this.regex.evaluate(env), SString.class,
-                new VMException(3011, "regex must be string", headAtom)).get();
+                new EgException(3011, "regex must be string", atom)).get();
 
         Matcher m = Pattern.compile(regex).matcher(text);
 
@@ -55,10 +55,10 @@ public class SERegexMatch extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SERegexMatch ret = new SERegexMatch();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.text = this.text.deepClone();
         ret.regex = this.regex.deepClone();
 

@@ -24,7 +24,7 @@ public class PInteropCall extends SExpression {
 
     public PInteropCall(Atom ha, SExpression sub,
                         String m, ListEx<String> defs, ListEx<SExpression> args, RETURN_TYPE t) {
-        headAtom = ha;
+        atom = ha;
 
         subject = sub;
         methodName = m;
@@ -33,24 +33,20 @@ public class PInteropCall extends SExpression {
         type = t;
     }
 
-    public PInteropCall(Atom ha, Compound c, RETURN_TYPE t) throws VMException {
-        throw new VMException(9999, "not implemented", ha);
-    }
-
     @Override
     @SuppressWarnings("unchecked")
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue sub = subject.evaluate(env);
         if (sub instanceof SNull)
-            throw new VMException(2028, "null object found", headAtom);
+            throw new EgException(2028, "null object found", atom);
 
         String method = methodName;
 
         Object[] ret;
         try {
             ret = InteropHelper.buildArguments(definition, arguments, env);
-        } catch (VMException ex) {
-            throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
+        } catch (EgException ex) {
+            throw new EgException(ex.errorCode, ex.getMessage(), atom);
         }
 
         ListEx<Class> classes = (ListEx<Class>)ret[0];
@@ -72,17 +68,16 @@ public class PInteropCall extends SExpression {
             }
 
         } catch (InvocationTargetException ie) {
-            throw new VMException(2031, "error caused by '" + method + "': " + ie.getCause(), headAtom);
+            throw new EgException(2031, "error caused by '" + method + "': " + ie.getCause(), atom);
         } catch (Exception e) {
-            throw new VMException(2032, "invoking '" + method + "' failed, " + e, headAtom);
+            throw new EgException(2032, "invoking '" + method + "' failed, " + e, atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PInteropCall ret = new PInteropCall();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
 
         ret.subject = this.subject.deepClone();
         ret.methodName = this.methodName;

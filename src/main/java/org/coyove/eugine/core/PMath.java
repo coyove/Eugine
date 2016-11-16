@@ -26,15 +26,8 @@ public class PMath extends SExpression {
         values = args;
     }
 
-    public PMath(Atom ha, Compound c, ACTION a) throws VMException {
-        super(ha, c, 1);
-
-        action = a;
-        values = SExpression.castPlain(c);
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         ListEx<SValue> results = SExpression.eval(values, env);
         SValue lead = results.head();
 
@@ -48,7 +41,7 @@ public class PMath extends SExpression {
                 BigDecimal.valueOf(lead.<Long>get());
 
         for (int i = 1; i < results.size(); i++) {
-            BigDecimal next = Utils.getNumber(results.get(i), headAtom);
+            BigDecimal next = Utils.getNumber(results.get(i), atom);
             switch (action) {
                 case SUBTRACT:
                     ret = ret.subtract(next);
@@ -57,14 +50,16 @@ public class PMath extends SExpression {
                     ret = ret.multiply(next);
                     break;
                 case DIVIDE:
-                    if (next.abs().doubleValue() < 0.000001)
-                        throw new VMException(2012, "divided by zero", headAtom);
+                    if (next.abs().doubleValue() < 0.000001) {
+                        throw new EgException(2012, "divided by zero", atom);
+                    }
 
                     ret = ret.divide(next, MathContext.DECIMAL64);
                     break;
                 case MODULAR:
-                    if (next.abs().doubleValue() < 0.000001)
-                        throw new VMException(2013, "moded by zero", headAtom);
+                    if (next.abs().doubleValue() < 0.000001) {
+                        throw new EgException(2013, "moded by zero", atom);
+                    }
 
                     Long rem = ret.divide(next, MathContext.DECIMAL64).longValue();
                     ret = ret.subtract(next.multiply(BigDecimal.valueOf(rem)));
@@ -80,10 +75,10 @@ public class PMath extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PMath ret = new PMath();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.action = this.action;
         ret.values = ListEx.deepClone(this.values);
 

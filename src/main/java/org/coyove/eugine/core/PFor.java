@@ -15,20 +15,19 @@ public class PFor extends SExpression {
     private SExpression body;
 
     private DIRECTION direction;
-
     public enum DIRECTION {ASC, DESC}
 
     public PFor() {
     }
 
     public PFor(Atom ha, SExpression l, SExpression b, DIRECTION dir) {
-        headAtom = ha;
+        atom = ha;
         list = l;
         body = b;
         direction = dir;
     }
 
-    private SValue execLoop(SClosure body, SValue v, Long idx) throws VMException {
+    private SValue execLoop(SClosure body, SValue v, Long idx) throws EgException {
         ExecEnvironment newEnv = new ExecEnvironment();
         if (body.arguments.size() >= 1)
             newEnv.put(body.arguments.head(), v);
@@ -47,23 +46,22 @@ public class PFor extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SClosure body = Utils.cast(this.body.evaluate(env), SClosure.class,
-                new VMException(2017, "invalid loop body", headAtom));
+                new EgException(2017, "invalid loop body", atom));
 
         SValue list_ = this.list.evaluate(env);
 
         if (list_ instanceof SDict) {
             HashMap<String, SExpression> m = ((SDict) list_).get();
-            ListEx<SExpression> keys = new ListEx<SExpression>();
+            long i = 0;
+
             for (String s : m.keySet()) {
-                keys.add(new SString(s));
+                SValue ret = execLoop(body, new SString(s), i++);
+                if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
+                    break;
             }
-
-            list_ = new SList(keys);
-        }
-
-        if (list_ instanceof SList) {
+        } else if (list_ instanceof SList) {
             ListEx<SExpression> values = ((SList) list_).get();
 
             if (direction == DIRECTION.ASC) {
@@ -97,17 +95,16 @@ public class PFor extends SExpression {
                     break;
             }
         } else {
-            throw new VMException(2018, "invalid loop condition", headAtom);
+            throw new EgException(2018, "invalid loop condition", atom);
         }
 
         return new SNull();
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PFor ret = new PFor();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.list = this.list.deepClone();
         ret.body = this.body.deepClone();
         ret.direction = this.direction;

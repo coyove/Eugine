@@ -23,28 +23,24 @@ public class PLogic extends SExpression {
         values = args;
     }
 
-    public PLogic(Atom ha, Compound c, LOGIC a) throws VMException {
-        super(ha, c, 1);
-
-        log = a;
-        values = SExpression.castPlain(c);
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
-        ListEx<SValue> results = SExpression.eval(values, env);
-        VMException ex = new VMException(2041, "non-boolean found", headAtom);
+    public SValue evaluate(ExecEnvironment env) throws EgException {
+        EgException ex = new EgException(2041, "non-boolean found", atom);
 
-        SBool lead = Utils.cast(results.head(), SBool.class, ex);
+        SBool lead = Utils.cast(values.head().evaluate(env), SBool.class, ex);
         boolean ret = lead.get();
 
         if (ret && log == LOGIC.OR) {
             return new SBool(true);
         }
 
+        if (!ret && log == LOGIC.AND) {
+            return new SBool(false);
+        }
+
         if (log != LOGIC.NOT) {
-            for (int i = 1; i < results.size(); i++) {
-                SBool next = Utils.cast(results.get(i), SBool.class, ex);
+            for (int i = 1; i < values.size(); i++) {
+                SBool next = Utils.cast(values.get(i).evaluate(env), SBool.class, ex);
                 switch (log) {
                     case AND:
                         ret = ret && next.<Boolean>get();
@@ -69,10 +65,10 @@ public class PLogic extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PLogic ret = new PLogic();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.log = this.log;
         ret.values = ListEx.deepClone(this.values);
 

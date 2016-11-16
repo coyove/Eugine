@@ -11,15 +11,12 @@ import org.coyove.eugine.util.*;
 public class PThread extends SExpression {
     private class GoTask implements Runnable {
         public SExpression closure;
-        public ListEx<SExpression> arguments;
-        public Atom headAtom;
-        public Compound tailCompound;
         public ExecEnvironment env;
 
         public void run() {
             try {
-                (new PCall(closure, arguments, headAtom, tailCompound)).evaluate(env);
-            } catch (VMException ex) {
+                (new PCall(atom, closure, arguments)).evaluate(env);
+            } catch (EgException ex) {
                 ErrorHandler.print(ex);
             }
         }
@@ -31,24 +28,21 @@ public class PThread extends SExpression {
     public PThread() {}
 
     public PThread(Atom ha, SExpression c, ListEx<SExpression> args) {
-        headAtom = ha;
+        atom = ha;
 
         closure = c;
         arguments = args;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SClosure closure = Utils.cast(this.closure.evaluate(env), SClosure.class);
         if (closure == null) {
-            throw new VMException(3020, "invalid function to go", headAtom);
+            throw new EgException(3020, "invalid function to go", atom);
         }
 
         GoTask go = new GoTask();
         go.closure = closure.clone();
-        go.arguments = this.arguments;
-        go.headAtom = this.headAtom;
-        go.tailCompound = this.tailCompound;
         go.env = env;
 
         Thread t = new Thread(go);
@@ -58,10 +52,9 @@ public class PThread extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PThread ret = new PThread();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
 
         // note here closure is not SClosure
         ret.closure = this.closure.deepClone();

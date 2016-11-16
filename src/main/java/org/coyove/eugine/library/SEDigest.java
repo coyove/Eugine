@@ -31,7 +31,7 @@ public class SEDigest extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue v = argument.evaluate(env);
         MessageDigest md;
 
@@ -62,15 +62,15 @@ public class SEDigest extends SExpression {
                 return new SObject(result);
             }
         } catch (Exception ex) {
-            throw new VMException(7029, "algorithm not implemented: " + ex, headAtom);
+            throw new EgException(7029, "algorithm not implemented: " + ex, atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEDigest ret = new SEDigest();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.argument = this.argument.deepClone();
         ret.func = this.func;
         ret.ret = this.ret;

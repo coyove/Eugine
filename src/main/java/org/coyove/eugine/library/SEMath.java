@@ -38,9 +38,9 @@ public class SEMath extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue arg = argument.evaluate(env);
-        double n = Utils.getDouble(arg, headAtom);
+        double n = Utils.getDouble(arg, atom);
 
         switch (func) {
             case SIN:
@@ -66,7 +66,7 @@ public class SEMath extends SExpression {
             case SQRT:
                 return new SDouble(Math.sqrt(n));
             case POW:
-                double p = Utils.getDouble(argument2.evaluate(env), headAtom);
+                double p = Utils.getDouble(argument2.evaluate(env), atom);
                 return new SDouble(Math.pow(n, p));
             case RANDOM:
                 if (n != 0) {
@@ -81,15 +81,15 @@ public class SEMath extends SExpression {
                 return new SString(DateFormatUtils.formatUTC((long) n,
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
             default:
-                throw new VMException(3007, "not implemented", headAtom);
+                throw new EgException(3007, "not implemented", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEMath ret = new SEMath();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.argument = this.argument.deepClone();
         if (this.argument2 != null) {
             ret.argument2 = this.argument2.deepClone();

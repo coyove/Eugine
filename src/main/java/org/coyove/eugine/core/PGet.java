@@ -17,13 +17,13 @@ public class PGet extends SExpression {
     public PGet() {}
 
     public PGet(Atom ha, SExpression d, SExpression k) {
-        headAtom = ha;
+        atom = ha;
         dict = d;
         key = k;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue dict = this.dict.evaluate(env);
         SExpression sk = this.key.evaluate(env);
 
@@ -38,7 +38,7 @@ public class PGet extends SExpression {
             } else if (sk instanceof SBool) {
                 k = ((SBool) sk).get().toString();
             } else {
-                throw new VMException(2019, "invalid dict key: " + sk, headAtom);
+                throw new EgException(2019, "invalid dict key: " + sk, atom);
             }
 
             HashMap<String, SExpression> d = dict.get();
@@ -54,13 +54,13 @@ public class PGet extends SExpression {
             return dk;
         } else if (dict instanceof SList) {
             SInteger index = Utils.cast(sk, SInteger.class,
-                    new VMException(2020, "list index must be integer", headAtom));
+                    new EgException(2020, "list index must be integer", atom));
 
             ListEx<SExpression> l = dict.get();
             Long idx = index.get();
 
             if (idx >= l.size() || idx < 0)
-                throw new VMException(2021, "index out of range", headAtom);
+                throw new EgException(2021, "index out of range", atom);
 
             SValue li = l.get(idx.intValue()).evaluate(env);
 
@@ -70,20 +70,20 @@ public class PGet extends SExpression {
             return li;
         } else if (dict instanceof SString) {
             SInteger index = Utils.cast(sk, SInteger.class,
-                    new VMException(2022, "string index must be integer", headAtom));
+                    new EgException(2022, "string index must be integer", atom));
 
             String str = dict.get();
             Long idx = index.get();
 
             if (idx >= str.length()) {
-                throw new VMException(2023, "index out of range", headAtom);
+                throw new EgException(2023, "index out of range", atom);
             }
 
             return new SString(String.valueOf(str.charAt(idx.intValue())));
 
         } else if (dict instanceof SClosure) {
             SString key = Utils.cast(sk, SString.class,
-                    new VMException(2024, "closure field must be string", headAtom));
+                    new EgException(2024, "closure field must be string", atom));
 
             String k = key.get();
             SValue ret = ((SClosure) dict).extra.containsKey(k) ?
@@ -95,7 +95,7 @@ public class PGet extends SExpression {
             return ret;
         } else if (dict instanceof SObject) {
             SString fn = Utils.cast(sk, SString.class,
-                    new VMException(2025, "object field must be string", headAtom));
+                    new EgException(2025, "object field must be string", atom));
 
             String field = fn.get();
             try {
@@ -106,19 +106,19 @@ public class PGet extends SExpression {
                 n.refKey = field;
 
                 return n;
-            } catch (VMException e) {
+            } catch (EgException e) {
                 throw e;
             }
         } else {
-            throw new VMException(7029, "failed to get", headAtom);
+            throw new EgException(7029, "failed to get", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PGet ret = new PGet();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.dict = this.dict.deepClone();
         ret.key = this.key.deepClone();
 

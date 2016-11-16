@@ -19,35 +19,29 @@ public class SEExit extends SExpression {
         argument = args.head();
     }
 
-    public SEExit(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-
-        argument = SExpression.cast(c.atoms.pop());
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SString msg = Utils.cast(argument.evaluate(env), SString.class);
 
         if (msg == null) {
             SInteger num = Utils.cast(argument.evaluate(env), SInteger.class);
             if (num == null) {
-                throw new VMException(2016, "message must be string or integer", headAtom);
+                throw new EgException(2016, "message must be string or integer", atom);
             }
 
             env.putVar("~e", num);
-            throw new VMException(7001, num.<Long>get().toString(), headAtom);
+            throw new EgException(7001, num.<Long>get().toString(), atom);
         } else {
             env.putVar("~e", msg);
-            throw new VMException(7000, msg.<String>get(), headAtom);
+            throw new EgException(7000, msg.<String>get(), atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEExit ret = new SEExit();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.argument = this.argument.deepClone();
         return ret;
     }

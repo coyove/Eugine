@@ -1,13 +1,13 @@
 package org.coyove.eugine.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.coyove.eugine.base.SKeywords;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
-import org.coyove.eugine.parser.Compound;
+import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.value.SDouble;
 import org.coyove.eugine.value.SInteger;
-import org.coyove.eugine.value.SNull;
-import org.coyove.eugine.value.SString;
+import org.reflections.Reflections;
 
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -19,6 +19,16 @@ import java.util.Formatter;
  * Created by coyove on 2016/9/10.
  */
 public final class Utils {
+    public static void importExportables() {
+        Reflections r = new Reflections("");
+        for (Class<? extends Exportable> cls : r.getSubTypesOf(Exportable.class)) {
+            try {
+                cls.newInstance().export(SKeywords.Lookup);
+            } catch (Exception e) {
+                ErrorHandler.print(9987, "error when importing " + cls.getSimpleName() + ": " + e, null);
+            }
+        }
+    }
 
     public static String getFileName(String path) {
         Path p = Paths.get(path);
@@ -41,7 +51,7 @@ public final class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T cast(Object obj, Class<T> cls, VMException ex) throws VMException {
+    public static <T> T cast(Object obj, Class<T> cls, EgException ex) throws EgException {
         if (cls.isInstance(obj)) {
             return (T) obj;
         } else {
@@ -64,7 +74,7 @@ public final class Utils {
         return ret;
     }
 
-    public static Double getDouble(SValue num, Atom headAtom) throws VMException {
+    public static Double getDouble(SValue num, Atom headAtom) throws EgException {
         Double ret;
 
         if (num instanceof SInteger) {
@@ -72,13 +82,13 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = num.<Double>get();
         } else {
-            throw new VMException(4007, "non-number found", headAtom);
+            throw new EgException(4007, "non-number found", headAtom);
         }
 
         return ret;
     }
 
-    public static Long getLong(SValue num, Atom headAtom) throws VMException {
+    public static Long getLong(SValue num, Atom headAtom) throws EgException {
         Long ret;
 
         if (num instanceof SInteger) {
@@ -86,7 +96,7 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = num.<Double>get().longValue();
         } else {
-            throw new VMException(4007, "non-number found", headAtom);
+            throw new EgException(4007, "non-number found", headAtom);
         }
 
         return ret;

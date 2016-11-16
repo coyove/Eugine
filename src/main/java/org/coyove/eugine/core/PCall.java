@@ -14,23 +14,19 @@ public class PCall extends SExpression {
     private SExpression closureObject = null;
 
     private ListEx<SExpression> arguments;
-    private enum continueState { CONTINUE, TAIL_CALL, FALSE_NULL }
 
-    public PCall() {}
+    private enum continueState {CONTINUE, TAIL_CALL, FALSE_NULL}
 
-    public PCall(Atom ha, Compound c) throws VMException {
-        super(ha, c);
-        closureName = ha.token.value.toString();
-        arguments = SExpression.castPlain(c);
+    public PCall() {
     }
 
-    public PCall(SExpression cls, ListEx<SExpression> args, Atom ha, Compound c) {
-        super(ha, c);
+    public PCall(Atom ha, SExpression cls, ListEx<SExpression> args) {
+        atom = ha;
         closureObject = cls;
         arguments = args == null ? new ListEx<SExpression>() : args;
     }
 
-    public static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws VMException {
+    public static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws EgException {
         ListEx<String> argNames = cls.arguments;
         ListEx<Boolean> passByValue = cls.passByValue;
         ExecEnvironment newEnv = new ExecEnvironment();
@@ -58,14 +54,14 @@ public class PCall extends SExpression {
         return newEnv;
     }
 
-    public SValue getClosure(ExecEnvironment env) throws VMException {
+    public SValue getClosure(ExecEnvironment env) throws EgException {
         SValue closure;
 
         if (closureObject == null) {
             if (env.containsKey(closureName)) {
                 closure = env.get(closureName);
             } else {
-                closure = (new PVariable(closureName, headAtom, tailCompound)).evaluate(env);
+                closure = (new PVariable(atom, closureName)).evaluate(env);
                 env.put(closureName, closure);
             }
         } else {
@@ -76,7 +72,7 @@ public class PCall extends SExpression {
     }
 
     public Triple<SClosure, ListEx<SValue>, continueState>
-    getContinue(SExpression se, ExecEnvironment env) throws VMException {
+    getContinue(SExpression se, ExecEnvironment env) throws EgException {
         ListEx<SValue> retArgs = new ListEx<SValue>();
         SClosure retCls = null;
         continueState ret = continueState.CONTINUE;
@@ -137,7 +133,7 @@ public class PCall extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue closure_ = getClosure(env);
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env);
         SClosure closure;
@@ -145,7 +141,7 @@ public class PCall extends SExpression {
         if (closure_ instanceof SClosure) {
             closure = (SClosure) closure_;
         } else {
-            throw new VMException(7031, "invalid calling closure", headAtom);
+            throw new EgException(7031, "invalid calling closure", atom);
         }
 
         while (true) {
@@ -160,9 +156,9 @@ public class PCall extends SExpression {
                     newArgs.add(v);
 
                 for (String a : argNames)
-                    newArgs.add(new PVariable(a, headAtom, tailCompound));
+                    newArgs.add(new PVariable(atom, a));
 
-                PCall newBody = new PCall(closure, newArgs, headAtom, tailCompound);
+                PCall newBody = new PCall(atom, closure, newArgs);
                 ListEx<SExpression> body = new ListEx<SExpression>();
                 body.add(newBody);
 
@@ -171,7 +167,7 @@ public class PCall extends SExpression {
 
             ExecEnvironment newEnv = prepareEE(closure, arguments);
             newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
-            newEnv.put("__atom__", new SObject(headAtom));
+            newEnv.put("__atom__", new SObject(atom));
 
             if (closure.refer instanceof SClosure) {
                 SClosure refer = ((SClosure) closure.refer);
@@ -219,10 +215,9 @@ public class PCall extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PCall ret = new PCall();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
 
         ret.closureName = this.closureName;
         ret.arguments = ListEx.deepClone(this.arguments);

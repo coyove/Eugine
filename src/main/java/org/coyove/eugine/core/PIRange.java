@@ -24,19 +24,19 @@ public class PIRange extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
-        Long start = Utils.getLong(this.start.evaluate(env), headAtom);
-        Long interval = Utils.getLong(this.interval.evaluate(env), headAtom);
-        Long end = Utils.getLong(this.end.evaluate(env), headAtom);
+    public SValue evaluate(ExecEnvironment env) throws EgException {
+        Long start = Utils.getLong(this.start.evaluate(env), atom);
+        Long interval = Utils.getLong(this.interval.evaluate(env), atom);
+        Long end = Utils.getLong(this.end.evaluate(env), atom);
 
         return new SRange(start, interval, end);
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PIRange ret = new PIRange();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.start = this.start.deepClone();
         ret.interval = this.interval.deepClone();
         ret.end = this.end.deepClone();

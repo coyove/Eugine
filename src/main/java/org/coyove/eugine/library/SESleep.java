@@ -20,26 +20,26 @@ public class SESleep extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SInteger time = Utils.cast(this.time.evaluate(env), SInteger.class);
         if (time == null) {
-            throw new VMException(3098, "sleep time must be integer", headAtom);
+            throw new EgException(3098, "sleep time must be integer", atom);
         }
 
         try {
             Thread.sleep(time.<Long>get());
         } catch (InterruptedException ex) {
-            throw new VMException(3099, "sleep is interrupted", headAtom);
+            throw new EgException(3099, "sleep is interrupted", atom);
         }
 
         return new SNull();
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SESleep ret = new SESleep();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.time = this.time.deepClone();
 
         return ret;

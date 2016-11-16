@@ -1,3 +1,5 @@
+var rssCache = {}
+
 (def Config() => {
     var this.port = 8080
     var this.socketReadTimeout = 5000
@@ -24,6 +26,33 @@
 
         (stream[length - 1] == "\n" && stream[length - 3] == "\n") &&
         (stream[length - 2] == "\r" && stream[length - 4] == "\r")
+    }
+
+    def this.getRss (url) => {
+        var now = Time.unix(1)
+        
+        if contains(rssCache, url) && (rssCache[url].updated - now < 60000) {
+            println("cache hit: ", url)
+            rssCache[url].rss
+        } else {
+            var obj = new java\net\URL(url : String)
+            var conn = obj::openConnection()
+            var br = new java\io\BufferedReader(
+                new java\io\InputStreamReader(conn:>getInputStream() : java\io\InputStream) : java\io\Reader)
+
+            var inputLine = ""
+            var response = new java\lang\StringBuffer()
+
+            for (inputLine = br::readLine()) != null do () =>
+                response:>append(inputLine : String)
+
+            br:>close()
+            var rss = response::toString()
+
+            rssCache[url] = { updated: Time.unix(1), rss : rss }
+
+            rss
+        }
     }
 
     def [this.struct] this.HttpContext (socket) => {
@@ -183,6 +212,11 @@ var ss = new java\net\ServerSocket()
 ss::bind(new java\net\InetSocketAddress("127.0.0.1" : String, Config.port : int) : java\net\SocketAddress)
 
 println("listening on port ", Config.port)
+
+println(rssCache)
+println(Util.getRss("http://share.dmhy.org/topics/rss/sort_id/2/rss.xml"))
+println(rssCache)
+println(Util.getRss("http://share.dmhy.org/topics/rss/sort_id/2/rss.xml"))
 
 for true do () => {
     var client = ss::accept()

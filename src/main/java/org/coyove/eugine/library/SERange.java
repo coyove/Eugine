@@ -30,7 +30,7 @@ public class SERange extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue start = this.start.evaluate(env);
         SValue interval = this.interval.evaluate(env);
         SValue end = this.end.evaluate(env);
@@ -53,17 +53,17 @@ public class SERange extends SExpression {
                 ret.add(new SDouble(i));
             }
         } else {
-            throw new VMException(3009, "needs integers or doubles", headAtom);
+            throw new EgException(3009, "needs integers or doubles", atom);
         }
 
         return new SList(ret);
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SERange ret = new SERange();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.start = this.start.deepClone();
         ret.interval = this.interval.deepClone();
         ret.end = this.end.deepClone();

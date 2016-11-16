@@ -23,11 +23,11 @@ public class PCompare extends SExpression {
         values = args;
     }
 
-    private boolean compareNumber(ListEx<SValue> nums, int ...signs) throws VMException {
-        BigDecimal first = Utils.getNumber(nums.head(), headAtom);
+    private boolean compareNumber(ListEx<SValue> nums, int ...signs) throws EgException {
+        BigDecimal first = Utils.getNumber(nums.head(), atom);
 
         for (int i = 1; i < nums.size(); i++) {
-            BigDecimal next = Utils.getNumber(nums.get(i), headAtom);
+            BigDecimal next = Utils.getNumber(nums.get(i), atom);
             int sign = first.subtract(next).signum();
 
             if (signs[0] != sign && signs[1] != sign)
@@ -40,7 +40,7 @@ public class PCompare extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         ListEx<SValue> results = SExpression.eval(values, env);
 
         if (action.equals("==") || action.equals("!=")) {
@@ -81,10 +81,9 @@ public class PCompare extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PCompare ret = new PCompare();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.action = this.action;
         ret.values = ListEx.deepClone(this.values);
 

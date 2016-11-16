@@ -22,12 +22,12 @@ public class SESplit extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SString text = Utils.cast(this.text.evaluate(env), SString.class,
-                new VMException(3010, "subject must be string", headAtom));
+                new EgException(3010, "subject must be string", atom));
 
         SString delim = Utils.cast(this.delim.evaluate(env), SString.class,
-                new VMException(3011, "delimiter must be string", headAtom));
+                new EgException(3011, "delimiter must be string", atom));
 
         ListEx<SExpression> ret = new ListEx<SExpression>();
         for (String s : text.<String>get().split(delim.<String>get())) {
@@ -38,10 +38,10 @@ public class SESplit extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SESplit ret = new SESplit();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.text = this.text.deepClone();
         ret.delim = this.delim.deepClone();
 

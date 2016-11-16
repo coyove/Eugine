@@ -20,7 +20,7 @@ public class SELen extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
 
         SValue obj = argument.evaluate(env);
         if (obj instanceof SString) {
@@ -38,10 +38,10 @@ public class SELen extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SELen ret = new SELen();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.argument = this.argument.deepClone();
         return ret;
     }

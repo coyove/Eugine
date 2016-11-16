@@ -16,37 +16,11 @@ public class PCond extends SExpression {
     public PCond() {}
 
     public PCond(Atom ha, SExpression condition, ListEx<Branch> branches, Branch db) {
-        headAtom = ha;
+        atom = ha;
 
         this.condition = condition;
         this.branches = branches;
         this.defaultBranch = db;
-    }
-
-    public PCond(Atom ha, Compound c) throws VMException {
-        super(ha, c, 2);
-        throw new VMException(9999, "not implemented", ha);
-//        condition = SExpression.cast(c.atoms.pop());
-//        branches = new ListEx<Branch>();
-//
-//        for (Base a : c.atoms) {
-//            Compound b = (Compound) a;
-//            if (b == null || b.atoms.size() < 2)
-//                throw new VMException(2002, "invalid branch definition", ha);
-//
-//            Base cond = b.atoms.pop();
-//
-//            if (cond instanceof Atom && ((Atom) cond).token.type == Token.TokenType.ATOMIC &&
-//                    ((Atom) cond).token.value.toString().equals("_")) {
-//                defaultBranch = SExpression.castPlain(b);
-//            } else {
-//                Branch n = new Branch();
-//                n.recv = SExpression.cast(cond);
-//                n.body = SExpression.castPlain(b);
-//
-//                branches.add(n);
-//            }
-//        }
     }
 
     public static boolean compare(Object left, Object right) {
@@ -54,7 +28,7 @@ public class PCond extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         Object cond = condition.evaluate(env).get();
         SValue ret = new SNull();
 
@@ -79,10 +53,9 @@ public class PCond extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PCond ret = new PCond();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.condition = this.condition.deepClone();
 
         if (this.defaultBranch != null) {

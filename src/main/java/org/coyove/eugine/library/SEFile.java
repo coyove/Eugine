@@ -42,27 +42,13 @@ public class SEFile extends SExpression {
         fileOp = op;
     }
 
-    public SEFile(Atom ha, Compound c, OPERATION op) throws VMException {
-        super(ha, c, op == OPERATION.OPEN_BINARY ||
-                op == OPERATION.OPEN_LINES ||
-                op == OPERATION.OPEN_TEXT ||
-                op == OPERATION.EXISTS ? 1 : 2);
-
-        filename = SExpression.cast(c.atoms.pop());
-        if (argCount == 2) {
-            data = SExpression.cast(c.atoms.pop());
-        }
-
-        fileOp = op;
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SString filename = Utils.cast(this.filename.evaluate(env), SString.class);
         SValue data = null;
 
         if (filename == null) {
-            throw new VMException(3029, "filename must be string", headAtom);
+            throw new EgException(3029, "filename must be string", atom);
         }
 
         if (this.data != null) {
@@ -119,10 +105,10 @@ public class SEFile extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEFile ret = new SEFile();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.filename = this.filename.deepClone();
         ret.fileOp = this.fileOp;
         if (this.data != null) {

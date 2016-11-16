@@ -7,11 +7,11 @@ import org.coyove.eugine.parser.Atom;
  */
 public class ErrorHandler {
     public static void print(int errCode, String errMessage, Atom ha) {
-        System.out.println((new VMException(errCode, errMessage, ha)).toString());
+        System.out.println((new EgException(errCode, errMessage, ha)).toString());
         System.exit(errCode);
     }
 
-    public static void print(VMException ex) {
+    public static void print(EgException ex) {
         System.out.println(ex.toString());
         System.exit(ex.errorCode);
     }

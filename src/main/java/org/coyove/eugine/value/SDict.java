@@ -3,7 +3,7 @@ package org.coyove.eugine.value;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.ErrorHandler;
-import org.coyove.eugine.util.VMException;
+import org.coyove.eugine.util.EgException;
 
 import java.util.HashMap;
 
@@ -29,7 +29,7 @@ public class SDict extends SValue {
             for (String s : dict.keySet()) {
                 n.put(s, dict.get(s).deepClone());
             }
-        } catch (VMException ex) {
+        } catch (EgException ex) {
             ErrorHandler.print(ex);
         }
 

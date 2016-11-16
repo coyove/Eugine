@@ -25,9 +25,9 @@ public class SEContains extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         String key = Utils.cast(this.key.evaluate(env), SString.class,
-                new VMException(3011, "key must be string", headAtom)).get();
+                new EgException(3011, "key must be string", atom)).get();
 
         SValue sub = this.map.evaluate(env);
         if (sub instanceof SDict) {
@@ -37,15 +37,14 @@ public class SEContains extends SExpression {
             String text = sub.get();
             return new SInteger(StringUtils.indexOf(text, key));
         } else {
-            throw new VMException(3010, "invalid subject", headAtom);
+            throw new EgException(3010, "invalid subject", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEContains ret = new SEContains();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.map = this.map.deepClone();
         ret.key = this.key.deepClone();
 

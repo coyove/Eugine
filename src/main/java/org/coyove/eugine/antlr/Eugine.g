@@ -147,8 +147,8 @@ defineStmt returns [SExpression v]
     ]
     : Def
         ('[' Decorator=expr argumentsList? ']' { 
-            $decorators.add(new PCall($Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v, 
-                new Atom($Decorator.start), null));
+            $decorators.add(new PCall(new Atom($Decorator.start), 
+                $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
         })*
         (Identifier | Get=expr) 
         Definition=definitionsList 
@@ -163,7 +163,7 @@ defineStmt returns [SExpression v]
 
             if ($Identifier != null || $Get.v instanceof PGet) {
                 for (SExpression d : $decorators) {
-                    lambda = new PCall(d, ListEx.build(lambda), a, null);
+                    lambda = new PCall(a, d, ListEx.build(lambda));
                 }
                 
                 $v = new PSet(a, sub, lambda, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
@@ -189,7 +189,8 @@ callStmt returns [SExpression v]
         if (SKeywords.Lookup.containsKey(func)) {
             $v = SKeywords.Lookup.get(func).call($Identifier, $argumentsList.v); 
         } else {
-            $v = new PCall(new PVariable($Identifier.text), $argumentsList.v, new Atom($Identifier), null);
+            Atom a = new Atom($Identifier);
+            $v = new PCall(a, new PVariable(a, $Identifier.text), $argumentsList.v);
         }
     }
     ;
@@ -264,7 +265,7 @@ topExpr returns [SExpression v]
                 if (SKeywords.Lookup.containsKey($Called.text)) {
                     $v = SKeywords.Lookup.get($Called.text).call($Called.start, $argumentsList.v); 
                 } else {
-                    $v = new PCall($Called.v, $argumentsList.v, new Atom($Called.start), null);
+                    $v = new PCall(new Atom($Called.start), $Called.v, $argumentsList.v);
                 }
             }
         }
@@ -283,7 +284,7 @@ topExpr returns [SExpression v]
             $v = new PGet(new Atom($Subject.start), $Subject.v, new SString($Identifier.text));
         }
     | Identifier    
-        { $v = new PVariable($Identifier.text); }
+        { $v = new PVariable(new Atom($Identifier), $Identifier.text); }
     | RawString     
         { $v = new SString(org.coyove.eugine.util.Utils.unescape($RawString.text)); }
     | StringLiteral 
@@ -363,7 +364,7 @@ logicExpr returns [SExpression v]
         }
     | Left=logicExpr ':' JavaFullName
         {
-            $v = new PInteropCast(new Atom($JavaFullName), $Left.v, $JavaFullName.text);
+            $v = new PInteropCast(new Atom($JavaFullName), $Left.v, $JavaFullName.text.replace("\\", "."));
         }
     ;
 

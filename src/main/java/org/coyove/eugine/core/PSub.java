@@ -5,6 +5,8 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.Arrays;
+
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -16,27 +18,20 @@ public class PSub extends SExpression {
     public PSub() {}
 
     public PSub(Atom ha, SExpression sub, SExpression s, SExpression e) {
-        headAtom = ha;
+        atom = ha;
         start = s;
         end = e;
         subject = sub;
     }
 
-    public PSub(Atom ha, Compound c) throws VMException {
-        throw new VMException(9999, "not implemented", ha);
-//        super(ha, c, 2);
-//
-//        arguments = SExpression.castPlain(c);
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subObj = subject.evaluate(env);
 
-        VMException ex = new VMException(3012, "start and end index must be integers", headAtom);
+        EgException ex = new EgException(3012, "start and end index must be integers", atom);
         int start = Utils.cast(this.start.evaluate(env), SInteger.class, ex).<Long>get().intValue();
         if (start < 0) {
-            throw new VMException(3015, "start cannot be negative", headAtom);
+            throw new EgException(3015, "start cannot be negative", atom);
         }
 
         int end = this.end != null ? Utils.cast(this.end, SInteger.class, ex).<Long>get().intValue() : 0;
@@ -50,7 +45,7 @@ public class PSub extends SExpression {
                 try {
                     return new SString(subStr.<String>get().substring(start, end));
                 } catch (StringIndexOutOfBoundsException se) {
-                    throw new VMException(3013, "string index out of range", headAtom);
+                    throw new EgException(3013, "string index out of range", atom);
                 }
             }
 
@@ -61,17 +56,24 @@ public class PSub extends SExpression {
             } else {
                 return new SList(subList.<ListEx<SExpression>>get().sub(start, end));
             }
+        } else if (subObj.underlying instanceof byte[]) {
+            byte[] buf = (byte[]) subObj.underlying;
+            if (this.end == null) {
+                return new SObject(Arrays.copyOfRange(buf, start, buf.length));
+            } else {
+                return new SObject(Arrays.copyOfRange(buf, start, end));
+            }
         } else {
-            throw new VMException(3014, "subject must be string or list", headAtom);
+            throw new EgException(3014, "invalid subject", atom);
         }
 
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PSub ret = new PSub();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.subject = this.subject.deepClone();
         ret.start = this.start.deepClone();
         if (this.end != null) {

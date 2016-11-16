@@ -22,7 +22,7 @@ public class SEReverse extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subject = this.list.evaluate(env);
 
         if (subject instanceof SList) {
@@ -38,15 +38,15 @@ public class SEReverse extends SExpression {
         } else if (subject instanceof SDouble) {
             return new SDouble(-subject.<Double>get());
         } else {
-            throw new VMException(3015, "require list, integer or double", headAtom);
+            throw new EgException(3015, "require list, integer or double", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEReverse ret = new SEReverse();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.list = this.list.deepClone();
 
         return ret;

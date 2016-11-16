@@ -22,22 +22,21 @@ public class SEBytesBuffer extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue src =this.src.evaluate(env);
         if (src instanceof SString) {
             return new SObject(src.<String>get().getBytes(Charset.forName("UTF-8")));
         } else if (src instanceof SInteger) {
             return new SObject(new byte[src.<Long>get().intValue()]);
         } else {
-            throw new VMException(3031, "failed to convert to bytes buffer", headAtom);
+            throw new EgException(3031, "failed to convert to bytes buffer", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEBytesBuffer ret = new SEBytesBuffer();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.src = this.src.deepClone();
         return ret;
     }

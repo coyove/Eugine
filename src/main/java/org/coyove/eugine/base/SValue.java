@@ -45,7 +45,7 @@ public abstract class SValue extends SExpression {
     public abstract SValue clone();
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         return this.clone();
     }
 

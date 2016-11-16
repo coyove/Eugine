@@ -24,38 +24,38 @@ public class SEDel extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subObj = host.evaluate(env);
         SValue idx = this.index.evaluate(env);
 
         if (idx instanceof SInteger && subObj instanceof SList) {
             if (subObj.immutable)
-                throw new VMException(2006, "list is immutable", headAtom);
+                throw new EgException(2006, "list is immutable", atom);
 
             ListEx<SValue> subList = subObj.get();
             int i = idx.<Long>get().intValue();
             if (i < 0 || i >= subList.size())
-                throw new VMException(2007, "index out of range", headAtom);
+                throw new EgException(2007, "index out of range", atom);
 
             return subList.remove(i);
         } else if (idx instanceof SString && subObj instanceof SDict) {
             if (subObj.immutable)
-                throw new VMException(2008, "dict is immutable", headAtom);
+                throw new EgException(2008, "dict is immutable", atom);
 
             HashMap<String, SValue> dict = subObj.get();
 
             SValue ret = dict.remove(idx.<String>get());
             return ret == null ? new SNull() : ret;
         } else {
-            throw new VMException(2009, "mismatch types", headAtom);
+            throw new EgException(2009, "mismatch types", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEDel ret = new SEDel();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.host = this.host.deepClone();
         ret.index = this.index.deepClone();
         return ret;

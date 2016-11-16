@@ -17,13 +17,15 @@ public class PSet extends SExpression {
     private ACTION action;
     private DECLARE declare;
 
-    public enum ACTION { IMMUTABLE, MUTABLE }
-    public enum DECLARE { DECLARE, SET }
+    public enum ACTION {IMMUTABLE, MUTABLE}
 
-    public PSet() {}
+    public enum DECLARE {DECLARE, SET}
+
+    public PSet() {
+    }
 
     public PSet(Atom ha, SExpression name, SExpression value, DECLARE d, ACTION a) {
-        headAtom = ha;
+        atom = ha;
         varName = name;
         varValue = value;
 
@@ -32,32 +34,8 @@ public class PSet extends SExpression {
         declare = d;
     }
 
-    public PSet(Atom ha, Compound c, DECLARE d, ACTION a) throws VMException {
-        super(ha, c, 1);
-
-        Base n = c.atoms.pop();
-        if (n instanceof Atom && ((Atom) n).token.type == Token.TokenType.ATOMIC) {
-            varName = new SString(((Atom) n).token.value.toString());
-            directName = true;
-        } else {
-            varName = SExpression.cast(n);
-            directName = false;
-        }
-
-        if (c.atoms.size() == 1) {
-            varValue = SExpression.cast(c.atoms.pop());
-        } else if (c.atoms.size() > 1) {
-            varValue = SExpression.cast(c);
-        } else {
-            varValue = new SNull();
-        }
-
-        action = a;
-        declare = d;
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue n = varName.evaluate(env);
         SValue v = varValue.evaluate(env);
         SValue ret = v;
@@ -81,10 +59,10 @@ public class PSet extends SExpression {
 
             if (declare == DECLARE.SET) {
                 if (!env.containsKey(sn) && env.strict)
-                    throw new VMException(2042, "strict mode", headAtom);
+                    throw new EgException(2042, "strict mode", atom);
 
                 if (env.containsKey(sn) && env.get(sn).immutable)
-                    throw new VMException(2043, "variable '" + sn + "' is immutable", headAtom);
+                    throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
 
                 env.put(sn, ret);
             } else if (declare == DECLARE.DECLARE) {
@@ -92,35 +70,29 @@ public class PSet extends SExpression {
                 env.putVar(sn, ret);
             }
         } else {
-            if (n.refer != null && n.refer instanceof SValue && ((SValue) n.refer).immutable) {
-                if (!(n.refer instanceof SClosure)) {
-                    throw new VMException(2044, "referred variable is immutable", headAtom);
-                }
+            Object refer = n.refer;
+            if (refer != null && refer instanceof SValue &&
+                    ((SValue) refer).immutable && !(refer instanceof SClosure)) {
+                throw new EgException(2044, "referred variable is immutable", atom);
             }
 
-            if (n.refer instanceof String) {
-                env.put(n.refer.toString(), ret);
-            } else if (n.refer instanceof SDict) {
-                ((SDict) n.refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
-            } else if (n.refer instanceof SList) {
-                ((SList) n.refer).<ListEx<SValue>>get().set(n.refIndex, ret);
-            } else {
-                try {
-                    if (n.refer instanceof SObject) {
-                        Object sub = ((SObject) n.refer).get();
-                        InteropHelper.setField(sub, n.refKey, ret);
-                    } else if (n.refer instanceof SClosure) {
-                        if (declare == DECLARE.DECLARE) {
-                            ((SClosure) n.refer).extra.putVar(n.refKey, ret);
-                        } else {
-                            ((SClosure) n.refer).extra.put(n.refKey, ret);
-                        }
-                    } else {
-                        throw new VMException(2045, "failed to set field", headAtom);
-                    }
-                } catch (Exception e) {
-                    throw new VMException(2046, e.getMessage(), headAtom);
+            if (refer instanceof String) {
+                env.put(refer.toString(), ret);
+            } else if (refer instanceof SDict) {
+                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
+            } else if (refer instanceof SList) {
+                ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, ret);
+            } else if (refer instanceof SObject) {
+                Object sub = ((SObject) refer).get();
+                InteropHelper.setField(sub, n.refKey, ret);
+            } else if (refer instanceof SClosure) {
+                if (declare == DECLARE.DECLARE) {
+                    ((SClosure) refer).extra.putVar(n.refKey, ret);
+                } else {
+                    ((SClosure) refer).extra.put(n.refKey, ret);
                 }
+            } else {
+                throw new EgException(2045, "failed to set, invalid referred object: " + refer, atom);
             }
         }
 
@@ -128,16 +100,15 @@ public class PSet extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PSet ret = new PSet();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
 
         ret.varName = this.varName.deepClone();
         ret.varValue = this.varValue.deepClone();
 
         ret.directName = this.directName;
-        ret.action  =this.action;
+        ret.action = this.action;
         ret.declare = this.declare;
 
         return ret;

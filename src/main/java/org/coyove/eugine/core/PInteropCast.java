@@ -16,13 +16,13 @@ public class PInteropCast extends SExpression {
     public PInteropCast() {}
 
     public PInteropCast(Atom ha, SExpression s, String type) {
-        headAtom = ha;
+        atom = ha;
         subject = s;
         toType = type;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue sub = subject.evaluate(env);
         String className = InteropHelper.expandJavaCassName(toType);
 
@@ -30,15 +30,15 @@ public class PInteropCast extends SExpression {
             Class tt = ClassUtils.getClass(className);
             return new SObject(tt.cast(sub.get()));
         } catch (ClassNotFoundException e) {
-            throw new VMException(2028, "getting class '" + className + "' failed", headAtom);
+            throw new EgException(2028, "getting class '" + className + "' failed", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PInteropCast ret = new PInteropCast();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.subject = this.subject.deepClone();
         ret.toType = this.toType;
         return ret;

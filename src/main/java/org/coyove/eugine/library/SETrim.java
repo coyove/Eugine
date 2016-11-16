@@ -21,7 +21,7 @@ public class SETrim extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue arg = argument.evaluate(env);
         if (arg instanceof SString) {
             return new SString(StringUtils.trim(arg.<String>get()));
@@ -31,10 +31,10 @@ public class SETrim extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SETrim ret = new SETrim();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.argument = this.argument.deepClone();
 
         return ret;

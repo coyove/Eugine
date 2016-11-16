@@ -25,7 +25,7 @@ public class SList extends SValue {
             for (SExpression t : origin) {
                 n.add(t.deepClone());
             }
-        } catch (VMException ex) {
+        } catch (EgException ex) {
             ErrorHandler.print(ex);
         }
 

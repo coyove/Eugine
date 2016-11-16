@@ -1,7 +1,7 @@
 package org.coyove.eugine.parser;
 
 import org.coyove.eugine.util.ListEx;
-import org.coyove.eugine.util.VMException;
+import org.coyove.eugine.util.EgException;
 
 import java.util.HashMap;
 
@@ -17,28 +17,28 @@ public class Macro {
         public ListEx<Base> tails;
     }
 
-    public Macro(Compound macro) throws VMException {
+    public Macro(Compound macro) throws EgException {
         Atom headAtom = (Atom) macro.atoms.head();
         if (macro.atoms.size() != 3)
-            throw new VMException(1200, "must have 2 arguments", headAtom);
+            throw new EgException(1200, "must have 2 arguments", headAtom);
 
         if (macro.atoms.get(1) instanceof Atom)
-            throw new VMException(1201, "the 2nd argument must be the macro header", headAtom);
+            throw new EgException(1201, "the 2nd argument must be the macro header", headAtom);
 
         Compound header = (Compound) macro.atoms.get(1);
         if (header.atoms.size() == 0)
-            throw new VMException(1202, "macro header must have a name", headAtom);
+            throw new EgException(1202, "macro header must have a name", headAtom);
 
         Base n = header.atoms.get(0);
         if (n instanceof Compound || ((Atom) n).token.type != Token.TokenType.ATOMIC)
-            throw new VMException(1203, "macro name must be a string atom", headAtom);
+            throw new EgException(1203, "macro name must be a string atom", headAtom);
 
         macroName = ((Atom) n).token.value.toString();
         macroArgs = new ListEx<String>();
 
         for (Base a : header.atoms.skip(1)) {
             if (a instanceof Compound || ((Atom) a).token.type != Token.TokenType.ATOMIC)
-                throw new VMException(1204, "macro argument must be a string atom", headAtom);
+                throw new EgException(1204, "macro argument must be a string atom", headAtom);
 
             macroArgs.add(((Atom) a).token.value.toString());
         }
@@ -46,11 +46,11 @@ public class Macro {
         macroBody = macro.atoms.get(2);
     }
 
-    public Base replace(Compound src) throws VMException {
+    public Base replace(Compound src) throws EgException {
         Atom headAtom = (Atom) src.atoms.head();
 
         if (src.atoms.size() < macroArgs.size() + 1)
-            throw new VMException(1205, "not enough arguments to expand macro", headAtom);
+            throw new EgException(1205, "not enough arguments to expand macro", headAtom);
 
         src.atoms.pop(); // first = macro name
 

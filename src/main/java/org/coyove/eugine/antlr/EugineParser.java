@@ -1263,8 +1263,8 @@ public class EugineParser extends Parser {
 					setState(223);
 					match(T__11);
 					 
-					            _localctx.decorators.add(new PCall(((DefineStmtContext)_localctx).Decorator.v, ((DefineStmtContext)_localctx).argumentsList == null ? null : ((DefineStmtContext)_localctx).argumentsList.v, 
-					                new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), null));
+					            _localctx.decorators.add(new PCall(new Atom((((DefineStmtContext)_localctx).Decorator!=null?(((DefineStmtContext)_localctx).Decorator.start):null)), 
+					                ((DefineStmtContext)_localctx).Decorator.v, ((DefineStmtContext)_localctx).argumentsList == null ? null : ((DefineStmtContext)_localctx).argumentsList.v));
 					        
 					}
 					} 
@@ -1350,7 +1350,7 @@ public class EugineParser extends Parser {
 
 			            if (((DefineStmtContext)_localctx).Identifier != null || ((DefineStmtContext)_localctx).Get.v instanceof PGet) {
 			                for (SExpression d : _localctx.decorators) {
-			                    lambda = new PCall(d, ListEx.build(lambda), a, null);
+			                    lambda = new PCall(a, d, ListEx.build(lambda));
 			                }
 			                
 			                ((DefineStmtContext)_localctx).v =  new PSet(a, sub, lambda, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
@@ -1499,7 +1499,8 @@ public class EugineParser extends Parser {
 			        if (SKeywords.Lookup.containsKey(func)) {
 			            ((CallStmtContext)_localctx).v =  SKeywords.Lookup.get(func).call(((CallStmtContext)_localctx).Identifier, ((CallStmtContext)_localctx).argumentsList.v); 
 			        } else {
-			            ((CallStmtContext)_localctx).v =  new PCall(new PVariable((((CallStmtContext)_localctx).Identifier!=null?((CallStmtContext)_localctx).Identifier.getText():null)), ((CallStmtContext)_localctx).argumentsList.v, new Atom(((CallStmtContext)_localctx).Identifier), null);
+			            Atom a = new Atom(((CallStmtContext)_localctx).Identifier);
+			            ((CallStmtContext)_localctx).v =  new PCall(a, new PVariable(a, (((CallStmtContext)_localctx).Identifier!=null?((CallStmtContext)_localctx).Identifier.getText():null)), ((CallStmtContext)_localctx).argumentsList.v);
 			        }
 			    
 			}
@@ -2048,7 +2049,7 @@ public class EugineParser extends Parser {
 				{
 				setState(373);
 				((TopExprContext)_localctx).Identifier = match(Identifier);
-				 ((TopExprContext)_localctx).v =  new PVariable((((TopExprContext)_localctx).Identifier!=null?((TopExprContext)_localctx).Identifier.getText():null)); 
+				 ((TopExprContext)_localctx).v =  new PVariable(new Atom(((TopExprContext)_localctx).Identifier), (((TopExprContext)_localctx).Identifier!=null?((TopExprContext)_localctx).Identifier.getText():null)); 
 				}
 				break;
 			case 4:
@@ -2147,7 +2148,7 @@ public class EugineParser extends Parser {
 						                          if (SKeywords.Lookup.containsKey((((TopExprContext)_localctx).Called!=null?_input.getText(((TopExprContext)_localctx).Called.start,((TopExprContext)_localctx).Called.stop):null))) {
 						                              ((TopExprContext)_localctx).v =  SKeywords.Lookup.get((((TopExprContext)_localctx).Called!=null?_input.getText(((TopExprContext)_localctx).Called.start,((TopExprContext)_localctx).Called.stop):null)).call((((TopExprContext)_localctx).Called!=null?(((TopExprContext)_localctx).Called.start):null), ((TopExprContext)_localctx).argumentsList.v); 
 						                          } else {
-						                              ((TopExprContext)_localctx).v =  new PCall(((TopExprContext)_localctx).Called.v, ((TopExprContext)_localctx).argumentsList.v, new Atom((((TopExprContext)_localctx).Called!=null?(((TopExprContext)_localctx).Called.start):null)), null);
+						                              ((TopExprContext)_localctx).v =  new PCall(new Atom((((TopExprContext)_localctx).Called!=null?(((TopExprContext)_localctx).Called.start):null)), ((TopExprContext)_localctx).Called.v, ((TopExprContext)_localctx).argumentsList.v);
 						                          }
 						                      }
 						                  
@@ -2803,7 +2804,7 @@ public class EugineParser extends Parser {
 						setState(503);
 						((LogicExprContext)_localctx).JavaFullName = match(JavaFullName);
 
-						                      ((LogicExprContext)_localctx).v =  new PInteropCast(new Atom(((LogicExprContext)_localctx).JavaFullName), ((LogicExprContext)_localctx).Left.v, (((LogicExprContext)_localctx).JavaFullName!=null?((LogicExprContext)_localctx).JavaFullName.getText():null));
+						                      ((LogicExprContext)_localctx).v =  new PInteropCast(new Atom(((LogicExprContext)_localctx).JavaFullName), ((LogicExprContext)_localctx).Left.v, (((LogicExprContext)_localctx).JavaFullName!=null?((LogicExprContext)_localctx).JavaFullName.getText():null).replace("\\", "."));
 						                  
 						}
 						break;

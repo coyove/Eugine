@@ -28,15 +28,15 @@ public class SEReplace extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         String text = Utils.cast(this.text.evaluate(env), SString.class,
-                new VMException(3010, "subject must be string", headAtom)).get();
+                new EgException(3010, "subject must be string", atom)).get();
 
         String oldText = Utils.cast(this.oldText.evaluate(env), SString.class,
-                new VMException(3011, "old must be string", headAtom)).get();
+                new EgException(3011, "old must be string", atom)).get();
 
         String newText = Utils.cast(this.newText.evaluate(env), SString.class,
-                new VMException(3011, "new must be string", headAtom)).get();
+                new EgException(3011, "new must be string", atom)).get();
 
         if (op == OPERATION.NORMAL) {
             return new SString(text.replace(oldText, newText));
@@ -46,10 +46,10 @@ public class SEReplace extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEReplace ret = new SEReplace();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.text = this.text.deepClone();
         ret.oldText = this.oldText.deepClone();
         ret.newText = this.newText.deepClone();

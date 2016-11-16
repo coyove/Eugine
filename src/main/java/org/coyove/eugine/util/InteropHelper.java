@@ -68,6 +68,8 @@ public class InteropHelper {
             }
 
             return new SDict(map);
+        } else if (value instanceof SValue) {
+            return ((SValue) value);
         }
 
         return new SObject(value);
@@ -104,82 +106,15 @@ public class InteropHelper {
                 ret.add(castSValue(value, c.getComponentType()));
             }
             return ret.toArray();
+        } else if (obj instanceof SClosure) {
+            return obj;
         } else {
             return obj.get();
         }
     }
 
-    public static Object[] formatDefinition(SList definition, ListEx<SValue> args) throws VMException {
-
-        ListEx<Class> classes = new ListEx<Class>();
-        ListEx<Object> passArgs = new ListEx<Object>();
-
-        boolean vararg = false;
-        int i = 0;
-        for (SValue def : definition.<ListEx<SValue>>get()) {
-            if (vararg)
-                throw new VMException(4001, "vararg must be at the tail of the definition");
-
-            SString cls = Utils.cast(def, SString.class);
-            if (cls == null)
-                throw new VMException(4002, "must specify the type using string");
-
-            String clsName = cls.get();
-
-            if (clsName.endsWith("...")) {
-                vararg = true;
-                clsName = clsName.substring(0, clsName.length() - 3) + "[]";
-            }
-
-            if (i >= args.size())
-                throw new VMException(4003, "not enough arguments");
-
-            try {
-                Class c = ClassUtils.getClass(clsName);
-                classes.add(c);
-
-                SValue value = args.get(i++);
-                Object ret = InteropHelper.castSValue(value, c);
-
-                if (value instanceof SObject) {
-                    passArgs.add(value.get());
-                } else if (c.isArray()) {
-                    Object[] tmp = (Object[]) ret;
-                    int len = tmp.length;
-
-                    Class p = c.getComponentType();
-                    if (p == int.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Integer[].class)));
-                    } else if (p == double.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Double[].class)));
-                    } else if (p == float.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Float[].class)));
-                    } else if (p == long.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Long[].class)));
-                    } else if (p == byte.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Byte[].class)));
-                    } else if (p == short.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Short[].class)));
-                    } else if (p == char.class) {
-                        passArgs.add(ArrayUtils.toPrimitive(Arrays.copyOf(tmp, len, Character[].class)));
-                    } else {
-                        passArgs.add(Arrays.copyOf(tmp, len, c));
-                    }
-                } else {
-                    passArgs.add(ret);
-                }
-            } catch (ClassNotFoundException ex) {
-                throw new VMException(4004, "cannot find type '" + clsName + "'");
-            }
-        }
-
-        return new Object[]{
-                classes, passArgs
-        };
-    }
-
     public static Object[] buildArguments(ListEx<String> defs, ListEx<SExpression> args, ExecEnvironment env)
-            throws VMException {
+            throws EgException {
 
         ListEx<Class> classes = new ListEx<Class>();
         ListEx<Object> passArgs = new ListEx<Object>();
@@ -188,7 +123,7 @@ public class InteropHelper {
         int i = 0;
         for (String clsName : defs) {
             if (vararg) {
-                throw new VMException(4001, "vararg must be at the tail of the definition");
+                throw new EgException(4001, "vararg must be at the tail of the definition");
             }
 
             if (clsName.endsWith("...")) {
@@ -197,7 +132,7 @@ public class InteropHelper {
             }
 
             if (i >= args.size()) {
-                throw new VMException(4003, "not enough arguments");
+                throw new EgException(4003, "not enough arguments");
             }
 
             try {
@@ -236,7 +171,7 @@ public class InteropHelper {
                     passArgs.add(ret);
                 }
             } catch (ClassNotFoundException ex) {
-                throw new VMException(4004, "cannot find type '" + clsName + "'");
+                throw new EgException(4004, "cannot find type '" + clsName + "'");
             }
         }
 
@@ -245,24 +180,24 @@ public class InteropHelper {
         };
     }
 
-    public static SValue getField(Object obj, String field) throws VMException {
+    public static SValue getField(Object obj, String field) throws EgException {
         try {
             Field f = (obj instanceof Class ? (Class) obj : obj.getClass()).getDeclaredField(field);
             f.setAccessible(true);
             return InteropHelper.castJavaType(f.get(obj));
         } catch (Exception e) {
-            throw new VMException(4005, "failed to get '" + field + "', " + e);
+            throw new EgException(4005, "failed to get '" + field + "', " + e);
         }
     }
 
-    public static SValue setField(Object obj, String field, SValue value) throws VMException {
+    public static SValue setField(Object obj, String field, SValue value) throws EgException {
         try {
             Field f = obj.getClass().getDeclaredField(field);
             f.setAccessible(true);
             f.set(obj, castSValue(value, f.getType()));
             return value;
         } catch (Exception e) {
-            throw new VMException(4006, "failed to set '" + field + "', " + e);
+            throw new EgException(4006, "failed to set '" + field + "', " + e);
         }
     }
 }

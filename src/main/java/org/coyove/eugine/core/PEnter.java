@@ -17,25 +17,15 @@ public class PEnter extends SExpression {
     public PEnter() {}
 
     public PEnter(Atom ha, SExpression m, SExpression c, SExpression f, String e) {
-        headAtom = ha;
+        atom = ha;
         mainBody = m;
         catchBody = c;
         finallyBody = f;
         exName = e;
     }
 
-    public PEnter(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
-
-        mainBody = SExpression.cast(c.atoms.pop());
-        if (c.atoms.size() > 0)
-            catchBody = SExpression.cast(c.atoms.pop());
-        if (c.atoms.size() > 0)
-            finallyBody = SExpression.cast(c.atoms.pop());
-    }
-
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
@@ -53,10 +43,10 @@ public class PEnter extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PEnter ret = new PEnter();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.mainBody = this.mainBody.deepClone();
         ret.exName = this.exName;
 

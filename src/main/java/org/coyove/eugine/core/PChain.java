@@ -1,7 +1,6 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
@@ -20,7 +19,7 @@ public class PChain extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue ret = new SNull();
         for (int i = 0; i < expressions.size(); i++) {
             SExpression se = expressions.get(i);
@@ -30,7 +29,7 @@ public class PChain extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PChain ret = new PChain();
         ret.expressions = ListEx.deepClone(this.expressions);
         return ret;

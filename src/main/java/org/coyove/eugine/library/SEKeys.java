@@ -21,7 +21,7 @@ public class SEKeys extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
 
         SValue dict = this.dict.evaluate(env);
         ListEx<SExpression> ret = new ListEx<SExpression>();
@@ -34,17 +34,17 @@ public class SEKeys extends SExpression {
                 ret.add(new SString(k));
             }
         } else {
-            throw new VMException(2037, "mismatch types", headAtom);
+            throw new EgException(2037, "mismatch types", atom);
         }
 
         return new SList(ret);
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEKeys ret = new SEKeys();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.dict = this.dict.deepClone();
         return ret;
     }

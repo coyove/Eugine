@@ -19,7 +19,7 @@ public class PInteropNew extends SExpression {
     public PInteropNew() {}
 
     public PInteropNew(Atom ha, SExpression s, ListEx<String> defs, ListEx<SExpression> args) {
-        headAtom = ha;
+        atom = ha;
 
         subject = s;
         definition = defs;
@@ -28,16 +28,16 @@ public class PInteropNew extends SExpression {
 
     @Override
     @SuppressWarnings("unchecked")
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue sub = subject.evaluate(env);
         if (sub instanceof SNull)
-            throw new VMException(2033, "null object found", headAtom);
+            throw new EgException(2033, "null object found", atom);
 
         Object[] ret;
         try {
             ret = InteropHelper.buildArguments(definition, arguments, env);
-        } catch (VMException ex) {
-            throw new VMException(ex.errorCode, ex.getMessage(), headAtom);
+        } catch (EgException ex) {
+            throw new EgException(ex.errorCode, ex.getMessage(), atom);
         }
 
         ListEx<Class> classes = (ListEx<Class>)ret[0];
@@ -52,18 +52,18 @@ public class PInteropNew extends SExpression {
             return InteropHelper.castJavaType(ctor.newInstance(passArgs.toArray()));
 
         } catch (InvocationTargetException ie) {
-            throw new VMException(2035, "error caused by the constructor: " + ie.getCause(), headAtom);
+            throw new EgException(2035, "error caused by the constructor: " + ie.getCause(), atom);
         } catch (Exception e) {
-            throw new VMException(2036, "creating '" + cls.getSimpleName() + "' failed, " +
-                    e.getMessage(), headAtom);
+            throw new EgException(2036, "creating '" + cls.getSimpleName() + "' failed, " +
+                    e.getMessage(), atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PInteropNew ret = new PInteropNew();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.subject = this.subject.deepClone();
         ret.definition = this.definition; // no need to clone
         ret.arguments = ListEx.deepClone(this.arguments);

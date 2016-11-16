@@ -16,18 +16,14 @@ import java.nio.file.Paths;
 public class Eugine implements Serializable {
     public ExecEnvironment environment = new ExecEnvironment() {{
         put("null", new SNull(true));
-        put("#nil", new SNull(true));
         put("true", new SBool(true, true));
         put("false", new SBool(false, true));
-        put("#t", new SBool(true, true));
-        put("#f", new SBool(false, true));
-        put("~init", new SString("~init", true));
-        put("~comparator", new SString("~comparator", true));
-        put("~doc", new SString("~doc", true));
-        put("~integer.max", new SInteger(Long.MAX_VALUE, true));
-        put("~integer.min", new SInteger(Long.MIN_VALUE, true));
-        put("~double.max", new SDouble(Double.MAX_VALUE, true));
-        put("~double.min", new SDouble(Double.MIN_VALUE, true));
+        put("__comparator__", new SString("__comparator__", true));
+        put("__doc__", new SString("__doc__", true));
+        put("__integer_max__", new SInteger(Long.MAX_VALUE, true));
+        put("__integer_min__", new SInteger(Long.MIN_VALUE, true));
+        put("__double_max__", new SDouble(Double.MAX_VALUE, true));
+        put("__double_min__", new SDouble(Double.MIN_VALUE, true));
     }};
 
     public Object execute(SExpression sExpr) throws Exception {
@@ -40,12 +36,6 @@ public class Eugine implements Serializable {
         out.writeObject(s);
         out.close();
         fileOut.close();
-    }
-
-    public SExpression loadString(String code) throws Exception {
-        Parser p = new Parser();
-        environment.put("__file__", new SString("<vm>"));
-        return SExpression.cast(p.parse(code, "", "<vm>"));
     }
 
     public SExpression loadBinary(String filePath) throws Exception {
@@ -64,19 +54,5 @@ public class Eugine implements Serializable {
         fileIn.close();
 
         return s;
-    }
-
-    public SExpression loadFile(String filePath) throws Exception {
-        Path p_ = Paths.get(filePath);
-        String code = new String(Files.readAllBytes(p_));
-
-        String codeSource = p_.getFileName().toString();
-        String codeFolder = filePath.substring(0, filePath.length() - codeSource.length());
-
-        Parser p = new Parser();
-        environment.put("__path__", new SString(codeFolder));
-        environment.put("__file__", new SString(codeSource));
-
-        return SExpression.cast(p.parse(code, codeFolder, codeSource));
     }
 }

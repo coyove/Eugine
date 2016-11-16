@@ -71,7 +71,7 @@ public class ListEx<T> extends java.util.ArrayList<T> {
         return sub(start, this.size());
     }
 
-    public static ListEx<SExpression> deepClone(ListEx<SExpression> src) throws VMException {
+    public static ListEx<SExpression> deepClone(ListEx<SExpression> src) throws EgException {
         if (src == null) {
             return null;
         }

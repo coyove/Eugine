@@ -17,13 +17,13 @@ public class PType extends SExpression {
     public PType() {}
 
     public PType(Atom ha, SExpression n, TYPE t) {
-        headAtom = ha;
+        atom = ha;
         name = n;
         type = t;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue v = name.evaluate(env);
 
         if (type == TYPE.ADDR) {
@@ -31,17 +31,17 @@ public class PType extends SExpression {
         }
 
         if (v instanceof SObject) {
-            return new SString(v.underlying.getClass().getSimpleName());
+            return new SString(v.underlying.getClass().getName());
         } else {
             return new SString(v.getClass().getSimpleName().substring(1));
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PType ret = new PType();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.name = this.name.deepClone();
         ret.type = this.type;
         return ret;

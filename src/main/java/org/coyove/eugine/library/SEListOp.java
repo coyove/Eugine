@@ -36,9 +36,9 @@ public class SEListOp extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
-                new VMException(3005, "subject must be list", headAtom));
+                new EgException(3005, "subject must be list", atom));
 
         ListEx<SExpression> list = listObj.get();
         switch (op) {
@@ -54,7 +54,7 @@ public class SEListOp extends SExpression {
                 SValue value = this.value.evaluate(env);
                 SInteger pos = Utils.cast(this.pos.evaluate(env), SInteger.class);
                 if (pos == null) {
-                    throw new VMException(3006, "position must be integer", headAtom);
+                    throw new EgException(3006, "position must be integer", atom);
                 }
 
                 list.add(pos.<Long>get().intValue(), value);
@@ -96,8 +96,8 @@ public class SEListOp extends SExpression {
                                 return 0;
                             }
 
-                            BigDecimal num1 = Utils.getNumber(v1, headAtom);
-                            BigDecimal num2 = Utils.getNumber(v2, headAtom);
+                            BigDecimal num1 = Utils.getNumber(v1, atom);
+                            BigDecimal num2 = Utils.getNumber(v2, atom);
 
                             double sign = Math.signum(num1.subtract(num2).doubleValue());
                             return ((int) sign);
@@ -111,15 +111,14 @@ public class SEListOp extends SExpression {
 
                 return listObj;
             default:
-                throw new VMException(3006, "unknown list operation", headAtom);
+                throw new EgException(3006, "unknown list operation", atom);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEListOp ret = new SEListOp();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.op = this.op;
         ret.list = this.list.deepClone();
 

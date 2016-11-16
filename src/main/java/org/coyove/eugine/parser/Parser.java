@@ -25,7 +25,7 @@ public class Parser {
         }
     }
 
-    public Compound parse(String text, String path, String source) throws VMException {
+    public Compound parse(String text, String path, String source) throws EgException {
         Pattern reString = Pattern.compile(
                 "(%\"(?<rawstr>(\"\"|[^\"])*)\")|" +
                         "(\"(?<str>(\\\\.|[^\"\\\\])*)\")|" +
@@ -35,7 +35,7 @@ public class Parser {
         );
 
         if (text.length() < 2)
-            throw new VMException(1000, "Invalid code");
+            throw new EgException(1000, "Invalid code");
 
         basePath = path;
 
@@ -112,7 +112,7 @@ public class Parser {
         return chain;
     }
 
-    private Base parseNext(ListEx<Token> tokens) throws VMException {
+    private Base parseNext(ListEx<Token> tokens) throws EgException {
         Token token = tokens.pop();
         if (token == null)
             return null;
@@ -120,7 +120,7 @@ public class Parser {
         if (token.type == Token.TokenType.RPAREN ||
                 token.type == Token.TokenType.RBRACK ||
                 token.type == Token.TokenType.RBRACE)
-            throw new VMException(1000, "unexpected character", token);
+            throw new EgException(1000, "unexpected character", token);
 
         if (token.type == Token.TokenType.LPAREN ||
                 token.type == Token.TokenType.LBRACK ||
@@ -144,7 +144,7 @@ public class Parser {
                 comp.atoms.add(parseNext(tokens));
 
             if (tokens.size() == 0 || tokens.head().type != ending)
-                throw new VMException(1000, "unexpected character", token);
+                throw new EgException(1000, "unexpected character", token);
 
             tokens.pop();
 
@@ -177,11 +177,11 @@ public class Parser {
                         comp.atoms = new ListEx<Base>();
                         comp.atoms.add(inc);
                     } catch (Exception ex) {
-                        throw new VMException(1100, "failed to include '" + codePath + "', " + ex.getMessage(),
+                        throw new EgException(1100, "failed to include '" + codePath + "', " + ex.getMessage(),
                                 (Atom) comp.atoms.get(0));
                     }
                 } else {
-                    throw new VMException(1101, "path must be a static string", (Atom) comp.atoms.head());
+                    throw new EgException(1101, "path must be a static string", (Atom) comp.atoms.head());
                 }
             }
 
@@ -195,7 +195,7 @@ public class Parser {
             if (comp.atoms.size() == 2 && comp.atoms.head() instanceof Atom &&
                     ((Atom) comp.atoms.head()).token.value.toString().equals("~undef")) {
                 Atom name = Utils.cast(comp.atoms.get(1), Atom.class,
-                        new VMException(1102, "invalid subject to undef", (Atom) comp.atoms.head()));
+                        new EgException(1102, "invalid subject to undef", (Atom) comp.atoms.head()));
                 macros.remove(name.token.value.toString());
                 return new Compound();
             }

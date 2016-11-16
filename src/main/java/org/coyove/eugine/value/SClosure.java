@@ -61,13 +61,13 @@ public class SClosure extends SValue {
 
             SValue.copyAttributes(ret, this);
             return ret;
-        } catch (VMException ex) {
+        } catch (EgException ex) {
             ErrorHandler.print(ex);
             return this;
         }
     }
 
-    public SValue getCopy() throws VMException {
+    public SValue getCopy() throws EgException {
         SClosure ret = new SClosure(outerEnv, arguments, passByValue, ListEx.deepClone(body));
 
         ret.extra.parentEnv = this.extra;

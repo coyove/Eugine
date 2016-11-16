@@ -1,20 +1,26 @@
 package org.coyove.test;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.System;
-import java.net.ServerSocket;
-import java.util.Iterator;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.concurrent.ConcurrentMap;
 
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SExpression;
+import org.coyove.eugine.base.SKeywords;
 import org.coyove.eugine.parser.Compound;
 import org.coyove.eugine.parser.Parser;
+import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.util.ANTLRHelper;
 import org.coyove.eugine.util.ExecEnvironment;
-import org.coyove.eugine.util.VMException;
-import org.kabeja.dxf.*;
-import org.kabeja.dxf.helpers.HatchBoundaryLoop;
-import org.kabeja.parser.*;
+import org.coyove.eugine.util.EgException;
+import org.coyove.eugine.util.Utils;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 
 import static org.coyove.test.REPLTask.multi;
 import static org.coyove.test.REPLTask.multiLine;
@@ -32,10 +38,7 @@ final class REPLTask implements Runnable {
         try {
             Parser p = new Parser();
             Compound c = p.parse(code, "", "<vm>");
-            sExpr = SExpression.cast(c);
-
-            System.out.printf("res%d: %s\n", line, sExpr.evaluate(env));
-        } catch (VMException ex) {
+        } catch (EgException ex) {
             if (ex.errorCode == 1000) {
                 multi = true;
                 multiLine = code;
@@ -54,6 +57,7 @@ final class REPLTask implements Runnable {
 public class main {
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
+        Utils.importExportables();
         try {
             Eugine e = new Eugine();
             System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
@@ -112,18 +116,6 @@ public class main {
                 } catch (InterruptedException iex) {
                     System.out.println("int");
                 }
-            }
-        }
-
-        Eugine e = new Eugine();
-        try {
-            System.out.printf("%s", e.loadFile(args[0]).execute(e.environment));
-        } catch (Exception ex) {
-            if (ex instanceof VMException) {
-                System.out.println("VM ERROR: " + ex.getMessage());
-            } else {
-                System.out.println("JVM ERROR: " + ex);
-                ex.printStackTrace();
             }
         }
     }

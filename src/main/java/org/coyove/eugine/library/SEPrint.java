@@ -28,7 +28,7 @@ public class SEPrint extends SExpression {
         delim = d;
     }
 
-    private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws VMException {
+    private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws EgException {
         String ret = "";
         if (re instanceof SList) {
             ListEx<SExpression> lv = re.get();
@@ -69,7 +69,7 @@ public class SEPrint extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue ret = new SNull();
         for (SValue v : SExpression.eval(arguments, env)) {
             ret = v;
@@ -81,10 +81,10 @@ public class SEPrint extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEPrint ret = new SEPrint();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
 
         ret.delim = this.delim;
         ret.arguments = ListEx.deepClone(this.arguments);

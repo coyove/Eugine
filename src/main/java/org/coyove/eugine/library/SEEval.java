@@ -16,42 +16,41 @@ public class SEEval extends SExpression {
 
     public SEEval() {}
 
-    public SEEval(Atom ha, Compound c) throws VMException {
-        super(ha, c, 1);
+    public SEEval(Atom ha, ListEx<SExpression> args) {
+        super(ha, args, 1);
 
-        text = SExpression.cast(c.atoms.pop());
-        if (c.atoms.size() > 0)
-            env = SExpression.cast(c.atoms.pop());
+        text = args.head();
+        if (args.size() > 1) {
+            env = args.get(1);
+        }
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
 
-        SString text = Utils.cast(this.text.evaluate(env), SString.class,
-                new VMException(2014, "must eval string", headAtom));
+        String text = Utils.cast(this.text.evaluate(env), SString.class,
+                new EgException(2014, "must eval string", atom)).get();
 
         if (this.env != null) {
             SDict e = Utils.cast(this.env.evaluate(env), SDict.class,
-                    new VMException(2015, "environment must be a dict", headAtom));
+                    new EgException(2015, "environment must be a dict", atom));
 
             env = new ExecEnvironment();
             HashMap<String, SValue> custom = e.get();
 
-            for (String k : custom.keySet())
+            for (String k : custom.keySet()) {
                 env.put(k, custom.get(k));
+            }
         }
 
-        Parser p = new Parser();
-        Compound s = p.parse(text.<String>get(), "", "<eval>");
-
-        return SExpression.cast(s).evaluate(env);
+        return ANTLRHelper.executeCode(text, env);
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEEval ret = new SEEval();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.text = this.text.deepClone();
         if (this.env != null) {
             ret.env = this.env.deepClone();

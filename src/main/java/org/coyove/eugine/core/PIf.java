@@ -16,14 +16,14 @@ public class PIf extends SExpression {
     public PIf() {}
 
     public PIf(Atom ha, SExpression c, SExpression t, SExpression f) {
-        headAtom = ha;
+        atom = ha;
         condition = c;
         trueBranch = t;
         falseBranch = f;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         if (evaluateCondition(env)) {
             return trueBranch.evaluate(env);
         } else {
@@ -35,18 +35,18 @@ public class PIf extends SExpression {
         }
     }
 
-    public boolean evaluateCondition(ExecEnvironment env) throws VMException {
+    public boolean evaluateCondition(ExecEnvironment env) throws EgException {
         SBool res = Utils.cast(condition.evaluate(env), SBool.class,
-                new VMException(2026, "invalid condition", headAtom));
+                new EgException(2026, "invalid condition", atom));
 
         return res.get();
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PIf ret = new PIf();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.condition = this.condition.deepClone();
         ret.trueBranch = this.trueBranch.deepClone();
 

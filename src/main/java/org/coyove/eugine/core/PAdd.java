@@ -23,15 +23,9 @@ public class PAdd extends SExpression {
         self = s;
     }
 
-    public PAdd(Atom ha, Compound c, boolean s) throws VMException {
-        super(ha, c, 1);
-        values = SExpression.castPlain(c);
-        self = s;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         ListEx<SValue> results = SExpression.eval(values, env);
         SValue lead = results.head();
 
@@ -66,7 +60,7 @@ public class PAdd extends SExpression {
                     BigDecimal.valueOf(lead.<Long>get());
 
             for (int i = 1; i < results.size(); i++) {
-                BigDecimal next = Utils.getNumber(results.get(i), headAtom);
+                BigDecimal next = Utils.getNumber(results.get(i), atom);
                 ret = ret.add(next);
             }
 
@@ -82,7 +76,7 @@ public class PAdd extends SExpression {
             if (self) {
                 list = lead.get();
                 if (lead.immutable) {
-                    throw new VMException(2101, "list is immutable", headAtom);
+                    throw new EgException(2101, "list is immutable", atom);
                 }
 
                 list.addAll(results.skip(1));
@@ -98,10 +92,9 @@ public class PAdd extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PAdd ret = new PAdd();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
         ret.values = ListEx.deepClone(values);
         ret.self = this.self;
         return ret;

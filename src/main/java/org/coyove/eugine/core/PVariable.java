@@ -17,19 +17,19 @@ public class PVariable extends SExpression {
         varName = n;
     }
 
-    public PVariable(String n, Atom ha, Compound c) {
-        super(ha, c);
+    public PVariable(Atom ha, String n) {
+        atom = ha;
         varName = n;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         if (!env.containsKey(varName)) {
             if (varName.charAt(0) == '@') {
                 return new SString(varName.substring(1), true);
             } else {
                 if (env.strict) {
-                    throw new VMException(2047, "strict mode", headAtom);
+                    throw new EgException(2047, "strict mode", atom);
                 }
 
                 SValue tmp = new SNull(true);
@@ -45,10 +45,10 @@ public class PVariable extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         PVariable ret = new PVariable();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.varName = this.varName;
 
         return ret;

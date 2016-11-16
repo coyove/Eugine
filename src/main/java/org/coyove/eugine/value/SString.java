@@ -1,8 +1,6 @@
 package org.coyove.eugine.value;
 
-import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.util.VMException;
 
 /**
  * Created by coyove on 2016/9/9.

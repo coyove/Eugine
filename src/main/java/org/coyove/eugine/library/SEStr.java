@@ -19,7 +19,7 @@ public class SEStr extends SExpression {
         argument = args.head();
     }
 
-    private SValue convert(SValue arg, ExecEnvironment env) throws VMException {
+    private SValue convert(SValue arg, ExecEnvironment env) throws EgException {
         if (arg instanceof SString) {
             return arg;
         } else if (arg instanceof SNull) {
@@ -41,15 +41,15 @@ public class SEStr extends SExpression {
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         return convert(argument.evaluate(env), env);
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         SEStr ret = new SEStr();
-        ret.headAtom = this.headAtom;
-        ret.tailCompound = this.tailCompound;
+        ret.atom = this.atom;
+
         ret.argument = this.argument.deepClone();
 
         return ret;

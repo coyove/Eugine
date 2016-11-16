@@ -13,19 +13,19 @@ public class PSync extends SExpression {
     public PSync() {}
 
     public PSync(Atom ha, SExpression e) {
-        headAtom = ha;
+        atom = ha;
         expression = e;
     }
 
     @Override
-    public SValue evaluate(ExecEnvironment env) throws VMException {
+    public SValue evaluate(ExecEnvironment env) throws EgException {
         synchronized (this) {
             return expression.evaluate(env);
         }
     }
 
     @Override
-    public SExpression deepClone() throws VMException {
+    public SExpression deepClone() throws EgException {
         // Sync cannot be cloned
         return this;
     }
