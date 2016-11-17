@@ -1,0 +1,12 @@
+(def ThreadDB() => {
+	var db = MapDB.open("test.db")
+	var threadsTable = MapDB.table.open(db, "threads")
+
+	def this.addThread() => sync {
+		
+	}
+
+	// actually not happened
+	def this.close() =>
+		MapDB.close(db)
+})()

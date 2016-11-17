@@ -11,79 +11,90 @@ import java.math.BigDecimal;
  * Created by coyove on 2016/9/10.
  */
 public class PAdd extends SExpression {
-    private ListEx<SExpression> values;
+    private SExpression left;
+    private SExpression right;
     private boolean self = false;
 
     public PAdd() {}
 
     public PAdd(Atom ha, ListEx<SExpression> args, boolean s) {
-        super(ha, args, 1);
+        super(ha, args, 2);
 
-        values = args;
+        left = args.get(0);
+        right = args.get(1);
         self = s;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        ListEx<SValue> results = SExpression.eval(values, env);
-        SValue lead = results.head();
+        SValue left = this.left.evaluate(env);
+        SValue right = this.right.evaluate(env);
 
-        if (lead instanceof SString) {
-            String ret = lead.get();
+        if (left instanceof SConcatString) {
+            if (right.underlying != null) {
+                if (self) {
+                    if (right instanceof SConcatString) {
+                        ((SConcatString) left).texts.addAll(((SConcatString) right).texts);
+                    } else {
+                        ((SConcatString) left).texts.add(right.underlying.toString());
+                    }
 
-            if (self) {
-                StringBuilder sb = new StringBuilder(ret);
-                for (int i = 1; i < results.size(); i++) {
-                    Object obj = results.get(i).get();
-                    if (obj != null) {
-                        sb.append(obj.toString());
+                    return left;
+                } else {
+                    ListEx<String> t = ((SConcatString) left).texts;
+                    SConcatString ret = new SConcatString(t.toArray(new String[t.size()]));
+
+                    if (right instanceof SConcatString) {
+                        ret.texts.addAll(((SConcatString) right).texts);
+                        return ret;
+                    } else {
+                        ret.texts.add(right.underlying.toString());
+                        return ret;
                     }
                 }
-
-                lead.underlying = sb.toString();
-                return new SNull();
             } else {
-                for (int i = 1; i < results.size(); i++) {
-                    Object obj = results.get(i).get();
-                    if (obj != null) {
-                        ret += obj.toString();
-                    }
-                }
-                return new SString(ret);
+                return left.clone();
             }
         }
 
-        if (lead instanceof SDouble || lead instanceof SInteger) {
-            BigDecimal ret = lead instanceof SDouble ?
-                    BigDecimal.valueOf(lead.<Double>get()) :
-                    BigDecimal.valueOf(lead.<Long>get());
-
-            for (int i = 1; i < results.size(); i++) {
-                BigDecimal next = Utils.getNumber(results.get(i), atom);
-                ret = ret.add(next);
-            }
-
-            if (lead instanceof SDouble) {
-                return new SDouble(ret.doubleValue());
+        if (left instanceof SString) {
+            if (right.underlying != null) {
+                if (right instanceof SConcatString) {
+                    SConcatString ret = new SConcatString(left.underlying.toString());
+                    ret.texts.addAll(((SConcatString) right).texts);
+                    return ret;
+                } else {
+                    return new SConcatString(left.underlying.toString(), right.underlying.toString());
+                }
+//                left.underlying = left.<String>get() + right.<String>get();
+//                return new SNull();
             } else {
-                return new SInteger(ret.longValue());
+                return left.clone();
             }
         }
 
-        if (lead instanceof SList) {
+        if (left instanceof SDouble) {
+            return new SDouble(left.<Double>get() + Utils.getDouble(right, atom));
+        }
+
+        if (left instanceof SInteger) {
+            return new SInteger(left.<Long>get() + Utils.getLong(right, atom));
+        }
+
+        if (left instanceof SList) {
             ListEx<SValue> list;
             if (self) {
-                list = lead.get();
-                if (lead.immutable) {
+                list = left.get();
+                if (left.immutable) {
                     throw new EgException(2101, "list is immutable", atom);
                 }
 
-                list.addAll(results.skip(1));
+                list.add(right);
                 return new SNull();
             } else {
-                list = (ListEx<SValue>) lead.<ListEx<SValue>>get().clone();
-                list.addAll(results.skip(1));
+                list = (ListEx<SValue>) left.<ListEx<SValue>>get().clone();
+                list.add(right);
                 return new SList(list);
             }
         }
@@ -95,7 +106,8 @@ public class PAdd extends SExpression {
     public SExpression deepClone() throws EgException {
         PAdd ret = new PAdd();
         ret.atom = this.atom;
-        ret.values = ListEx.deepClone(values);
+        ret.left = this.left.deepClone();
+        ret.right = this.right.deepClone();
         ret.self = this.self;
         return ret;
     }

@@ -21,7 +21,7 @@ public class SEMath extends SExpression {
     private OPERATION func;
 
     public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN,
-        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, TIME, UTC_TIME, POW}
+        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, POW}
 
     public SEMath() {
     }
@@ -75,11 +75,6 @@ public class SEMath extends SExpression {
                 } else {
                     return new SDouble(defaultRandom.nextDouble());
                 }
-            case TIME:
-                return new SInteger((long) (new Date().getTime() / n));
-            case UTC_TIME:
-                return new SString(DateFormatUtils.formatUTC((long) n,
-                        "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
             default:
                 throw new EgException(3007, "not implemented", atom);
         }

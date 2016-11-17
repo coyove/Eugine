@@ -19,5 +19,35 @@ public class EgExport implements Exportable {
                 return new OpenOp(new Atom(tok), arguments);
             }
         });
+        lookup.put("MapDB.table.open", new SKeywords.CallableKeyword() {
+            public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                return new OpenTableOp(new Atom(tok), arguments);
+            }
+        });
+        lookup.put("MapDB.close", new SKeywords.CallableKeyword() {
+            public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                return new DbOp(new Atom(tok), arguments, DbOp.OPERATION.CLOSE);
+            }
+        });
+        lookup.put("MapDB.commit", new SKeywords.CallableKeyword() {
+            public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                return new DbOp(new Atom(tok), arguments, DbOp.OPERATION.COMMIT);
+            }
+        });
+        lookup.put("MapDB.table.put", new SKeywords.CallableKeyword() {
+            public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                return new TableOp(new Atom(tok), arguments, TableOp.OPERATION.PUT);
+            }
+        });
+        lookup.put("MapDB.table.get", new SKeywords.CallableKeyword() {
+            public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                return new TableOp(new Atom(tok), arguments, TableOp.OPERATION.GET);
+            }
+        });
+        lookup.put("MapDB.table.remove", new SKeywords.CallableKeyword() {
+            public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                return new TableOp(new Atom(tok), arguments, TableOp.OPERATION.REMOVE);
+            }
+        });
     }
 }

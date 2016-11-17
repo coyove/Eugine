@@ -15,24 +15,32 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
 
         def this.parsePostBody () => {
             var this.postParams = parsePairs(this.data, "&")
-            var parts = String.split(this.route, "\\?")
+            if this.route != null {
+                var parts = String.split(this.route, "\\?")
 
-            if len(parts) == 2 {
-                var tmp = parsePairs(parts[1], "&")
-                for tmp do (k) => 
-                    this.postParams[k] = tmp[k]
+                if len(parts) == 2 {
+                    var tmp = parsePairs(parts[1], "&")
+                    for tmp do (k) => 
+                        this.postParams[k] = tmp[k]
 
-                this.route = parts[0]
+                    this.route = parts[0]
+                }
             }
         }
+
+        def this.parseCookies () =>
+            var this.cookies = parsePairs(if (this.rawCookie) this.rawCookie else "", ";")
 
         def parsePairs (text, delim) => {
             var pairs = String.split(text, delim)
             var ret = {}
             for pairs do (pair) => {
                 var kv = String.split(pair, "=")
+                var key = String.trim(kv[0])
                 if len(kv) == 2 {
-                    ret[String.trim(kv[0])] = Util.decodeURI(String.trim(kv[1]))
+                    ret[key] = Util.decodeURI(String.trim(kv[1]))
+                } else if len(kv) == 1 && key != "" {
+                    ret[key] = ""
                 }
             }
 
@@ -61,6 +69,26 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             }
         }
 
+        def this.writeCookie(key, value, options) => {
+            var payload = key + "=" + value
+
+            for options do (k, v) =>
+                switch k do {
+                    "Expires" => {
+                        payload += "; Expires=" + Time.utcFormat(Time.unix(0) + v * 1000)
+                        payload += "; Max-Age=" + v
+                    }
+                    "HttpOnly" => {
+                        payload += "; HttpOnly"
+                    }
+                    _ => {
+                        payload += "; " + k + "=" + v
+                    }
+                }
+
+            this.writeHeader("Set-Cookie", payload)
+        }
+
         def this.writeHeader (key, value) =>
             this.writeBytes(buffer(key + ": " + value + "\r\n"))
 
@@ -70,6 +98,9 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
 
             this.writeBytes(buffer(tmp))
         }
+
+        def this.eoh() =>
+            this.writeBytes(buffer("\r\n"))
 
         def this.writeBytes(bytes) =>
             if !responseSocket::isClosed()
@@ -119,16 +150,15 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         for requests do (request) => {
             var parts = String.split(request, " ")
             var p = null
-
             if len(parts) > 1
                 switch p = parts[0]::toLowerCase() do {
                     "get" =>
-                        var context.route = parts[1], context.action = "get"
+                        var context.route = parts[1], context.method = "get"
 
                     "post" =>
-                        var context.route = parts[1], context.action = "post"   
+                        var context.route = parts[1], context.method = "post"   
 
-                    "cookie" =>
+                    "cookie:" =>
                         var context.rawCookie = request[7..]
 
                     _ =>
@@ -136,15 +166,20 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                 }
         }
 
-        var context.data = rawRequest[headerLength..]
-        context.parsePostBody()
+        if !context.method 
+            exit("invalid request (" + rawRequest + ")")
 
-        switch context.action do {
+        var context.data = rawRequest[headerLength..]
+        
+        context.parsePostBody()
+        context.parseCookies()
+
+        switch context.method do {
             "get" => var rref = routerGET
             "post" => var rref = routerPOST
         }
 
-        if context.action == "post" && context.headers["content-type"] != "application/x-www-form-urlencoded" {
+        if context.method == "post" && context.headers["content-type"] != "application/x-www-form-urlencoded" {
             context.writeCommon(403, "plain")
             context.write("\r\n")
         } else {

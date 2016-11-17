@@ -37,7 +37,9 @@ public class SEReverse extends SExpression {
             return new SInteger(-subject.<Long>get());
         } else if (subject instanceof SDouble) {
             return new SDouble(-subject.<Double>get());
-        } else {
+        } else if (subject instanceof SBool) {
+            return new SBool(!subject.<Boolean>get());
+        }else {
             throw new EgException(3015, "require list, integer or double", atom);
         }
     }

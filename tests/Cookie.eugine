@@ -1,0 +1,16 @@
+(def Cookie() => {
+    def this.newCookie() => {
+        var name = Util.randomString(8)
+        name + "&" + Util.hashString(name)
+    }
+
+    def this.get(cookie) => {
+        var parts = String.split(str(cookie), "&")
+        if len(parts) != 2
+            null
+        else if Util.hashString(parts[0]) == parts[1]
+            parts[0]
+        else
+            null
+    }
+})()

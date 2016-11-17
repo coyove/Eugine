@@ -5,8 +5,7 @@ import org.coyove.eugine.base.SKeywords;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
-import org.coyove.eugine.value.SDouble;
-import org.coyove.eugine.value.SInteger;
+import org.coyove.eugine.value.*;
 import org.reflections.Reflections;
 
 import java.math.BigDecimal;
@@ -59,6 +58,23 @@ public final class Utils {
         }
     }
 
+    public static boolean getBoolean(SValue num, Atom headAtom) {
+        if (num instanceof SInteger) {
+            return num.<Long>get() != 0;
+        } else if (num instanceof SDouble) {
+            return Math.abs(num.<Double>get()) > 1e-6;
+        } else if (num instanceof SBool) {
+            return num.get();
+        } else if (num instanceof SNull) {
+            return false;
+        } else if (num instanceof SString) {
+            return !num.<String>get().isEmpty();
+        } else {
+            ErrorHandler.print(4008, num + " is not a boolean", headAtom);
+            return false;
+        }
+    }
+
     public static BigDecimal getNumber(SValue num, Atom headAtom) {
         BigDecimal ret;
 
@@ -68,7 +84,7 @@ public final class Utils {
             ret = BigDecimal.valueOf(num.<Double>get());
         } else {
             ret = BigDecimal.valueOf(0);
-            ErrorHandler.print(4008, "non-number found", headAtom);
+            ErrorHandler.print(4008, num + " is not a number", headAtom);
         }
 
         return ret;
@@ -82,7 +98,7 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = num.<Double>get();
         } else {
-            throw new EgException(4007, "non-number found", headAtom);
+            throw new EgException(4007, num + " is not a number", headAtom);
         }
 
         return ret;
@@ -96,7 +112,7 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = num.<Double>get().longValue();
         } else {
-            throw new EgException(4007, "non-number found", headAtom);
+            throw new EgException(4007, num + " is not a number", headAtom);
         }
 
         return ret;

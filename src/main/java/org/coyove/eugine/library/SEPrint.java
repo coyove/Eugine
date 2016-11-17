@@ -31,11 +31,11 @@ public class SEPrint extends SExpression {
     private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws EgException {
         String ret = "";
         if (re instanceof SList) {
-            ListEx<SExpression> lv = re.get();
+            ListEx<SValue> lv = re.get();
             String[] values = new String[lv.size()];
 
             for (int i = 0; i < lv.size(); i++) {
-                values[i] = print(lv.get(i).evaluate(env), env, padding, true);
+                values[i] = print(lv.get(i), env, padding, true);
             }
 
             ret += "[" + StringUtils.join(values, ", ") + "]";
@@ -47,7 +47,7 @@ public class SEPrint extends SExpression {
 
             for (String key : keys) {
                 values[i++] = String.format("%1$" + padding + "s\"%2$s\": %3$s,\n", " ", key,
-                        print(map.get(key).evaluate(env), env, padding + 2, true));
+                        print(map.get(key), env, padding + 2, true));
             }
 
             ret += "{\n" + StringUtils.join(values, "") + StringUtils.leftPad("}", padding - 1);
@@ -55,9 +55,9 @@ public class SEPrint extends SExpression {
             ret = "null";
         } else if (re instanceof SString) {
             if (quote) {
-                ret = String.format("\"%1$s\"", StringEscapeUtils.escapeJava(re.underlying.toString()));
+                ret = String.format("\"%1$s\"", StringEscapeUtils.escapeJava(re.<String>get()));
             } else {
-                ret = String.format("%1$s", re.underlying.toString());
+                ret = String.format("%1$s", re.get());
             }
         } else if (re instanceof SClosure) {
             ret = re.toString();

@@ -1,3 +1,5 @@
+import Cookie
+
 (def Util() => {
     var javaURLDecoder = static java\net\URLDecoder
     var javaURLEncoder = static java\net\URLEncoder
@@ -14,6 +16,18 @@
             false
         else 
             text[0..len(prefix)] == prefix
+
+    def this.randomString(length) => {
+        var table = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        var ret = ""
+        for 0..length do () => 
+            ret += table[Math.floor(Math.random(0) * 58)]
+
+        ret
+    }
+
+    def this.hashString(text) =>
+        Digest.hexSHA1(Digest.SHA256(text + Config.salt))
 
     def this.struct (f, args...) => {
         f(args...)

@@ -236,7 +236,7 @@ pair returns [String k, SExpression v]
     ;
 
 list returns [PList v = new PList()]
-    : '[' (value { $v.values.add($value.v); }) (',' value { $v.values.add($value.v); } )* ']'
+    : '[' (value { $v.values.add($value.v); }) (',' value { $v.values.add($value.v); } )* ','? ']'
     | '[' ']'
     ;
 
@@ -286,13 +286,17 @@ topExpr returns [SExpression v]
     | Identifier    
         { $v = new PVariable(new Atom($Identifier), $Identifier.text); }
     | RawString     
-        { $v = new SString(org.coyove.eugine.util.Utils.unescape($RawString.text)); }
+        { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($RawString.text)); }
     | StringLiteral 
-        { $v = new SString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
+        { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
     | Integer
         { $v = new SInteger($Integer.text); }
     | Double
         { $v = new SDouble($Double.text); }
+    | list
+        { $v = $list.v; }
+    | dict
+        { $v = $dict.v; }
     ;
 
 unaryExpr returns [SExpression v]
@@ -436,8 +440,4 @@ expr returns [SExpression v]
         }
     | switchStmt
         { $v = $switchStmt.v; }
-    | list
-        { $v = $list.v; }
-    | dict
-        { $v = $dict.v; }
     ;

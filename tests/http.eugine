@@ -1,50 +1,62 @@
-import Util
+import Utils
 import HttpServer
-
-var rssCache = {}
+import Template
+import Thread
 
 (def Config() => {
     var this.port = 8080
     var this.socketReadTimeout = 5000
+
+    var this.siteName = "Test Site"
+    var this.salt = "test salt"
+
+    var this.openPost = false
 })()
 
-println("listening on port ", Config.port)
 var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
+
+def errorHandler(ctx, msg) => {
+	ctx.writeCommon(200, "html")
+    ctx.eoh()
+    ctx.write(Template.error(msg))
+}
 
 server.addRouter("GET", "_/", (context) => {
     context.writeCommon(200, "html")
-    context.write("\r\n")
-    for context.postParams do (k) =>
-        context.write(k, "=", context.postParams[k], "<br>")
+    context.eoh()
+    context.write(Template.index())
 })
-server.start()
 
-// println(str(Digest.MD5("zzz")))
+server.addRouter("POST", "_/new", (context) => enter {
+	var uid = context.cookies.uid
+	var name = Cookie.get(uid)
 
-// var res = []
-// var _zzz = -1
+	if !name
+		if Config.openPost {
+			uid = Cookie.newCookie()
+			name = Cookie.get(uid)
+		} else 
+			exit(1)
 
-// def struct (f, args...) => {
-//         f(args...)
-//         clone f
-//     }
+    context.writeCommon(302, "html")
+    context.writeHeader("Location", "/")
+    context.writeCookie("uid", uid, { Expires: 86400 * 365 })
+    context.eoh()
 
-// def [struct] zzz(a) => {
-//     var b = a
+    for context.postParams do (k) =>
+        println(k, "=", context.postParams[k])
+} catch (e) {
+	switch __e__ do {
+		1 => errorHandler(context, "无效cookie")
+	}
+})
 
-//     def this.print() => sync res +> b
+// var _start = Time.unix(0)
+// var zzz = clone ""
+// for 0..100 do () => {
+// 	for 0..100 do () => zzz <+ "a"
 // }
-
-// for 0..5000 do (i) => ((i) => {
-//     zzz(i).print()
-// })#(i)
-
-// sleep(2000)
-
-// var tmp = {}
-// for res do (r) => tmp[r] = true
-// res = []
-
-// for tmp do (k) => res +> k
-
-// enter println(range(1,0, zzz(1)))
+// println(Time.unix(0) - _start)
+// println(len(zzz))
+println("listening on port ", Config.port)
+server.start()

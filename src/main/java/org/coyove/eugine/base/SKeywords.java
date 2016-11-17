@@ -250,12 +250,17 @@ public class SKeywords {
                 });
                 put("Time.unix", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.TIME);
+                        return new SETime(new Atom(tok), c, SETime.OPERATION.TIME);
+                    }
+                });
+                put("Time.format", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SETime(new Atom(tok), c, SETime.OPERATION.FORMAT_TIME);
                     }
                 });
                 put("Time.utcFormat", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.UTC_TIME);
+                        return new SETime(new Atom(tok), c, SETime.OPERATION.UTC_TIME);
                     }
                 });
                 put("Math.round", new CallableKeyword() {
@@ -367,6 +372,16 @@ public class SKeywords {
                 put("List.insert", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INSERT);
+                    }
+                });
+                put("Json.encode", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEJsonEncoder(new Atom(tok), c);
+                    }
+                });
+                put("Json.decode", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEJsonDecoder(new Atom(tok), c);
                     }
                 });
             }};

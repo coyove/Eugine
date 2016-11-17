@@ -36,10 +36,7 @@ public class PIf extends SExpression {
     }
 
     public boolean evaluateCondition(ExecEnvironment env) throws EgException {
-        SBool res = Utils.cast(condition.evaluate(env), SBool.class,
-                new EgException(2026, "invalid condition", atom));
-
-        return res.get();
+        return Utils.getBoolean(condition.evaluate(env), atom);
     }
 
     @Override

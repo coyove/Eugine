@@ -24,7 +24,13 @@ public class PCond extends SExpression {
     }
 
     public static boolean compare(Object left, Object right) {
-        return (left == null && right == null) || left.equals(right);
+        if (left == null && right == null) {
+            return true;
+        } else if (left == null || right == null) {
+            return false;
+        } else {
+            return left.equals(right);
+        }
     }
 
     @Override

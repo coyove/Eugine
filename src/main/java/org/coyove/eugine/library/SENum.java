@@ -45,10 +45,8 @@ public class SENum extends SExpression {
             }
 
             return new SList(ret);
-        } else if (arg instanceof SInteger) {
-            return new SDouble(arg.<Long>get().doubleValue());
-        } else if (arg instanceof SDouble) {
-            return new SInteger(arg.<Double>get().longValue());
+        } else if (arg instanceof SInteger || arg instanceof SDouble) {
+            return arg;
         } else {
             return new SNull();
         }

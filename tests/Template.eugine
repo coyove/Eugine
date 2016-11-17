@@ -1,0 +1,61 @@
+(def Template() => {
+    def header(title) => @"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='referrer' content='origin'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <link href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAKlBMVEVLWX3///9seJVyfZlaZ4heaopUYYS8wc7b3uVjb47x8vXT1t96hJ/8/Pwv3cUDAAAAOklEQVR4XmOgH5hsDAZmcIFGQTAQxy2wEV3AxcVHUDA0NIABDhiYBAUZGBhGrADnRSm0cGZLYKAeAABwbwqMNFT1HQAAAABJRU5ErkJggg==' rel='icon' type='image/x-icon'>
+    <title>" + title + " | " + Config.siteName + @"</title>
+</head>
+<body>
+    <div id='container'>"
+
+    def footer() => @"
+    </div>
+</body>"
+
+    def _post(action, fields) => {
+        var ret = clone @"
+<form action='" + action + @"' method='post'>
+    <table>"
+        for fields do (f) => 
+            ret <+ ("<tr><td>" + f.text + "</td><td>" + {
+                text: 
+                    "<input type='text' name='" + f.name + "'/>",
+                textarea: 
+                    "<textarea name='" + f.name + "' rows='" + f.rows + "'></textarea>",
+                checkbox:
+                    "<input type='checkbox' name='" + f.name + "'/><label for='" + f.name + "'>" + f.label + "</label>",
+                submit:
+                    "<input type='submit' value='" + f.value + "'/>"
+            }[f.type] + "</td></tr>")
+
+        ret + @"
+    </table>
+</form>"
+    }
+
+    def post(endpoint, button) => {
+        _post(endpoint, [
+            { text: "标题", type: "text", name: "title" },
+            { text: "名称", type: "text", name: "name" },
+            { text: "正文", type: "textarea", name: "content", rows: 10 },
+            { text: "", type: "submit", value: button },
+        ])
+    }
+
+    def this.index() => {
+        var ret = clone header("首页")
+        ret <+ post("/new", "提交")
+        ret <+ footer()
+        ; ret
+    }
+
+    def this.error(msg) => {
+        var ret = clone header("错误")
+        ret <+ msg
+        ret <+ footer()
+        ; ret
+    }
+})()

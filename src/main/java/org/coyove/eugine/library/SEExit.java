@@ -29,10 +29,10 @@ public class SEExit extends SExpression {
                 throw new EgException(2016, "message must be string or integer", atom);
             }
 
-            env.putVar("~e", num);
+            env.putVar("__e__", num);
             throw new EgException(7001, num.<Long>get().toString(), atom);
         } else {
-            env.putVar("~e", msg);
+            env.putVar("__e__", msg);
             throw new EgException(7000, msg.<String>get(), atom);
         }
     }
