@@ -26,18 +26,28 @@ public class SEContains extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String key = Utils.cast(this.key.evaluate(env), SString.class,
-                new EgException(3011, "key must be string", atom)).get();
+        SValue key = this.key.evaluate(env);
 
         SValue sub = this.map.evaluate(env);
-        if (sub instanceof SDict) {
+        if (sub instanceof SDict && key instanceof SString) {
             HashMap<String, SValue> map = sub.get();
-            return new SBool(map.containsKey(key));
-        } else if (sub instanceof SString) {
+            return new SBool(map.containsKey(key.<String>get()));
+        } else if (sub instanceof SList) {
+            ListEx<SValue> list = sub.get();
+            Object tester = key instanceof SConcatString ? key.<String>get() : key.get();
+
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).equals(tester)) {
+                    return new SInteger(i);
+                }
+            }
+
+            return new SInteger(-1);
+        } else if (sub instanceof SString && key instanceof SString) {
             String text = sub.get();
-            return new SInteger(StringUtils.indexOf(text, key));
+            return new SInteger(StringUtils.indexOf(text, key.<String>get()));
         } else {
-            throw new EgException(3010, "invalid subject", atom);
+            throw new EgException(3010, "invalid subject or key", atom);
         }
     }
 

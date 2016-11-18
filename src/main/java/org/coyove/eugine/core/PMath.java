@@ -12,7 +12,8 @@ import java.math.MathContext;
  * Created by coyove on 2016/9/10.
  */
 public class PMath extends SExpression {
-    private ListEx<SExpression> values;
+    private SExpression left;
+    private SExpression right;
     private ACTION action;
 
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
@@ -20,57 +21,59 @@ public class PMath extends SExpression {
     public PMath() {}
 
     public PMath(Atom ha, ListEx<SExpression> args, ACTION a) {
-        super(ha, args, 1);
+        super(ha, args, 2);
 
         action = a;
-        values = args;
+        left = args.get(0);
+        right = args.get(1);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        ListEx<SValue> results = SExpression.eval(values, env);
-        SValue lead = results.head();
+        SValue left = this.left.evaluate(env);
+        SValue right = this.right.evaluate(env);
 
-        if (lead instanceof SDouble || lead instanceof SInteger) {
-        } else {
-            return new SNull();
-        }
-
-        BigDecimal ret = lead instanceof SDouble ?
-                BigDecimal.valueOf(lead.<Double>get()) :
-                BigDecimal.valueOf(lead.<Long>get());
-
-        for (int i = 1; i < results.size(); i++) {
-            BigDecimal next = Utils.getNumber(results.get(i), atom);
-            switch (action) {
-                case SUBTRACT:
-                    ret = ret.subtract(next);
-                    break;
-                case MULTIPLY:
-                    ret = ret.multiply(next);
-                    break;
-                case DIVIDE:
-                    if (next.abs().doubleValue() < 0.000001) {
-                        throw new EgException(2012, "divided by zero", atom);
+        switch (action) {
+            case SUBTRACT:
+                if (left instanceof SInteger) {
+                    return new SInteger(left.<Long>get() - Utils.castLong(right, atom));
+                } else if (left instanceof SDouble) {
+                    return new SDouble(left.<Double>get() - Utils.castDouble(right, atom));
+                } else {
+                    throw new EgException(7040, "invalid number: " + left, atom);
+                }
+            case MULTIPLY:
+                if (left instanceof SInteger) {
+                    return new SInteger(left.<Long>get() * Utils.castLong(right, atom));
+                } else if (left instanceof SDouble) {
+                    return new SDouble(left.<Double>get() * Utils.castDouble(right, atom));
+                } else {
+                    throw new EgException(7040, "invalid number: " + left, atom);
+                }
+            case DIVIDE:
+                if (left instanceof SInteger) {
+                    Long lr = Utils.castLong(right, atom);
+                    if (lr == 0) {
+                        throw new EgException(7041, "divided by zero", atom);
+                    } else {
+                        return new SInteger(left.<Long>get() / lr);
                     }
-
-                    ret = ret.divide(next, MathContext.DECIMAL64);
-                    break;
-                case MODULAR:
-                    if (next.abs().doubleValue() < 0.000001) {
-                        throw new EgException(2013, "moded by zero", atom);
-                    }
-
-                    Long rem = ret.divide(next, MathContext.DECIMAL64).longValue();
-                    ret = ret.subtract(next.multiply(BigDecimal.valueOf(rem)));
-                    break;
-            }
-        }
-
-        if (lead instanceof SDouble) {
-            return new SDouble(ret.doubleValue());
-        } else {
-            return new SInteger(ret.longValue());
+                } else if (left instanceof SDouble) {
+                    return new SDouble(left.<Double>get() / Utils.castDouble(right, atom));
+                } else {
+                    throw new EgException(7040, "invalid number: " + left, atom);
+                }
+            case MODULAR:
+                if (left instanceof SInteger) {
+                    return new SInteger(left.<Long>get() % Utils.castLong(right, atom));
+                } else if (left instanceof SDouble) {
+                    return new SDouble(left.<Double>get() % Utils.castDouble(right, atom));
+                } else {
+                    throw new EgException(7040, "invalid number: " + left, atom);
+                }
+            default:
+                // never happen
+                return null;
         }
     }
 
@@ -80,7 +83,8 @@ public class PMath extends SExpression {
         ret.atom = this.atom;
 
         ret.action = this.action;
-        ret.values = ListEx.deepClone(this.values);
+        ret.left = this.left.deepClone();
+        ret.right = this.right.deepClone();
 
         return ret;
     }

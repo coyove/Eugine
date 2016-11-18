@@ -96,8 +96,8 @@ public class SEListOp extends SExpression {
                                 return 0;
                             }
 
-                            BigDecimal num1 = Utils.getNumber(v1, atom);
-                            BigDecimal num2 = Utils.getNumber(v2, atom);
+                            BigDecimal num1 = Utils.castNumber(v1, atom);
+                            BigDecimal num2 = Utils.castNumber(v2, atom);
 
                             double sign = Math.signum(num1.subtract(num2).doubleValue());
                             return ((int) sign);

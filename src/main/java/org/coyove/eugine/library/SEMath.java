@@ -1,13 +1,11 @@
 package org.coyove.eugine.library;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 import java.util.Date;
-import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -40,7 +38,7 @@ public class SEMath extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue arg = argument.evaluate(env);
-        double n = Utils.getDouble(arg, atom);
+        double n = Utils.castDouble(arg, atom);
 
         switch (func) {
             case SIN:
@@ -66,7 +64,7 @@ public class SEMath extends SExpression {
             case SQRT:
                 return new SDouble(Math.sqrt(n));
             case POW:
-                double p = Utils.getDouble(argument2.evaluate(env), atom);
+                double p = Utils.castDouble(argument2.evaluate(env), atom);
                 return new SDouble(Math.pow(n, p));
             case RANDOM:
                 if (n != 0) {

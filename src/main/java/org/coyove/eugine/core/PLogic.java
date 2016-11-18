@@ -25,7 +25,7 @@ public class PLogic extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        boolean ret = Utils.getBoolean(values.head().evaluate(env), atom);
+        boolean ret = Utils.castBoolean(values.head().evaluate(env), atom);
 
         if (ret && log == LOGIC.OR) {
             return new SBool(true);
@@ -37,7 +37,7 @@ public class PLogic extends SExpression {
 
         if (log != LOGIC.NOT) {
             for (int i = 1; i < values.size(); i++) {
-                boolean next = Utils.getBoolean(values.get(i).evaluate(env), atom);
+                boolean next = Utils.castBoolean(values.get(i).evaluate(env), atom);
                 switch (log) {
                     case AND:
                         ret = ret && next;

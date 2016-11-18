@@ -35,6 +35,6 @@ public class SConcatString extends SString {
 
     @Override
     public String toString() {
-        return "ConcatString = " + this.get();
+        return "String = " + this.get();
     }
 }

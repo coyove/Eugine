@@ -2,7 +2,9 @@
 	var db = MapDB.open("test.db")
 	var threadsTable = MapDB.table.open(db, "threads")
 
-	def this.addThread() => sync {
+	def this.addThread(data) => sync {
+		var counter = MapDB.table.get(threadsTable, "counter")
+		MapDB.table.put(threadsTable, "counter", counter++)
 		
 	}
 

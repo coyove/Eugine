@@ -24,10 +24,10 @@ public class PCompare extends SExpression {
     }
 
     private boolean compareNumber(ListEx<SValue> nums, int ...signs) throws EgException {
-        BigDecimal first = Utils.getNumber(nums.head(), atom);
+        BigDecimal first = Utils.castNumber(nums.head(), atom);
 
         for (int i = 1; i < nums.size(); i++) {
-            BigDecimal next = Utils.getNumber(nums.get(i), atom);
+            BigDecimal next = Utils.castNumber(nums.get(i), atom);
             int sign = first.subtract(next).signum();
 
             if (signs[0] != sign && signs[1] != sign)

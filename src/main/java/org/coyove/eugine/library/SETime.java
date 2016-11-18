@@ -8,7 +8,6 @@ import org.coyove.eugine.util.*;
 
 import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -40,17 +39,17 @@ public class SETime extends SExpression {
 
         switch (func) {
             case TIME:
-                long div = Utils.getLong(arg, atom);
+                long div = Utils.castLong(arg, atom);
                 if (div == 0) {
                     div++;
                 }
 
                 return new SInteger(new Date().getTime() / div);
             case UTC_TIME:
-                return new SString(DateFormatUtils.formatUTC(Utils.getLong(arg, atom),
+                return new SString(DateFormatUtils.formatUTC(Utils.castLong(arg, atom),
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
             case FORMAT_TIME:
-                long millis = Utils.getLong(arg, atom);
+                long millis = Utils.castLong(arg, atom);
                 String format = Utils.cast(argument2.evaluate(env), SString.class,
                         new EgException(7034, "invalid time format", atom)).get();
 

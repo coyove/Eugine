@@ -5,8 +5,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.math.BigDecimal;
-
 /**
  * Created by coyove on 2016/9/10.
  */
@@ -75,11 +73,11 @@ public class PAdd extends SExpression {
         }
 
         if (left instanceof SDouble) {
-            return new SDouble(left.<Double>get() + Utils.getDouble(right, atom));
+            return new SDouble(left.<Double>get() + Utils.castDouble(right, atom));
         }
 
         if (left instanceof SInteger) {
-            return new SInteger(left.<Long>get() + Utils.getLong(right, atom));
+            return new SInteger(left.<Long>get() + Utils.castLong(right, atom));
         }
 
         if (left instanceof SList) {

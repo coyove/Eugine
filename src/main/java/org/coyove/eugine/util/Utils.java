@@ -58,7 +58,7 @@ public final class Utils {
         }
     }
 
-    public static boolean getBoolean(SValue num, Atom headAtom) {
+    public static boolean castBoolean(SValue num, Atom headAtom) {
         if (num instanceof SInteger) {
             return num.<Long>get() != 0;
         } else if (num instanceof SDouble) {
@@ -75,7 +75,7 @@ public final class Utils {
         }
     }
 
-    public static BigDecimal getNumber(SValue num, Atom headAtom) {
+    public static BigDecimal castNumber(SValue num, Atom headAtom) {
         BigDecimal ret;
 
         if (num instanceof SInteger) {
@@ -90,7 +90,7 @@ public final class Utils {
         return ret;
     }
 
-    public static Double getDouble(SValue num, Atom headAtom) throws EgException {
+    public static Double castDouble(SValue num, Atom headAtom) throws EgException {
         Double ret;
 
         if (num instanceof SInteger) {
@@ -98,13 +98,13 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = num.<Double>get();
         } else {
-            throw new EgException(4007, num + " is not a number", headAtom);
+            throw new EgException(4007, num + " is not a double", headAtom);
         }
 
         return ret;
     }
 
-    public static Long getLong(SValue num, Atom headAtom) throws EgException {
+    public static Long castLong(SValue num, Atom headAtom) throws EgException {
         Long ret;
 
         if (num instanceof SInteger) {
@@ -112,10 +112,18 @@ public final class Utils {
         } else if (num instanceof SDouble) {
             ret = num.<Double>get().longValue();
         } else {
-            throw new EgException(4007, num + " is not a number", headAtom);
+            throw new EgException(4007, num + " is not an integer", headAtom);
         }
 
         return ret;
+    }
+
+    public static String castString(SValue num, Atom headAtom) throws EgException {
+        if (num instanceof SString) {
+            return num.get();
+        } else {
+            throw new EgException(4007, num + " is not a string", headAtom);
+        }
     }
 
     public static String bytesToHexString(byte[] buf) {

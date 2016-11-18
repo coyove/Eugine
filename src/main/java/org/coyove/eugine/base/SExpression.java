@@ -15,7 +15,7 @@ public abstract class SExpression implements java.io.Serializable {
         atom = ha;
 
         if (args.size() < count) {
-            System.out.println((new EgException(2000, "not enough arguments", ha)).toString());
+            ErrorHandler.print(2000, "not enough arguments", ha);
         }
     }
 

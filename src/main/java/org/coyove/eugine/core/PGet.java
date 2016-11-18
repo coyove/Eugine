@@ -25,18 +25,13 @@ public class PGet extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue dict = this.dict.evaluate(env);
-        SExpression sk = this.key.evaluate(env);
+        SValue sk = this.key.evaluate(env);
 
         if (dict instanceof SDict) {
             String k;
-            if (sk instanceof SString) {
-                k = ((SString) sk).get();
-            } else if (sk instanceof SInteger) {
-                k = ((SInteger) sk).get().toString();
-            } else if (sk instanceof SDouble) {
-                k = ((SDouble) sk).get().toString();
-            } else if (sk instanceof SBool) {
-                k = ((SBool) sk).get().toString();
+            if (sk instanceof SString || sk instanceof SInteger ||
+                    sk instanceof SDouble || sk instanceof SBool) {
+                k = sk.get();
             } else {
                 throw new EgException(2019, "invalid dict key: " + sk, atom);
             }
@@ -106,10 +101,8 @@ public class PGet extends SExpression {
                 return ret;
             }
         } else if (dict instanceof SObject) {
-            SString fn = Utils.cast(sk, SString.class,
-                    new EgException(2025, "object field must be string", atom));
+            String field = Utils.castString(sk, atom);
 
-            String field = fn.get();
             try {
                 Object obj = dict.get();
 
