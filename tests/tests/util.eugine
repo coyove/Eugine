@@ -1,6 +1,42 @@
+def struct (f, args...) => {
+	f(args...)
+	clone f
+}
+
+def map (f, list) => {
+	for list do (elem, i) =>{
+		list[i] = f(elem)
+	}
+
+	list
+}
+
+(def Utils() => {
+	def this.deepCompareList(list1, list2) =>
+		if len(list1) != len(list2) 
+			false
+		else {
+			var ret = true
+
+			for list1 do (elem, i) => {
+				if (typeof elem) == "List" && (typeof list2[i]) == "List"
+					ret = _this_.deepCompareList(elem, list2[i])
+				else
+					ret = elem == list2[i]
+			}
+
+			ret
+		} 
+
+	var _this_ = this
+})()
+
 (def Debug() => {
 	var totalPassed = 0
 	var totalFailed = 0
+	var startTime = 0
+
+	def this.start() => startTime = Time.unix(0)
 
 	def this.assert (result, text) =>
 		if result { 
@@ -11,5 +47,7 @@
 			println("[FAILED] ", text)
 		}
 
-	def this.summary() => println("Total tests: ", totalFailed + totalPassed, " fails: ", totalFailed)
-})
+	def this.summary() => 
+		println("Finish ", totalFailed + totalPassed, " tests in ", Time.unix(0) - startTime ,"ms, ", 
+			totalFailed, " fails")
+})()

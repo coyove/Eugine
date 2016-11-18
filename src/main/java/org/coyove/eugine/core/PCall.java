@@ -3,6 +3,7 @@ package org.coyove.eugine.core;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.coyove.eugine.base.ReplaceableVariable;
+import org.coyove.eugine.base.ReplaceableVariables;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
@@ -16,7 +17,7 @@ public class PCall extends SExpression {
     @ReplaceableVariable
     private SExpression closureObject;
 
-    @ReplaceableVariable
+    @ReplaceableVariables
     private ListEx<SExpression> arguments;
 
     private boolean expanded = false;

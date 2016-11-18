@@ -697,8 +697,8 @@ public class EugineParser extends Parser {
 
 	public static class DeclareSubjectContext extends ParserRuleContext {
 		public SExpression v;
-		public ExprContext Subject;
 		public Token Identifier;
+		public ExprContext Subject;
 		public TerminalNode Identifier() { return getToken(EugineParser.Identifier, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
@@ -729,13 +729,13 @@ public class EugineParser extends Parser {
 			case 1:
 				{
 				setState(133);
-				((DeclareSubjectContext)_localctx).Subject = expr();
+				((DeclareSubjectContext)_localctx).Identifier = match(Identifier);
 				}
 				break;
 			case 2:
 				{
 				setState(134);
-				((DeclareSubjectContext)_localctx).Identifier = match(Identifier);
+				((DeclareSubjectContext)_localctx).Subject = expr();
 				}
 				break;
 			}
@@ -3425,7 +3425,7 @@ public class EugineParser extends Parser {
 		"\3\2\2\2{|\3\2\2\2|\177\3\2\2\2}~\7\67\2\2~\u0080\5\4\3\2\177}\3\2\2\2"+
 		"\177\u0080\3\2\2\2\u0080\u0081\3\2\2\2\u0081\u0082\b\7\1\2\u0082\r\3\2"+
 		"\2\2\u0083\u0084\7\62\2\2\u0084\u0085\5\4\3\2\u0085\u0086\b\b\1\2\u0086"+
-		"\17\3\2\2\2\u0087\u008a\58\35\2\u0088\u008a\7A\2\2\u0089\u0087\3\2\2\2"+
+		"\17\3\2\2\2\u0087\u008a\7A\2\2\u0088\u008a\58\35\2\u0089\u0087\3\2\2\2"+
 		"\u0089\u0088\3\2\2\2\u008a\u008b\3\2\2\2\u008b\u008c\b\t\1\2\u008c\21"+
 		"\3\2\2\2\u008d\u008e\t\2\2\2\u008e\u008f\b\n\1\2\u008f\u0090\5\20\t\2"+
 		"\u0090\u0091\7\t\2\2\u0091\u0092\58\35\2\u0092\u0099\b\n\1\2\u0093\u0094"+

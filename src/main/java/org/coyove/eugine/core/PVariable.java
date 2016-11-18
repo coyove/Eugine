@@ -34,13 +34,11 @@ public class PVariable extends SExpression {
 
                 SValue tmp = new SNull(true);
                 env.put(varName, tmp);
-                tmp.refer = varName;
                 return tmp;
             }
         }
 
         SValue tmp = env.get(varName);
-        tmp.refer = varName;
         return tmp;
     }
 

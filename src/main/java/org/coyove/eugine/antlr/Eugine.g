@@ -70,7 +70,7 @@ syncStmt returns [SExpression v]
     ;
 
 declareSubject returns [SExpression v]
-    : (Subject=expr | Identifier)
+    : (Identifier | Subject=expr)
     {
         $v = $Identifier == null ? $Subject.v : new SString($Identifier.text);
     }

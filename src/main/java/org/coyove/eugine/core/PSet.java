@@ -60,15 +60,16 @@ public class PSet extends SExpression {
             ret.immutable = true;
         }
 
-        if (directName) {
-            String sn = n.get();
+        if (directName || varName instanceof PVariable) {
+            String sn = directName ? n.get().toString() : ((PVariable) varName).varName;
 
             if (declare == DECLARE.SET) {
-                if (!env.containsKey(sn) && env.strict)
-                    throw new EgException(2042, "strict mode", atom);
+//                if (!env.containsKey(sn) && env.strict)
+//                    throw new EgException(2042, "strict mode", atom);
 
-                if (env.containsKey(sn) && env.get(sn).immutable)
+                if (env.containsKey(sn) && env.get(sn).immutable) {
                     throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
+                }
 
                 env.put(sn, ret);
             } else if (declare == DECLARE.DECLARE) {
@@ -83,7 +84,8 @@ public class PSet extends SExpression {
             }
 
             if (refer instanceof String) {
-                env.put(refer.toString(), ret);
+                throw new EgException(9087, "refer is string", atom);
+                // env.put(refer.toString(), ret);
             } else if (refer instanceof SDict) {
                 ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
             } else if (refer instanceof SList) {

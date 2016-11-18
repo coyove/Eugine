@@ -1,3 +1,33 @@
 import util
 
-Debug.assert
+Debug.start()
+Debug.assert(true == true && false == false && true != false &&
+	!false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
+	1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
+	-1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1 &&
+	null == null && 1 != null && "a" == "a" && "abcdef" == "abcdef" &&
+	"a" != "b" && "" != null && "" != 0 && "" != [] && 0 != [] &&
+	__integer_max__ == __integer_max__ && __integer_min__ == __integer_min__, "Basic Comparisons")
+
+Debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
+	1 + 2 * 3 == 7 && 1 + 0.1 == 1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
+	10 * 0.2 == 0 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
+	10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
+
+Debug.assert(Utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
+	Utils.deepCompareList([1,2, 3], [1,2,3]) && 
+	!Utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
+
+def fibonacci (n) =>
+	if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
+Debug.assert(Utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
+
+var zzz = 0
+def numSeqSum (n, sum) => {
+	if n == 0 {sum} else {		
+		numSeqSum(n -1,sum+n)}
+}
+
+println(numSeqSum(100000, 0))
+
+Debug.summary()
