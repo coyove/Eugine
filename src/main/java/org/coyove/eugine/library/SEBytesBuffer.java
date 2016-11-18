@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
  * Created by zezhong on 2016/9/10.
  */
 public class SEBytesBuffer extends SExpression {
+    @ReplaceableVariable
     private SExpression src;
 
     public SEBytesBuffer() {}

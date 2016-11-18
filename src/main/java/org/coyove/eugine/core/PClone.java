@@ -9,6 +9,7 @@ import org.coyove.eugine.value.*;
  * Created by zezhong on 2016/9/9.
  */
 public class PClone extends SExpression {
+    @ReplaceableVariable
     private SExpression varName;
 
     public PClone() {}

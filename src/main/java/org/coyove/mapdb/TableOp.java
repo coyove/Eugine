@@ -12,8 +12,13 @@ import java.util.concurrent.ConcurrentMap;
  * Created by zezhong on 2016/9/10.
  */
 public class TableOp extends SExpression {
+    @ReplaceableVariable
     private SExpression table;
+
+    @ReplaceableVariable
     private SExpression key;
+
+    @ReplaceableVariable
     private SExpression value = null;
 
     public enum OPERATION {PUT, GET, REMOVE}

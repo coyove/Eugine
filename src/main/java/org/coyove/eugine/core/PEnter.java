@@ -9,9 +9,15 @@ import org.coyove.eugine.util.*;
  * Created by zezhong on 2016/9/10.
  */
 public class PEnter extends SExpression {
+    @ReplaceableVariable
     private SExpression mainBody;
+
+    @ReplaceableVariable
     private SExpression catchBody = null;
+
+    @ReplaceableVariable
     private SExpression finallyBody = null;
+
     private String exName;
 
     public PEnter() {}
@@ -29,7 +35,7 @@ public class PEnter extends SExpression {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
-            env.putVar(exName == null ? "~ex" : exName, new SString(ex.toString()));
+            env.bPut(exName == null ? "~ex" : exName, new SString(ex.toString()));
             if (this.catchBody != null) {
                 this.catchBody.evaluate(env);
             }

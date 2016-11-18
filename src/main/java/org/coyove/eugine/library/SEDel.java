@@ -11,7 +11,10 @@ import java.util.HashMap;
  * Created by coyove on 2016/9/10.
  */
 public class SEDel extends SExpression {
+    @ReplaceableVariable
     private SExpression host;
+
+    @ReplaceableVariable
     private SExpression index;
 
     public SEDel() {}

@@ -3,6 +3,8 @@ package org.coyove.test;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.System;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -10,8 +12,10 @@ import java.net.URLConnection;
 import java.util.concurrent.ConcurrentMap;
 
 import org.coyove.eugine.*;
+import org.coyove.eugine.base.ReplaceableVariable;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SKeywords;
+import org.coyove.eugine.core.PAdd;
 import org.coyove.eugine.parser.Compound;
 import org.coyove.eugine.parser.Parser;
 import org.coyove.eugine.pm.Exportable;
@@ -59,6 +63,14 @@ public class main {
     public static void main(String[] args) {
         Utils.importExportables();
         try {
+//            PAdd a = new PAdd();
+//            for (Field f : a.getClass().getDeclaredFields()) {
+//                f.setAccessible(true);
+//                System.out.print(f.getName());
+//                System.out.print(f.getAnnotation(ReplaceableVariable.class));
+//                System.out.println();
+//            }
+
             Eugine e = new Eugine();
             System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
         } catch (Exception e) {

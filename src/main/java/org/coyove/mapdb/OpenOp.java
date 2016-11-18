@@ -11,6 +11,7 @@ import org.mapdb.DBMaker;
  * Created by zezhong on 2016/9/10.
  */
 public class OpenOp extends SExpression {
+    @ReplaceableVariable
     private SExpression filename;
 
     public OpenOp() {}

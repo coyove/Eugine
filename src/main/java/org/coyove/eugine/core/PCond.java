@@ -9,8 +9,11 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class PCond extends SExpression {
+    @ReplaceableVariable
     public SExpression condition;
+
     public ListEx<Branch> branches;
+
     public Branch defaultBranch = null;
 
     public PCond() {}

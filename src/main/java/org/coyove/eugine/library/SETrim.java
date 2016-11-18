@@ -10,6 +10,7 @@ import org.coyove.eugine.util.*;
  * Created by zezhong on 2016/9/10.
  */
 public class SETrim extends SExpression {
+    @ReplaceableVariable
     private SExpression argument;
 
     public SETrim() {}

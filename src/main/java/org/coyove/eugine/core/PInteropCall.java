@@ -12,9 +12,14 @@ import java.lang.reflect.Method;
  * Created by coyove on 2016/9/11.
  */
 public class PInteropCall extends SExpression {
+    @ReplaceableVariable
     private SExpression subject;
+
     private String methodName;
+
     private ListEx<String> definition;
+
+    @ReplaceableVariable
     private ListEx<SExpression> arguments;
 
     private RETURN_TYPE type;

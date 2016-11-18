@@ -11,6 +11,7 @@ import java.security.MessageDigest;
  * Created by coyove on 2016/9/10.
  */
 public class SEDigest extends SExpression {
+    @ReplaceableVariable
     private SExpression argument;
 
     private ALGORITHM func;

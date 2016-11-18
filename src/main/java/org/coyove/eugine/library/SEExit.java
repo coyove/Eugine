@@ -9,6 +9,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SEExit extends SExpression {
+    @ReplaceableVariable
     private SExpression argument;
 
     public SEExit() {}
@@ -29,10 +30,10 @@ public class SEExit extends SExpression {
                 throw new EgException(2016, "message must be string or integer", atom);
             }
 
-            env.putVar("__e__", num);
+            env.bPut("__e__", num);
             throw new EgException(7001, num.<Long>get().toString(), atom);
         } else {
-            env.putVar("__e__", msg);
+            env.bPut("__e__", msg);
             throw new EgException(7000, msg.<String>get(), atom);
         }
     }

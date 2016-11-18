@@ -11,7 +11,10 @@ import java.util.HashMap;
  * Created by coyove on 2016/9/10.
  */
 public class SEEval extends SExpression {
+    @ReplaceableVariable
     private SExpression text;
+
+    @ReplaceableVariable
     private SExpression env = null;
 
     public SEEval() {}

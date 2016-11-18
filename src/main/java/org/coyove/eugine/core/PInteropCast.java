@@ -10,7 +10,9 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/11.
  */
 public class PInteropCast extends SExpression {
+    @ReplaceableVariable
     private SExpression subject;
+
     private String toType;
 
     public PInteropCast() {}

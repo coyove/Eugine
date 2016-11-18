@@ -12,8 +12,12 @@ import java.math.MathContext;
  * Created by coyove on 2016/9/10.
  */
 public class PMath extends SExpression {
+    @ReplaceableVariable
     private SExpression left;
+
+    @ReplaceableVariable
     private SExpression right;
+
     private ACTION action;
 
     public enum ACTION {SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
@@ -28,11 +32,7 @@ public class PMath extends SExpression {
         right = args.get(1);
     }
 
-    @Override
-    public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue left = this.left.evaluate(env);
-        SValue right = this.right.evaluate(env);
-
+    public static SValue perform(SValue left, SValue right, ACTION action, Atom atom) throws EgException {
         switch (action) {
             case SUBTRACT:
                 if (left instanceof SInteger) {
@@ -59,15 +59,30 @@ public class PMath extends SExpression {
                         return new SInteger(left.<Long>get() / lr);
                     }
                 } else if (left instanceof SDouble) {
-                    return new SDouble(left.<Double>get() / Utils.castDouble(right, atom));
+                    Double dr = Utils.castDouble(right, atom);
+                    if (Math.abs(dr) < 1e-6) {
+                        throw new EgException(7041, "divided by zero", atom);
+                    } else {
+                        return new SDouble(left.<Double>get() / dr);
+                    }
                 } else {
                     throw new EgException(7040, "invalid number: " + left, atom);
                 }
             case MODULAR:
                 if (left instanceof SInteger) {
-                    return new SInteger(left.<Long>get() % Utils.castLong(right, atom));
+                    Long lr = Utils.castLong(right, atom);
+                    if (lr == 0) {
+                        throw new EgException(7041, "moded by zero", atom);
+                    } else {
+                        return new SInteger(left.<Long>get() % lr);
+                    }
                 } else if (left instanceof SDouble) {
-                    return new SDouble(left.<Double>get() % Utils.castDouble(right, atom));
+                    Double dr = Utils.castDouble(right, atom);
+                    if (Math.abs(dr) < 1e-6) {
+                        throw new EgException(7041, "moded by zero", atom);
+                    } else {
+                        return new SDouble(left.<Double>get() % dr);
+                    }
                 } else {
                     throw new EgException(7040, "invalid number: " + left, atom);
                 }
@@ -75,6 +90,13 @@ public class PMath extends SExpression {
                 // never happen
                 return null;
         }
+    }
+
+    @Override
+    public SValue evaluate(ExecEnvironment env) throws EgException {
+        SValue left = this.left.evaluate(env);
+        SValue right = this.right.evaluate(env);
+        return perform(left, right, this.action, atom);
     }
 
     @Override

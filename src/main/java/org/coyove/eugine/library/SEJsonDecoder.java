@@ -14,6 +14,7 @@ import java.util.Map;
  * Created by coyove on 2016/9/9.
  */
 public class SEJsonDecoder extends SExpression {
+    @ReplaceableVariable
     private SExpression subject;
 
     public SEJsonDecoder() {

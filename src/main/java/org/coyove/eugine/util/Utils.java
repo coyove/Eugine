@@ -1,18 +1,20 @@
 package org.coyove.eugine.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.coyove.eugine.base.SKeywords;
-import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.value.*;
 import org.reflections.Reflections;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.List;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -145,7 +147,61 @@ public final class Utils {
         }
     }
 
-    private static<T> void quickSort(T[] arr, int left, int right, Comparator<T> comp) {
+    @SuppressWarnings("unchecked")
+    public static void replaceVariables(SExpression expr, ListEx<String> from, ListEx<SExpression> to) {
+        if (expr == null) {
+            return;
+        }
+
+        try {
+            for (Field f : expr.getClass().getDeclaredFields()) {
+                f.setAccessible(true);
+                Object obj = f.get(expr);
+                if (obj == null) {
+                    continue;
+                }
+
+                if (f.getAnnotation(ReplaceableVariable.class) != null) {
+                    SExpression se = (SExpression) obj;
+                    if (se instanceof PVariable) {
+                        String name = ((PVariable) se).varName;
+                        int idx = from.indexOf(name);
+                        if (idx > -1) {
+                            f.set(expr, to.get(idx));
+                        }
+                    } else {
+                        replaceVariables(se, from, to);
+                    }
+                } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
+                    ListEx<SExpression> ses = (ListEx<SExpression>) obj;
+                    for (int i = 0; i < ses.size(); i++) {
+                        SExpression se = ses.get(i);
+                        if (se instanceof PVariable) {
+                            String name = ((PVariable) se).varName;
+                            int idx = from.indexOf(name);
+                            if (idx > -1) {
+                                ses.set(i, to.get(idx));
+                            }
+                        } else {
+                            replaceVariables(se, from, to);
+                            ses.set(i, se);
+                        }
+                    }
+                } else if (obj instanceof Branch) {
+                    ((Branch) obj).replaceBranch(from, to);
+                } else if (f.getName().equals("branches")) {
+                    for (Branch b : ((ListEx<Branch>) obj)) {
+                        b.replaceBranch(from, to);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // nothing
+            e.printStackTrace();
+        }
+    }
+
+    private static <T> void quickSort(T[] arr, int left, int right, Comparator<T> comp) {
         int i = left, j = right;
         T tmp;
         T pivot = arr[(left + right) / 2];
@@ -173,7 +229,7 @@ public final class Utils {
             quickSort(arr, i, right, comp);
     }
 
-    public static<T> void quickSort(T[] arr, Comparator<T> comp) {
+    public static <T> void quickSort(T[] arr, Comparator<T> comp) {
         quickSort(arr, 0, arr.length - 1, comp);
     }
 }

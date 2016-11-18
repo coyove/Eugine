@@ -9,6 +9,7 @@ import org.coyove.eugine.util.*;
  * Created by zezhong on 2016/9/10.
  */
 public class SESleep extends SExpression {
+    @ReplaceableVariable
     private SExpression time;
 
     public SESleep() {}

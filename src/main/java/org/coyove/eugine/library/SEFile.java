@@ -16,7 +16,10 @@ import java.nio.file.StandardOpenOption;
  * Created by zezhong on 2016/9/10.
  */
 public class SEFile extends SExpression {
+    @ReplaceableVariable
     private SExpression filename;
+
+    @ReplaceableVariable
     private SExpression data = null;
 
     private OPERATION fileOp;

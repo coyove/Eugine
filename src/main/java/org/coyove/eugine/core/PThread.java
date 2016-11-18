@@ -22,7 +22,10 @@ public class PThread extends SExpression {
         }
     }
 
+    @ReplaceableVariable
     private SExpression closure;
+
+    @ReplaceableVariables
     private ListEx<SExpression> arguments;
 
     public PThread() {}

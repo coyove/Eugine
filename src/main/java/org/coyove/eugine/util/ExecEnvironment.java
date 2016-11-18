@@ -1,6 +1,5 @@
 package org.coyove.eugine.util;
 
-import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.value.SClosure;
 
@@ -17,10 +16,7 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     @Override
     public boolean containsKey(Object key) {
         if (parentEnv != null) {
-            if (super.containsKey(key))
-                return true;
-            else
-                return parentEnv.containsKey(key);
+            return super.containsKey(key) || parentEnv.containsKey(key);
         } else {
             return super.containsKey(key);
         }
@@ -29,41 +25,43 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     @Override
     public SValue get(Object key) {
         if (parentEnv != null) {
-            if (super.containsKey(key))
-                return super.get(key);
-            else
-                return parentEnv.get(key);
+            return super.containsKey(key) ? super.get(key) : parentEnv.get(key);
         } else {
-            SValue ret = super.get(key);
-            return ret;
+            return super.get(key);
         }
     }
 
     @Override
     public SValue put(String key, SValue value) {
+        if (value == null) {
+            return null;
+        }
+
         if (parentEnv != null) {
-            if (super.containsKey(key) || !parentEnv.containsKey(key))
+            if (super.containsKey(key) || !parentEnv.containsKey(key)) {
                 super.put(key, value);
-            else
+            } else {
                 parentEnv.put(key, value);
+            }
         } else {
             super.put(key, value);
-
-            if (key.equalsIgnoreCase("~strict")) {
-                strict = true;
-            }
-
-            if (key.equalsIgnoreCase("__mt__")) {
-                overlay = true;
-            }
-            // TODO
         }
 
         return value;
     }
 
-    public void putVar(String key, SValue value) {
-        super.put(key, value);
+    public void bPut(String key, SValue value) {
+        if (value != null) {
+            super.put(key, value);
+        }
+    }
+
+    public SValue bGet(String key) {
+        return super.get(key);
+    }
+
+    public SValue bRemove(String key) {
+        return super.remove(key);
     }
 
     public ExecEnvironment clone() {
@@ -71,7 +69,7 @@ public class ExecEnvironment extends HashMap<String, SValue> {
         for (String s : super.keySet()) {
             SValue v = super.get(s);
             if (v != null) {
-                ret.putVar(s, v.clone());
+                ret.bPut(s, v.clone());
             }
         }
 
@@ -93,7 +91,7 @@ public class ExecEnvironment extends HashMap<String, SValue> {
             SValue v = super.get(s);
             if (v != null) {
                 if (v instanceof SClosure || v.immutable) {
-                    ret.putVar(s, v.clone());
+                    ret.bPut(s, v.clone());
                 }
             }
         }

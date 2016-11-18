@@ -1,0 +1,15 @@
+(def Debug() => {
+	var totalPassed = 0
+	var totalFailed = 0
+
+	def this.assert (result, text) =>
+		if result { 
+			totalPassed++
+			println("[  OK  ] ", text)
+		} else {
+			totalFailed++
+			println("[FAILED] ", text)
+		}
+
+	def this.summary() => println("Total tests: ", totalFailed + totalPassed, " fails: ", totalFailed)
+})

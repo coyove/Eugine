@@ -1,5 +1,7 @@
 package org.coyove.eugine.core;
 
+import org.coyove.eugine.base.ReplaceableVariable;
+import org.coyove.eugine.base.ReplaceableVariables;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
@@ -15,6 +17,7 @@ import java.util.HashMap;
  * Created by zezhong on 2016/11/16.
  */
 public class PList extends SExpression {
+    @ReplaceableVariables
     public ListEx<SExpression> values = new ListEx<SExpression>();
 
     public PList() {

@@ -1,19 +1,25 @@
 package org.coyove.eugine.core;
 
-import org.coyove.eugine.base.*;
-import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.coyove.eugine.base.ReplaceableVariable;
+import org.coyove.eugine.base.SExpression;
+import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
-import org.apache.commons.lang3.tuple.*;
+import org.coyove.eugine.value.*;
 
 /**
  * Created by coyove on 2016/9/9.
  */
 public class PCall extends SExpression {
-    private String closureName;
-    private SExpression closureObject = null;
+    @ReplaceableVariable
+    private SExpression closureObject;
 
+    @ReplaceableVariable
     private ListEx<SExpression> arguments;
+
+    private boolean expanded = false;
 
     private enum continueState {CONTINUE, TAIL_CALL, FALSE_NULL}
 
@@ -27,7 +33,7 @@ public class PCall extends SExpression {
     }
 
     public static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws EgException {
-        ListEx<String> argNames = cls.arguments;
+        ListEx<String> argNames = cls.argNames;
         ListEx<Boolean> passByValue = cls.passByValue;
         ExecEnvironment newEnv = new ExecEnvironment();
 
@@ -54,23 +60,6 @@ public class PCall extends SExpression {
         return newEnv;
     }
 
-    public SValue getClosure(ExecEnvironment env) throws EgException {
-        SValue closure;
-
-        if (closureObject == null) {
-            if (env.containsKey(closureName)) {
-                closure = env.get(closureName);
-            } else {
-                closure = (new PVariable(atom, closureName)).evaluate(env);
-                env.put(closureName, closure);
-            }
-        } else {
-            closure = closureObject.evaluate(env);
-        }
-
-        return closure;
-    }
-
     public Triple<SClosure, ListEx<SValue>, continueState>
     getContinue(SExpression se, ExecEnvironment env) throws EgException {
         ListEx<SValue> retArgs = new ListEx<SValue>();
@@ -79,11 +68,11 @@ public class PCall extends SExpression {
 
         if (se instanceof PCall) {
             PCall call = (PCall) se;
-            SValue cls_ = call.getClosure(env);
+            SValue cls_ = call.closureObject.evaluate(env);
 
             if (cls_ instanceof SClosure) {
                 retCls = (SClosure) cls_;
-                retArgs = SExpression.eval(call.arguments, env);
+                retArgs = SExpression.eval(call.arguments, env, atom);
                 ret = continueState.TAIL_CALL;
             }
         } else if (se instanceof PIf) {
@@ -134,21 +123,64 @@ public class PCall extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue closure_ = getClosure(env);
-        ListEx<SValue> arguments = SExpression.eval(this.arguments, env);
-        SClosure closure;
+        if (expanded) {
+            SValue ret = new SNull();
+            for (SExpression argument : arguments) {
+                ret = argument.evaluate(env);
+            }
+            return ret;
+        }
 
-        if (closure_ instanceof SClosure) {
-            closure = (SClosure) closure_;
-        } else {
-            throw new EgException(7031, "invalid calling closure", atom);
+        SValue closure_ = closureObject.evaluate(env);
+        if (!(closure_ instanceof SClosure)) {
+            throw new EgException(7031, "invalid calling closure: " + closure_, atom);
+        }
+
+        SClosure closure = (SClosure) closure_;
+        ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);
+
+        // expand the inline code to upper level
+        if (closure.inline && this.arguments.size() >= closure.argNames.size()) {
+            expanded = true;
+            ListEx<SExpression> body = ListEx.deepClone(closure.body);
+            if (closure.argNames.size() > 0) {
+                if (closure.argNames.last().endsWith("...")) {
+                    String varargName = closure.argNames.last();
+                    varargName = varargName.substring(0, varargName.length() - 3);
+
+                    ListEx<String> argNames = new ListEx<String>();
+                    for (int i = 0; i < closure.argNames.size() - 1; i++) {
+                        argNames.add(closure.argNames.get(i));
+                    }
+
+                    PList vararg = new PList(atom);
+                    for (int i = closure.argNames.size() - 1; i < this.arguments.size(); i++) {
+                        vararg.values.add(this.arguments.get(i));
+                    }
+
+                    PSet tmp = new PSet(atom, new SString(varargName), vararg,
+                            PSet.DECLARE.DECLARE, PSet.ACTION.MUTABLE);
+
+                    for (SExpression b : body) {
+                        Utils.replaceVariables(b, argNames, this.arguments);
+                    }
+
+                    body.add(0, tmp);
+                } else {
+                    for (SExpression b : body) {
+                        Utils.replaceVariables(b, closure.argNames, this.arguments);
+                    }
+                }
+            }
+
+            this.arguments = body;
         }
 
         while (true) {
 
-            if (closure.arguments.size() > arguments.size()) {
+            if (closure.argNames.size() > arguments.size()) {
 
-                ListEx<String> argNames = closure.arguments.skip(arguments.size());
+                ListEx<String> argNames = closure.argNames.skip(arguments.size());
                 ListEx<Boolean> passByValue = closure.passByValue.skip(arguments.size());
                 ListEx<SExpression> newArgs = new ListEx<SExpression>();
 
@@ -219,8 +251,8 @@ public class PCall extends SExpression {
         PCall ret = new PCall();
         ret.atom = this.atom;
 
-        ret.closureName = this.closureName;
         ret.arguments = ListEx.deepClone(this.arguments);
+        ret.expanded = this.expanded;
 
         if (this.closureObject != null) {
             ret.closureObject = this.closureObject.deepClone();

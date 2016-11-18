@@ -12,70 +12,77 @@ import java.math.BigDecimal;
  */
 public class PCompare extends SExpression {
     private String action;
-    private ListEx<SExpression> values;
+
+    @ReplaceableVariable
+    private SExpression left;
+
+    @ReplaceableVariable
+    private SExpression right;
 
     public PCompare() {}
 
     public PCompare(Atom ha, ListEx<SExpression> args, String a) {
-        super(ha, args, 1);
+        super(ha, args, 2);
 
         action = a;
-        values = args;
+        left = args.get(0);
+        right = args.get(1);
     }
 
-    private boolean compareNumber(ListEx<SValue> nums, int ...signs) throws EgException {
-        BigDecimal first = Utils.castNumber(nums.head(), atom);
+    private boolean compareNumber(SValue left, SValue right, int ...signs) throws EgException {
+        if (left instanceof SInteger) {
+            Long l = left.get();
+            Long r = Utils.castLong(right, atom);
+            int sign = (int) Math.signum(l - r);
 
-        for (int i = 1; i < nums.size(); i++) {
-            BigDecimal next = Utils.castNumber(nums.get(i), atom);
-            int sign = first.subtract(next).signum();
-
-            if (signs[0] != sign && signs[1] != sign)
-                return false;
-
-            first = next;
+            return (signs[0] == sign || signs[1] == sign);
         }
 
-        return true;
+        if (left instanceof SDouble) {
+            Double l = left.get();
+            Double r = Utils.castDouble(right, atom);
+            int sign = (int) Math.signum(l - r);
+
+            return (signs[0] == sign || signs[1] == sign);
+        }
+
+        return false;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        ListEx<SValue> results = SExpression.eval(values, env);
+        SValue left = this.left.evaluate(env);
+        SValue right = this.right.evaluate(env);
 
         if (action.equals("==") || action.equals("!=")) {
-            Object first = results.head().get();
-            boolean ret = true;
-            for (int i = 1; i < results.size(); i++) {
-                Object next = results.get(i).get();
-                boolean flag;
+            Object lo = left.get();
+            Object ro = right.get();
+            boolean flag;
 
-                if (first != null && next != null) {
-                    flag = first.equals(next);
-                } else {
-                    flag = first == next;
-                }
-
-                if (action.equals("!="))
-                    flag = !flag;
-
-                ret = ret && flag;
+            if (lo != null && ro != null) {
+                flag = lo.equals(ro);
+            } else {
+                flag = lo == ro;
             }
 
-            return new SBool(ret);
+            if (action.equals("!=")) {
+                flag = !flag;
+            }
+
+            return new SBool(flag);
         }
 
         if (action.equals(">"))
-            return new SBool(compareNumber(results, 1, 1));
+            return new SBool(compareNumber(left, right, 1, 1));
 
         if (action.equals("<"))
-            return new SBool(compareNumber(results, -1, -1));
+            return new SBool(compareNumber(left, right, -1, -1));
 
         if (action.equals(">="))
-            return new SBool(compareNumber(results, 1, 0));
+            return new SBool(compareNumber(left, right, 1, 0));
 
         if (action.equals("<="))
-            return new SBool(compareNumber(results, -1, 0));
+            return new SBool(compareNumber(left, right, -1, 0));
 
         return new SNull();
     }
@@ -85,7 +92,8 @@ public class PCompare extends SExpression {
         PCompare ret = new PCompare();
         ret.atom = this.atom;
         ret.action = this.action;
-        ret.values = ListEx.deepClone(this.values);
+        ret.left = this.left.deepClone();
+        ret.right = this.right.deepClone();
 
         return ret;
     }

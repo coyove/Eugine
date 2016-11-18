@@ -9,24 +9,31 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class PLambda extends SExpression {
+    @ReplaceableVariables
     private ListEx<SExpression> body;
+
     private ListEx<String> arguments;
+
     private ListEx<Boolean> passByValue;
+
     private String description;
+
+    private boolean inline;
 
     public PLambda() {
     }
 
     public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
-        this(ha, args, pass, b, "");
+        this(ha, args, pass, b, "", false);
     }
 
-    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b, String d) {
+    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b, String d, boolean i) {
         atom = ha;
         arguments = args;
         body = b;
         passByValue = pass;
         description = d;
+        inline = i;
     }
 
     @Override
@@ -34,6 +41,7 @@ public class PLambda extends SExpression {
         SClosure cls = new SClosure(env, arguments, passByValue, body, description);
         cls.immutable = true;
         cls.doc = description;
+        cls.inline = inline;
         return cls;
     }
 

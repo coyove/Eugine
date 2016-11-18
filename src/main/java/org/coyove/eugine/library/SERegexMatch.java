@@ -13,7 +13,10 @@ import java.util.regex.Pattern;
  * Created by zezhong on 2016/9/10.
  */
 public class SERegexMatch extends SExpression {
+    @ReplaceableVariable
     private SExpression text;
+
+    @ReplaceableVariable
     private SExpression regex;
 
     public SERegexMatch() {}

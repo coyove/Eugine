@@ -11,10 +11,16 @@ import java.util.HashMap;
  * Created by zezhong on 2016/9/9.
  */
 public class PSet extends SExpression {
+    @ReplaceableVariable
     private SExpression varName;
+
     private boolean directName;
+
+    @ReplaceableVariable
     private SExpression varValue;
+
     private ACTION action;
+
     private DECLARE declare;
 
     public enum ACTION {IMMUTABLE, MUTABLE}
@@ -67,7 +73,7 @@ public class PSet extends SExpression {
                 env.put(sn, ret);
             } else if (declare == DECLARE.DECLARE) {
                 // TODO
-                env.putVar(sn, ret);
+                env.bPut(sn, ret);
             }
         } else {
             Object refer = n.refer;
@@ -87,7 +93,7 @@ public class PSet extends SExpression {
                 InteropHelper.setField(sub, n.refKey, ret);
             } else if (refer instanceof SClosure) {
                 if (declare == DECLARE.DECLARE) {
-                    ((SClosure) refer).extra.putVar(n.refKey, ret);
+                    ((SClosure) refer).extra.bPut(n.refKey, ret);
                 } else {
                     ((SClosure) refer).extra.put(n.refKey, ret);
                 }

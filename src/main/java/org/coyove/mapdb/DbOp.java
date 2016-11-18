@@ -10,7 +10,9 @@ import org.mapdb.DB;
  * Created by zezhong on 2016/9/10.
  */
 public class DbOp extends SExpression {
+    @ReplaceableVariable
     private SExpression db;
+
     public enum OPERATION {CLOSE, COMMIT}
     private OPERATION op;
 

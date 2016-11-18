@@ -11,7 +11,10 @@ import java.util.HashMap;
  * Created by coyove on 2016/9/10.
  */
 public class PFor extends SExpression {
+    @ReplaceableVariable
     private SExpression list;
+
+    @ReplaceableVariable
     private SExpression body;
 
     private DIRECTION direction;
@@ -29,11 +32,11 @@ public class PFor extends SExpression {
 
     private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
         ExecEnvironment newEnv = new ExecEnvironment();
-        if (body.arguments.size() >= 1)
-            newEnv.put(body.arguments.head(), v);
+        if (body.argNames.size() >= 1)
+            newEnv.put(body.argNames.head(), v);
 
-        if (body.arguments.size() == 2)
-            newEnv.put(body.arguments.get(1), idx);
+        if (body.argNames.size() == 2)
+            newEnv.put(body.argNames.get(1), idx);
 
         newEnv.parentEnv = body.outerEnv;
         SValue ret = new SNull();

@@ -3,6 +3,7 @@ lexer grammar CommonLexerRules;
 Var: 'var';
 Const: 'const';
 Def: 'def';
+Inline: 'inline';
 For: ('for' | 'forr');
 If: 'if';
 Switch: 'switch';

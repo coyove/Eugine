@@ -12,8 +12,12 @@ import java.util.Random;
  * Created by coyove on 2016/9/10.
  */
 public class SEMath extends SExpression {
+    @ReplaceableVariable
     private SExpression argument;
+
+    @ReplaceableVariable
     private SExpression argument2;
+
     private static Random defaultRandom = new Random(new Date().getTime());
 
     private OPERATION func;

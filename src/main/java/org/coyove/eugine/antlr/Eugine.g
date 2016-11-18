@@ -38,9 +38,8 @@ code returns [SExpression v]
     }
     ;
 
-block returns [SExpression v]
-    @init { $v = new PChain(); }
-    : (stmt { ((PChain) $v).expressions.add($stmt.v); })+
+block returns [PChain v = new PChain()]
+    : (stmt { $v.expressions.add($stmt.v); })+
 ;
 
 stmt returns [SExpression v]
@@ -145,7 +144,7 @@ defineStmt returns [SExpression v]
         ListEx<SExpression> body = new ListEx<SExpression>(),
         ListEx<SExpression> decorators = new ListEx<SExpression>()
     ]
-    : Def
+    : Def Inline?
         ('[' Decorator=expr argumentsList? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
@@ -158,15 +157,17 @@ defineStmt returns [SExpression v]
         {
             Atom a = $Identifier != null ? new Atom($Identifier) : new Atom($Get.start);
             SExpression sub = $Identifier != null ? new SString($Identifier.text) : $Get.v;
-            SExpression lambda = new PLambda(a, $Definition.v, $Definition.passByValue, 
-                $body, $Description == null ? "" : $Description.text);
+            SExpression closure = new PLambda(a, $Definition.v, $Definition.passByValue, 
+                $body,
+                $Description == null ? "" : $Description.text,
+                $Inline != null);
 
             if ($Identifier != null || $Get.v instanceof PGet) {
                 for (SExpression d : $decorators) {
-                    lambda = new PCall(a, d, ListEx.build(lambda));
+                    closure = new PCall(a, d, ListEx.build(closure));
                 }
                 
-                $v = new PSet(a, sub, lambda, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
+                $v = new PSet(a, sub, closure, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
             } else {
                 // error
                 $v = new SNull();
@@ -179,7 +180,7 @@ lambdaStmt returns [SExpression v]
     : definitionsList '=>' ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
     {
         $v = new PLambda(new Atom($definitionsList.start), $definitionsList.v, $definitionsList.passByValue,
-            $body, "anonymous");
+            $body, "anonymous", false);
     }
     ;
 

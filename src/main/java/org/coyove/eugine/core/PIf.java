@@ -9,8 +9,13 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class PIf extends SExpression {
+    @ReplaceableVariable
     public SExpression condition;
+
+    @ReplaceableVariable
     public SExpression trueBranch;
+
+    @ReplaceableVariable
     public SExpression falseBranch;
 
     public PIf() {}

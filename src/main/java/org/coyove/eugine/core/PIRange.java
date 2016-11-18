@@ -9,8 +9,13 @@ import org.coyove.eugine.util.*;
  * Created by zezhong on 2016/9/10.
  */
 public class PIRange extends SExpression {
+    @ReplaceableVariable
     private SExpression start;
+
+    @ReplaceableVariable
     private SExpression interval;
+
+    @ReplaceableVariable
     private SExpression end;
 
     public PIRange() {}

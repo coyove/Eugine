@@ -3,8 +3,6 @@ import HttpServer
 import Template
 import Thread
 
-println(1 % 0)
-
 (def Config() => {
     var this.port = 8080
     var this.socketReadTimeout = 5000

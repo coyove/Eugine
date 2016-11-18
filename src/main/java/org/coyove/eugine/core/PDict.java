@@ -1,5 +1,6 @@
 package org.coyove.eugine.core;
 
+import org.coyove.eugine.base.ReplaceableVariables;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
@@ -15,6 +16,8 @@ import java.util.HashMap;
  */
 public class PDict extends SExpression {
     public ListEx<String> keys = new ListEx<String>();
+
+    @ReplaceableVariables
     public ListEx<SExpression> values = new ListEx<SExpression>();
 
     public PDict() {

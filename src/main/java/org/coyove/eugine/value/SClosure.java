@@ -10,18 +10,19 @@ import org.coyove.eugine.util.*;
  */
 public class SClosure extends SValue {
     public ExecEnvironment outerEnv;
-    public ListEx<String> arguments;
+    public ListEx<String> argNames;
     public ListEx<Boolean> passByValue;
     public ListEx<SExpression> body;
     public ExecEnvironment extra;
     public SClosure proto;
     public String doc = "";
     public boolean transparent = false;
+    public boolean inline = false;
 
     public SClosure(ExecEnvironment env, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
         super(b);
         outerEnv = env;
-        arguments = args;
+        argNames = args;
         passByValue = pass;
         body = b;
         extra = new ExecEnvironment();
@@ -35,7 +36,7 @@ public class SClosure extends SValue {
 
     public SClosure(ExecEnvironment env, SExpression single) {
         outerEnv = env;
-        arguments = new ListEx<String>();
+        argNames = new ListEx<String>();
         passByValue = new ListEx<Boolean>();
 
         body = new ListEx<SExpression>();
@@ -54,7 +55,7 @@ public class SClosure extends SValue {
     @Override
     public SValue clone() {
         try {
-            SClosure ret = new SClosure(outerEnv, arguments, passByValue, ListEx.deepClone(body));
+            SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
 
             ret.extra = this.extra.clone();
             ret.proto = this.proto;
@@ -70,7 +71,7 @@ public class SClosure extends SValue {
     }
 
     public SValue getCopy() throws EgException {
-        SClosure ret = new SClosure(outerEnv, arguments, passByValue, ListEx.deepClone(body));
+        SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
         ret.transparent = this.transparent;
@@ -83,7 +84,7 @@ public class SClosure extends SValue {
 
     @Override
     public String toString() {
-        return "(" + StringUtils.join(arguments.toArray(), ",") + ") => {" +
+        return "(" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
                 body.size() + "}";
     }
 }

@@ -9,8 +9,12 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class PAdd extends SExpression {
+    @ReplaceableVariable
     private SExpression left;
+
+    @ReplaceableVariable
     private SExpression right;
+
     private boolean self = false;
 
     public PAdd() {}

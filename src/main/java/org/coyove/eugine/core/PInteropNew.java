@@ -12,8 +12,12 @@ import java.lang.reflect.InvocationTargetException;
  * Created by coyove on 2016/9/11.
  */
 public class PInteropNew extends SExpression {
+    @ReplaceableVariable
     private SExpression subject;
+
     private ListEx<String> definition;
+
+    @ReplaceableVariables
     private ListEx<SExpression> arguments;
 
     public PInteropNew() {}

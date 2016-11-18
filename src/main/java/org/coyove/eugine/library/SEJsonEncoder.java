@@ -15,6 +15,7 @@ import java.util.Set;
  * Created by coyove on 2016/9/9.
  */
 public class SEJsonEncoder extends SExpression {
+    @ReplaceableVariable
     private SExpression subject;
 
     public SEJsonEncoder() {

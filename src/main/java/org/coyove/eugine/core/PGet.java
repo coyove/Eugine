@@ -11,7 +11,10 @@ import java.util.HashMap;
  * Created by coyove on 2016/9/10.
  */
 public class PGet extends SExpression {
+    @ReplaceableVariable
     private SExpression dict;
+
+    @ReplaceableVariable
     private SExpression key;
 
     public PGet() {}

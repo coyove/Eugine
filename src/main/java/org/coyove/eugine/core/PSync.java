@@ -8,6 +8,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class PSync extends SExpression {
+    @ReplaceableVariable
     public SExpression expression;
 
     public PSync() {}

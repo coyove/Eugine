@@ -14,9 +14,15 @@ import java.util.Comparator;
  * Created by zezhong on 2016/9/10.
  */
 public class SEListOp extends SExpression {
+    @ReplaceableVariable
     private SExpression list;
+
+    @ReplaceableVariable
     private SExpression pos = null;
+
+    @ReplaceableVariable
     private SExpression value = null;
+
     private OPERATION op;
 
     public enum OPERATION {HEAD, TAIL, INIT, LAST, INSERT, SORT}

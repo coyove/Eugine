@@ -15,7 +15,9 @@ import java.util.Set;
  * Created by coyove on 2016/9/9.
  */
 public class SEPrint extends SExpression {
+    @ReplaceableVariables
     private ListEx<SExpression> arguments;
+
     private String delim;
 
     public SEPrint() {
@@ -71,7 +73,7 @@ public class SEPrint extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue ret = new SNull();
-        for (SValue v : SExpression.eval(arguments, env)) {
+        for (SValue v : SExpression.eval(arguments, env, atom)) {
             ret = v;
             System.out.print(print(v, env, 2, false));
         }

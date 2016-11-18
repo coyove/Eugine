@@ -9,6 +9,7 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/10.
  */
 public class SELen extends SExpression {
+    @ReplaceableVariable
     private SExpression argument;
 
     public SELen() {}

@@ -11,8 +11,13 @@ import java.util.Arrays;
  * Created by zezhong on 2016/9/10.
  */
 public class PSub extends SExpression {
+    @ReplaceableVariable
     private SExpression subject;
+
+    @ReplaceableVariable
     private SExpression start;
+
+    @ReplaceableVariable
     private SExpression end;
 
     public PSub() {}

@@ -12,7 +12,10 @@ import java.util.concurrent.ConcurrentMap;
  * Created by zezhong on 2016/9/10.
  */
 public class OpenTableOp extends SExpression {
+    @ReplaceableVariable
     private SExpression db;
+
+    @ReplaceableVariable
     private SExpression tableName;
 
     public OpenTableOp() {}

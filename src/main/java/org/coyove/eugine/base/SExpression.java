@@ -22,7 +22,9 @@ public abstract class SExpression implements java.io.Serializable {
     public SExpression() {
     }
 
-    public static ListEx<SValue> eval(ListEx<SExpression> arguments, ExecEnvironment env) throws EgException {
+    public static ListEx<SValue> eval(ListEx<SExpression> arguments,
+                                      ExecEnvironment env,
+                                      Atom atom) throws EgException {
 
         ListEx<SValue> ret = new ListEx<SValue>();
         for (SExpression e : arguments) {
@@ -32,7 +34,7 @@ public abstract class SExpression implements java.io.Serializable {
                     varName = varName.substring(0, varName.length() - 3);
 
                     if (!env.containsKey(varName)) {
-                        throw new EgException(9997, "invalid vararg");
+                        throw new EgException(9997, "invalid vararg", atom);
                     }
 
                     SValue v = env.get(varName);
@@ -40,7 +42,7 @@ public abstract class SExpression implements java.io.Serializable {
                     if (v instanceof SList) {
                         ret.addAll(v.<ListEx<SExpression>>get().cast(SValue.class));
                     } else {
-                        throw new EgException(9998, "wrong vararg list");
+                        throw new EgException(9998, "wrong vararg list", atom);
                     }
                 } else {
                     SValue v = e.evaluate(env);
@@ -51,7 +53,7 @@ public abstract class SExpression implements java.io.Serializable {
                     }
                 }
             } else {
-                throw new EgException(9998, "found null");
+                throw new EgException(9998, "found null", atom);
             }
         }
 

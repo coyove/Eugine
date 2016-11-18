@@ -13,7 +13,10 @@ import java.util.Locale;
  * Created by coyove on 2016/9/10.
  */
 public class SETime extends SExpression {
+    @ReplaceableVariable
     private SExpression argument;
+
+    @ReplaceableVariable
     private SExpression argument2;
 
     private OPERATION func;

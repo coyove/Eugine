@@ -12,7 +12,10 @@ import java.util.HashMap;
  * Created by zezhong on 2016/9/10.
  */
 public class SEContains extends SExpression {
+    @ReplaceableVariable
     private SExpression map;
+
+    @ReplaceableVariable
     private SExpression key;
 
     public SEContains() {}
