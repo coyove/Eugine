@@ -11,6 +11,8 @@ import org.coyove.eugine.util.*;
 public class PVariable extends SExpression {
     public String varName;
 
+    public short cacheIndex = -1;
+
     public PVariable() {}
 
     public PVariable(String n) {
@@ -24,15 +26,9 @@ public class PVariable extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-//        if (!env.containsKey(varName)) {
-//            if (varName.charAt(0) == '@') {
-//                return new SString(varName.substring(1), true);
-//            } else {
-//                SValue tmp = new SNull(true);
-//                env.put(varName, tmp);
-//                return tmp;
-//            }
-//        }
+        if (this.cacheIndex >= 0) {
+            return SCache.slots[this.cacheIndex];
+        }
 
         SValue tmp = env.get(varName);
         return tmp == null ? new SNull() : tmp;
@@ -43,6 +39,7 @@ public class PVariable extends SExpression {
         PVariable ret = new PVariable();
         ret.atom = this.atom;
         ret.varName = this.varName;
+        ret.cacheIndex = this.cacheIndex;
         return ret;
     }
 }

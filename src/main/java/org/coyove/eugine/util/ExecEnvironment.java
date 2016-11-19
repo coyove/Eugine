@@ -10,8 +10,16 @@ import java.util.HashMap;
  */
 public class ExecEnvironment extends HashMap<String, SValue> {
     public ExecEnvironment parentEnv = null;
-    public boolean strict = false;
-    public boolean overlay = false;
+    public HashMap<String, Short> cacheReverseLookup = new HashMap<String, Short>();
+
+    public Short cacheReverseLookupGet(String n) {
+        Short ret = cacheReverseLookup.get(n);
+        if (ret == null && parentEnv != null) {
+            return parentEnv.cacheReverseLookupGet(n);
+        } else {
+            return ret;
+        }
+    }
 
     @Override
     public boolean containsKey(Object key) {
@@ -77,15 +85,10 @@ public class ExecEnvironment extends HashMap<String, SValue> {
         if (this.parentEnv != null) {
             ret.parentEnv = this.parentEnv.clone();
         }
-        ret.strict = this.strict;
-        ret.overlay = this.overlay;
         return ret;
     }
 
     public ExecEnvironment cloneClosureAndConstOnly() {
-        if (!overlay) {
-            return this;
-        }
 
         ExecEnvironment ret = new ExecEnvironment();
         for (String s : super.keySet()) {
@@ -98,8 +101,6 @@ public class ExecEnvironment extends HashMap<String, SValue> {
         }
 
         ret.parentEnv = this;
-        ret.strict = this.strict;
-        ret.overlay = this.overlay;
         return ret;
     }
 }

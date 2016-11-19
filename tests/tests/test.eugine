@@ -1,5 +1,5 @@
 import util
-sleep(5000)
+// sleep(5000)
 Debug.start()
 // Debug.assert(true == true && false == false && true != false &&
 //  !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
@@ -25,7 +25,7 @@ Debug.start()
 // def numSeqSum (n, sum) =>
 //  if n == 0 {sum} else numSeqSum(n -1,sum+n)
 // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
-var N = 160
+var N = 1600
 var Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
 var invN = 2.0/N
 for 0..N do (i) => { 
@@ -84,7 +84,7 @@ def worker () => {
 }
 
 var threads = []
-for 0..2 do () =>
+for 0..4 do () =>
 	threads <+ worker#()
 
 for threads do (t) => wait(t)

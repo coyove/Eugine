@@ -216,7 +216,6 @@ public class PCall extends SExpression {
                 } else {
                     newEnv.parentEnv = closure.outerEnv; //.cloneClosureAndConstOnly();
                 }
-                newEnv.overlay = closure.outerEnv.overlay;
             }
 
             SValue ret = new SNull();

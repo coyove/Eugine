@@ -140,29 +140,28 @@ defineStmt returns [SExpression v]
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
         })*
-        (Identifier | Get=expr) 
+        Get=expr
         Definition=definitionsList 
         Description=(RawString | StringLiteral)? 
         '=>'
         ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
         {
-            Atom a = $Identifier != null ? new Atom($Identifier) : new Atom($Get.start);
-            SExpression sub = $Identifier != null ? new SString($Identifier.text) : $Get.v;
+            Atom a = new Atom($Get.start);
             SExpression closure = new PLambda(a, $Definition.v, $Definition.passByValue, 
                 $body,
                 $Description == null ? "" : $Description.text,
                 $Inline != null);
 
-            if ($Identifier != null || $Get.v instanceof PGet) {
+            // if ($Get.v instanceof PGet) {
                 for (SExpression d : $decorators) {
                     closure = new PCall(a, d, ListEx.build(closure));
                 }
                 
-                $v = new PSet(a, sub, closure, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
-            } else {
-                // error
-                $v = new SNull();
-            }
+                $v = new PSet(a, $Get.v, closure, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
+            // } else {
+            //     // error
+            //     $v = new SNull();
+            // }
         }
     ;
 

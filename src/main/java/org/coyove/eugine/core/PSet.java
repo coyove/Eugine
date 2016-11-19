@@ -62,17 +62,37 @@ public class PSet extends SExpression {
 
         if (directName || varName instanceof PVariable) {
             String sn = directName ? n.get().toString() : ((PVariable) varName).varName;
+            PVariable var = (PVariable) varName;
 
             if (declare == DECLARE.SET) {
-                SValue sv = env.get(sn);
-                if (sv != null && sv.immutable) {
-                    throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
-                }
+                // TODO: more elegant way to deal with immutable variables
+//                SValue sv = env.get(sn);
+//                if (sv != null && sv.immutable) {
+//                    throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
+//                }
 
                 env.put(sn, ret);
+
+                if (var.cacheIndex >= 0) {
+                    SCache.slots[var.cacheIndex] = ret;
+                } else {
+                    Short ci = env.cacheReverseLookupGet(sn);
+                    if (ci != null) {
+                        var.cacheIndex = ci;
+                    } else {
+                        // set a variable who was not declared
+                    }
+                }
             } else if (declare == DECLARE.DECLARE) {
-                // TODO
                 env.bPut(sn, ret);
+
+                if (var.cacheIndex >= 0) {
+                    SCache.slots[var.cacheIndex] = ret;
+                } else {
+                    short ci = SCache.put(ret, env, sn);
+                    var.cacheIndex = ci;
+                    env.cacheReverseLookup.put(sn, ci);
+                }
             }
         } else {
             Object refer = n.refer;

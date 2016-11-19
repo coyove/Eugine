@@ -33,11 +33,10 @@ public abstract class SExpression implements java.io.Serializable {
                     String varName = ((PVariable) e).varName;
                     varName = varName.substring(0, varName.length() - 3);
 
-                    if (!env.containsKey(varName)) {
+                    SValue v = env.get(varName);
+                    if (v == null) {
                         throw new EgException(9997, "invalid vararg", atom);
                     }
-
-                    SValue v = env.get(varName);
 
                     if (v instanceof SList) {
                         ret.addAll(v.<ListEx<SExpression>>get().cast(SValue.class));
