@@ -94,6 +94,71 @@ public class PMath extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
+        if (this.left instanceof PVariable && this.right instanceof PVariable) {
+            if (((PVariable) this.left).varName.equals(((PVariable) this.right).varName)) {
+                SValue left = this.left.evaluate(env);
+                switch (action) {
+                    case SUBTRACT:
+                        if (left instanceof SInteger) {
+                            return new SInteger(0);
+                        } else if (left instanceof SDouble) {
+                            return new SDouble(0.0);
+                        } else {
+                            throw new EgException(7040, "invalid number: " + left, atom);
+                        }
+                    case MULTIPLY:
+                        if (left instanceof SInteger) {
+                            Long v = left.get();
+                            return new SInteger(v * v);
+                        } else if (left instanceof SDouble) {
+                            Double v = left.get();
+                            return new SDouble(v * v);
+                        } else {
+                            throw new EgException(7040, "invalid number: " + left, atom);
+                        }
+                    case DIVIDE:
+                        if (left instanceof SInteger) {
+                            Long lr = left.get();
+                            if (lr == 0) {
+                                throw new EgException(7041, "divided by zero", atom);
+                            } else {
+                                return new SInteger(1);
+                            }
+                        } else if (left instanceof SDouble) {
+                            Double dr = left.get();
+                            if (Math.abs(dr) < 1e-6) {
+                                throw new EgException(7041, "divided by zero", atom);
+                            } else {
+                                return new SDouble(1.0);
+                            }
+                        } else {
+                            throw new EgException(7040, "invalid number: " + left, atom);
+                        }
+                    case MODULAR:
+                        if (left instanceof SInteger) {
+                            Long lr = left.get();
+                            if (lr == 0) {
+                                throw new EgException(7041, "moded by zero", atom);
+                            } else {
+                                return new SInteger(0);
+                            }
+                        } else if (left instanceof SDouble) {
+                            Double dr = left.get();
+                            if (Math.abs(dr) < 1e-6) {
+                                throw new EgException(7041, "moded by zero", atom);
+                            } else {
+                                return new SDouble(0.0);
+                            }
+                        } else {
+                            throw new EgException(7040, "invalid number: " + left, atom);
+                        }
+                    default:
+                        // never happen
+                        return null;
+                }
+            }
+        }
+
         SValue left = this.left.evaluate(env);
         SValue right = this.right.evaluate(env);
         return perform(left, right, this.action, atom);

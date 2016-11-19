@@ -10,15 +10,15 @@ import org.coyove.eugine.util.*;
  */
 public class PLambda extends SExpression {
     @ReplaceableVariables
-    private ListEx<SExpression> body;
+    public ListEx<SExpression> body;
 
-    private ListEx<String> arguments;
+    public ListEx<String> arguments;
 
-    private ListEx<Boolean> passByValue;
+    public ListEx<Boolean> passByValue;
 
-    private String description;
+    public String description;
 
-    private boolean inline;
+    public boolean inline;
 
     public PLambda() {
     }

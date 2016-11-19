@@ -3004,7 +3004,13 @@ public class EugineParser extends Parser {
 					setState(536);
 					((AssignExprContext)_localctx).Value = expr();
 
-					                      ((AssignExprContext)_localctx).v =  new PSet(new Atom((((AssignExprContext)_localctx).Subject!=null?(((AssignExprContext)_localctx).Subject.start):null)), ((AssignExprContext)_localctx).Subject.v, ((AssignExprContext)_localctx).Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);    
+					                      if (((AssignExprContext)_localctx).Subject.v instanceof PGet) {
+					                          PGet get = (PGet) ((AssignExprContext)_localctx).Subject.v;
+					                          ((AssignExprContext)_localctx).v =  new PPut(new Atom((((AssignExprContext)_localctx).Subject!=null?(((AssignExprContext)_localctx).Subject.start):null)), get.sub, get.key, ((AssignExprContext)_localctx).Value.v, PPut.DECLARE.SET);
+					                      } else {
+					                          ((AssignExprContext)_localctx).v =  new PSet(new Atom((((AssignExprContext)_localctx).Subject!=null?(((AssignExprContext)_localctx).Subject.start):null)), 
+					                              ((AssignExprContext)_localctx).Subject.v, ((AssignExprContext)_localctx).Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
+					                      }
 					                  
 					}
 					} 

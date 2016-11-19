@@ -2,6 +2,7 @@ package org.coyove.eugine.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
@@ -173,23 +174,41 @@ public final class Utils {
                         replaceVariables(se, from, to);
                     }
                 } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
+                    // special case, lambda's arguments may collide with the names in "from"
+                    ListEx<String> _from = from;
+                    ListEx<SExpression> _to = to;
+                    if (expr instanceof PLambda) {
+                        _from = (ListEx<String>) from.clone();
+                        _to = (ListEx<SExpression>) to.clone();
+                        for (String la : ((PLambda) expr).arguments) {
+                            for (int i = 0; i < _from.size(); i++) {
+                                if (_from.get(i).equals(la)) {
+                                    _from.remove(i);
+                                    _to.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     ListEx<SExpression> ses = (ListEx<SExpression>) obj;
                     for (int i = 0; i < ses.size(); i++) {
                         SExpression se = ses.get(i);
                         if (se instanceof PVariable) {
                             String name = ((PVariable) se).varName;
-                            int idx = from.indexOf(name);
+                            int idx = _from.indexOf(name);
                             if (idx > -1) {
-                                ses.set(i, to.get(idx));
+                                ses.set(i, _to.get(idx));
                             }
                         } else {
-                            replaceVariables(se, from, to);
+                            replaceVariables(se, _from, _to);
                             ses.set(i, se);
                         }
                     }
                 } else if (obj instanceof Branch) {
                     ((Branch) obj).replaceBranch(from, to);
                 } else if (f.getName().equals("branches")) {
+                    // special case of switch ... do {}
                     for (Branch b : ((ListEx<Branch>) obj)) {
                         b.replaceBranch(from, to);
                     }

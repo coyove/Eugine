@@ -374,6 +374,21 @@ public class SKeywords {
                         return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INSERT);
                     }
                 });
+                put("Bit.and", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.OPERATION.AND);
+                    }
+                });
+                put("Bit.or", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.OPERATION.OR);
+                    }
+                });
+                put("Bit.not", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.OPERATION.NOT);
+                    }
+                });
                 put("Json.encode", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEJsonEncoder(new Atom(tok), c);

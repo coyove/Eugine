@@ -96,8 +96,10 @@ public class PSet extends SExpression {
             } else if (refer instanceof SClosure) {
                 if (declare == DECLARE.DECLARE) {
                     ((SClosure) refer).extra.bPut(n.refKey, ret);
+                    env.bPut(n.refKey, ret);
                 } else {
                     ((SClosure) refer).extra.put(n.refKey, ret);
+                    env.put(n.refKey, ret);
                 }
             } else {
                 throw new EgException(2045, "failed to set, invalid referred object: " + refer, atom);

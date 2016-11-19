@@ -1,33 +1,102 @@
 import util
 
-Debug.start()
-Debug.assert(true == true && false == false && true != false &&
-	!false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
-	1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
-	-1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1 &&
-	null == null && 1 != null && "a" == "a" && "abcdef" == "abcdef" &&
-	"a" != "b" && "" != null && "" != 0 && "" != [] && 0 != [] &&
-	__integer_max__ == __integer_max__ && __integer_min__ == __integer_min__, "Basic Comparisons")
-
-Debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
-	1 + 2 * 3 == 7 && 1 + 0.1 == 1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
-	10 * 0.2 == 0 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
-	10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
-
-Debug.assert(Utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
-	Utils.deepCompareList([1,2, 3], [1,2,3]) && 
-	!Utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
-
-def fibonacci (n) =>
-	if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
-Debug.assert(Utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
-
-var zzz = 0
-def numSeqSum (n, sum) => {
-	if n == 0 {sum} else {		
-		numSeqSum(n -1,sum+n)}
+def tester(a, b) => {
+    a + b
 }
 
-println(numSeqSum(100000, 0))
+for 0..1000000 do ()  =>
+    tester(10, 20)
+ 
+Debug.start()
+// Debug.assert(true == true && false == false && true != false &&
+//  !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
+//  1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
+//  -1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1 &&
+//  null == null && 1 != null && "a" == "a" && "abcdef" == "abcdef" &&
+//  "a" != "b" && "" != null && "" != 0 && "" != [] && 0 != [] &&
+//  __integer_max__ == __integer_max__ && __integer_min__ == __integer_min__, "Basic Comparisons")
+
+// Debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
+//  1 + 2 * 3 == 7 && 1 + 0.1 == 1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
+//  10 * 0.2 == 0 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
+//  10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
+
+// Debug.assert(Utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
+//  Utils.deepCompareList([1,2, 3], [1,2,3]) && 
+//  !Utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
+
+// def fibonacci (n) =>
+//  if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
+// Debug.assert(Utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
+
+// def numSeqSum (n, sum) =>
+//  if n == 0 {sum} else numSeqSum(n -1,sum+n)
+// Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
+
+var LIMIT_SQUARED = 4.0
+var MAXIMUM_ITERATIONS = 50
+var image_Width_And_Height = 160
+var pixels = range(image_Width_And_Height * image_Width_And_Height / 8, 0, 0.0)
+var initial_r = [], initial_i = []
+
+for 0..image_Width_And_Height do (xy) => {
+    initial_r <+ (2.0 / image_Width_And_Height * xy - 1.5)
+    initial_i <+ (2.0 / image_Width_And_Height * xy - 1.0)
+}
+
+for 0..image_Width_And_Height do (y) => {
+    var prefetched_Initial_i = initial_i[y]
+
+    for 0,8..image_Width_And_Height do (x_Major) => {
+
+        var pixel_Group_r = [
+            initial_r[x_Major],
+            initial_r[x_Major + 1],
+            initial_r[x_Major + 2],
+            initial_r[x_Major + 3],
+            initial_r[x_Major + 4],
+            initial_r[x_Major + 5],
+            initial_r[x_Major + 6],
+            initial_r[x_Major + 7],
+        ], pixel_Group_i = range(8, 0, prefetched_Initial_i)
+
+        var eight_Pixels = 255
+        var iteration = MAXIMUM_ITERATIONS
+        
+        for eight_Pixels && iteration-- do () => {
+            var current_Pixel_Bitmask = 128
+
+            for 0..8 do (x_Minor) => {
+                var r = pixel_Group_r[x_Minor], i = pixel_Group_i[x_Minor]
+
+                pixel_Group_r[x_Minor] = r*r - i*i + initial_r[x_Major+x_Minor]
+                pixel_Group_i[x_Minor] = 2.0*r*i + prefetched_Initial_i
+
+                if r*r + i*i > LIMIT_SQUARED
+                    eight_Pixels = Bit.and(eight_Pixels, Bit.not(current_Pixel_Bitmask))
+
+                current_Pixel_Bitmask /= 2
+            }
+        }
+
+        pixels[y*image_Width_And_Height/8 + x_Major/8]=eight_Pixels
+    }
+}
+
+
+// var image = "P4\n"
+// image <+ image_Width_And_Height + " " + image_Width_And_Height + "\n"
+
+// for 0..image_Width_And_Height do (x) => {
+//     for 0..image_Width_And_Height do (y) => {
+//         image <+ pixels[y * image_Width_And_Height + x] + " "
+//     }
+//     image <+ "\n"
+// }
+
+// println(image)
+
+   // fwrite(pixels, image_Width_And_Height*image_Width_And_Height/8, 1, stdout);
 
 Debug.summary()
+println(pixels)

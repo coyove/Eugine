@@ -31,18 +31,34 @@ public class PFor extends SExpression {
     }
 
     private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
-        ExecEnvironment newEnv = new ExecEnvironment();
-        if (body.argNames.size() >= 1)
-            newEnv.put(body.argNames.head(), v);
+        ExecEnvironment env = body.outerEnv;
+        SValue[] olds = new SValue[2];
+        String name1 = "";
+        String name2 = "";
 
-        if (body.argNames.size() == 2)
-            newEnv.put(body.argNames.get(1), idx);
+        if (body.argNames.size() >= 1) {
+            name1 = body.argNames.head();
+            olds[0] = env.bGet(name1);
+            env.bPut(name1, v);
+        }
 
-        newEnv.parentEnv = body.outerEnv;
+        if (body.argNames.size() >= 2) {
+            name2 = body.argNames.get(1);
+            olds[1] = env.bGet(name2);
+            env.bPut(name2, idx);
+        }
+
         SValue ret = new SNull();
-
         for (SExpression se : body.body) {
-            ret = se.evaluate(newEnv);
+            ret = se.evaluate(env);
+        }
+
+        if (olds[0] != null) {
+            env.bPut(name1, olds[0]);
+        }
+
+        if (olds[1] != null) {
+            env.bPut(name2, olds[1]);
         }
 
         return ret;
@@ -57,7 +73,6 @@ public class PFor extends SExpression {
 
         if (list_ instanceof SDict) {
             HashMap<String, SValue> m = ((SDict) list_).get();
-            long i = 0;
 
             for (String s : m.keySet()) {
                 SValue ret = execLoop(body, new SString(s), m.get(s));

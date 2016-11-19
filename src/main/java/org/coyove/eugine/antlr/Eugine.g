@@ -397,7 +397,13 @@ assignExpr returns [SExpression v]
         }
     | Subject=assignExpr '=' Value=expr
         {
-            $v = new PSet(new Atom($Subject.start), $Subject.v, $Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);    
+            if ($Subject.v instanceof PGet) {
+                PGet get = (PGet) $Subject.v;
+                $v = new PPut(new Atom($Subject.start), get.sub, get.key, $Value.v, PPut.DECLARE.SET);
+            } else {
+                $v = new PSet(new Atom($Subject.start), 
+                    $Subject.v, $Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
+            }
         }
     ;
 

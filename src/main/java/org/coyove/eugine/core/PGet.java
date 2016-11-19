@@ -12,22 +12,22 @@ import java.util.HashMap;
  */
 public class PGet extends SExpression {
     @ReplaceableVariable
-    private SExpression dict;
+    public SExpression sub;
 
     @ReplaceableVariable
-    private SExpression key;
+    public SExpression key;
 
     public PGet() {}
 
     public PGet(Atom ha, SExpression d, SExpression k) {
         atom = ha;
-        dict = d;
+        sub = d;
         key = k;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue dict = this.dict.evaluate(env);
+        SValue dict = this.sub.evaluate(env);
         SValue sk = this.key.evaluate(env);
 
         if (dict instanceof SDict) {
@@ -36,7 +36,7 @@ public class PGet extends SExpression {
                     sk instanceof SDouble || sk instanceof SBool) {
                 k = sk.get();
             } else {
-                throw new EgException(2019, "invalid dict key: " + sk, atom);
+                throw new EgException(2019, "invalid key: " + sk, atom);
             }
 
             HashMap<String, SValue> d = dict.get();
@@ -127,7 +127,7 @@ public class PGet extends SExpression {
         PGet ret = new PGet();
         ret.atom = this.atom;
 
-        ret.dict = this.dict.deepClone();
+        ret.sub = this.sub.deepClone();
         ret.key = this.key.deepClone();
 
         return ret;
