@@ -308,6 +308,11 @@ public class SKeywords {
                         return new SESleep(new Atom(tok), c);
                     }
                 });
+                put("wait", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEWait(new Atom(tok), c);
+                    }
+                });
                 put("contains", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEContains(new Atom(tok), c);
@@ -397,6 +402,11 @@ public class SKeywords {
                 put("Json.decode", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEJsonDecoder(new Atom(tok), c);
+                    }
+                });
+                put("Pbm.write", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEPbmWriter(new Atom(tok), c);
                     }
                 });
             }};

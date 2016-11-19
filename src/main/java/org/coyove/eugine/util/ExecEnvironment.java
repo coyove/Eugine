@@ -24,10 +24,11 @@ public class ExecEnvironment extends HashMap<String, SValue> {
 
     @Override
     public SValue get(Object key) {
-        if (parentEnv != null) {
-            return super.containsKey(key) ? super.get(key) : parentEnv.get(key);
+        SValue v = super.get(key);
+        if (parentEnv != null && v == null) {
+            return parentEnv.get(key);
         } else {
-            return super.get(key);
+            return v;
         }
     }
 

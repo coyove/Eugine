@@ -1,12 +1,5 @@
 import util
-
-def tester(a, b) => {
-    a + b
-}
-
-for 0..1000000 do ()  =>
-    tester(10, 20)
- 
+sleep(5000)
 Debug.start()
 // Debug.assert(true == true && false == false && true != false &&
 //  !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
@@ -32,71 +25,70 @@ Debug.start()
 // def numSeqSum (n, sum) =>
 //  if n == 0 {sum} else numSeqSum(n -1,sum+n)
 // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
-
-var LIMIT_SQUARED = 4.0
-var MAXIMUM_ITERATIONS = 50
-var image_Width_And_Height = 160
-var pixels = range(image_Width_And_Height * image_Width_And_Height / 8, 0, 0.0)
-var initial_r = [], initial_i = []
-
-for 0..image_Width_And_Height do (xy) => {
-    initial_r <+ (2.0 / image_Width_And_Height * xy - 1.5)
-    initial_i <+ (2.0 / image_Width_And_Height * xy - 1.0)
+var N = 160
+var Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
+var invN = 2.0/N
+for 0..N do (i) => { 
+	Cib[i] = invN * i - 1.0
+	Crb[i] = invN * i - 1.5
 }
 
-for 0..image_Width_And_Height do (y) => {
-    var prefetched_Initial_i = initial_i[y]
+var yCt = 0
+def incr() => sync yCt++
 
-    for 0,8..image_Width_And_Height do (x_Major) => {
+var linelen = (N + 7) / 8
+var out = range(N * linelen, 0, 0.0)
 
-        var pixel_Group_r = [
-            initial_r[x_Major],
-            initial_r[x_Major + 1],
-            initial_r[x_Major + 2],
-            initial_r[x_Major + 3],
-            initial_r[x_Major + 4],
-            initial_r[x_Major + 5],
-            initial_r[x_Major + 6],
-            initial_r[x_Major + 7],
-        ], pixel_Group_i = range(8, 0, prefetched_Initial_i)
+def putLine(y) =>
+	for 0..linelen do (xb) => {
+		var x = xb * 8
+		var res = 0
+        for [0, 2, 4, 6] do (i) => {
+            var Zr1 = Crb[x+i]
+            var Zi1 = Cib[y]
+            var Zr2 = Crb[x+i+1]
+            var Zi2 = Cib[y]
 
-        var eight_Pixels = 255
-        var iteration = MAXIMUM_ITERATIONS
-        
-        for eight_Pixels && iteration-- do () => {
-            var current_Pixel_Bitmask = 128
+            var b = 0
+            var j = 50
 
-            for 0..8 do (x_Minor) => {
-                var r = pixel_Group_r[x_Minor], i = pixel_Group_i[x_Minor]
+            enter for j-- > 0 do () => {
+                var nZr1=Zr1*Zr1-Zi1*Zi1+Crb[x+i]
+                var nZi1=Zr1*Zi1+Zr1*Zi1+Cib[y]
+                Zr1=nZr1
+                Zi1=nZi1
 
-                pixel_Group_r[x_Minor] = r*r - i*i + initial_r[x_Major+x_Minor]
-                pixel_Group_i[x_Minor] = 2.0*r*i + prefetched_Initial_i
+                var nZr2=Zr2*Zr2-Zi2*Zi2+Crb[x+i+1]
+                var nZi2=Zr2*Zi2+Zr2*Zi2+Cib[y]
+                Zr2=nZr2
+                Zi2=nZi2
 
-                if r*r + i*i > LIMIT_SQUARED
-                    eight_Pixels = Bit.and(eight_Pixels, Bit.not(current_Pixel_Bitmask))
-
-                current_Pixel_Bitmask /= 2
+                if Zr1*Zr1+Zi1*Zi1>4 { 
+                	b = Bit.or(b, 2)
+                	if b==3 exit(1)
+                }
+                if Zr2*Zr2+Zi2*Zi2>4 { 
+                	b = Bit.or(b, 1)
+                	if b==3 exit(1)
+                }
             }
-        }
 
-        pixels[y*image_Width_And_Height/8 + x_Major/8]=eight_Pixels
-    }
+            res = res * 4 + b
+        }
+        out[y * linelen + xb] = res
+	}
+
+def worker () => {
+	var y = 0
+	for (y = incr()) < N do () => putLine(y)
 }
 
+var threads = []
+for 0..2 do () =>
+	threads <+ worker#()
 
-// var image = "P4\n"
-// image <+ image_Width_And_Height + " " + image_Width_And_Height + "\n"
+for threads do (t) => wait(t)
 
-// for 0..image_Width_And_Height do (x) => {
-//     for 0..image_Width_And_Height do (y) => {
-//         image <+ pixels[y * image_Width_And_Height + x] + " "
-//     }
-//     image <+ "\n"
-// }
-
-// println(image)
-
-   // fwrite(pixels, image_Width_And_Height*image_Width_And_Height/8, 1, stdout);
+Pbm.write("test.pbm", N, N, out)
 
 Debug.summary()
-println(pixels)

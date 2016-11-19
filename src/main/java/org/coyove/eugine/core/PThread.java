@@ -51,7 +51,7 @@ public class PThread extends SExpression {
         Thread t = new Thread(go);
         t.start();
 
-        return new SNull();
+        return new SObject(t);
     }
 
     @Override

@@ -89,16 +89,6 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitSyncStmt(EugineParser.SyncStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link EugineParser#declareSubject}.
-	 * @param ctx the parse tree
-	 */
-	void enterDeclareSubject(EugineParser.DeclareSubjectContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link EugineParser#declareSubject}.
-	 * @param ctx the parse tree
-	 */
-	void exitDeclareSubject(EugineParser.DeclareSubjectContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link EugineParser#declareStmt}.
 	 * @param ctx the parse tree
 	 */

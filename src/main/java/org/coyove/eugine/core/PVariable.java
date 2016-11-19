@@ -24,31 +24,25 @@ public class PVariable extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        if (!env.containsKey(varName)) {
-            if (varName.charAt(0) == '@') {
-                return new SString(varName.substring(1), true);
-            } else {
-                if (env.strict) {
-                    throw new EgException(2047, "strict mode", atom);
-                }
-
-                SValue tmp = new SNull(true);
-                env.put(varName, tmp);
-                return tmp;
-            }
-        }
+//        if (!env.containsKey(varName)) {
+//            if (varName.charAt(0) == '@') {
+//                return new SString(varName.substring(1), true);
+//            } else {
+//                SValue tmp = new SNull(true);
+//                env.put(varName, tmp);
+//                return tmp;
+//            }
+//        }
 
         SValue tmp = env.get(varName);
-        return tmp;
+        return tmp == null ? new SNull() : tmp;
     }
 
     @Override
     public SExpression deepClone() throws EgException {
         PVariable ret = new PVariable();
         ret.atom = this.atom;
-
         ret.varName = this.varName;
-
         return ret;
     }
 }

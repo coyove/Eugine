@@ -69,32 +69,23 @@ syncStmt returns [SExpression v]
     : Sync Body=code { $v = new PSync(new Atom($Sync), $Body.v); }
     ;
 
-declareSubject returns [SExpression v]
-    : (Identifier | Subject=expr)
-    {
-        $v = $Identifier == null ? $Subject.v : new SString($Identifier.text);
-    }
-    ;
-
 declareStmt returns [SExpression v]
     locals [ ListEx<SExpression> multi = new ListEx<SExpression>(), PSet.ACTION act = PSet.ACTION.MUTABLE ]
     : Action=(Var | Const) 
         {
             $act = $Action.text.equals("var") ? PSet.ACTION.MUTABLE : PSet.ACTION.IMMUTABLE;
         }
-        Head=declareSubject '=' HeadValue=expr
+    Head=expr '=' HeadValue=expr
         {
             $multi.add(new PSet(new Atom($Action), $Head.v, $HeadValue.v, PSet.DECLARE.DECLARE, $act));
         }
-        (',' Tail=declareSubject '=' TailValue=expr {
-            $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, PSet.DECLARE.DECLARE, $act));
-        })?
+    (',' Tail=expr '=' TailValue=expr 
         {
-            if ($multi.size() == 1) {
-                $v = $multi.head();
-            } else {
-                $v = new PChain($multi);
-            }
+            $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, PSet.DECLARE.DECLARE, $act));
+        }
+    )?
+        {
+            $v = $multi.size() == 1 ? $multi.head() : new PChain($multi);
         }
     ;
 
@@ -185,7 +176,8 @@ lambdaStmt returns [SExpression v]
     ;
 
 callStmt returns [SExpression v]
-    : Identifier argumentsList {
+    : Identifier argumentsList 
+    {
         String func = $Identifier.text;
         if (SKeywords.Lookup.containsKey(func)) {
             $v = SKeywords.Lookup.get(func).call($Identifier, $argumentsList.v); 
@@ -389,11 +381,6 @@ assignExpr returns [SExpression v]
                         ListEx.build($Left.v, $Right.v)),
                     PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             }
-        }
-    | Identifier '=' Value=expr
-        {
-            $v = new PSet(new Atom($Identifier),
-                new SString($Identifier.text), $Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE); 
         }
     | Subject=assignExpr '=' Value=expr
         {

@@ -5,7 +5,9 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +27,7 @@ public class SEFile extends SExpression {
     private OPERATION fileOp;
 
     public enum OPERATION {
-        OPEN_TEXT, OPEN_BINARY, OPEN_LINES, WRITE, APPEND, EXISTS
+        OPEN_TEXT, OPEN_BINARY, OPEN_LINES, WRITE, APPEND, EXISTS, WRITE_BINARY
     }
 
     public SEFile() {
@@ -74,6 +76,8 @@ public class SEFile extends SExpression {
                     return new SList(ret);
                 case EXISTS:
                     return new SBool(Files.exists(path));
+//                case WRITE_BINARY:
+
                 default:
                     StandardOpenOption[] oo = fileOp == OPERATION.APPEND ?
                             new StandardOpenOption[]{StandardOpenOption.APPEND} :

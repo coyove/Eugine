@@ -64,10 +64,8 @@ public class PSet extends SExpression {
             String sn = directName ? n.get().toString() : ((PVariable) varName).varName;
 
             if (declare == DECLARE.SET) {
-//                if (!env.containsKey(sn) && env.strict)
-//                    throw new EgException(2042, "strict mode", atom);
-
-                if (env.containsKey(sn) && env.get(sn).immutable) {
+                SValue sv = env.get(sn);
+                if (sv != null && sv.immutable) {
                     throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
                 }
 

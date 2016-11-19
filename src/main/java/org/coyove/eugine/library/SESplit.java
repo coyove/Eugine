@@ -26,14 +26,11 @@ public class SESplit extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SString text = Utils.cast(this.text.evaluate(env), SString.class,
-                new EgException(3010, "subject must be string", atom));
-
-        SString delim = Utils.cast(this.delim.evaluate(env), SString.class,
-                new EgException(3011, "delimiter must be string", atom));
+        String text = Utils.castString(this.text.evaluate(env), atom);
+        String delim = Utils.castString(this.delim.evaluate(env), atom);
 
         ListEx<SValue> ret = new ListEx<SValue>();
-        for (String s : text.<String>get().split(delim.<String>get())) {
+        for (String s : text.split(delim)) {
             ret.add(new SString(s));
         }
 

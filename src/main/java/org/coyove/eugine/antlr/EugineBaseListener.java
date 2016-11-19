@@ -111,18 +111,6 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDeclareSubject(EugineParser.DeclareSubjectContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDeclareSubject(EugineParser.DeclareSubjectContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterDeclareStmt(EugineParser.DeclareStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}

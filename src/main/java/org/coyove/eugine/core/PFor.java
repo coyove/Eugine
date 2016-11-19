@@ -66,21 +66,24 @@ public class PFor extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SClosure body = Utils.cast(this.body.evaluate(env), SClosure.class,
-                new EgException(2017, "invalid loop body", atom));
+        SValue _body = this.body.evaluate(env);
+        if (!(_body instanceof SClosure)) {
+            throw new EgException(2017, "invalid loop body", atom);
+        }
 
-        SValue list_ = this.list.evaluate(env);
+        SClosure body = ((SClosure) _body);
+        SValue _list = this.list.evaluate(env);
 
-        if (list_ instanceof SDict) {
-            HashMap<String, SValue> m = ((SDict) list_).get();
+        if (_list instanceof SDict) {
+            HashMap<String, SValue> m = ((SDict) _list).get();
 
             for (String s : m.keySet()) {
                 SValue ret = execLoop(body, new SString(s), m.get(s));
                 if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                     break;
             }
-        } else if (list_ instanceof SList) {
-            ListEx<SExpression> values = ((SList) list_).get();
+        } else if (_list instanceof SList) {
+            ListEx<SExpression> values = ((SList) _list).get();
 
             if (direction == DIRECTION.ASC) {
                 for (int i = 0; i < values.size(); i++) {
@@ -95,15 +98,15 @@ public class PFor extends SExpression {
                         break;
                 }
             }
-        } else if (list_ instanceof SBool) {
+        } else if (_list instanceof SBool) {
             Long i = (long) 0;
             while (this.list.evaluate(env).<Boolean>get()) {
                 SValue ret = execLoop(body, new SNull(), new SInteger(i++));
                 if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                     break;
             }
-        } else if (list_ instanceof SRange) {
-            SRange r = (SRange) list_;
+        } else if (_list instanceof SRange) {
+            SRange r = (SRange) _list;
             Long i = r.start;
 
             while (i < r.end) {

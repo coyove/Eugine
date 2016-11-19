@@ -11,6 +11,7 @@ import java.util.regex.*;
 /**
  * Created by coyove on 2016/9/9.
  */
+@Deprecated
 public class Parser {
 
     private String basePath;
@@ -120,7 +121,7 @@ public class Parser {
         if (token.type == Token.TokenType.RPAREN ||
                 token.type == Token.TokenType.RBRACK ||
                 token.type == Token.TokenType.RBRACE)
-            throw new EgException(1000, "unexpected character", token);
+            throw new EgException(1000, "unexpected character");
 
         if (token.type == Token.TokenType.LPAREN ||
                 token.type == Token.TokenType.LBRACK ||
@@ -144,7 +145,7 @@ public class Parser {
                 comp.atoms.add(parseNext(tokens));
 
             if (tokens.size() == 0 || tokens.head().type != ending)
-                throw new EgException(1000, "unexpected character", token);
+                throw new EgException(1000, "unexpected character");
 
             tokens.pop();
 

@@ -51,11 +51,8 @@ public class PGet extends SExpression {
 
             return dk;
         } else if (dict instanceof SList) {
-            SInteger index = Utils.cast(sk, SInteger.class,
-                    new EgException(2020, "list index must be integer", atom));
-
             ListEx<SExpression> l = dict.get();
-            Long idx = index.get();
+            Long idx = Utils.castLong(sk, atom);
 
             if (idx >= l.size() || idx < 0)
                 throw new EgException(2021, "index out of range", atom);
@@ -67,11 +64,8 @@ public class PGet extends SExpression {
 
             return li;
         } else if (dict instanceof SString) {
-            SInteger index = Utils.cast(sk, SInteger.class,
-                    new EgException(2022, "string index must be integer", atom));
-
             String str = dict.get();
-            Long idx = index.get();
+            Long idx = Utils.castLong(sk, atom);
 
             if (idx >= str.length()) {
                 throw new EgException(2023, "index out of range", atom);
@@ -80,10 +74,7 @@ public class PGet extends SExpression {
             return new SString(String.valueOf(str.charAt(idx.intValue())));
 
         } else if (dict instanceof SClosure) {
-            SString key = Utils.cast(sk, SString.class,
-                    new EgException(2024, "closure field must be string", atom));
-
-            String k = key.get();
+            String k = Utils.castString(sk, atom);
 
             if (k.equals("__extra__")) {
                 HashMap<String, SValue> ret = new HashMap<String, SValue>();

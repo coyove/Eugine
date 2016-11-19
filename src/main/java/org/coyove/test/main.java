@@ -9,6 +9,8 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 import org.coyove.eugine.*;
@@ -63,14 +65,6 @@ public class main {
     public static void main(String[] args) {
         Utils.importExportables();
         try {
-//            PAdd a = new PAdd();
-//            for (Field f : a.getClass().getDeclaredFields()) {
-//                f.setAccessible(true);
-//                System.out.print(f.getName());
-//                System.out.print(f.getAnnotation(ReplaceableVariable.class));
-//                System.out.println();
-//            }
-
             Eugine e = new Eugine();
             System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
         } catch (Exception e) {

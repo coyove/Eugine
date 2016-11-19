@@ -34,14 +34,9 @@ public class SEReplace extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String text = Utils.cast(this.text.evaluate(env), SString.class,
-                new EgException(3010, "subject must be string", atom)).get();
-
-        String oldText = Utils.cast(this.oldText.evaluate(env), SString.class,
-                new EgException(3011, "old must be string", atom)).get();
-
-        String newText = Utils.cast(this.newText.evaluate(env), SString.class,
-                new EgException(3011, "new must be string", atom)).get();
+        String text = Utils.castString(this.text.evaluate(env), atom);
+        String oldText = Utils.castString(this.oldText.evaluate(env), atom);
+        String newText = Utils.castString(this.newText.evaluate(env), atom);
 
         if (op == OPERATION.NORMAL) {
             return new SString(text.replace(oldText, newText));

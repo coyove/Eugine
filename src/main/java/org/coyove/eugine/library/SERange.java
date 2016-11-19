@@ -5,6 +5,8 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.Arrays;
+
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -39,29 +41,33 @@ public class SERange extends SExpression {
         SValue start = this.start.evaluate(env);
         SValue interval = this.interval.evaluate(env);
         SValue end = this.end.evaluate(env);
-        ListEx<SValue> ret = new ListEx<SValue>();
 
         if (start instanceof SInteger && interval instanceof SInteger) {
             Long interval_ = interval.<Long>get();
 
             if (interval_ == 0) {
-                for (Long i = 0l; i < start.<Long>get(); i ++) {
-                    ret.add(end);
-                }
+                int len = start.<Long>get().intValue();
+                SValue[] arr = new SValue[len];
+                Arrays.fill(arr, end);
+                ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
+                return new SList(ret);
             } else if (end instanceof SInteger) {
+                Long len = end.<Long>get() - start.<Long>get();
+                ListEx<SValue> ret = new ListEx<SValue>(len.intValue());
                 for (Long i = start.get(); i < end.<Long>get(); i += interval_) {
                     ret.add(new SInteger(i));
                 }
+                return new SList(ret);
             }
         } else if (start instanceof SDouble && interval instanceof SDouble && end instanceof SDouble) {
+            ListEx<SValue> ret = new ListEx<SValue>();
             for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get()) {
                 ret.add(new SDouble(i));
             }
-        } else {
-            throw new EgException(3009, "needs integers or doubles", atom);
+            return new SList(ret);
         }
 
-        return new SList(ret);
+        throw new EgException(3009, "needs integers or doubles", atom);
     }
 
     @Override
