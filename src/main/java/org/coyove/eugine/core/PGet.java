@@ -32,8 +32,7 @@ public class PGet extends SExpression {
 
         if (dict instanceof SDict) {
             String k;
-            if (sk instanceof SString || sk instanceof SInteger ||
-                    sk instanceof SDouble || sk instanceof SBool) {
+            if (sk instanceof SString) {
                 k = sk.get();
             } else {
                 throw new EgException(2019, "invalid key: " + sk, atom);

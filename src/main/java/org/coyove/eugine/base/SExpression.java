@@ -39,7 +39,7 @@ public abstract class SExpression implements java.io.Serializable {
                     }
 
                     if (v instanceof SList) {
-                        ret.addAll(v.<ListEx<SExpression>>get().cast(SValue.class));
+                        ret.addAll(v.<ListEx<SValue>>get());
                     } else {
                         throw new EgException(9998, "wrong vararg list", atom);
                     }

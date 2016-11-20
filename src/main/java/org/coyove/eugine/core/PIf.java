@@ -35,7 +35,7 @@ public class PIf extends SExpression {
             if (falseBranch != null) {
                 return falseBranch.evaluate(env);
             } else {
-                return new SNull();
+                return ExecEnvironment.Null;
             }
         }
     }

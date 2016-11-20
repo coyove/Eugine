@@ -54,7 +54,7 @@ public class SEDigest extends SExpression {
             } else if (v instanceof SObject && v.underlying instanceof byte[]) {
                 result = md.digest(((byte[]) v.underlying));
             } else {
-                return new SNull();
+                return env.Null;
             }
 
             if (ret == RETURN.STRING) {

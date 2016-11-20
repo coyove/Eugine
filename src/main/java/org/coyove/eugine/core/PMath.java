@@ -20,9 +20,11 @@ public class PMath extends SExpression {
 
     public Object[] stack = new Object[3];
 
+    public boolean expanded = false;
+
     private ACTION action;
 
-    public enum ACTION {ADD, SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
+    public enum ACTION {EXPANDED, ADD, SUBTRACT, MULTIPLY, DIVIDE, MODULAR}
 
     public PMath() {}
 
@@ -38,17 +40,17 @@ public class PMath extends SExpression {
         switch (action) {
             case SUBTRACT:
                 if (left instanceof SInteger) {
-                    return new SInteger(left.<Long>get() - Utils.castLong(right, atom));
+                    return new SInteger(((SInteger) left).val() - Utils.castLong(right, atom));
                 } else if (left instanceof SDouble) {
-                    return new SDouble(left.<Double>get() - Utils.castDouble(right, atom));
+                    return new SDouble(((SDouble) left).val() - Utils.castDouble(right, atom));
                 } else {
                     throw new EgException(7040, "invalid number: " + left, atom);
                 }
             case MULTIPLY:
                 if (left instanceof SInteger) {
-                    return new SInteger(left.<Long>get() * Utils.castLong(right, atom));
+                    return new SInteger(((SInteger) left).val() * Utils.castLong(right, atom));
                 } else if (left instanceof SDouble) {
-                    return new SDouble(left.<Double>get() * Utils.castDouble(right, atom));
+                    return new SDouble(((SDouble) left).val() * Utils.castDouble(right, atom));
                 } else {
                     throw new EgException(7040, "invalid number: " + left, atom);
                 }
@@ -58,14 +60,14 @@ public class PMath extends SExpression {
                     if (lr == 0) {
                         throw new EgException(7041, "divided by zero", atom);
                     } else {
-                        return new SInteger(left.<Long>get() / lr);
+                        return new SInteger(((SInteger) left).val() / lr);
                     }
                 } else if (left instanceof SDouble) {
                     Double dr = Utils.castDouble(right, atom);
                     if (Math.abs(dr) < 1e-6) {
                         throw new EgException(7041, "divided by zero", atom);
                     } else {
-                        return new SDouble(left.<Double>get() / dr);
+                        return new SDouble(((SDouble) left).val() / dr);
                     }
                 } else {
                     throw new EgException(7040, "invalid number: " + left, atom);
@@ -76,14 +78,14 @@ public class PMath extends SExpression {
                     if (lr == 0) {
                         throw new EgException(7041, "moded by zero", atom);
                     } else {
-                        return new SInteger(left.<Long>get() % lr);
+                        return new SInteger(((SInteger) left).val() % lr);
                     }
                 } else if (left instanceof SDouble) {
                     Double dr = Utils.castDouble(right, atom);
                     if (Math.abs(dr) < 1e-6) {
                         throw new EgException(7041, "moded by zero", atom);
                     } else {
-                        return new SDouble(left.<Double>get() % dr);
+                        return new SDouble(((SDouble) left).val() % dr);
                     }
                 } else {
                     throw new EgException(7040, "invalid number: " + left, atom);
@@ -96,20 +98,24 @@ public class PMath extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
+//        if (expanded) {
+//            return MathOpStack.eval(this.stack, env, atom);
+//        }
+
         if (this.left instanceof PVariable && this.right instanceof PVariable) {
             if (((PVariable) this.left).varName.equals(((PVariable) this.right).varName)) {
                 SValue left = this.left.evaluate(env);
                 if (action == ACTION.MULTIPLY) {
                     if (stack[0] == null) {
-                        stack[0] = stack[1] = ((PVariable) this.left).varName;
+                        stack[0] = stack[1] = this.left;
                         stack[2] = ACTION.MULTIPLY;
                     }
 
                     if (left instanceof SInteger) {
-                        Long v = left.get();
+                        long v = ((SInteger) left).val();
                         return new SInteger(v * v);
                     } else if (left instanceof SDouble) {
-                        Double v = left.get();
+                        double v = ((SDouble) left).val();
                         return new SDouble(v * v);
                     } else {
                         throw new EgException(7040, "invalid number: " + left, atom);
@@ -124,30 +130,51 @@ public class PMath extends SExpression {
         SValue right = this.right.evaluate(env);
         SValue ret = perform(left, right);
 
-        if (stack[0] == null) {
-            if (this.left instanceof SInteger) {
-                stack[0] = ((SInteger) this.left).underlying;
-            } else if (this.left instanceof SDouble) {
-                stack[0] = ((SDouble) this.left).underlying;
-            } else {
-                stack[0] = this.left;
-            }
+//        if (stack[0] == null) {
+//            pushStack(stack, this.left, this.right, action);
+//        }
 
-            if (this.right instanceof SInteger) {
-                stack[1] = ((SInteger) this.right).underlying;
-                if (stack[0] instanceof Double) {
-                    stack[1] = ((Long) stack[1]).doubleValue();
-                }
-            } else if (this.right instanceof SDouble) {
-                stack[1] = ((SDouble) this.right).underlying;
-                if (stack[0] instanceof Long) {
-                    stack[1] = ((Double) stack[1]).longValue();
-                }
-            } else {
-                stack[1] = this.right;
-            }
+        return ret;
+    }
 
-            stack[2] = action;
+//    public static void pushStack(Object[] stack, SExpression left, SExpression right, ACTION action) {
+//        if (left instanceof SInteger) {
+//            stack[0] = ((SInteger) left).underlying;
+//        } else if (left instanceof SDouble) {
+//            stack[0] = ((SDouble) left).underlying;
+//        } else {
+//            stack[0] = left;
+//        }
+//
+//        if (right instanceof SInteger) {
+//            stack[1] = ((SInteger) right).underlying;
+//            if (stack[0] instanceof Double) {
+//                stack[1] = ((Long) stack[1]).doubleValue();
+//            }
+//        } else if (right instanceof SDouble) {
+//            stack[1] = ((SDouble) right).underlying;
+//            if (stack[0] instanceof Long) {
+//                stack[1] = ((Double) stack[1]).longValue();
+//            }
+//        } else {
+//            stack[1] = right;
+//        }
+//
+//        stack[2] = action;
+//    }
+
+    public static Object[] copyStack(Object[] from) throws EgException {
+        Object[] ret = new Object[3];
+
+        if (from[0] != null) {
+            ret = new Object[from.length];
+            for (int i = 0; i < from.length; i++) {
+                if (from[i] instanceof SExpression) {
+                    ret[i] = ((SExpression) from[i]).deepClone();
+                } else {
+                    ret[i] = from[i];
+                }
+            }
         }
 
         return ret;
@@ -161,6 +188,8 @@ public class PMath extends SExpression {
         ret.action = this.action;
         ret.left = this.left.deepClone();
         ret.right = this.right.deepClone();
+        ret.stack = copyStack(this.stack);
+        ret.expanded = this.expanded;
 
         return ret;
     }

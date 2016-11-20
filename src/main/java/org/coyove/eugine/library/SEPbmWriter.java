@@ -52,14 +52,14 @@ public class SEPbmWriter extends SExpression {
             OutputStream stream = new FileOutputStream(filename);
             stream.write(("P4\n" + sizeX + " " + sizeY + "\n").getBytes());
             for (SValue v : list) {
-                stream.write(Utils.castLong(v, atom).intValue());
+                stream.write(((int) Utils.castLong(v, atom)));
             }
             stream.close();
         } catch (Exception e) {
             throw new EgException(7088, "failed to write: " + e, atom);
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override

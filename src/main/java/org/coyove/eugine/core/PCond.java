@@ -38,12 +38,11 @@ public class PCond extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        Object cond = condition.evaluate(env).get();
+        SValue cond = condition.evaluate(env);
         SValue ret = new SNull();
 
         for (Branch b : branches) {
-            Object tester = b.recv.evaluate(env).get();
-            if (compare(cond, tester)) {
+            if (cond.equals(b.recv.evaluate(env))) {
                 for (SExpression e : b.body) {
                     ret = e.evaluate(env);
                 }

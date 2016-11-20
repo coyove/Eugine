@@ -30,7 +30,7 @@ public class InteropHelper {
 
     public static SValue castJavaType(Object value) {
         if (value == null) {
-            return new SNull();
+            return ExecEnvironment.Null;
         } else if (value instanceof String) {
             return new SString((String) value);
         } else if (value instanceof Double) {
@@ -46,7 +46,7 @@ public class InteropHelper {
         } else if (value instanceof Short) {
             return new SInteger(((long) ((Short) value)));
         } else if (value instanceof Boolean) {
-            return new SBool((Boolean) value);
+            return (Boolean) value ? ExecEnvironment.True : ExecEnvironment.False;
         } else if (value.getClass().isArray()) {
             ListEx<SValue> ret = new ListEx<SValue>();
             for (int i = 0; i < Array.getLength(value); i++)
@@ -78,7 +78,7 @@ public class InteropHelper {
     public static Object castSValue(SValue obj, Class c) {
         if (obj instanceof SDouble || obj instanceof SInteger) {
             BigDecimal num = new BigDecimal(obj instanceof SDouble ?
-                    obj.<Double>get() : obj.<Long>get()
+                    ((SDouble) obj).val() : ((SInteger) obj).val()
             );
 
             if (c == int.class) {

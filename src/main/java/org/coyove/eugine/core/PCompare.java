@@ -19,7 +19,8 @@ public class PCompare extends SExpression {
     @ReplaceableVariable
     private SExpression right;
 
-    public PCompare() {}
+    public PCompare() {
+    }
 
     public PCompare(Atom ha, ListEx<SExpression> args, String a) {
         super(ha, args, 2);
@@ -29,18 +30,18 @@ public class PCompare extends SExpression {
         right = args.get(1);
     }
 
-    private boolean compareNumber(SValue left, SValue right, int ...signs) throws EgException {
+    private boolean compareNumber(SValue left, SValue right, int... signs) throws EgException {
         if (left instanceof SInteger) {
-            Long l = left.get();
-            Long r = Utils.castLong(right, atom);
+            long l = ((SInteger) left).val();
+            long r = Utils.castLong(right, atom);
             int sign = (int) Math.signum(l - r);
 
             return (signs[0] == sign || signs[1] == sign);
         }
 
         if (left instanceof SDouble) {
-            Double l = left.get();
-            Double r = Utils.castDouble(right, atom);
+            double l = ((SDouble) left).val();
+            double r = Utils.castDouble(right, atom);
             int sign = (int) Math.signum(l - r);
 
             return (signs[0] == sign || signs[1] == sign);
@@ -55,36 +56,28 @@ public class PCompare extends SExpression {
         SValue right = this.right.evaluate(env);
 
         if (action.equals("==") || action.equals("!=")) {
-            Object lo = left.get();
-            Object ro = right.get();
-            boolean flag;
-
-            if (lo != null && ro != null) {
-                flag = lo.equals(ro);
-            } else {
-                flag = lo == ro;
-            }
+            boolean flag = left.equals(right);
 
             if (action.equals("!=")) {
                 flag = !flag;
             }
 
-            return new SBool(flag);
+            return flag ? ExecEnvironment.True : ExecEnvironment.False;
         }
 
         if (action.equals(">"))
-            return new SBool(compareNumber(left, right, 1, 1));
+            return compareNumber(left, right, 1, 1) ? ExecEnvironment.True : ExecEnvironment.False;
 
         if (action.equals("<"))
-            return new SBool(compareNumber(left, right, -1, -1));
+            return compareNumber(left, right, -1, -1) ? ExecEnvironment.True : ExecEnvironment.False;
 
         if (action.equals(">="))
-            return new SBool(compareNumber(left, right, 1, 0));
+            return compareNumber(left, right, 1, 0) ? ExecEnvironment.True : ExecEnvironment.False;
 
         if (action.equals("<="))
-            return new SBool(compareNumber(left, right, -1, 0));
+            return compareNumber(left, right, -1, 0) ? ExecEnvironment.True : ExecEnvironment.False;
 
-        return new SNull();
+        return ExecEnvironment.Null;
     }
 
     @Override

@@ -44,7 +44,9 @@ public class PSet extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue n = varName.evaluate(env);
         SValue v = varValue.evaluate(env);
-        SValue ret = v;
+        SValue value = v;
+
+//        MathOpStack.expand(varValue, true);
 
         if (action == ACTION.MUTABLE && v.immutable) {
             /**
@@ -52,12 +54,12 @@ public class PSet extends SExpression {
              * b is immutable, a should be mutable
              * note that "clone" is shallow copy
              */
-            ret = v.clone();
-            ret.immutable = false;
+            value = v.clone();
+            value.immutable = false;
         }
 
         if (action == ACTION.IMMUTABLE) {
-            ret.immutable = true;
+            value.immutable = true;
         }
 
         if (directName || varName instanceof PVariable) {
@@ -65,34 +67,34 @@ public class PSet extends SExpression {
             PVariable var = (PVariable) varName;
 
             if (declare == DECLARE.SET) {
-                // TODO: more elegant way to deal with immutable variables
+                // TODO: find a more elegant way to deal with immutable variable checking
 //                SValue sv = env.get(sn);
 //                if (sv != null && sv.immutable) {
 //                    throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
 //                }
 
-                env.put(sn, ret);
+                env.put(sn, value);
 
-                if (var.cacheIndex >= 0) {
-                    SCache.slots[var.cacheIndex] = ret;
-                } else {
-                    Short ci = env.cacheReverseLookupGet(sn);
-                    if (ci != null) {
-                        var.cacheIndex = ci;
-                    } else {
-                        // set a variable who was not declared
-                    }
-                }
+//                if (var.cacheIndex >= 0) {
+//                    SCache.slots[var.cacheIndex] = value;
+//                } else {
+//                    Short ci = env.cacheReverseLookupGet(sn);
+//                    if (ci != null) {
+//                        var.cacheIndex = ci;
+//                    } else {
+//                        // set a variable who was not declared
+//                    }
+//                }
             } else if (declare == DECLARE.DECLARE) {
-                env.bPut(sn, ret);
+                env.bPut(sn, value);
 
-                if (var.cacheIndex >= 0) {
-                    SCache.slots[var.cacheIndex] = ret;
-                } else {
-                    short ci = SCache.put(ret, env, sn);
-                    var.cacheIndex = ci;
-                    env.cacheReverseLookup.put(sn, ci);
-                }
+//                if (var.cacheIndex >= 0) {
+//                    SCache.slots[var.cacheIndex] = value;
+//                } else {
+//                    short ci = SCache.put(value, env, sn);
+//                    var.cacheIndex = ci;
+//                    env.cacheReverseLookup.put(sn, ci);
+//                }
             }
         } else {
             Object refer = n.refer;
@@ -101,30 +103,27 @@ public class PSet extends SExpression {
                 throw new EgException(2044, "referred variable is immutable", atom);
             }
 
-            if (refer instanceof String) {
-                throw new EgException(9087, "refer is string", atom);
-                // env.put(refer.toString(), ret);
-            } else if (refer instanceof SDict) {
-                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey, ret);
+            if (refer instanceof SDict) {
+                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey, value);
             } else if (refer instanceof SList) {
-                ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, ret);
+                ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, value);
             } else if (refer instanceof SObject) {
                 Object sub = ((SObject) refer).get();
-                InteropHelper.setField(sub, n.refKey, ret);
+                InteropHelper.setField(sub, n.refKey, value);
             } else if (refer instanceof SClosure) {
                 if (declare == DECLARE.DECLARE) {
-                    ((SClosure) refer).extra.bPut(n.refKey, ret);
-                    env.bPut(n.refKey, ret);
+                    ((SClosure) refer).extra.bPut(n.refKey, value);
+                    env.bPut(n.refKey, value);
                 } else {
-                    ((SClosure) refer).extra.put(n.refKey, ret);
-                    env.put(n.refKey, ret);
+                    ((SClosure) refer).extra.put(n.refKey, value);
+                    env.put(n.refKey, value);
                 }
             } else {
                 throw new EgException(2045, "failed to set, invalid referred object: " + refer, atom);
             }
         }
 
-        return ret;
+        return value;
     }
 
     @Override

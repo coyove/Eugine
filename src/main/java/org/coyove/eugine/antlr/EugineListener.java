@@ -219,6 +219,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitTopExpr(EugineParser.TopExprContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#postfixExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterPostfixExpr(EugineParser.PostfixExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#postfixExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitPostfixExpr(EugineParser.PostfixExprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#unaryExpr}.
 	 * @param ctx the parse tree
 	 */

@@ -30,17 +30,16 @@ public class SEContains extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue key = this.key.evaluate(env);
-
         SValue sub = this.map.evaluate(env);
+
         if (sub instanceof SDict && key instanceof SString) {
             HashMap<String, SValue> map = sub.get();
-            return new SBool(map.containsKey(key.<String>get()));
+            return map.containsKey(key.<String>get()) ? ExecEnvironment.True : ExecEnvironment.False;
         } else if (sub instanceof SList) {
             ListEx<SValue> list = sub.get();
-            Object tester = key instanceof SConcatString ? key.<String>get() : key.get();
 
             for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).equals(tester)) {
+                if (list.get(i).equals(key)) {
                     return new SInteger(i);
                 }
             }

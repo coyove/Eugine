@@ -58,7 +58,7 @@ public class TableOp extends SExpression {
                 return v;
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override

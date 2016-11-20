@@ -27,7 +27,7 @@ public class SETrim extends SExpression {
         if (arg instanceof SString) {
             return new SString(StringUtils.trim(arg.<String>get()));
         } else {
-            return new SNull();
+            return env.Null;
         }
     }
 

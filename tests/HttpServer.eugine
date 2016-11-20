@@ -115,7 +115,6 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
     def handle (client) => {
         client::setSoTimeout(readTimeout: int)
         var is = client::getInputStream()
-
         var context = _HttpServer.HttpContext(client)
 
         enter {
@@ -126,7 +125,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         var bodyLength   = 0
         var headerLength = 0
         var totalLength  = 0
-        
+       
         enter for read != -1 do () => {
             totalRead += (read = is::read(buf : byte[]))
             var output = new java\lang\String(buf : byte[], 0 : int, read : int)
@@ -143,8 +142,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             !(totalLength == totalRead || Util.isEndOfStream(rawRequest))
         }
         catch (e)
-            if rawRequest != "" 
-                println("timeout:\n", e, "\n", rawRequest)
+            println("timeout:\n", e, "\n", rawRequest)
 
         var requests = String.split(rawRequest, "\r\n")
         for requests do (request) => {

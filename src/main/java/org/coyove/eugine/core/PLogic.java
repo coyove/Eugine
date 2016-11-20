@@ -29,11 +29,11 @@ public class PLogic extends SExpression {
         boolean ret = Utils.castBoolean(values.head().evaluate(env), atom);
 
         if (ret && log == LOGIC.OR) {
-            return new SBool(true);
+            return ExecEnvironment.True;
         }
 
         if (!ret && log == LOGIC.AND) {
-            return new SBool(false);
+            return ExecEnvironment.False;
         }
 
         if (log != LOGIC.NOT) {
@@ -43,13 +43,13 @@ public class PLogic extends SExpression {
                     case AND:
                         ret = ret && next;
                         if (!ret) {
-                            return new SBool(false);
+                            return ExecEnvironment.False;
                         }
                         break;
                     case OR:
                         ret = ret || next;
                         if (ret) {
-                            return new SBool(true);
+                            return ExecEnvironment.True;
                         }
                         break;
                 }
@@ -58,7 +58,7 @@ public class PLogic extends SExpression {
             ret = !ret;
         }
 
-        return new SBool(ret);
+        return ret ? ExecEnvironment.True : ExecEnvironment.False;
 
     }
 

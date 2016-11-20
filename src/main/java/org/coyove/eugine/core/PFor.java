@@ -100,7 +100,7 @@ public class PFor extends SExpression {
             }
         } else if (_list instanceof SBool) {
             Long i = (long) 0;
-            while (this.list.evaluate(env).<Boolean>get()) {
+            while (this.list.evaluate(env) == ExecEnvironment.True) {
                 SValue ret = execLoop(body, new SNull(), new SInteger(i++));
                 if (ret.underlying instanceof Boolean && !(Boolean) ret.underlying)
                     break;
@@ -119,7 +119,7 @@ public class PFor extends SExpression {
             throw new EgException(2018, "invalid loop condition", atom);
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override

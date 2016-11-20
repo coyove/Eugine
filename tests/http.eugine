@@ -1,7 +1,6 @@
 import Utils
 import HttpServer
 import Template
-import Thread
 
 (def Config() => {
     var this.port = 8080

@@ -5,6 +5,9 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by coyove on 2016/9/10.
  */
@@ -16,6 +19,10 @@ public class PAdd extends SExpression {
     private SExpression right;
 
     private boolean self = false;
+
+    public boolean expanded = false;
+
+    public Object[] stack = new Object[3];
 
     public PAdd() {}
 
@@ -30,16 +37,29 @@ public class PAdd extends SExpression {
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
+//        if (expanded) {
+//            return MathOpStack.eval(this.stack, env, atom);
+//        }
+
         SValue left = this.left.evaluate(env);
         SValue right = this.right.evaluate(env);
 
         if (left instanceof SConcatString) {
             if (right.underlying != null) {
+                String text;
+                if (right instanceof SInteger) {
+                    text = ((Long) ((SInteger) right).val()).toString();
+                } else if (right instanceof SDouble) {
+                    text = ((Double) ((SDouble) right).val()).toString();
+                } else {
+                    text = right.underlying.toString();
+                }
+
                 if (self) {
                     if (right instanceof SConcatString) {
                         ((SConcatString) left).texts.addAll(((SConcatString) right).texts);
                     } else {
-                        ((SConcatString) left).texts.add(right.underlying.toString());
+                        ((SConcatString) left).texts.add(text);
                     }
 
                     return left;
@@ -51,7 +71,7 @@ public class PAdd extends SExpression {
                         ret.texts.addAll(((SConcatString) right).texts);
                         return ret;
                     } else {
-                        ret.texts.add(right.underlying.toString());
+                        ret.texts.add(text);
                         return ret;
                     }
                 }
@@ -67,21 +87,41 @@ public class PAdd extends SExpression {
                     ret.texts.addAll(((SConcatString) right).texts);
                     return ret;
                 } else {
-                    return new SConcatString(left.underlying.toString(), right.underlying.toString());
+                    String t;
+                    if (right instanceof SInteger) {
+                        t = ((Long) ((SInteger) right).val()).toString();
+                    } else if (right instanceof SDouble) {
+                        t = ((Double) ((SDouble) right).val()).toString();
+                    } else {
+                        t = right.underlying.toString();
+                    }
+                    return new SConcatString(left.underlying.toString(), t);
                 }
-//                left.underlying = left.<String>get() + right.<String>get();
-//                return new SNull();
             } else {
                 return left.clone();
             }
         }
 
         if (left instanceof SDouble) {
-            return new SDouble(left.<Double>get() + Utils.castDouble(right, atom));
+            double r = Utils.castDouble(right, atom);
+            double l = ((SDouble) left).val();
+
+//            if (stack[0] == null) {
+//                PMath.pushStack(stack, this.left, this.right, PMath.ACTION.ADD);
+//            }
+
+            return new SDouble(l + r);
         }
 
         if (left instanceof SInteger) {
-            return new SInteger(left.<Long>get() + Utils.castLong(right, atom));
+            long l = ((SInteger) left).val();
+            long r = Utils.castLong(right, atom);
+
+//            if (stack[0] == null) {
+//                PMath.pushStack(stack, this.left, this.right, PMath.ACTION.ADD);
+//            }
+
+            return new SInteger(l + r);
         }
 
         if (left instanceof SList) {
@@ -93,7 +133,7 @@ public class PAdd extends SExpression {
                 }
 
                 list.add(right);
-                return new SNull();
+                return env.Null;
             } else {
                 list = (ListEx<SValue>) left.<ListEx<SValue>>get().clone();
                 list.add(right);
@@ -101,7 +141,7 @@ public class PAdd extends SExpression {
             }
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override
@@ -111,6 +151,9 @@ public class PAdd extends SExpression {
         ret.left = this.left.deepClone();
         ret.right = this.right.deepClone();
         ret.self = this.self;
+        ret.stack = PMath.copyStack(this.stack);
+        ret.expanded = this.expanded;
+
         return ret;
     }
 }

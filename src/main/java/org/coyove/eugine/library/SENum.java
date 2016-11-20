@@ -31,12 +31,12 @@ public class SENum extends SExpression {
                     return new SInteger(Long.parseLong(str));
                 }
             } catch (Exception e) {
-                return new SNull();
+                return env.Null;
             }
         } else if (arg instanceof SBool) {
-            return new SInteger(arg.<Boolean>get() ? 1 : 0);
+            return new SInteger(arg == ExecEnvironment.True ? 1 : 0);
         } else if (arg instanceof SNull) {
-            return new SNull();
+            return env.Null;
         } else if (arg instanceof SList) {
             ListEx<SValue> list = arg.get();
             ListEx<SValue> ret = new ListEx<SValue>(list.size());
@@ -49,7 +49,7 @@ public class SENum extends SExpression {
         } else if (arg instanceof SInteger || arg instanceof SDouble) {
             return arg;
         } else {
-            return new SNull();
+            return env.Null;
         }
     }
 

@@ -15,9 +15,6 @@ import java.nio.file.Paths;
  */
 public class Eugine implements Serializable {
     public ExecEnvironment environment = new ExecEnvironment() {{
-        put("null", new SNull(true));
-        put("true", new SBool(true, true));
-        put("false", new SBool(false, true));
         put("__comparator__", new SString("__comparator__", true));
         put("__doc__", new SString("__doc__", true));
         put("__integer_max__", new SInteger(Long.MAX_VALUE, true));

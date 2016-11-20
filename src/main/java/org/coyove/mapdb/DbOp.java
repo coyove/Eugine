@@ -37,7 +37,7 @@ public class DbOp extends SExpression {
                 break;
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override

@@ -1,7 +1,9 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.value.SBool;
 import org.coyove.eugine.value.SClosure;
+import org.coyove.eugine.value.SNull;
 
 import java.util.HashMap;
 
@@ -9,6 +11,10 @@ import java.util.HashMap;
  * Created by coyove on 2016/9/9.
  */
 public class ExecEnvironment extends HashMap<String, SValue> {
+    public static SNull Null = new SNull(true);
+    public static SBool True = new SBool(true, true);
+    public static SBool False = new SBool(false, true);
+
     public ExecEnvironment parentEnv = null;
     public HashMap<String, Short> cacheReverseLookup = new HashMap<String, Short>();
 

@@ -43,7 +43,7 @@ public class PEnter extends SExpression {
             if (this.finallyBody != null) {
                 return this.finallyBody.evaluate(env);
             } else {
-                return new SNull();
+                return env.Null;
             }
         }
     }

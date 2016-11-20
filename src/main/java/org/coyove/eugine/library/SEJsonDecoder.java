@@ -45,7 +45,7 @@ public class SEJsonDecoder extends SExpression {
         } else if (obj instanceof JsonPrimitive) {
             JsonPrimitive p = ((JsonPrimitive) obj);
             if (p.isBoolean()) {
-                return new SBool(p.getAsBoolean());
+                return p.getAsBoolean() ? ExecEnvironment.True : ExecEnvironment.False;
             } else if (p.isString()) {
                 return new SString(p.getAsString());
             } else if (p.isNumber()) {
@@ -60,7 +60,7 @@ public class SEJsonDecoder extends SExpression {
                 return null;
             }
         } else if (obj instanceof JsonNull) {
-            return new SNull();
+            return ExecEnvironment.Null;
         } else {
             // never happen
             return null;

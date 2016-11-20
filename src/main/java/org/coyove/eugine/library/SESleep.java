@@ -28,12 +28,12 @@ public class SESleep extends SExpression {
         }
 
         try {
-            Thread.sleep(time.<Long>get());
+            Thread.sleep(time.val());
         } catch (InterruptedException ex) {
             throw new EgException(3099, "sleep is interrupted", atom);
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override

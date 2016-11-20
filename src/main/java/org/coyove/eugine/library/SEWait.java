@@ -31,7 +31,7 @@ public class SEWait extends SExpression {
             }
         }
 
-        return new SNull();
+        return env.Null;
     }
 
     @Override

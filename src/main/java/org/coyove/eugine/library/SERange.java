@@ -43,25 +43,25 @@ public class SERange extends SExpression {
         SValue end = this.end.evaluate(env);
 
         if (start instanceof SInteger && interval instanceof SInteger) {
-            Long interval_ = interval.<Long>get();
+            long interval_ = ((SInteger) interval).val();
 
             if (interval_ == 0) {
-                int len = start.<Long>get().intValue();
+                int len = ((int) ((SInteger) start).val());
                 SValue[] arr = new SValue[len];
                 Arrays.fill(arr, end);
                 ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
                 return new SList(ret);
             } else if (end instanceof SInteger) {
-                Long len = end.<Long>get() - start.<Long>get();
-                ListEx<SValue> ret = new ListEx<SValue>(len.intValue());
-                for (Long i = start.get(); i < end.<Long>get(); i += interval_) {
+                long len = ((SInteger) end).val() - ((SInteger) start).val();
+                ListEx<SValue> ret = new ListEx<SValue>((int) len);
+                for (long i = ((SInteger) start).val(); i < ((SInteger) end).val(); i += interval_) {
                     ret.add(new SInteger(i));
                 }
                 return new SList(ret);
             }
         } else if (start instanceof SDouble && interval instanceof SDouble && end instanceof SDouble) {
             ListEx<SValue> ret = new ListEx<SValue>();
-            for (Double i = start.get(); i < end.<Double>get(); i += interval.<Double>get()) {
+            for (double i = ((SDouble) start).val(); i < ((SDouble) end).val(); i += ((SDouble) interval).val()) {
                 ret.add(new SDouble(i));
             }
             return new SList(ret);

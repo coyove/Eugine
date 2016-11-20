@@ -241,7 +241,41 @@ value returns [SExpression v]
 topExpr returns [SExpression v]
     : '(' Inner=stmt ')'
         { $v = $Inner.v; }
-    | Called=topExpr Op=('::' | ':>') Method=Identifier interopArgumentsList 
+    | lambdaStmt
+        { $v = $lambdaStmt.v; }
+    | 'true'
+        { $v = ExecEnvironment.True; }
+    | 'false'
+        { $v = ExecEnvironment.False; }
+    | 'null'
+        { $v = ExecEnvironment.Null; }
+    | Identifier    
+        { $v = new PVariable(new Atom($Identifier), $Identifier.text); }
+    | RawString     
+        { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($RawString.text)); }
+    | StringLiteral 
+        { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
+    | Integer
+        { $v = new SInteger($Integer.text); }
+    | Double
+        { $v = new SDouble($Double.text); }
+    ;
+
+postfixExpr returns [SExpression v]
+    : Top=topExpr { $v = $Top.v; }
+    | Subject=postfixExpr '[' Key=expr ']'
+        {
+            $v = new PGet(new Atom($Subject.start), $Subject.v, $Key.v);
+        }
+    | Subject=postfixExpr '[' Start=expr ('..' | '...') (End=expr)? ']'
+        {
+            $v = new PSub(new Atom($Subject.start), $Subject.v, $Start.v, $End.ctx == null ? null : $End.v);
+        }
+    | Subject=postfixExpr '.' Identifier
+        {
+            $v = new PGet(new Atom($Subject.start), $Subject.v, new SString($Identifier.text));
+        }
+    | Called=postfixExpr Op=('::' | ':>') Method=Identifier interopArgumentsList 
         {
             $v = new PInteropCall(new Atom($Called.start), $Called.v,
                 $Method.text, $interopArgumentsList.defs, $interopArgumentsList.args, 
@@ -249,7 +283,7 @@ topExpr returns [SExpression v]
                     PInteropCall.RETURN_TYPE.CAST_TO_SVALUE :
                     PInteropCall.RETURN_TYPE.DIRECT_RETURN);
         }
-    | Called=topExpr Mt='#'? argumentsList
+    | Called=postfixExpr Mt='#'? argumentsList
         {
             if ($Mt != null) {
                 $v = new PThread(new Atom($Mt), $Called.v, $argumentsList.v);
@@ -261,39 +295,11 @@ topExpr returns [SExpression v]
                 }
             }
         }
-    | lambdaStmt
-        { $v = $lambdaStmt.v; }
-    | Subject=topExpr '[' Key=expr ']'
-        {
-            $v = new PGet(new Atom($Subject.start), $Subject.v, $Key.v);
-        }
-    | Subject=topExpr '[' Start=expr ('..' | '...') (End=expr)? ']'
-        {
-            $v = new PSub(new Atom($Subject.start), $Subject.v, $Start.v, $End.ctx == null ? null : $End.v);
-        }
-    | Subject=topExpr '.' Identifier
-        {
-            $v = new PGet(new Atom($Subject.start), $Subject.v, new SString($Identifier.text));
-        }
-    | Identifier    
-        { $v = new PVariable(new Atom($Identifier), $Identifier.text); }
-    | RawString     
-        { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($RawString.text)); }
-    | StringLiteral 
-        { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
-    | Integer
-        { $v = new SInteger($Integer.text); }
-    | Double
-        { $v = new SDouble($Double.text); }
-    | list
-        { $v = $list.v; }
-    | dict
-        { $v = $dict.v; }
     ;
 
 unaryExpr returns [SExpression v]
-    : Top=topExpr { $v = $Top.v; }
-    | Sub Right=topExpr
+    : Top=postfixExpr { $v = $Top.v; }
+    | Sub Right=postfixExpr
         {
             if ($Right.v instanceof SInteger) {
                 $v = new SInteger(-((SInteger) $Right.v).<Long>get());
@@ -303,7 +309,7 @@ unaryExpr returns [SExpression v]
                 $v = new SEReverse(new Atom($Sub), ListEx.build($Right.v));
             }
         }
-    | Not Right=topExpr
+    | Not Right=postfixExpr
         {
             $v = SKeywords.Lookup.get($Not.text).call($Not, ListEx.build($Right.v));
         }
@@ -376,8 +382,7 @@ assignExpr returns [SExpression v]
             } else {
                 String text = $Op.text.substring(0, 1);
                 $v = new PSet(ha, $Left.v, 
-                    SKeywords.Lookup.get(text).call($Op, 
-                        ListEx.build($Left.v, $Right.v)),
+                    SKeywords.Lookup.get(text).call($Op, ListEx.build($Left.v, $Right.v)),
                     PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             }
         }
@@ -433,4 +438,8 @@ expr returns [SExpression v]
         }
     | switchStmt
         { $v = $switchStmt.v; }
+    | list
+        { $v = $list.v; }
+    | dict
+        { $v = $dict.v; }
     ;

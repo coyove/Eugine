@@ -31,7 +31,7 @@ public class SEExit extends SExpression {
             }
 
             env.bPut("__e__", num);
-            throw new EgException(7001, num.<Long>get().toString(), atom);
+            throw new EgException(7001, ((Long) num.val()).toString(), atom);
         } else {
             env.bPut("__e__", msg);
             throw new EgException(7000, msg.<String>get(), atom);

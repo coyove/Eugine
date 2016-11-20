@@ -36,7 +36,7 @@ public class SEDel extends SExpression {
                 throw new EgException(2006, "list is immutable", atom);
 
             ListEx<SValue> subList = subObj.get();
-            int i = idx.<Long>get().intValue();
+            int i = (int) ((SInteger) idx).val();
             if (i < 0 || i >= subList.size())
                 throw new EgException(2007, "index out of range", atom);
 

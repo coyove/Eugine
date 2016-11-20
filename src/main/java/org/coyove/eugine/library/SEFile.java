@@ -75,7 +75,7 @@ public class SEFile extends SExpression {
                     }
                     return new SList(ret);
                 case EXISTS:
-                    return new SBool(Files.exists(path));
+                    return Files.exists(path) ? ExecEnvironment.True : ExecEnvironment.False;
 //                case WRITE_BINARY:
 
                 default:
@@ -107,7 +107,7 @@ public class SEFile extends SExpression {
                     return filename;
             }
         } catch (Exception ex) {
-            return new SNull();
+            return env.Null;
         }
     }
 

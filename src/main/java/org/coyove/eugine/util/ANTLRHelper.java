@@ -39,7 +39,7 @@ public class ANTLRHelper {
         eil.env.put("__path__", new SString(Utils.getDirectoryName(source)));
         eil.env.put("__file__", new SString(Utils.getFileName(source)));
         walk.walk(eil, pc);
-
+//System.out.println(pc.toStringTree(parser));
         try {
             SValue ret = pc.v.execute(eil.env);
 

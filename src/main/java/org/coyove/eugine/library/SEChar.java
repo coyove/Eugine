@@ -33,7 +33,7 @@ public class SEChar extends SExpression {
                     SString str = Utils.cast(arg, SString.class,
                             new EgException(3001, "invalid argument", atom));
 
-                    return new SInteger(Long.valueOf((int) str.<String>get().charAt(0)));
+                    return new SInteger(str.<String>get().charAt(0));
                 } catch (StringIndexOutOfBoundsException e) {
                     throw new EgException(3002, "string index out of range", atom);
                 }
@@ -41,7 +41,7 @@ public class SEChar extends SExpression {
                 SInteger i = Utils.cast(arg, SInteger.class,
                         new EgException(3003, "invalid argument", atom));
 
-                return new SString(String.valueOf((char) (i.<Long>get().intValue())));
+                return new SString(String.valueOf(i.val()));
             default:
                 throw new EgException(3004, "unknown operation", atom);
         }

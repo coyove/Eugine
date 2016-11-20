@@ -89,13 +89,13 @@ public class PCall extends SExpression {
             }
         } else if (se instanceof PCond) {
             PCond cond = (PCond) se;
-            Object tester = cond.condition.evaluate(env).get();
+            SValue tester = cond.condition.evaluate(env);
             boolean flag = false;
 
             ret = continueState.TAIL_CALL;
 
             for (Branch b : cond.branches) {
-                if (PCond.compare(b.recv.evaluate(env).get(), tester)) {
+                if (b.recv.evaluate(env).equals(tester)) {
                     retCls = new SClosure(env, b.body);
                     flag = true;
                     break;
@@ -231,7 +231,7 @@ public class PCall extends SExpression {
                         flag = true;
                         break;
                     } else if (tail.getRight() == continueState.FALSE_NULL) {
-                        return new SNull();
+                        return env.Null;
                     }
                 }
 

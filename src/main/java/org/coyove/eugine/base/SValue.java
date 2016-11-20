@@ -1,6 +1,10 @@
 package org.coyove.eugine.base;
 
 import org.coyove.eugine.util.*;
+import org.coyove.eugine.value.SConcatString;
+import org.coyove.eugine.value.SDouble;
+import org.coyove.eugine.value.SInteger;
+import org.coyove.eugine.value.SString;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -13,7 +17,8 @@ public abstract class SValue extends SExpression {
     public Object underlying;
     public boolean immutable;
 
-    public SValue() {}
+    public SValue() {
+    }
 
     public SValue(Object underlying) {
         this.underlying = underlying;
@@ -25,9 +30,8 @@ public abstract class SValue extends SExpression {
         this.immutable = imm;
     }
 
-    public <T> T get()
-    {
-        return (T)underlying;
+    public <T> T get() {
+        return (T) underlying;
     }
 
     @Override
@@ -55,5 +59,41 @@ public abstract class SValue extends SExpression {
         to.refer = from.refer;
         to.refKey = from.refKey;
         to.refIndex = from.refIndex;
+    }
+
+    @Override
+    public boolean equals(Object right) {
+        if (!(right instanceof SValue)) {
+            return false;
+        }
+
+        if (this instanceof SInteger) {
+            if (right instanceof SInteger) {
+                return ((SInteger) this).val() == ((SInteger) right).val();
+            } else {
+                return false;
+            }
+        }
+
+        if (this instanceof SDouble) {
+            if (right instanceof SDouble) {
+                return Math.abs(((SDouble) this).val() - ((SDouble) right).val()) < 1e-6;
+            } else {
+                return false;
+            }
+        }
+
+        if (this instanceof SString && right instanceof SString) {
+            return this.<String>get().equals(((SString) right).<String>get());
+        }
+
+        Object lo = this.get();
+        Object ro = ((SValue) right).get();
+
+        if (lo != null && ro != null) {
+            return lo.equals(ro);
+        } else {
+            return lo == ro;
+        }
     }
 }

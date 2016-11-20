@@ -35,11 +35,11 @@ public class SEReverse extends SExpression {
                     Arrays.asList(Arrays.copyOf(objs, objs.length, SValue[].class)));
             return new SList(ret);
         } else if (subject instanceof SInteger) {
-            return new SInteger(-subject.<Long>get());
+            return new SInteger(-((SInteger) subject).val());
         } else if (subject instanceof SDouble) {
-            return new SDouble(-subject.<Double>get());
+            return new SDouble(-((SDouble) subject).val());
         } else if (subject instanceof SBool) {
-            return new SBool(!subject.<Boolean>get());
+            return subject == ExecEnvironment.True ? ExecEnvironment.False : ExecEnvironment.True;
         }else {
             throw new EgException(3015, "require list, integer or double", atom);
         }

@@ -63,6 +63,10 @@ public class SEPrint extends SExpression {
             }
         } else if (re instanceof SClosure) {
             ret = re.toString();
+        } else if (re instanceof SInteger) {
+            ret = String.format("%d", ((SInteger) re).val());
+        } else if (re instanceof SDouble) {
+            ret = String.format("%f", ((SDouble) re).val());
         } else {
             ret = String.format("%1$s", re.underlying.toString());
         }

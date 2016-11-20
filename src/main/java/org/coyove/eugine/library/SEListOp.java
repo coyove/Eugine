@@ -63,7 +63,7 @@ public class SEListOp extends SExpression {
                     throw new EgException(3006, "position must be integer", atom);
                 }
 
-                list.add(pos.<Long>get().intValue(), value);
+                list.add((int) pos.val(), value);
                 return listObj;
             case SORT:
                 if (list.size() == 0) {
@@ -102,11 +102,14 @@ public class SEListOp extends SExpression {
                                 return 0;
                             }
 
-                            BigDecimal num1 = Utils.castNumber(v1, atom);
-                            BigDecimal num2 = Utils.castNumber(v2, atom);
-
-                            double sign = Math.signum(num1.subtract(num2).doubleValue());
-                            return ((int) sign);
+                            try {
+                                double num1 = Utils.castDouble(v1, atom);
+                                double num2 = Utils.castDouble(v2, atom);
+                                double sign = Math.signum(num1 - num2);
+                                return ((int) sign);
+                            } catch (Exception e) {
+                                return 0;
+                            }
                         }
                     });
 
