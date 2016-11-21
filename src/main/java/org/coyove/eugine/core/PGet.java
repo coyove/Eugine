@@ -41,7 +41,7 @@ public class PGet extends SExpression {
             HashMap<String, SValue> d = dict.get();
 
             if (!d.containsKey(k)) {
-                d.put(k, new SNull());
+                d.put(k, ExecEnvironment.Null);
             }
 
             SValue dk = d.get(k).evaluate(env);
@@ -51,26 +51,26 @@ public class PGet extends SExpression {
             return dk;
         } else if (dict instanceof SList) {
             ListEx<SExpression> l = dict.get();
-            Long idx = Utils.castLong(sk, atom);
+            int idx = Utils.castInt(sk, atom);
 
             if (idx >= l.size() || idx < 0)
                 throw new EgException(2021, "index out of range", atom);
 
-            SValue li = l.get(idx.intValue()).evaluate(env);
+            SValue li = l.get(idx).evaluate(env);
 
             li.refer = Utils.cast(dict, SList.class);
-            li.refIndex = idx.intValue();
+            li.refIndex = idx;
 
             return li;
         } else if (dict instanceof SString) {
             String str = dict.get();
-            Long idx = Utils.castLong(sk, atom);
+            int idx = Utils.castInt(sk, atom);
 
             if (idx >= str.length()) {
                 throw new EgException(2023, "index out of range", atom);
             }
 
-            return new SString(String.valueOf(str.charAt(idx.intValue())));
+            return new SString(String.valueOf(str.charAt(idx)));
 
         } else if (dict instanceof SClosure) {
             String k = Utils.castString(sk, atom);
@@ -85,8 +85,10 @@ public class PGet extends SExpression {
             } else if (k.equals("__doc__")) {
                 return new SString(((SClosure) dict).doc);
             } else {
-                SValue ret = ((SClosure) dict).extra.containsKey(k) ?
-                        ((SClosure) dict).extra.get(k) : new SNull();
+                SValue ret = ((SClosure) dict).extra.get(k);
+                if (ret == null) {
+                    ret = ExecEnvironment.Null;
+                }
 
                 ret.refer = dict;
                 ret.refKey = k;

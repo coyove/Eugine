@@ -33,15 +33,13 @@ public class SEChar extends SExpression {
                     SString str = Utils.cast(arg, SString.class,
                             new EgException(3001, "invalid argument", atom));
 
-                    return new SInteger(str.<String>get().charAt(0));
+                    return new SInt(str.<String>get().charAt(0));
                 } catch (StringIndexOutOfBoundsException e) {
                     throw new EgException(3002, "string index out of range", atom);
                 }
             case CHR:
-                SInteger i = Utils.cast(arg, SInteger.class,
-                        new EgException(3003, "invalid argument", atom));
-
-                return new SString(String.valueOf(i.val()));
+                int i = Utils.castInt(arg, atom);
+                return new SString(String.valueOf((char) i));
             default:
                 throw new EgException(3004, "unknown operation", atom);
         }

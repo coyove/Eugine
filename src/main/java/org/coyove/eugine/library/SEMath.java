@@ -58,13 +58,13 @@ public class SEMath extends SExpression {
             case ATAN:
                 return new SDouble(Math.atan(n));
             case ROUND:
-                return new SInteger(Math.round(n));
+                return new SLong(Math.round(n));
             case FLOOR:
-                return new SInteger((long) Math.floor(n));
+                return new SLong((long) Math.floor(n));
             case ABS:
                 return new SDouble(Math.abs(n));
             case SGN:
-                return new SInteger((long) Math.signum(n));
+                return new SLong((long) Math.signum(n));
             case SQRT:
                 return new SDouble(Math.sqrt(n));
             case POW:

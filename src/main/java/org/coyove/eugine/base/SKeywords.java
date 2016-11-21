@@ -2,6 +2,7 @@ package org.coyove.eugine.base;
 
 import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.core.*;
+import org.coyove.eugine.core.math.PCompare;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.ListEx;
@@ -26,36 +27,6 @@ public class SKeywords {
                 put("println", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEPrint(new Atom(tok), arguments, "\n");
-                    }
-                });
-                put("*", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PMath(new Atom(tok), arguments, PMath.ACTION.MULTIPLY);
-                    }
-                });
-                put("-", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PMath(new Atom(tok), arguments, PMath.ACTION.SUBTRACT);
-                    }
-                });
-                put("/", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PMath(new Atom(tok), arguments, PMath.ACTION.DIVIDE);
-                    }
-                });
-                put("%", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PMath(new Atom(tok), arguments, PMath.ACTION.MODULAR);
-                    }
-                });
-                put("+", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PAdd(new Atom(tok), arguments, false);
-                    }
-                });
-                put("<+", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PAdd(new Atom(tok), arguments, true);
                     }
                 });
                 put("==", new CallableKeyword() {
@@ -86,21 +57,6 @@ public class SKeywords {
                 put(">=", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new PCompare(new Atom(tok), arguments, ">=");
-                    }
-                });
-                put("&&", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PLogic(new Atom(tok), arguments, PLogic.LOGIC.AND);
-                    }
-                });
-                put("||", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PLogic(new Atom(tok), arguments, PLogic.LOGIC.OR);
-                    }
-                });
-                put("!", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PLogic(new Atom(tok), arguments, PLogic.LOGIC.NOT);
                     }
                 });
                 put("reverse", new CallableKeyword() {
@@ -140,7 +96,22 @@ public class SKeywords {
                 });
                 put("num", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SENum(new Atom(tok), arguments);
+                        return new SENum(new Atom(tok), arguments, SENum.NUM);
+                    }
+                });
+                put("int", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SENum(new Atom(tok), arguments, SENum.INT);
+                    }
+                });
+                put("long", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SENum(new Atom(tok), arguments, SENum.LONG);
+                    }
+                });
+                put("double", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SENum(new Atom(tok), arguments, SENum.DOUBLE);
                     }
                 });
                 put("str", new CallableKeyword() {
@@ -381,17 +352,17 @@ public class SKeywords {
                 });
                 put("Bit.and", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEBitOp(new Atom(tok), c, SEBitOp.OPERATION.AND);
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.AND);
                     }
                 });
                 put("Bit.or", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEBitOp(new Atom(tok), c, SEBitOp.OPERATION.OR);
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.OR);
                     }
                 });
                 put("Bit.not", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEBitOp(new Atom(tok), c, SEBitOp.OPERATION.NOT);
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.NOT);
                     }
                 });
                 put("Json.encode", new CallableKeyword() {

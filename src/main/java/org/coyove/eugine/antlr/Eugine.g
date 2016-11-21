@@ -9,6 +9,9 @@ import org.coyove.eugine.util.*;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
+import org.coyove.eugine.core.interop.*;
+import org.coyove.eugine.core.math.*;
+import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
@@ -28,7 +31,7 @@ import org.apache.commons.lang3.ClassUtils;
 
 prog returns [SExpression v]
     : (block { $v = $block.v; } )+ 
-    | EOF    { $v = new SNull(); }
+    | EOF    { $v = ExecEnvironment.Null; }
 ;
 
 code returns [SExpression v]
@@ -43,13 +46,13 @@ block returns [PChain v = new PChain()]
 ;
 
 stmt returns [SExpression v]
-    : importStmt        { $v = new SNull(); }
+    : importStmt        { $v = ExecEnvironment.Null; }
     | enterStmt         { $v = $enterStmt.v; }
     | syncStmt          { $v = $syncStmt.v; }
     | declareStmt       { $v = $declareStmt.v; }
     | defineStmt        { $v = $defineStmt.v; }
     | expr              { $v = $expr.v; }
-    | Semi              { $v = new SNull(); }
+    | Semi              { $v = ExecEnvironment.Null; }
     ;
 
 importStmt 
@@ -70,18 +73,18 @@ syncStmt returns [SExpression v]
     ;
 
 declareStmt returns [SExpression v]
-    locals [ ListEx<SExpression> multi = new ListEx<SExpression>(), PSet.ACTION act = PSet.ACTION.MUTABLE ]
+    locals [ ListEx<SExpression> multi = new ListEx<SExpression>(), byte act ]
     : Action=(Var | Const) 
         {
-            $act = $Action.text.equals("var") ? PSet.ACTION.MUTABLE : PSet.ACTION.IMMUTABLE;
+            $act = $Action.text.equals("var") ? PSet.MUTABLE : PSet.IMMUTABLE;
         }
     Head=expr '=' HeadValue=expr
         {
-            $multi.add(new PSet(new Atom($Action), $Head.v, $HeadValue.v, PSet.DECLARE.DECLARE, $act));
+            $multi.add(new PSet(new Atom($Action), $Head.v, $HeadValue.v, $act));
         }
     (',' Tail=expr '=' TailValue=expr 
         {
-            $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, PSet.DECLARE.DECLARE, $act));
+            $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, $act));
         }
     )?
         {
@@ -116,16 +119,16 @@ interopArgumentsList returns [
         ListEx<SExpression> args = new ListEx<SExpression>(),
         ListEx<String> defs = new ListEx<String>() ]
     : '(' 
-        (InitExpr=expr ':' InitDef=(JavaFullName | Identifier) ',' 
+        (InitExpr=expr (':' InitDef=(JavaFullName | Identifier))? ',' 
             { 
                 $args.add($InitExpr.v);
-                $defs.add($InitDef.text.replace("\\", "."));
+                $defs.add($InitDef == null ? "" : $InitDef.text.replace("\\", "."));
             } )* 
-        LastExpr=expr ':' LastDef=(JavaFullName | Identifier)
+        LastExpr=expr (':' LastDef=(JavaFullName | Identifier))?
     ')'
     {
         $args.add($LastExpr.v);
-        $defs.add($LastDef.text.replace("\\", "."));
+        $defs.add($LastDef == null ? "" : $LastDef.text.replace("\\", "."));
     }
     | '(' ')'
     ;
@@ -150,7 +153,7 @@ defineStmt returns [SExpression v]
                 closure = new PCall(a, d, ListEx.build(closure));
             }
             
-            $v = new PSet(a, $Get.v, closure, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
+            $v = new PSet(a, $Get.v, closure, PSet.IMMUTABLE);
         }
     ;
 
@@ -161,8 +164,7 @@ lambdaStmt returns [PLambda v]
     '=>' 
     ('@' Identifier {
         $ret = new PVariable($Identifier.text);
-        $body.add(new PSet(new Atom($Identifier), $ret, ExecEnvironment.Null, 
-            PSet.DECLARE.DECLARE, PSet.ACTION.MUTABLE)); 
+        $body.add(new PSet(new Atom($Identifier), $ret, ExecEnvironment.Null, PSet.MUTABLE)); 
     })?
     ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
         {
@@ -173,19 +175,6 @@ lambdaStmt returns [PLambda v]
             $v = new PLambda(new Atom($definitionsList.start), $definitionsList.v, $definitionsList.passByValue,
                 $body, $Description == null ? "" : $Description.text, false);
         }
-    ;
-
-callStmt returns [SExpression v]
-    : Identifier argumentsList 
-    {
-        String func = $Identifier.text;
-        if (SKeywords.Lookup.containsKey(func)) {
-            $v = SKeywords.Lookup.get(func).call($Identifier, $argumentsList.v); 
-        } else {
-            Atom a = new Atom($Identifier);
-            $v = new PCall(a, new PVariable(a, $Identifier.text), $argumentsList.v);
-        }
-    }
     ;
 
 switchStmt returns [SExpression v]
@@ -257,13 +246,24 @@ topExpr returns [SExpression v]
     | StringLiteral 
         { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
     | Integer
-        { $v = new SInteger($Integer.text); }
+        { $v = new SInt($Integer.text); }
+    | Integer ('l' | 'L')
+        { $v = new SLong($Integer.text); }
     | Double
         { $v = new SDouble($Double.text); }
     ;
 
 postfixExpr returns [SExpression v]
     : Top=topExpr { $v = $Top.v; }
+    | Left=postfixExpr Op=('++' | '--')
+        {
+            Atom ha = new Atom($Op);
+            if ($Op.text.equals("++")) {
+                $v = new PSet(ha, $Left.v, new PAdd(ha, $Left.v, new SInt(1)), PSet.SET);
+            } else {
+                $v = new PSet(ha, $Left.v, new PSubtract(ha, $Left.v, new SInt(1)), PSet.SET);
+            }
+        }
     | Subject=postfixExpr '[' Key=expr ']'
         {
             $v = new PGet(new Atom($Subject.start), $Subject.v, $Key.v);
@@ -302,50 +302,60 @@ unaryExpr returns [SExpression v]
     : Top=postfixExpr { $v = $Top.v; }
     | Sub Right=postfixExpr
         {
-            if ($Right.v instanceof SInteger) {
-                $v = new SInteger(-((SInteger) $Right.v).<Long>get());
+            if ($Right.v instanceof SInt) {
+                $v = new SInt(-((SInt) $Right.v).val());
+            } else if ($Right.v instanceof SLong) {
+                $v = new SLong(-((SLong) $Right.v).val());
             } else if ($Right.v instanceof SDouble) {
-                $v = new SDouble(-((SDouble) $Right.v).<Double>get());
+                $v = new SDouble(-((SDouble) $Right.v).val());
             } else {
                 $v = new SEReverse(new Atom($Sub), ListEx.build($Right.v));
             }
         }
     | Not Right=postfixExpr
         {
-            $v = SKeywords.Lookup.get($Not.text).call($Not, ListEx.build($Right.v));
+            $v = new SEReverse(new Atom($Not), ListEx.build($Right.v));
         }
-    | Left=unaryExpr Op=('++' | '--')
+    | Op=('++' | '--') Left=unaryExpr
         {
             Atom ha = new Atom($Op);
             if ($Op.text.equals("++")) {
-                $v = new PSet(ha, $Left.v, 
-                    new PAdd(ha, ListEx.build($Left.v, new SInteger(1)), false),
-                    PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
+                $v = new PSet(ha, $Left.v, new PAdd(ha, $Left.v, new SInt(1)), PSet.SET);
             } else {
-                $v = new PSet(ha, $Left.v, 
-                    new PMath(ha, ListEx.build($Left.v, new SInteger(1)), PMath.ACTION.SUBTRACT),
-                    PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
+                $v = new PSet(ha, $Left.v, new PSubtract(ha, $Left.v, new SInt(1)), PSet.SET);
             }
         }
     ;
 
 multiplyExpr returns [SExpression v]
     : Top=unaryExpr { $v = $Top.v; }
-    | Left=multiplyExpr Op=('*'|'/'|'%') Right=unaryExpr
+    | Left=multiplyExpr Op='*' Right=unaryExpr
         {
-            $v = SKeywords.Lookup.get($Op.text).call($Op, ListEx.build($Left.v, $Right.v));
+            $v = new PMultiply(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=multiplyExpr Op='/' Right=unaryExpr
+        {
+            $v = new PDivide(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=multiplyExpr Op='%' Right=unaryExpr
+        {
+            $v = new PModular(new Atom($Op), $Left.v, $Right.v);
         }
     ;
 
 addExpr returns [SExpression v]
     : Top=multiplyExpr { $v = $Top.v; }
-    | Left=addExpr AddOp=('+'|'<+') Right=multiplyExpr
+    | Left=addExpr AddOp='+' Right=multiplyExpr
         {
-            $v = new PAdd(new Atom($AddOp), ListEx.build($Left.v, $Right.v), $AddOp.text.equals("<+"));
+            $v = new PAdd(new Atom($AddOp), $Left.v, $Right.v);
+        }
+    | Left=addExpr AddOp='<+' Right=multiplyExpr
+        {
+            $v = new PAppend(new Atom($AddOp), $Left.v, $Right.v);
         }
     | Left=addExpr Sub Right=multiplyExpr
         {
-            $v = new PMath(new Atom($Sub), ListEx.build($Left.v, $Right.v), PMath.ACTION.SUBTRACT);
+            $v = new PSubtract(new Atom($Sub), $Left.v, $Right.v);
         }
     ;
 
@@ -359,9 +369,13 @@ compareExpr returns [SExpression v]
 
 logicExpr returns [SExpression v]
     : Top=compareExpr { $v = $Top.v; }
-    | Left=logicExpr Op=('&&'|'||') Right=compareExpr
+    | Left=logicExpr Op='&&' Right=compareExpr
         {
-            $v = SKeywords.Lookup.get($Op.text).call($Op, ListEx.build($Left.v, $Right.v));
+            $v = new PLogic(new Atom($Op), $Left.v, $Right.v, PLogic.AND);
+        }
+    | Left=logicExpr Op='||' Right=compareExpr
+        {
+            $v = new PLogic(new Atom($Op), $Left.v, $Right.v, PLogic.OR);
         }
     | Left=logicExpr ':' JavaFullName
         {
@@ -370,18 +384,22 @@ logicExpr returns [SExpression v]
     ;
 
 assignExpr returns [SExpression v]
-    :   Top=logicExpr { $v = $Top.v; }
-    |   Left=unaryExpr Op=('+=' | '-=' | '*=' | '/=') Right=assignExpr
+    : Top=logicExpr { $v = $Top.v; }
+    | Left=unaryExpr Op='+=' Right=assignExpr
         {
-            Atom ha = new Atom($Op);
-            if ($Op.text.equals("+=")) {
-                $v = new PSet(ha, $Left.v, new PAdd(ha, ListEx.build($Left.v, $Right.v), false),
-                    PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
-            } else {
-                String text = $Op.text.substring(0, 1);
-                $v = new PSet(ha, $Left.v, SKeywords.Lookup.get(text).call($Op, ListEx.build($Left.v, $Right.v)),
-                    PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
-            }
+            $v = new PSet(new Atom($Op), $Left.v, new PAdd(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+        }
+    | Left=unaryExpr Op='-=' Right=assignExpr
+        {
+            $v = new PSet(new Atom($Op), $Left.v, new PSubtract(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+        }
+    | Left=unaryExpr Op='*=' Right=assignExpr
+        {
+            $v = new PSet(new Atom($Op), $Left.v, new PMultiply(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+        }
+    | Left=unaryExpr Op='/=' Right=assignExpr
+        {
+            $v = new PSet(new Atom($Op), $Left.v, new PDivide(new Atom($Op), $Left.v, $Right.v), PSet.SET);
         }
     | Subject=assignExpr '=' Value=expr
         {
@@ -389,7 +407,7 @@ assignExpr returns [SExpression v]
                 PGet get = (PGet) $Subject.v;
                 $v = new PPut(new Atom($Subject.start), get.sub, get.key, $Value.v, PPut.DECLARE.SET);
             } else {
-                $v = new PSet(new Atom($Subject.start), $Subject.v, $Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
+                $v = new PSet(new Atom($Subject.start), $Subject.v, $Value.v, PSet.SET);
             }
         }
     ;
@@ -429,9 +447,7 @@ expr returns [SExpression v]
             Atom atom = new Atom($For);
             PIRange r = new PIRange(atom, ListEx.build(
                     $Start.v, 
-                    $Next.ctx == null ? 
-                        new SInteger(1) : 
-                        new PMath(atom, ListEx.build($Next.v, $Start.v), PMath.ACTION.SUBTRACT), 
+                    $Next.ctx == null ? new SInt(1) : new PSubtract(atom, $Next.v, $Start.v), 
                     $End.v
                 ));
 

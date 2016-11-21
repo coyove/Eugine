@@ -2,9 +2,7 @@ package org.coyove.eugine.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.PAdd;
 import org.coyove.eugine.core.PLambda;
-import org.coyove.eugine.core.PMath;
 import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
@@ -12,13 +10,10 @@ import org.coyove.eugine.value.*;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Formatter;
-import java.util.List;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -65,8 +60,8 @@ public final class Utils {
     }
 
     public static boolean castBoolean(SValue num, Atom headAtom) {
-        if (num instanceof SInteger) {
-            return ((SInteger) num).val() != 0;
+        if (num instanceof SLong) {
+            return ((SLong) num).val() != 0;
         } else if (num instanceof SDouble) {
             return Math.abs(((SDouble) num).val()) > 1e-6;
         } else if (num instanceof SBool) {
@@ -84,10 +79,12 @@ public final class Utils {
     public static double castDouble(SValue num, Atom headAtom) throws EgException {
         double ret;
 
-        if (num instanceof SInteger) {
-            ret = ((SInteger) num).val();
+        if (num instanceof SLong) {
+            ret = ((SLong) num).val();
         } else if (num instanceof SDouble) {
             ret = ((SDouble) num).val();
+        } else if (num instanceof SInt) {
+            ret = ((SInt) num).val();
         } else {
             throw new EgException(4007, num + " is not a double", headAtom);
         }
@@ -96,17 +93,31 @@ public final class Utils {
     }
 
     public static long castLong(SValue num, Atom headAtom) throws EgException {
-        Long ret;
+        long ret;
 
-        if (num instanceof SInteger) {
-            ret = ((SInteger) num).val();
+        if (num instanceof SLong) {
+            ret = ((SLong) num).val();
+        } else if (num instanceof SInt) {
+            ret = ((SInt) num).val();
         } else if (num instanceof SDouble) {
             ret = (long) ((SDouble) num).val();
         } else {
-            throw new EgException(4007, num + " is not an integer", headAtom);
+            throw new EgException(4007, num + " is not a long", headAtom);
         }
 
         return ret;
+    }
+
+    public static int castInt(SValue num, Atom headAtom) throws EgException {
+        if (num instanceof SLong) {
+            return (int) ((SLong) num).val();
+        } else if (num instanceof SDouble) {
+            return (int) ((SDouble) num).val();
+        } else if (num instanceof SInt) {
+            return ((SInt) num).val();
+        } else {
+            throw new EgException(4007, num + " is not an integer", headAtom);
+        }
     }
 
     public static String castString(SValue num, Atom headAtom) throws EgException {

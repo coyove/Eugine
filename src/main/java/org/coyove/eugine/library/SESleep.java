@@ -22,27 +22,22 @@ public class SESleep extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SInteger time = Utils.cast(this.time.evaluate(env), SInteger.class);
-        if (time == null) {
-            throw new EgException(3098, "sleep time must be integer", atom);
-        }
+        long time = Utils.castLong(this.time.evaluate(env), atom);
 
         try {
-            Thread.sleep(time.val());
+            Thread.sleep(time);
         } catch (InterruptedException ex) {
-            throw new EgException(3099, "sleep is interrupted", atom);
+            throw new EgException(3099, "sleep was interrupted", atom);
         }
 
-        return env.Null;
+        return ExecEnvironment.Null;
     }
 
     @Override
     public SExpression deepClone() throws EgException {
         SESleep ret = new SESleep();
         ret.atom = this.atom;
-
         ret.time = this.time.deepClone();
-
         return ret;
     }
 }

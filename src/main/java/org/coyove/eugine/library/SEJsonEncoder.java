@@ -7,7 +7,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.lang.System;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -53,8 +52,10 @@ public class SEJsonEncoder extends SExpression {
             return String.format("\"%1$s\"", StringEscapeUtils.escapeJava(re.<String>get()));
         } else if (re instanceof SBool) {
             return re.get().toString().toLowerCase();
-        } else if (re instanceof SInteger) {
-            return ((Long) ((SInteger) re).val()).toString();
+        } else if (re instanceof SLong) {
+            return ((Long) ((SLong) re).val()).toString();
+        } else if (re instanceof SInt) {
+            return ((Integer) ((SInt) re).val()).toString();
         } else if (re instanceof SDouble) {
             return ((Double) ((SDouble) re).val()).toString();
         } else {

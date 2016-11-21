@@ -63,10 +63,12 @@ public class SEPrint extends SExpression {
             }
         } else if (re instanceof SClosure) {
             ret = re.toString();
-        } else if (re instanceof SInteger) {
-            ret = String.format("%d", ((SInteger) re).val());
+        } else if (re instanceof SLong) {
+            ret = String.format("%d", ((SLong) re).val());
         } else if (re instanceof SDouble) {
             ret = String.format("%f", ((SDouble) re).val());
+        } else if (re instanceof SInt) {
+            ret = String.format("%d", ((SInt) re).val());
         } else {
             ret = String.format("%1$s", re.underlying.toString());
         }
@@ -76,7 +78,7 @@ public class SEPrint extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue ret = new SNull();
+        SValue ret = ExecEnvironment.Null;
         for (SValue v : SExpression.eval(arguments, env, atom)) {
             ret = v;
             System.out.print(print(v, env, 2, false));

@@ -47,8 +47,8 @@ public class PPut extends SExpression {
 
         if (refer instanceof SDict && key instanceof SString) {
             refer.<HashMap<String, SValue>>get().put(key.<String>get(), value);
-        } else if (refer instanceof SList && key instanceof SInteger) {
-            refer.<ListEx<SValue>>get().set(((int) ((SInteger) key).val()), value);
+        } else if (refer instanceof SList) {
+            refer.<ListEx<SValue>>get().set(Utils.castInt(key, atom), value);
         } else if (refer instanceof SObject && key instanceof SString) {
             Object sub = refer.get();
             InteropHelper.setField(sub, key.<String>get(), value);

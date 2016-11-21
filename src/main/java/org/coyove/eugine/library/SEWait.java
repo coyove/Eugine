@@ -31,14 +31,13 @@ public class SEWait extends SExpression {
             }
         }
 
-        return env.Null;
+        return ExecEnvironment.Null;
     }
 
     @Override
     public SExpression deepClone() throws EgException {
         SEWait ret = new SEWait();
         ret.atom = this.atom;
-
         ret.argument = this.argument.deepClone();
         return ret;
     }

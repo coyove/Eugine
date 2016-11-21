@@ -33,14 +33,12 @@ public class PSub extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subObj = subject.evaluate(env);
 
-        EgException ex = new EgException(3012, "start and end index must be integers", atom);
-        int start = ((int) Utils.cast(this.start.evaluate(env), SInteger.class, ex).val());
+        int start = Utils.castInt(this.start.evaluate(env), atom);
         if (start < 0) {
             throw new EgException(3015, "start cannot be negative", atom);
         }
 
-        int end = this.end != null ?
-                ((int) Utils.cast(this.end.evaluate(env), SInteger.class, ex).val()) : 0;
+        int end = this.end != null ? Utils.castInt(this.end.evaluate(env), atom) : 0;
 
         if (subObj instanceof SString) {
             SString subStr = (SString) subObj;

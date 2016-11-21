@@ -6,7 +6,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.lang.System;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class SEJsonDecoder extends SExpression {
             } else if (p.isNumber()) {
                 double num = p.getAsDouble();
                 if (num % 1 == 0) {
-                    return new SInteger(p.getAsLong());
+                    return new SLong(p.getAsLong());
                 } else {
                     return new SDouble(num);
                 }

@@ -31,12 +31,12 @@ public class SEDel extends SExpression {
         SValue subObj = host.evaluate(env);
         SValue idx = this.index.evaluate(env);
 
-        if (idx instanceof SInteger && subObj instanceof SList) {
+        if (idx instanceof SInt && subObj instanceof SList) {
             if (subObj.immutable)
                 throw new EgException(2006, "list is immutable", atom);
 
             ListEx<SValue> subList = subObj.get();
-            int i = (int) ((SInteger) idx).val();
+            int i = ((SInt) idx).val();
             if (i < 0 || i >= subList.size())
                 throw new EgException(2007, "index out of range", atom);
 
@@ -48,7 +48,7 @@ public class SEDel extends SExpression {
             HashMap<String, SValue> dict = subObj.get();
 
             SValue ret = dict.remove(idx.<String>get());
-            return ret == null ? new SNull() : ret;
+            return ret == null ? ExecEnvironment.Null : ret;
         } else {
             throw new EgException(2009, "mismatch types", atom);
         }

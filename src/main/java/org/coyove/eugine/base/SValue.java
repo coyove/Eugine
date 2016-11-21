@@ -1,9 +1,9 @@
 package org.coyove.eugine.base;
 
 import org.coyove.eugine.util.*;
-import org.coyove.eugine.value.SConcatString;
 import org.coyove.eugine.value.SDouble;
-import org.coyove.eugine.value.SInteger;
+import org.coyove.eugine.value.SInt;
+import org.coyove.eugine.value.SLong;
 import org.coyove.eugine.value.SString;
 
 /**
@@ -47,10 +47,12 @@ public abstract class SValue extends SExpression {
 
     public String asString() {
         if (underlying == null) {
-            if (this instanceof SInteger) {
-                return ((Long) ((SInteger) this).val()).toString();
+            if (this instanceof SLong) {
+                return ((Long) ((SLong) this).val()).toString();
             } else if (this instanceof SDouble) {
                 return ((Double) ((SDouble) this).val()).toString();
+            } else if (this instanceof SInt) {
+                return ((Integer) ((SInt) this).val()).toString();
             } else {
                 return "";
             }
@@ -80,9 +82,21 @@ public abstract class SValue extends SExpression {
             return false;
         }
 
-        if (this instanceof SInteger) {
-            if (right instanceof SInteger) {
-                return ((SInteger) this).val() == ((SInteger) right).val();
+        if (this instanceof SInt) {
+            if (right instanceof SLong) {
+                return ((SInt) this).val() == ((SLong) right).val();
+            } else if (right instanceof SInt) {
+                return ((SInt) this).val() == ((SInt) right).val();
+            } else {
+                return false;
+            }
+        }
+
+        if (this instanceof SLong) {
+            if (right instanceof SLong) {
+                return ((SLong) this).val() == ((SLong) right).val();
+            } else if (right instanceof SInt) {
+                return ((SLong) this).val() == ((SInt) right).val();
             } else {
                 return false;
             }

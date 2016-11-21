@@ -40,14 +40,14 @@ public class SEContains extends SExpression {
 
             for (int i = 0; i < list.size(); i++) {
                 if (list.get(i).equals(key)) {
-                    return new SInteger(i);
+                    return new SInt(i);
                 }
             }
 
-            return new SInteger(-1);
+            return new SInt(-1);
         } else if (sub instanceof SString && key instanceof SString) {
             String text = sub.get();
-            return new SInteger(StringUtils.indexOf(text, key.<String>get()));
+            return new SInt(StringUtils.indexOf(text, key.<String>get()));
         } else {
             throw new EgException(3010, "invalid subject or key", atom);
         }

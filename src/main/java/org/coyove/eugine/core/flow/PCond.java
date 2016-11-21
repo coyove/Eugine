@@ -1,4 +1,4 @@
-package org.coyove.eugine.core;
+package org.coyove.eugine.core.flow;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
@@ -39,7 +39,7 @@ public class PCond extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue cond = condition.evaluate(env);
-        SValue ret = new SNull();
+        SValue ret = ExecEnvironment.Null;
 
         for (Branch b : branches) {
             if (cond.equals(b.recv.evaluate(env))) {

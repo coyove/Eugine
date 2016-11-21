@@ -25,16 +25,16 @@ public class SELen extends SExpression {
 
         SValue obj = argument.evaluate(env);
         if (obj instanceof SString) {
-            return new SInteger(obj.<String>get().length());
+            return new SInt(obj.<String>get().length());
         } else if (obj instanceof SList) {
-            return new SInteger(obj.<ListEx<SValue>>get().size());
+            return new SInt(obj.<ListEx<SValue>>get().size());
         } else {
             if (obj.get() instanceof byte[]) {
                 byte[] buf = obj.get();
-                return new SInteger(buf.length);
+                return new SInt(buf.length);
             }
 
-            return new SInteger(0);
+            return new SInt(0);
         }
     }
 

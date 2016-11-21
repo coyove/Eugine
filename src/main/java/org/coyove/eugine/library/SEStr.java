@@ -20,7 +20,7 @@ public class SEStr extends SExpression {
         argument = args.head();
     }
 
-    private SValue convert(SValue arg, ExecEnvironment env) throws EgException {
+    private SValue convert(SValue arg) throws EgException {
         if (arg instanceof SString) {
             return arg;
         } else if (arg instanceof SNull) {
@@ -28,7 +28,7 @@ public class SEStr extends SExpression {
         } else if (arg instanceof SList) {
             ListEx<SValue> ret = new ListEx<SValue>();
             for (SValue v : arg.<ListEx<SValue>>get())
-                ret.add(convert(v, env));
+                ret.add(convert(v));
 
             return new SList(ret);
         } else {
@@ -37,22 +37,20 @@ public class SEStr extends SExpression {
                 return new SString(Utils.bytesToHexString(buf));
             }
 
-            return new SString(arg.get().toString());
+            return new SString(arg.asString());
         }
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        return convert(argument.evaluate(env), env);
+        return convert(argument.evaluate(env));
     }
 
     @Override
     public SExpression deepClone() throws EgException {
         SEStr ret = new SEStr();
         ret.atom = this.atom;
-
         ret.argument = this.argument.deepClone();
-
         return ret;
     }
 }

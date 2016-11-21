@@ -47,7 +47,7 @@ public class SETime extends SExpression {
                     div++;
                 }
 
-                return new SInteger(new Date().getTime() / div);
+                return new SLong(new Date().getTime() / div);
             case UTC_TIME:
                 return new SString(DateFormatUtils.formatUTC(Utils.castLong(arg, atom),
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));

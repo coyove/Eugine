@@ -27,8 +27,8 @@ public class SEBytesBuffer extends SExpression {
         SValue src =this.src.evaluate(env);
         if (src instanceof SString) {
             return new SObject(src.<String>get().getBytes(Charset.forName("UTF-8")));
-        } else if (src instanceof SInteger) {
-            return new SObject(new byte[(int) ((SInteger) src).val()]);
+        } else if (src instanceof SInt) {
+            return new SObject(new byte[((SInt) src).val()]);
         } else {
             throw new EgException(3031, "failed to convert to bytes buffer", atom);
         }

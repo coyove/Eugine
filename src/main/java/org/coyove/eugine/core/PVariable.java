@@ -31,7 +31,7 @@ public class PVariable extends SExpression {
         }
 
         SValue tmp = env.get(varName);
-        return tmp == null ? new SNull() : tmp;
+        return tmp == null ? ExecEnvironment.Null : tmp;
     }
 
     @Override

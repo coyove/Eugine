@@ -28,7 +28,7 @@ public class PType extends SExpression {
         SValue v = name.evaluate(env);
 
         if (type == TYPE.ADDR) {
-            return new SInteger(v.hashCode());
+            return new SInt(v.hashCode());
         }
 
         if (v instanceof SObject) {

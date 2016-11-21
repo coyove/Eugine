@@ -36,15 +36,15 @@ public class InteropHelper {
         } else if (value instanceof Double) {
             return new SDouble((Double) value);
         } else if (value instanceof Long) {
-            return new SInteger((Long) value);
+            return new SLong((Long) value);
         } else if (value instanceof Integer) {
-            return new SInteger((Integer) value);
+            return new SInt((Integer) value);
         } else if (value instanceof Byte) {
-            return new SInteger(((Byte) value).longValue());
+            return new SInt((Byte) value);
         } else if (value instanceof Character) {
-            return new SInteger(((long) ((Character) value)));
+            return new SInt((Character) value);
         } else if (value instanceof Short) {
-            return new SInteger(((long) ((Short) value)));
+            return new SInt((Short) value);
         } else if (value instanceof Boolean) {
             return (Boolean) value ? ExecEnvironment.True : ExecEnvironment.False;
         } else if (value.getClass().isArray()) {
@@ -76,9 +76,9 @@ public class InteropHelper {
     }
 
     public static Object castSValue(SValue obj, Class c) {
-        if (obj instanceof SDouble || obj instanceof SInteger) {
+        if (obj instanceof SDouble || obj instanceof SLong) {
             BigDecimal num = new BigDecimal(obj instanceof SDouble ?
-                    ((SDouble) obj).val() : ((SInteger) obj).val()
+                    ((SDouble) obj).val() : ((SLong) obj).val()
             );
 
             if (c == int.class) {
@@ -137,10 +137,28 @@ public class InteropHelper {
 
             try {
                 clsName = expandJavaCassName(clsName);
-                Class c = ClassUtils.getClass(clsName);
-                classes.add(c);
-
                 SValue value = args.get(i++).evaluate(env);
+                Class c;
+
+                if (clsName.isEmpty()) {
+                    if (value instanceof SString) {
+                        c = ClassUtils.getClass("java.lang.String");
+                    } else if (value instanceof SInt) {
+                        c = ClassUtils.getClass("int");
+                    } else if (value instanceof SLong) {
+                        c = ClassUtils.getClass("long");
+                    } else if (value instanceof SDouble) {
+                        c = ClassUtils.getClass("double");
+                    } else if (value instanceof SBool) {
+                        c = ClassUtils.getClass("boolean");
+                    } else {
+                        throw new EgException("cannot guess the type");
+                    }
+                } else {
+                    c = ClassUtils.getClass(clsName);
+                }
+
+                classes.add(c);
                 Object ret = InteropHelper.castSValue(value, c);
 
                 if (value instanceof SObject) {
@@ -186,7 +204,7 @@ public class InteropHelper {
             f.setAccessible(true);
             return InteropHelper.castJavaType(f.get(obj));
         } catch (Exception e) {
-            throw new EgException(4005, "failed to get '" + field + "', " + e);
+            throw new EgException(4005, "failed to get '" + field + "': " + e);
         }
     }
 
@@ -197,7 +215,7 @@ public class InteropHelper {
             f.set(obj, castSValue(value, f.getType()));
             return value;
         } catch (Exception e) {
-            throw new EgException(4006, "failed to set '" + field + "', " + e);
+            throw new EgException(4006, "failed to set '" + field + "': " + e);
         }
     }
 }

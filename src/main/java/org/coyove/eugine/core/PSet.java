@@ -19,25 +19,20 @@ public class PSet extends SExpression {
     @ReplaceableVariable
     private SExpression varValue;
 
-    private ACTION action;
+    private byte type;
 
-    private DECLARE declare;
-
-    public enum ACTION {IMMUTABLE, MUTABLE}
-
-    public enum DECLARE {DECLARE, SET}
+    public final static byte MUTABLE = 0;
+    public final static byte IMMUTABLE = 1;
+    public final static byte SET = 2;
 
     public PSet() {
     }
 
-    public PSet(Atom ha, SExpression name, SExpression value, DECLARE d, ACTION a) {
+    public PSet(Atom ha, SExpression name, SExpression value, byte a) {
         atom = ha;
         varName = name;
         varValue = value;
-
-        directName = name instanceof SString;
-        action = a;
-        declare = d;
+        type = a;
     }
 
     @Override
@@ -46,9 +41,7 @@ public class PSet extends SExpression {
         SValue v = varValue.evaluate(env);
         SValue value = v;
 
-//        MathOpStack.expand(varValue, true);
-
-        if (action == ACTION.MUTABLE && v.immutable) {
+        if (type == MUTABLE && v.immutable) {
             /**
              * (const b ...) (set a b)
              * b is immutable, a should be mutable
@@ -58,15 +51,15 @@ public class PSet extends SExpression {
             value.immutable = false;
         }
 
-        if (action == ACTION.IMMUTABLE) {
+        if (type == IMMUTABLE) {
             value.immutable = true;
         }
 
-        if (directName || varName instanceof PVariable) {
+        if (varName instanceof PVariable) {
             String sn = directName ? n.get().toString() : ((PVariable) varName).varName;
             PVariable var = (PVariable) varName;
 
-            if (declare == DECLARE.SET) {
+            if (type == SET) {
                 // TODO: find a more elegant way to deal with immutable variable checking
 //                SValue sv = env.get(sn);
 //                if (sv != null && sv.immutable) {
@@ -85,7 +78,7 @@ public class PSet extends SExpression {
 //                        // set a variable who was not declared
 //                    }
 //                }
-            } else if (declare == DECLARE.DECLARE) {
+            } else {
                 env.bPut(sn, value);
 
 //                if (var.cacheIndex >= 0) {
@@ -111,7 +104,7 @@ public class PSet extends SExpression {
                 Object sub = ((SObject) refer).get();
                 InteropHelper.setField(sub, n.refKey, value);
             } else if (refer instanceof SClosure) {
-                if (declare == DECLARE.DECLARE) {
+                if (type == MUTABLE || type == IMMUTABLE) {
                     ((SClosure) refer).extra.bPut(n.refKey, value);
                     env.bPut(n.refKey, value);
                 } else {
@@ -135,8 +128,7 @@ public class PSet extends SExpression {
         ret.varValue = this.varValue.deepClone();
 
         ret.directName = this.directName;
-        ret.action = this.action;
-        ret.declare = this.declare;
+        ret.type = this.type;
 
         return ret;
     }

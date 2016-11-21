@@ -1,4 +1,4 @@
-package org.coyove.eugine.core;
+package org.coyove.eugine.core.interop;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.coyove.eugine.base.*;

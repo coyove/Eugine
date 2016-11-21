@@ -1,11 +1,9 @@
-package org.coyove.eugine.core;
+package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
-
-import java.math.BigDecimal;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -30,24 +28,24 @@ public class PCompare extends SExpression {
         right = args.get(1);
     }
 
-    private boolean compareNumber(SValue left, SValue right, int... signs) throws EgException {
-        if (left instanceof SInteger) {
-            long l = ((SInteger) left).val();
-            long r = Utils.castLong(right, atom);
-            int sign = (int) Math.signum(l - r);
-
-            return (signs[0] == sign || signs[1] == sign);
-        }
-
+    private int compareNumber(SValue left, SValue right) throws EgException {
         if (left instanceof SDouble) {
-            double l = ((SDouble) left).val();
-            double r = Utils.castDouble(right, atom);
-            int sign = (int) Math.signum(l - r);
-
-            return (signs[0] == sign || signs[1] == sign);
+            return (int) Math.signum(((SDouble) left).val() - Utils.castDouble(right, atom));
         }
 
-        return false;
+        if (left instanceof SInt) {
+            if (right instanceof SInt) {
+                return (int) Math.signum(((SInt) left).val() - ((SInt) right).val());
+            } else {
+                return (int) Math.signum(((SInt) left).val() - Utils.castLong(right, atom));
+            }
+        }
+
+        if (left instanceof SLong) {
+            return (int) Math.signum(((SLong) left).val() - Utils.castLong(right, atom));
+        }
+
+        throw new EgException(7056, left + " is not a number", atom);
     }
 
     @Override
@@ -66,16 +64,16 @@ public class PCompare extends SExpression {
         }
 
         if (action.equals(">"))
-            return compareNumber(left, right, 1, 1) ? ExecEnvironment.True : ExecEnvironment.False;
+            return compareNumber(left, right) == 1 ? ExecEnvironment.True : ExecEnvironment.False;
 
         if (action.equals("<"))
-            return compareNumber(left, right, -1, -1) ? ExecEnvironment.True : ExecEnvironment.False;
+            return compareNumber(left, right) == -1 ? ExecEnvironment.True : ExecEnvironment.False;
 
         if (action.equals(">="))
-            return compareNumber(left, right, 1, 0) ? ExecEnvironment.True : ExecEnvironment.False;
+            return compareNumber(left, right) >= 0 ? ExecEnvironment.True : ExecEnvironment.False;
 
         if (action.equals("<="))
-            return compareNumber(left, right, -1, 0) ? ExecEnvironment.True : ExecEnvironment.False;
+            return compareNumber(left, right) <= 0 ? ExecEnvironment.True : ExecEnvironment.False;
 
         return ExecEnvironment.Null;
     }

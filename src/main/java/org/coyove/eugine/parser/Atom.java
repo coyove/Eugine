@@ -3,7 +3,7 @@ package org.coyove.eugine.parser;
 /**
  * Created by coyove on 2016/9/9.
  */
-public class Atom extends Base {
+public class Atom {
     public Token token;
 
     public Atom(Token tok)
@@ -27,11 +27,5 @@ public class Atom extends Base {
         } else {
             return false;
         }
-    }
-
-    @Override
-    public Base clone()
-    {
-        return new Atom(token);
     }
 }

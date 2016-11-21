@@ -30,9 +30,9 @@ public class PIRange extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        Long start = Utils.castLong(this.start.evaluate(env), atom);
-        Long interval = Utils.castLong(this.interval.evaluate(env), atom);
-        Long end = Utils.castLong(this.end.evaluate(env), atom);
+        int start = Utils.castInt(this.start.evaluate(env), atom);
+        int interval = Utils.castInt(this.interval.evaluate(env), atom);
+        int end = Utils.castInt(this.end.evaluate(env), atom);
 
         return new SRange(start, interval, end);
     }

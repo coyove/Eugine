@@ -27,7 +27,7 @@ public class SETrim extends SExpression {
         if (arg instanceof SString) {
             return new SString(StringUtils.trim(arg.<String>get()));
         } else {
-            return env.Null;
+            return ExecEnvironment.Null;
         }
     }
 
@@ -35,9 +35,7 @@ public class SETrim extends SExpression {
     public SExpression deepClone() throws EgException {
         SETrim ret = new SETrim();
         ret.atom = this.atom;
-
         ret.argument = this.argument.deepClone();
-
         return ret;
     }
 }

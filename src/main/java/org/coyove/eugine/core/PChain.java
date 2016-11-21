@@ -21,7 +21,7 @@ public class PChain extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue ret = new SNull();
+        SValue ret = ExecEnvironment.Null;
         for (int i = 0; i < expressions.size(); i++) {
             SExpression se = expressions.get(i);
             ret = se.evaluate(env);

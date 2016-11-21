@@ -1,5 +1,5 @@
 import util
-sleep(5000)
+
 Debug.start()
 // for 0..10000000 do () => {
 // 	var a = 1
@@ -33,13 +33,13 @@ Debug.start()
 // // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
 
 
-var N = 1600
+var N = 160
 var Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
 var invN = 2.0/N
 for 0..N do (i) => { 
 	Cib[i] = invN * i - 1.0
 	Crb[i] = invN * i - 1.5
-}
+} 
 
 var yCt = 0
 def incr() => sync yCt++
@@ -61,7 +61,12 @@ def putLine(y) =>
             var j = 50
 
             enter for j-- > 0 do () => {
+            	// println(Zr1, " ", Zi1, " ", Crb[x+i], " ", x + i)
+
                 var nZr1=Zr1*Zr1-Zi1*Zi1+Crb[x+i]
+
+                // println(nZr1)
+
                 var nZi1=Zr1*Zi1+Zr1*Zi1+Cib[y]
                 Zr1=nZr1
                 Zi1=nZi1

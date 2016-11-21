@@ -1,11 +1,12 @@
 package org.coyove.eugine.core;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.coyove.eugine.base.ReplaceableVariable;
 import org.coyove.eugine.base.ReplaceableVariables;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.core.flow.PCond;
+import org.coyove.eugine.core.flow.PIf;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
@@ -125,7 +126,7 @@ public class PCall extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         if (expanded) {
-            SValue ret = new SNull();
+            SValue ret = ExecEnvironment.Null;
             for (SExpression argument : arguments) {
                 ret = argument.evaluate(env);
             }
@@ -159,8 +160,7 @@ public class PCall extends SExpression {
                         vararg.values.add(this.arguments.get(i));
                     }
 
-                    PSet tmp = new PSet(atom, new SString(varargName), vararg,
-                            PSet.DECLARE.DECLARE, PSet.ACTION.MUTABLE);
+                    PSet tmp = new PSet(atom, new SString(varargName), vararg, PSet.MUTABLE);
 
                     for (SExpression b : body) {
                         Utils.replaceVariables(b, argNames, this.arguments);
@@ -218,7 +218,7 @@ public class PCall extends SExpression {
                 }
             }
 
-            SValue ret = new SNull();
+            SValue ret = ExecEnvironment.Null;
 
             boolean flag = false;
             for (int i = 0; i < closure.body.size(); i++) {
@@ -231,7 +231,7 @@ public class PCall extends SExpression {
                         flag = true;
                         break;
                     } else if (tail.getRight() == continueState.FALSE_NULL) {
-                        return env.Null;
+                        return ExecEnvironment.Null;
                     }
                 }
 

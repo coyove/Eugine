@@ -28,7 +28,7 @@ public class SERange extends SExpression {
         if (args.size() == 2) {
             start = args.get(0);
             end = args.get(1);
-            interval = new SInteger(1);
+            interval = new SLong(1);
         } else if (args.size() == 3) {
             start = args.get(0);
             interval = args.get(1);
@@ -38,30 +38,32 @@ public class SERange extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue start = this.start.evaluate(env);
-        SValue interval = this.interval.evaluate(env);
-        SValue end = this.end.evaluate(env);
+        SValue _start = this.start.evaluate(env);
+        SValue _interval = this.interval.evaluate(env);
+        SValue _end = this.end.evaluate(env);
 
-        if (start instanceof SInteger && interval instanceof SInteger) {
-            long interval_ = ((SInteger) interval).val();
+        if (_start instanceof SLong || _start instanceof SInt) {
+            int interval = Utils.castInt(_interval, atom);
 
-            if (interval_ == 0) {
-                int len = ((int) ((SInteger) start).val());
+            if (interval == 0) {
+                int len = Utils.castInt(_start, atom);
                 SValue[] arr = new SValue[len];
-                Arrays.fill(arr, end);
+                Arrays.fill(arr, _end);
                 ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
                 return new SList(ret);
-            } else if (end instanceof SInteger) {
-                long len = ((SInteger) end).val() - ((SInteger) start).val();
-                ListEx<SValue> ret = new ListEx<SValue>((int) len);
-                for (long i = ((SInteger) start).val(); i < ((SInteger) end).val(); i += interval_) {
-                    ret.add(new SInteger(i));
-                }
-                return new SList(ret);
             }
-        } else if (start instanceof SDouble && interval instanceof SDouble && end instanceof SDouble) {
+
+            int start = Utils.castInt(_start, atom);
+            int end = Utils.castInt(_end, atom);
+
+            ListEx<SValue> ret = new ListEx<SValue>(end - start);
+            for (int i = start; i < end; i += interval) {
+                ret.add(new SInt(i));
+            }
+            return new SList(ret);
+        } else if (_start instanceof SDouble && _interval instanceof SDouble && _end instanceof SDouble) {
             ListEx<SValue> ret = new ListEx<SValue>();
-            for (double i = ((SDouble) start).val(); i < ((SDouble) end).val(); i += ((SDouble) interval).val()) {
+            for (double i = ((SDouble) _start).val(); i < ((SDouble) _end).val(); i += ((SDouble) _interval).val()) {
                 ret.add(new SDouble(i));
             }
             return new SList(ret);
