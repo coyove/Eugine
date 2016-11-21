@@ -16,7 +16,7 @@ import org.apache.commons.lang3.ClassUtils;
 }
 
 @parser::members {
-    public static SObject getClassObjectByName(String classname, Token tok) {
+    public static SObject getClassByName(String classname, Token tok) {
         try {
             return new SObject(ClassUtils.getClass(classname));
         } catch(Exception e) {
@@ -140,38 +140,39 @@ defineStmt returns [SExpression v]
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
         })*
-        Get=expr
-        Definition=definitionsList 
-        Description=(RawString | StringLiteral)? 
-        '=>'
-        ('{' (stmt { $body.add($stmt.v); })* '}' | stmt { $body.add($stmt.v); }) 
+        Get=expr Lambda=lambdaStmt
         {
             Atom a = new Atom($Get.start);
-            SExpression closure = new PLambda(a, $Definition.v, $Definition.passByValue, 
-                $body,
-                $Description == null ? "" : $Description.text,
-                $Inline != null);
+            SExpression closure = $Lambda.v;
+            ((PLambda) closure).inline = $Inline != null;
 
-            // if ($Get.v instanceof PGet) {
-                for (SExpression d : $decorators) {
-                    closure = new PCall(a, d, ListEx.build(closure));
-                }
-                
-                $v = new PSet(a, $Get.v, closure, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
-            // } else {
-            //     // error
-            //     $v = new SNull();
-            // }
+            for (SExpression d : $decorators) {
+                closure = new PCall(a, d, ListEx.build(closure));
+            }
+            
+            $v = new PSet(a, $Get.v, closure, PSet.DECLARE.DECLARE, PSet.ACTION.IMMUTABLE);
         }
     ;
 
-lambdaStmt returns [SExpression v]
-    locals [ ListEx<SExpression> body = new ListEx<SExpression>(); ]
-    : definitionsList '=>' ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
-    {
-        $v = new PLambda(new Atom($definitionsList.start), $definitionsList.v, $definitionsList.passByValue,
-            $body, "anonymous", false);
-    }
+lambdaStmt returns [PLambda v]
+    locals [ ListEx<SExpression> body = new ListEx<SExpression>(), PVariable ret]
+    : definitionsList 
+    Description=(RawString | StringLiteral)?
+    '=>' 
+    ('@' Identifier {
+        $ret = new PVariable($Identifier.text);
+        $body.add(new PSet(new Atom($Identifier), $ret, ExecEnvironment.Null, 
+            PSet.DECLARE.DECLARE, PSet.ACTION.MUTABLE)); 
+    })?
+    ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
+        {
+            if ($ret != null) {
+                $body.add($ret);
+            }
+
+            $v = new PLambda(new Atom($definitionsList.start), $definitionsList.v, $definitionsList.passByValue,
+                $body, $Description == null ? "" : $Description.text, false);
+        }
     ;
 
 callStmt returns [SExpression v]
@@ -322,8 +323,7 @@ unaryExpr returns [SExpression v]
                     PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             } else {
                 $v = new PSet(ha, $Left.v, 
-                    new PMath(ha, 
-                        ListEx.build($Left.v, new SInteger(1)), PMath.ACTION.SUBTRACT),
+                    new PMath(ha, ListEx.build($Left.v, new SInteger(1)), PMath.ACTION.SUBTRACT),
                     PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             }
         }
@@ -361,8 +361,7 @@ logicExpr returns [SExpression v]
     : Top=compareExpr { $v = $Top.v; }
     | Left=logicExpr Op=('&&'|'||') Right=compareExpr
         {
-            $v = SKeywords.Lookup.get($Op.text).call($Op, 
-                ListEx.build($Left.v, $Right.v));
+            $v = SKeywords.Lookup.get($Op.text).call($Op, ListEx.build($Left.v, $Right.v));
         }
     | Left=logicExpr ':' JavaFullName
         {
@@ -376,13 +375,11 @@ assignExpr returns [SExpression v]
         {
             Atom ha = new Atom($Op);
             if ($Op.text.equals("+=")) {
-                $v = new PSet(ha, $Left.v, 
-                    new PAdd(ha, ListEx.build($Left.v, $Right.v), false),
+                $v = new PSet(ha, $Left.v, new PAdd(ha, ListEx.build($Left.v, $Right.v), false),
                     PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             } else {
                 String text = $Op.text.substring(0, 1);
-                $v = new PSet(ha, $Left.v, 
-                    SKeywords.Lookup.get(text).call($Op, ListEx.build($Left.v, $Right.v)),
+                $v = new PSet(ha, $Left.v, SKeywords.Lookup.get(text).call($Op, ListEx.build($Left.v, $Right.v)),
                     PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             }
         }
@@ -392,8 +389,7 @@ assignExpr returns [SExpression v]
                 PGet get = (PGet) $Subject.v;
                 $v = new PPut(new Atom($Subject.start), get.sub, get.key, $Value.v, PPut.DECLARE.SET);
             } else {
-                $v = new PSet(new Atom($Subject.start), 
-                    $Subject.v, $Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
+                $v = new PSet(new Atom($Subject.start), $Subject.v, $Value.v, PSet.DECLARE.SET, PSet.ACTION.MUTABLE);
             }
         }
     ;
@@ -403,34 +399,47 @@ expr returns [SExpression v]
     | New JavaFullName interopArgumentsList
         {
             String classname = $JavaFullName.text.replace("\\", ".");
-            $v = new PInteropNew(new Atom($New), getClassObjectByName(classname, $New),
+            $v = new PInteropNew(new Atom($New), getClassByName(classname, $New),
                 $interopArgumentsList.defs, $interopArgumentsList.args);
         }
     | Static JavaFullName
-        { $v = getClassObjectByName($JavaFullName.text.replace("\\", "."), $Static); }
-    | Clone Subject=expr
-        { $v = new PClone(new Atom($Clone), $Subject.v); }
-    | Type Subject=expr
-        { $v = new PType(new Atom($Type), $Subject.v, PType.TYPE.TYPE); }
-    | AddressOf Subject=expr
-        { $v = new PType(new Atom($AddressOf), $Subject.v, PType.TYPE.ADDR); }
-    | For Subject=expr Do Body=expr
         { 
-            $v = new PFor(new Atom($For), $Subject.v, $Body.v, 
-                $For.text.equals("for") ? PFor.DIRECTION.ASC : PFor.DIRECTION.DESC); 
+            $v = getClassByName($JavaFullName.text.replace("\\", "."), $Static); 
+        }
+    | Clone Subject=expr
+        { 
+            $v = new PClone(new Atom($Clone), $Subject.v); 
+        }
+    | Type Subject=expr
+        { 
+            $v = new PType(new Atom($Type), $Subject.v, PType.TYPE.TYPE); 
+        }
+    | For Subject=expr Do Body=expr
+        {
+            if (SConfig.strictForLoop) {
+                $v = new PForStrict(new Atom($For), $Subject.v, $Body.v, 
+                    $For.text.equals("for") ? PFor.DIRECTION.ASC : PFor.DIRECTION.DESC); 
+            } else {
+                $v = new PFor(new Atom($For), $Subject.v, $Body.v, 
+                    $For.text.equals("for") ? PFor.DIRECTION.ASC : PFor.DIRECTION.DESC); 
+            }
         }
     | For Start=expr (',' Next=expr)? ('..' | '...') End=expr Do Body=expr
-        { 
-            PIRange r = new PIRange(new Atom($For), ListEx.build(
+        {
+            Atom atom = new Atom($For);
+            PIRange r = new PIRange(atom, ListEx.build(
                     $Start.v, 
                     $Next.ctx == null ? 
                         new SInteger(1) : 
-                        new PMath(new Atom($Next.start), 
-                            ListEx.build($Next.v, $Start.v),
-                            PMath.ACTION.SUBTRACT), 
+                        new PMath(atom, ListEx.build($Next.v, $Start.v), PMath.ACTION.SUBTRACT), 
                     $End.v
                 ));
-            $v = new PFor(new Atom($For), r, $Body.v, PFor.DIRECTION.ASC); 
+
+            if (SConfig.strictForLoop) {
+                $v = new PForStrict(atom, r, $Body.v, PFor.DIRECTION.ASC); 
+            } else {
+                $v = new PFor(atom, r, $Body.v, PFor.DIRECTION.ASC); 
+            }
         }
     | If Condition=expr True=code (Else False=code)?
         {

@@ -45,21 +45,12 @@ public class PAdd extends SExpression {
         SValue right = this.right.evaluate(env);
 
         if (left instanceof SConcatString) {
-            if (right.underlying != null) {
-                String text;
-                if (right instanceof SInteger) {
-                    text = ((Long) ((SInteger) right).val()).toString();
-                } else if (right instanceof SDouble) {
-                    text = ((Double) ((SDouble) right).val()).toString();
-                } else {
-                    text = right.underlying.toString();
-                }
-
+            if (right != ExecEnvironment.Null) {
                 if (self) {
                     if (right instanceof SConcatString) {
                         ((SConcatString) left).texts.addAll(((SConcatString) right).texts);
                     } else {
-                        ((SConcatString) left).texts.add(text);
+                        ((SConcatString) left).texts.add(right.asString());
                     }
 
                     return left;
@@ -69,11 +60,11 @@ public class PAdd extends SExpression {
 
                     if (right instanceof SConcatString) {
                         ret.texts.addAll(((SConcatString) right).texts);
-                        return ret;
                     } else {
-                        ret.texts.add(text);
-                        return ret;
+                        ret.texts.add(right.asString());
                     }
+
+                    return ret;
                 }
             } else {
                 return left.clone();
@@ -81,21 +72,13 @@ public class PAdd extends SExpression {
         }
 
         if (left instanceof SString) {
-            if (right.underlying != null) {
+            if (right != ExecEnvironment.Null) {
                 if (right instanceof SConcatString) {
                     SConcatString ret = new SConcatString(left.underlying.toString());
                     ret.texts.addAll(((SConcatString) right).texts);
                     return ret;
                 } else {
-                    String t;
-                    if (right instanceof SInteger) {
-                        t = ((Long) ((SInteger) right).val()).toString();
-                    } else if (right instanceof SDouble) {
-                        t = ((Double) ((SDouble) right).val()).toString();
-                    } else {
-                        t = right.underlying.toString();
-                    }
-                    return new SConcatString(left.underlying.toString(), t);
+                    return new SConcatString(left.underlying.toString(), right.asString());
                 }
             } else {
                 return left.clone();

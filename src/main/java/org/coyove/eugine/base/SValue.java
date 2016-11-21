@@ -45,7 +45,20 @@ public abstract class SValue extends SExpression {
         return valType + " = " + (underlying == null ? "null" : underlying.toString());
     }
 
-    // It clones the SValue, but not includes the object underlaying
+    public String asString() {
+        if (underlying == null) {
+            if (this instanceof SInteger) {
+                return ((Long) ((SInteger) this).val()).toString();
+            } else if (this instanceof SDouble) {
+                return ((Double) ((SDouble) this).val()).toString();
+            } else {
+                return "";
+            }
+        } else {
+            return underlying.toString();
+        }
+    }
+
     public abstract SValue clone();
 
     @Override

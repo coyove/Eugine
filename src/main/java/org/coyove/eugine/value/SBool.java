@@ -16,8 +16,6 @@ public class SBool extends SValue {
 
     @Override
     public SValue clone() {
-//        SBool ret = new SBool((Boolean) underlying);
-//        SValue.copyAttributes(ret, this);
         return this;
     }
 }

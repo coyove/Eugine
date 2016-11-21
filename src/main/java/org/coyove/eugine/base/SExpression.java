@@ -44,12 +44,7 @@ public abstract class SExpression implements java.io.Serializable {
                         throw new EgException(9998, "wrong vararg list", atom);
                     }
                 } else {
-                    SValue v = e.evaluate(env);
-                    if (v instanceof SExploded) {
-                        ret.addAll(((SExploded) v).comps);
-                    } else {
-                        ret.add(v);
-                    }
+                    ret.add(e.evaluate(env));
                 }
             } else {
                 throw new EgException(9998, "found null", atom);

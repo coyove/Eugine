@@ -9,12 +9,12 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class SRange extends SValue {
-    public Long start;
-    public Long end;
-    public Long interval;
+    public long start;
+    public long end;
+    public long interval;
 
-    public SRange(Long start, Long interval, Long end) {
-        super(new Triple<Long, Long, Long>(start, end, interval));
+    public SRange(long start, long interval, long end) {
+        super();
 
         this.start = start;
         this.end = end;

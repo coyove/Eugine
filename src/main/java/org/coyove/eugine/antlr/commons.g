@@ -4,7 +4,7 @@ Var: 'var';
 Const: 'const';
 Def: 'def';
 Inline: 'inline';
-For: ('for' | 'forr');
+For: ('for' | 'rev');
 If: 'if';
 Switch: 'switch';
 Else: 'else';

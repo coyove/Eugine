@@ -23,6 +23,7 @@ def errorHandler(ctx, msg) => {
 server.addRouter("GET", "_/", (context) => {
     context.writeCommon(200, "html")
     context.eoh()
+    context.write(context.cookies.uid)
     context.write(Template.index())
 })
 
@@ -50,12 +51,5 @@ server.addRouter("POST", "_/new", (context) => enter {
 	}
 })
 
-// var _start = Time.unix(0)
-// var zzz = clone ""
-// for 0..100 do () => {
-// 	for 0..100 do () => zzz <+ "a"
-// }
-// println(Time.unix(0) - _start)
-// println(len(zzz))
 println("listening on port ", Config.port)
 server.start()

@@ -10,20 +10,19 @@ import java.util.HashMap;
 /**
  * Created by coyove on 2016/9/10.
  */
-public class PFor extends SExpression {
+public class PForStrict extends SExpression {
     @ReplaceableVariable
     private SExpression list;
 
     @ReplaceableVariable
     private SExpression body;
 
-    private DIRECTION direction;
-    public enum DIRECTION {ASC, DESC}
+    private PFor.DIRECTION direction;
 
-    public PFor() {
+    public PForStrict() {
     }
 
-    public PFor(Atom ha, SExpression l, SExpression b, DIRECTION dir) {
+    public PForStrict(Atom ha, SExpression l, SExpression b, PFor.DIRECTION dir) {
         atom = ha;
         list = l;
         body = b;
@@ -31,40 +30,6 @@ public class PFor extends SExpression {
     }
 
     private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
-        ExecEnvironment env = body.outerEnv;
-        SValue[] olds = new SValue[2];
-        String name1 = "";
-        String name2 = "";
-
-        if (body.argNames.size() >= 1) {
-            name1 = body.argNames.head();
-            olds[0] = env.bGet(name1);
-            env.bPut(name1, v);
-        }
-
-        if (body.argNames.size() >= 2) {
-            name2 = body.argNames.get(1);
-            olds[1] = env.bGet(name2);
-            env.bPut(name2, idx);
-        }
-
-        SValue ret = new SNull();
-        for (SExpression se : body.body) {
-            ret = se.evaluate(env);
-        }
-
-        if (olds[0] != null) {
-            env.bPut(name1, olds[0]);
-        }
-
-        if (olds[1] != null) {
-            env.bPut(name2, olds[1]);
-        }
-
-        return ret;
-    }
-
-    private SValue execLoopStrict(SClosure body, SValue v, SValue idx) throws EgException {
         ExecEnvironment env = new ExecEnvironment();
 
         if (body.argNames.size() >= 1) {
@@ -106,7 +71,7 @@ public class PFor extends SExpression {
         } else if (_list instanceof SList) {
             ListEx<SExpression> values = ((SList) _list).get();
 
-            if (direction == DIRECTION.ASC) {
+            if (direction == PFor.DIRECTION.ASC) {
                 for (int i = 0; i < values.size(); i++) {
                     if (execLoop(body, values.get(i).evaluate(env), new SInteger(i)) ==
                             ExecEnvironment.False) {
@@ -148,7 +113,7 @@ public class PFor extends SExpression {
 
     @Override
     public SExpression deepClone() throws EgException {
-        PFor ret = new PFor();
+        PForStrict ret = new PForStrict();
         ret.atom = this.atom;
         ret.list = this.list.deepClone();
         ret.body = this.body.deepClone();

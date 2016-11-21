@@ -118,8 +118,8 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         var context = _HttpServer.HttpContext(client)
 
         enter {
-        var buf  = buffer(1024)
-        var read = 0
+        var buf  = buffer(1024), 
+            read = 0
         var totalRead    = 0
         var rawRequest   = ""
         var bodyLength   = 0
@@ -140,9 +140,9 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                 totalLength = (headerLength = m[0].end) + bodyLength // we reach the end of HTTP request headers
 
             !(totalLength == totalRead || Util.isEndOfStream(rawRequest))
-        }
-        catch (e)
-            println("timeout:\n", e, "\n", rawRequest)
+        } catch (e)
+            if rawRequest != ""
+                println("timeout:\n", e, "\n", rawRequest)
 
         var requests = String.split(rawRequest, "\r\n")
         for requests do (request) => {
@@ -207,12 +207,10 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         }
 
         // end of enter
-        } 
-        catch(e) {
+        } catch(e) {
             println(e)
-        }
-        do {
-            is::close()
+        } do {
+            is:>close()
             context.close()
         }
     }
