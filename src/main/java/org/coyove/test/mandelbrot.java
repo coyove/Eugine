@@ -42,8 +42,8 @@ public final class mandelbrot {
     }
 
     public static void main(String[] args) throws Exception {
-        int N=160;
-//        if (args.length>=1) N=Integer.parseInt(args[1]);
+        int N=16000;
+        long start = System.currentTimeMillis();
 //
         Crb=new double[N+7]; Cib=new double[N+7];
         double invN=2.0/N; for(int i=0;i<N;i++){ Cib[i]=i*invN-1.0; Crb[i]=i*invN-1.5; }
@@ -64,5 +64,7 @@ public final class mandelbrot {
         stream.write(("P4\n"+N+" "+N+"\n").getBytes());
         for(int i=0;i<N;i++) stream.write(out[i]);
         stream.close();
+
+        System.out.println(System.currentTimeMillis() - start);
     }
 }

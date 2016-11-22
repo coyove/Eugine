@@ -6,14 +6,22 @@ import java.lang.reflect.Array;
  * Created by coyove on 2016/11/21.
  */
 public class EgFastMap<V extends Object> {
+    public static int MAX_SLOTS = 16;
     private Object[] slots;
     private int[] keys;
     private int pointer;
 
+    public static void generate() {
+        // put
+        for (int i = 0; i < MAX_SLOTS; i++) {
+
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public EgFastMap() {
-        slots = new Object[8];
-        keys = new int[8];
+        slots = new Object[MAX_SLOTS];
+        keys = new int[MAX_SLOTS];
         pointer = -1;
     }
 
@@ -27,7 +35,7 @@ public class EgFastMap<V extends Object> {
         }
 
         pointer++;
-        if (pointer >= 8) {
+        if (pointer >= MAX_SLOTS) {
             return null;
         }
 

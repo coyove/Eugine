@@ -67,27 +67,29 @@ public class PSet extends SExpression {
 //                }
 
                 env.put(sn, value);
-
-//                if (var.cacheIndex >= 0) {
-//                    SCache.slots[var.cacheIndex] = value;
-//                } else {
-//                    Short ci = env.cacheReverseLookupGet(sn);
-//                    if (ci != null) {
-//                        var.cacheIndex = ci;
-//                    } else {
-//                        // set a variable who was not declared
-//                    }
-//                }
+                if (SConfig.cacheVariables) {
+                    if (var.cacheIndex >= 0) {
+                        SCache.slots[var.cacheIndex] = value;
+                    } else {
+                        Short ci = env.cacheReverseLookupGet(sn);
+                        if (ci != null) {
+                            var.cacheIndex = ci;
+                        } else {
+                            // set a variable who was not declared
+                        }
+                    }
+                }
             } else {
                 env.bPut(sn, value);
-
-//                if (var.cacheIndex >= 0) {
-//                    SCache.slots[var.cacheIndex] = value;
-//                } else {
-//                    short ci = SCache.put(value, env, sn);
-//                    var.cacheIndex = ci;
-//                    env.cacheReverseLookup.put(sn, ci);
-//                }
+                if (SConfig.cacheVariables) {
+                    if (var.cacheIndex >= 0) {
+                        SCache.slots[var.cacheIndex] = value;
+                    } else {
+                        short ci = SCache.put(value, env, sn);
+                        var.cacheIndex = ci;
+                        env.cacheReverseLookup.put(sn, ci);
+                    }
+                }
             }
         } else {
             Object refer = n.refer;

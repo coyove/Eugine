@@ -6,10 +6,7 @@ import java.util.HashMap;
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.util.EgFastMap;
-import org.coyove.eugine.util.ExecEnvironment;
-import org.coyove.eugine.util.EgException;
-import org.coyove.eugine.util.Utils;
+import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.SInt;
 import org.coyove.eugine.value.SNull;
 
@@ -35,28 +32,28 @@ public class main {
     public static void main(String[] args) {
         Utils.importExportables();
         try {
-            HashMap<String, SValue> map = new HashMap<String, SValue>();
-            map.put("test", new SInt(1));
-            map.put("test2", new SInt(2));
+//            HashMap<String, SValue> map = new HashMap<String, SValue>();
+//            map.put("test", new SInt(1));
+//            map.put("test2", new SInt(2));
+//
+//            EgFastMap<SValue> zzz = new EgFastMap<SValue>();
+//            zzz.put("test1", new SInt(1));
+//            zzz.put("test2", new SInt(2));
+//            zzz.put("test3", new SInt(2));
+//            zzz.put("test4", new SInt(2));
+//            zzz.put("test5", new SInt(2));
+//            zzz.put("test6", new SInt(2));
+//            zzz.put("test7", new SInt(2));
+//            zzz.put("test8", new SInt(2));
+//
+//            long start = System.currentTimeMillis();
+//            for (long i = 0; i < 1000000000l; i++) {
+//                map.put("test4", map.get("test3"));
+//            }
+//            System.out.println(System.currentTimeMillis() - start);
 
-            EgFastMap<SValue> zzz = new EgFastMap<SValue>();
-            zzz.put("test1", new SInt(1));
-            zzz.put("test2", new SInt(2));
-            zzz.put("test3", new SInt(2));
-            zzz.put("test4", new SInt(2));
-            zzz.put("test5", new SInt(2));
-            zzz.put("test6", new SInt(2));
-            zzz.put("test7", new SInt(2));
-            zzz.put("test8", new SInt(2));
-
-            long start = System.currentTimeMillis();
-            for (long i = 0; i < 1000000000l; i++) {
-                zzz.put("test4", zzz.get("test3"));
-            }
-            System.out.println(System.currentTimeMillis() - start);
-
-//            Eugine e = new Eugine();
-//            System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
+            Eugine e = new Eugine();
+            System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
         } catch (Exception e) {
             e.printStackTrace();
         }

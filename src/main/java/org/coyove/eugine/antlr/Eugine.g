@@ -78,11 +78,11 @@ declareStmt returns [SExpression v]
         {
             $act = $Action.text.equals("var") ? PSet.MUTABLE : PSet.IMMUTABLE;
         }
-    Head=expr '=' HeadValue=expr
+    Head=unaryExpr '=' HeadValue=expr
         {
             $multi.add(new PSet(new Atom($Action), $Head.v, $HeadValue.v, $act));
         }
-    (',' Tail=expr '=' TailValue=expr 
+    (',' Tail=unaryExpr '=' TailValue=expr 
         {
             $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, $act));
         }
@@ -361,9 +361,29 @@ addExpr returns [SExpression v]
 
 compareExpr returns [SExpression v]
     : Top=addExpr { $v = $Top.v; }
-    | Left=compareExpr Op=('<'|'>'|'<='|'>='|'=='|'!=') Right=addExpr
+    | Left=compareExpr Op='<' Right=addExpr
         {
-            $v = SKeywords.Lookup.get($Op.text).call($Op, ListEx.build($Left.v, $Right.v));
+            $v = new PLess(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=compareExpr Op='>' Right=addExpr
+        {
+            $v = new PGreat(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=compareExpr Op='<=' Right=addExpr
+        {
+            $v = new PLessEqual(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=compareExpr Op='>=' Right=addExpr
+        {
+            $v = new PGreatEqual(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=compareExpr Op='==' Right=addExpr
+        {
+            $v = new PEqual(new Atom($Op), $Left.v, $Right.v);
+        }
+    | Left=compareExpr Op='!=' Right=addExpr
+        {
+            $v = new PNotEqual(new Atom($Op), $Left.v, $Right.v);
         }
     ;
 

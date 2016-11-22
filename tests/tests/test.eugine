@@ -33,7 +33,7 @@ Debug.start()
 // // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
 
 
-var N = 160
+var N = 1600
 var Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
 var invN = 2.0/N
 for 0..N do (i) => { 
@@ -52,27 +52,24 @@ def putLine(y) =>
 		var x = xb * 8
 		var res = 0
         for [0, 2, 4, 6] do (i) => {
-            var Zr1 = Crb[x+i]
-            var Zi1 = Cib[y]
-            var Zr2 = Crb[x+i+1]
-            var Zi2 = Cib[y]
+            var Ciby = Cib[y]
+            var Crbx = Crb[x+i]
+            var Crbx1 = Crb[x+i+1]
+
+            var Zr1 = Crbx, Zr2 = Crbx1
+            var Zi1 = Zi2 = Ciby
 
             var b = 0
             var j = 50
 
             enter for j-- > 0 do () => {
-            	// println(Zr1, " ", Zi1, " ", Crb[x+i], " ", x + i)
-
-                var nZr1=Zr1*Zr1-Zi1*Zi1+Crb[x+i]
-
-                // println(nZr1)
-
-                var nZi1=Zr1*Zi1+Zr1*Zi1+Cib[y]
+                var nZr1=Zr1*Zr1-Zi1*Zi1+Crbx
+                var nZi1=Zr1*Zi1*2+Ciby
                 Zr1=nZr1
                 Zi1=nZi1
 
-                var nZr2=Zr2*Zr2-Zi2*Zi2+Crb[x+i+1]
-                var nZi2=Zr2*Zi2+Zr2*Zi2+Cib[y]
+                var nZr2=Zr2*Zr2-Zi2*Zi2+Crbx1
+                var nZi2=Zr2*Zi2*2+Ciby
                 Zr2=nZr2
                 Zi2=nZi2
 
@@ -97,7 +94,7 @@ def worker () => {
 }
 
 var threads = []
-for 0..4 do () =>
+for 0..8 do () =>
 	threads <+ worker#()
 
 for threads do (t) => wait(t)
