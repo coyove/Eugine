@@ -122,6 +122,16 @@ public interface EugineListener extends ParseTreeListener {
 	 */
 	void exitArgumentsList(EugineParser.ArgumentsListContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link EugineParser#interopArgumentDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterInteropArgumentDeclaration(EugineParser.InteropArgumentDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#interopArgumentDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitInteropArgumentDeclaration(EugineParser.InteropArgumentDeclarationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link EugineParser#interopArgumentsList}.
 	 * @param ctx the parse tree
 	 */

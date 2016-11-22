@@ -113,7 +113,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
     }
 
     def handle (client) => {
-        client::setSoTimeout(readTimeout: int)
+        client::setSoTimeout(readTimeout)
         var is = client::getInputStream()
         var context = _HttpServer.HttpContext(client)
 
@@ -125,10 +125,10 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         var bodyLength   = 0
         var headerLength = 0
         var totalLength  = 0
-       
+
         enter for read != -1 do () => {
             totalRead += (read = is::read(buf : byte[]))
-            var output = new java\lang\String(buf : byte[], 0 : int, read : int)
+            var output = new java/lang/String(buf : byte[], 0, read)
             rawRequest <+ output
 
             var m = String.match(rawRequest, @"(?i)content-length:\s?(\d+)")
@@ -143,6 +143,8 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         } catch (e)
             if rawRequest != ""
                 println("timeout:\n", e, "\n", rawRequest)
+
+            // println(rawRequest)
 
         var requests = String.split(rawRequest, "\r\n")
         for requests do (request) => {
@@ -224,8 +226,8 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
     }
 
     def this.start() => {
-        var ss = new java\net\ServerSocket()
-        ss:>bind(new java\net\InetSocketAddress(listenAddress: String, listenPort: int): java\net\SocketAddress)
+        var ss = new java/net/ServerSocket()
+        ss:>bind(new java/net/InetSocketAddress(listenAddress, listenPort): java/net/SocketAddress)
 
         for true do () => {
             var client = ss::accept()

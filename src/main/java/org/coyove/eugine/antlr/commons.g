@@ -41,7 +41,7 @@ Identifier
     ;
 
 JavaFullName
-    : Identifier ('\\' Identifier)* '[]'? '...'?
+    : Identifier ('/' Identifier)* '[]'? '...'?
     ;
 
 Letter

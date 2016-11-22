@@ -84,7 +84,7 @@ public class SClosure extends SValue {
 
     @Override
     public String toString() {
-        return "(" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
+        return "Closure = (" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
                 body.size() + "}";
     }
 }

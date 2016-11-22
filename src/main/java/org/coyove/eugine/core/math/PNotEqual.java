@@ -28,7 +28,7 @@ public class PNotEqual extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue left = this.left.evaluate(env);
         SValue right = this.right.evaluate(env);
-        return left.equals(right) ? ExecEnvironment.True : ExecEnvironment.False;
+        return left.equals(right) ? ExecEnvironment.False : ExecEnvironment.True;
     }
 
     @Override

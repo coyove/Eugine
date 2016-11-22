@@ -1,8 +1,8 @@
 import Cookie
 
 (def Util() => {
-    var javaURLDecoder = static java\net\URLDecoder
-    var javaURLEncoder = static java\net\URLEncoder
+    var javaURLDecoder = static java/net/URLDecoder
+    var javaURLEncoder = static java/net/URLEncoder
     var thisUtil = this
 
     def this.encodeURI (text) => 
@@ -49,14 +49,14 @@ import Cookie
             println("cache hit: ", url)
             ret = rssCache[url].rss
         } else {
-            var obj = new java\net\URL(url : String)
+            var obj = new java/net/URL(url : String)
             var conn = obj::openConnection()
 
             // error when url is invalid
-            var br = new java\io\BufferedReader(
-                new java\io\InputStreamReader(conn:>getInputStream(): java\io\InputStream): java\io\Reader)
+            var br = new java/io/BufferedReader(
+                new java/io/InputStreamReader(conn:>getInputStream(): java/io/InputStream): java/io/Reader)
 
-            var inputLine = "", response = new java\lang\StringBuffer()
+            var inputLine = "", response = new java/lang/StringBuffer()
 
             for (inputLine = br::readLine()) != null do () =>
                 response:>append(inputLine : String)

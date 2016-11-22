@@ -115,21 +115,25 @@ argumentsList returns [ ListEx<SExpression> v = new ListEx<SExpression>() ]
     | '(' ')'
     ;
 
+interopArgumentDeclaration returns [SExpression v, String c]
+    : InitExpr=expr (':' InitDef=(JavaFullName | Identifier))?
+        {
+            $v = $InitExpr.v;
+            $c = $InitDef.text == null ? "" : $InitDef.text.replace("/", ".");
+        } 
+    ;
+
 interopArgumentsList returns [ 
         ListEx<SExpression> args = new ListEx<SExpression>(),
         ListEx<String> defs = new ListEx<String>() ]
     : '(' 
-        (InitExpr=expr (':' InitDef=(JavaFullName | Identifier))? ',' 
-            { 
-                $args.add($InitExpr.v);
-                $defs.add($InitDef == null ? "" : $InitDef.text.replace("\\", "."));
-            } )* 
-        LastExpr=expr (':' LastDef=(JavaFullName | Identifier))?
+        (InitExpr=interopArgumentDeclaration ',' { $args.add($InitExpr.v); $defs.add($InitExpr.c); })* 
+        LastExpr=interopArgumentDeclaration
     ')'
-    {
-        $args.add($LastExpr.v);
-        $defs.add($LastDef == null ? "" : $LastDef.text.replace("\\", "."));
-    }
+        {
+            $args.add($LastExpr.v);
+            $defs.add($LastExpr.c);
+        }
     | '(' ')'
     ;
 
@@ -162,9 +166,10 @@ lambdaStmt returns [PLambda v]
     : definitionsList 
     Description=(RawString | StringLiteral)?
     '=>' 
-    ('@' Identifier {
+    ('@' Identifier ('(' InitValue=expr ')')? {
         $ret = new PVariable($Identifier.text);
-        $body.add(new PSet(new Atom($Identifier), $ret, ExecEnvironment.Null, PSet.MUTABLE)); 
+        $body.add(new PSet(new Atom($Identifier), $ret, 
+            $InitValue.start == null ? ExecEnvironment.Null : $InitValue.v, PSet.MUTABLE)); 
     })?
     ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
         {
@@ -200,13 +205,10 @@ switchStmt returns [SExpression v]
     ;
 
 dict returns [PDict v = new PDict()]
-    : '{' pair { 
-            $v.keys.add($pair.k); 
-            $v.values.add($pair.v);
-        } (',' pair { 
-            $v.keys.add($pair.k); 
-            $v.values.add($pair.v);
-        } )* ','? '}'
+    : '{' 
+        pair { $v.keys.add($pair.k); $v.values.add($pair.v); }
+        (',' pair { $v.keys.add($pair.k); $v.values.add($pair.v); } )* ','? 
+        '}'
     | '{' '}'
     ;
 
@@ -397,10 +399,10 @@ logicExpr returns [SExpression v]
         {
             $v = new PLogic(new Atom($Op), $Left.v, $Right.v, PLogic.OR);
         }
-    | Left=logicExpr ':' JavaFullName
-        {
-            $v = new PInteropCast(new Atom($JavaFullName), $Left.v, $JavaFullName.text.replace("\\", "."));
-        }
+    // | Left=logicExpr ':' JavaFullName
+    //     {
+    //         $v = new PInteropCast(new Atom($JavaFullName), $Left.v, $JavaFullName.text.replace("/", "."));
+    //     }
     ;
 
 assignExpr returns [SExpression v]
@@ -436,13 +438,13 @@ expr returns [SExpression v]
     : assignExpr { $v = $assignExpr.v; }
     | New JavaFullName interopArgumentsList
         {
-            String classname = $JavaFullName.text.replace("\\", ".");
+            String classname = $JavaFullName.text.replace("/", ".");
             $v = new PInteropNew(new Atom($New), getClassByName(classname, $New),
                 $interopArgumentsList.defs, $interopArgumentsList.args);
         }
     | Static JavaFullName
         { 
-            $v = getClassByName($JavaFullName.text.replace("\\", "."), $Static); 
+            $v = getClassByName($JavaFullName.text.replace("/", "."), $Static); 
         }
     | Clone Subject=expr
         { 
