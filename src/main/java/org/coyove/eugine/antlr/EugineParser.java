@@ -1568,10 +1568,7 @@ public class EugineParser extends Parser {
 				match(T__0);
 				setState(286);
 				((DictContext)_localctx).pair = pair();
-				 
-				            _localctx.v.keys.add(((DictContext)_localctx).pair.k); 
-				            _localctx.v.values.add(((DictContext)_localctx).pair.v);
-				        
+				 _localctx.v.keys.add(((DictContext)_localctx).pair.k); _localctx.v.values.add(((DictContext)_localctx).pair.v); 
 				setState(294);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,27,_ctx);
@@ -1583,10 +1580,7 @@ public class EugineParser extends Parser {
 						match(T__7);
 						setState(289);
 						((DictContext)_localctx).pair = pair();
-						 
-						            _localctx.v.keys.add(((DictContext)_localctx).pair.k); 
-						            _localctx.v.values.add(((DictContext)_localctx).pair.v);
-						        
+						 _localctx.v.keys.add(((DictContext)_localctx).pair.k); _localctx.v.values.add(((DictContext)_localctx).pair.v); 
 						}
 						} 
 					}

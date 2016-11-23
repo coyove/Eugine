@@ -1,6 +1,8 @@
 package org.coyove.test;
 
 import java.awt.*;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.lang.System;
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SConfig;
@@ -38,12 +40,14 @@ public class main {
             String indicator = "";
             boolean flag = false;
             String code = "";
+            String totalCode = "";
             String lastLine = "";
 
             System.out.println("+------------------+");
             System.out.println("| Eugine REPL beta |");
             System.out.println("+------------------+");
-            System.out.println("Type '\\q' to quit, '\\c' to abandon the code and start a new line\n");
+            System.out.println("Type '\\q' to quit, '\\c' to abandon the code and start a new line");
+            System.out.println("For more info, type '\\h'\n");
 
             while (true) {
                 if (flag) {
@@ -70,10 +74,25 @@ public class main {
                     return;
                 }
 
+                if (lastLine.startsWith("\\e")) {
+                    String filename = lastLine.substring(3).trim();
+                    try {
+                        OutputStream os = new FileOutputStream(filename);
+                        os.write(totalCode.getBytes("utf-8"));
+                        os.close();
+                    } catch(Exception foe) {
+                        foe.printStackTrace();
+                    }
+                    flag = false;
+                    code = "";
+                    continue;
+                }
+
                 if (code.endsWith(";")) {
                     code = code.substring(0, code.length() - 1);
                     System.out.println(ANTLRHelper.executeCode(code, e.environment));
                     flag = false;
+                    totalCode += code + "\n";
                     code = "";
                 }
             }
@@ -81,7 +100,7 @@ public class main {
         }
     }
 
-    public static String getLeadingSpaces(String s) {
+    private static String getLeadingSpaces(String s) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == ' ') {
@@ -96,7 +115,7 @@ public class main {
         return sb.toString();
     }
 
-    public static void fakeInput(String s) {
+    private static void fakeInput(String s) {
         if (options.isEnabled("no-robot")) {
             return;
         }
