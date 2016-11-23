@@ -80,17 +80,22 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     }
 
     public ExecEnvironment clone() {
-        ExecEnvironment ret = new ExecEnvironment();// (ExecEnvironment) super.clone();
+        ExecEnvironment ret = bClone();
+        if (this.parentEnv != null) {
+            ret.parentEnv = this.parentEnv.clone();
+        }
+        return ret;
+    }
+
+    public ExecEnvironment bClone() {
+        ExecEnvironment ret = new ExecEnvironment();
         for (String s : super.keySet()) {
             SValue v = super.get(s);
             if (v != null) {
                 ret.bPut(s, v.clone());
             }
         }
-
-        if (this.parentEnv != null) {
-            ret.parentEnv = this.parentEnv.clone();
-        }
+        ret.parentEnv = this.parentEnv;
         return ret;
     }
 

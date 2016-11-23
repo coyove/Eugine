@@ -29,7 +29,7 @@ import Cookie
     def this.hashString(text) =>
         Digest.hexSHA1(Digest.SHA256(text + Config.salt))
 
-    def this.struct (f, args...) => {
+    def this.struct (f, args...) => sync {
         f(args...)
         clone f
     }

@@ -45,7 +45,7 @@ public class PThread extends SExpression {
         }
 
         GoTask go = new GoTask();
-        go.closure = closure.clone();
+        go.closure = closure;
         go.env = env;
 
         Thread t = new Thread(go);

@@ -92,11 +92,8 @@ public class SEPrint extends SExpression {
     public SExpression deepClone() throws EgException {
         SEPrint ret = new SEPrint();
         ret.atom = this.atom;
-
-
         ret.delim = this.delim;
         ret.arguments = ListEx.deepClone(this.arguments);
-
         return ret;
     }
 }

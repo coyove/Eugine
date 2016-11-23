@@ -48,7 +48,6 @@ block returns [PChain v = new PChain()]
 stmt returns [SExpression v]
     : importStmt        { $v = ExecEnvironment.Null; }
     | enterStmt         { $v = $enterStmt.v; }
-    | syncStmt          { $v = $syncStmt.v; }
     | declareStmt       { $v = $declareStmt.v; }
     | defineStmt        { $v = $defineStmt.v; }
     | expr              { $v = $expr.v; }
@@ -316,7 +315,7 @@ unaryExpr returns [SExpression v]
         }
     | Not Right=postfixExpr
         {
-            $v = new SEReverse(new Atom($Not), ListEx.build($Right.v));
+            $v = new PNot(new Atom($Not), $Right.v);
         }
     | Op=('++' | '--') Left=unaryExpr
         {
@@ -449,6 +448,10 @@ expr returns [SExpression v]
     | Clone Subject=expr
         { 
             $v = new PClone(new Atom($Clone), $Subject.v); 
+        }
+    | Sync SyncBody=code 
+        { 
+            $v = new PSync(new Atom($Sync), $SyncBody.v); 
         }
     | Type Subject=expr
         { 

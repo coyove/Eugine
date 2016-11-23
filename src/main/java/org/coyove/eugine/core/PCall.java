@@ -177,19 +177,21 @@ public class PCall extends SExpression {
             this.arguments = body;
         }
 
+        Execute_Next_Closure:
         while (true) {
-
+            // Curry
             if (closure.argNames.size() > arguments.size()) {
-
                 ListEx<String> argNames = closure.argNames.skip(arguments.size());
                 ListEx<Boolean> passByValue = closure.passByValue.skip(arguments.size());
                 ListEx<SExpression> newArgs = new ListEx<SExpression>();
 
-                for (SValue v : arguments)
+                for (SValue v : arguments) {
                     newArgs.add(v);
+                }
 
-                for (String a : argNames)
+                for (String a : argNames) {
                     newArgs.add(new PVariable(atom, a));
+                }
 
                 PCall newBody = new PCall(atom, closure, newArgs);
                 ListEx<SExpression> body = new ListEx<SExpression>();
@@ -198,13 +200,13 @@ public class PCall extends SExpression {
                 return new SClosure(env, argNames, passByValue, body);
             }
 
+            // Prepare the environment
             ExecEnvironment newEnv = prepareEE(closure, arguments);
             newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
             newEnv.put("__atom__", new SObject(atom));
 
             if (closure.refer instanceof SClosure) {
-                SClosure refer = ((SClosure) closure.refer);
-                newEnv.put("this", refer);
+                newEnv.put("this", (SClosure) closure.refer);
                 newEnv.put("__this__", closure);
             } else {
                 newEnv.put("this", closure);
@@ -212,15 +214,15 @@ public class PCall extends SExpression {
 
             if (closure.outerEnv != null) {
                 if (closure.transparent) {
-                    newEnv = closure.outerEnv; //.cloneClosureAndConstOnly();
+                    newEnv = closure.outerEnv;
                 } else {
-                    newEnv.parentEnv = closure.outerEnv; //.cloneClosureAndConstOnly();
+                    newEnv.parentEnv = closure.outerEnv;
                 }
             }
 
+            // Execute the closure body
             SValue ret = ExecEnvironment.Null;
 
-            boolean flag = false;
             for (int i = 0; i < closure.body.size(); i++) {
                 SExpression se = closure.body.get(i);
                 if (i == closure.body.size() - 1) {
@@ -228,18 +230,14 @@ public class PCall extends SExpression {
                     if (tail.getRight() == continueState.TAIL_CALL) {
                         closure = tail.getLeft();
                         arguments = tail.getMiddle();
-                        flag = true;
-                        break;
+
+                        continue Execute_Next_Closure;
                     } else if (tail.getRight() == continueState.FALSE_NULL) {
                         return ExecEnvironment.Null;
                     }
                 }
 
                 ret = se.evaluate(newEnv);
-            }
-
-            if (flag) {
-                continue;
             }
 
             return ret;
@@ -250,15 +248,9 @@ public class PCall extends SExpression {
     public SExpression deepClone() throws EgException {
         PCall ret = new PCall();
         ret.atom = this.atom;
-
         ret.arguments = ListEx.deepClone(this.arguments);
         ret.expanded = this.expanded;
-
-        if (this.closureObject != null) {
-            ret.closureObject = this.closureObject.deepClone();
-        } else {
-            ret.closureObject = null;
-        }
+        ret.closureObject = this.closureObject.deepClone();
 
         return ret;
     }

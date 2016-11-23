@@ -30,7 +30,9 @@ public class SConcatString extends SString {
 
     @Override
     public SValue clone() {
-        return new SConcatString(this.texts.toArray(new String[texts.size()]));
+        SConcatString ret = new SConcatString(this.texts.toArray(new String[texts.size()]));
+        SValue.copyAttributes(ret, this);
+        return ret;
     }
 
     @Override

@@ -51,7 +51,6 @@ public class SClosure extends SValue {
         transparent = true;
     }
 
-    // This clone() is invoked by "(clone ...)"
     @Override
     public SValue clone() {
         try {

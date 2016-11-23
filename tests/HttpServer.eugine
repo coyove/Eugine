@@ -166,7 +166,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                 }
         }
 
-        if !context.method 
+        if context.method == null
             exit("invalid request (" + rawRequest + ")")
 
         var context.data = rawRequest[headerLength..]
