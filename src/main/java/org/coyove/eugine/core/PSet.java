@@ -41,6 +41,10 @@ public class PSet extends SExpression {
         SValue v = varValue.evaluate(env);
         SValue value = v;
 
+        if (v instanceof SString) {
+            value = v.clone();
+        }
+
         if (type == MUTABLE && v.immutable) {
             /**
              * (const b ...) (set a b)

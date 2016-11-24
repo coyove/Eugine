@@ -49,7 +49,7 @@ public class SENum extends SExpression {
                 return ExecEnvironment.Null;
             }
         } else if (arg instanceof SBool) {
-            return new SInt(arg == ExecEnvironment.True ? 1 : 0);
+            return new SInt((Boolean) ((SBool) arg).underlying ? 1 : 0);
         } else if (arg instanceof SNull) {
             return ExecEnvironment.Null;
         } else if (arg instanceof SList) {

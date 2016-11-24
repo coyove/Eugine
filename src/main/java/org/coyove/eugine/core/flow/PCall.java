@@ -1,12 +1,13 @@
-package org.coyove.eugine.core;
+package org.coyove.eugine.core.flow;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.coyove.eugine.base.ReplaceableVariable;
 import org.coyove.eugine.base.ReplaceableVariables;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.core.flow.PCond;
-import org.coyove.eugine.core.flow.PIf;
+import org.coyove.eugine.core.PList;
+import org.coyove.eugine.core.PSet;
+import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
@@ -23,7 +24,9 @@ public class PCall extends SExpression {
 
     private boolean expanded = false;
 
-    private enum continueState {CONTINUE, TAIL_CALL, FALSE_NULL}
+    private final static byte CONTINUE = 0;
+    private final static byte TAIL_CALL = 1;
+    private final static byte FALSE_NULL = 2;
 
     public PCall() {
     }
@@ -34,7 +37,7 @@ public class PCall extends SExpression {
         arguments = args == null ? new ListEx<SExpression>() : args;
     }
 
-    public static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws EgException {
+    private static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws EgException {
         ListEx<String> argNames = cls.argNames;
         ListEx<Boolean> passByValue = cls.passByValue;
         ExecEnvironment newEnv = new ExecEnvironment();
@@ -62,11 +65,11 @@ public class PCall extends SExpression {
         return newEnv;
     }
 
-    public Triple<SClosure, ListEx<SValue>, continueState>
+    private Triple<SClosure, ListEx<SValue>, Byte>
     getContinue(SExpression se, ExecEnvironment env) throws EgException {
         ListEx<SValue> retArgs = new ListEx<SValue>();
         SClosure retCls = null;
-        continueState ret = continueState.CONTINUE;
+        Byte ret = CONTINUE;
 
         if (se instanceof PCall) {
             PCall call = (PCall) se;
@@ -75,25 +78,25 @@ public class PCall extends SExpression {
             if (cls_ instanceof SClosure) {
                 retCls = (SClosure) cls_;
                 retArgs = SExpression.eval(call.arguments, env, atom);
-                ret = continueState.TAIL_CALL;
+                ret = TAIL_CALL;
             }
         } else if (se instanceof PIf) {
             PIf iif = (PIf) se;
-            ret = continueState.TAIL_CALL;
+            ret = TAIL_CALL;
 
             if (iif.evaluateCondition(env)) {
                 retCls = new SClosure(env, iif.trueBranch);
             } else if (iif.falseBranch != null) {
                 retCls = new SClosure(env, iif.falseBranch);
             } else {
-                ret = continueState.FALSE_NULL;
+                ret = FALSE_NULL;
             }
-        } else if (se instanceof PCond) {
-            PCond cond = (PCond) se;
+        } else if (se instanceof PSwitch) {
+            PSwitch cond = (PSwitch) se;
             SValue tester = cond.condition.evaluate(env);
             boolean flag = false;
 
-            ret = continueState.TAIL_CALL;
+            ret = TAIL_CALL;
 
             for (Branch b : cond.branches) {
                 if (b.recv.evaluate(env).equals(tester)) {
@@ -107,16 +110,16 @@ public class PCall extends SExpression {
                 if (cond.defaultBranch != null) {
                     retCls = new SClosure(env, cond.defaultBranch.body);
                 } else {
-                    ret = continueState.FALSE_NULL;
+                    ret = FALSE_NULL;
                 }
             }
         } else if (se instanceof PChain) {
             PChain chain = (PChain) se;
             if (chain.expressions.size() > 0) {
-                ret = continueState.TAIL_CALL;
+                ret = TAIL_CALL;
                 retCls = new SClosure(env, chain.expressions);
             } else {
-                ret = continueState.FALSE_NULL;
+                ret = FALSE_NULL;
             }
         }
 
@@ -141,8 +144,8 @@ public class PCall extends SExpression {
         SClosure closure = (SClosure) closure_;
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);
 
-        // expand the inline code to upper level
-        if (closure.inline && this.arguments.size() >= closure.argNames.size()) {
+        // Inline: expand the inline code to upper level
+        if (closure.isInline && this.arguments.size() >= closure.argNames.size()) {
             expanded = true;
             ListEx<SExpression> body = ListEx.deepClone(closure.body);
             if (closure.argNames.size() > 0) {
@@ -221,27 +224,63 @@ public class PCall extends SExpression {
             }
 
             // Execute the closure body
-            SValue ret = ExecEnvironment.Null;
+            if (closure.isCoroutine) {
+                return execCoroutine(closure, newEnv);
+            } else {
+                SValue ret = ExecEnvironment.Null;
 
-            for (int i = 0; i < closure.body.size(); i++) {
-                SExpression se = closure.body.get(i);
-                if (i == closure.body.size() - 1) {
-                    Triple<SClosure, ListEx<SValue>, continueState> tail = getContinue(se, newEnv);
-                    if (tail.getRight() == continueState.TAIL_CALL) {
-                        closure = tail.getLeft();
-                        arguments = tail.getMiddle();
+                for (int i = 0; i < closure.body.size(); i++) {
+                    SExpression se = closure.body.get(i);
 
-                        continue Execute_Next_Closure;
-                    } else if (tail.getRight() == continueState.FALSE_NULL) {
-                        return ExecEnvironment.Null;
+                    // TCO
+                    if (i == closure.body.size() - 1) {
+                        Triple<SClosure, ListEx<SValue>, Byte> tail = getContinue(se, newEnv);
+                        if (tail.getRight() == TAIL_CALL) {
+                            closure = tail.getLeft();
+                            arguments = tail.getMiddle();
+
+                            continue Execute_Next_Closure;
+                        } else if (tail.getRight() == FALSE_NULL) {
+                            return ExecEnvironment.Null;
+                        }
                     }
+
+                    ret = se.evaluate(newEnv);
                 }
 
-                ret = se.evaluate(newEnv);
+                return ret;
             }
-
-            return ret;
         }
+    }
+
+    private SValue execCoroutine(SClosure closure, ExecEnvironment env) throws EgException {
+        if (closure.coroutineState == SClosure.DEAD) {
+            throw new EgException(7062, "coroutine is dead", atom);
+        }
+
+        if (closure.coroutineState == SClosure.RUNNING) {
+
+        }
+
+        // First time
+        if (closure.dummyCoroutine == null) {
+            closure.dummyCoroutine = new PChain();
+            closure.dummyCoroutine.expressions = closure.body;
+        }
+
+        closure.coroutineState = SClosure.RUNNING;
+        SValue ret = closure.dummyCoroutine.evaluate(env);
+        closure.coroutineState = SClosure.SUSPENDED;
+
+        if (ret instanceof SYielded) {
+            return ((SValue) ret.underlying);
+        }
+
+        if (closure.dummyCoroutine.execToEnd) {
+            closure.coroutineState = SClosure.DEAD;
+        }
+
+        return ret;
     }
 
     @Override

@@ -54,42 +54,53 @@
 // println("listening on port ", Config.port)
 // server.start()
 
-def struct (f, args...) => {
-    f(args...)
-    clone f
+def coroutine foo(a) => {
+    println("hello ", a)
+    yield ()
+    println("hello ", a + 1)
+    yield 1
+    println("hello ", a + 2)
 }
 
-def [struct] st (a) => {
-    var this.map = {test: a}
+foo(1)
+foo(1)
 
-    def this.gg () => {
-        var tmp = sync doublize(this.map.test)
-        tmp.doo() + 0.5
-    }
+// // def struct (f, args...) => {
+// //     f(args...)
+// //     clone f
+// // }
 
-    def [struct] doublize(num) => {
-        var n = num
+// // def [struct] st (a) => {
+// //     var this.map = {test: a}
 
-        def this.doo() => {
-            double(n)
-        }
-    }
-}
+// //     def this.gg () => {
+// //         var tmp = sync doublize(this.map.test)
+// //         tmp.doo() + 0.5
+// //     }
 
-var p = "+"
+// //     def [struct] doublize(num) => {
+// //         var n = num
 
-def foo(a) => println(p + a.gg())
+// //         def this.doo() => {
+// //             double(n)
+// //         }
+// //     }
+// // }
 
-def bar(a, f) => {
-    sleep(Math.floor(Math.random(0) * 1000))
+// // var p = "+"
 
-    if a > 500 
-        p = "-"
+// // def foo(a) => println(p + a.gg())
 
-    var tmp = sync st(a)
-    f(tmp)
-}
+// // def bar(a, f) => {
+// //     sleep(Math.floor(Math.random(0) * 1000))
 
-for 0..1000 do (i) => {
-    bar#(i, foo)
-}
+// //     if a > 500 
+// //         p = "-"
+
+// //     var tmp = sync st(a)
+// //     f(tmp)
+// // }
+
+// // for 0..1000 do (i) => {
+// //     bar#(i, foo)
+// // }

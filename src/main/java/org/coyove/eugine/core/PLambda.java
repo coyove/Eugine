@@ -20,20 +20,24 @@ public class PLambda extends SExpression {
 
     public boolean inline;
 
+    public boolean coroutine;
+
     public PLambda() {
     }
 
     public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
-        this(ha, args, pass, b, "", false);
+        this(ha, args, pass, b, "", false, false);
     }
 
-    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b, String d, boolean i) {
+    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b,
+                   String d, boolean i, boolean c) {
         atom = ha;
         arguments = args;
         body = b;
         passByValue = pass;
         description = d;
         inline = i;
+        coroutine = c;
     }
 
     @Override
@@ -41,7 +45,8 @@ public class PLambda extends SExpression {
         SClosure cls = new SClosure(env, arguments, passByValue, body, description);
         cls.immutable = true;
         cls.doc = description;
-        cls.inline = inline;
+        cls.isInline = inline;
+        cls.isCoroutine = coroutine;
         return cls;
     }
 

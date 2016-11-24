@@ -6,6 +6,10 @@ import org.coyove.eugine.base.SValue;
  * Created by coyove on 2016/9/9.
  */
 public class SString extends SValue {
+    public SString() {
+        // Only used by SConcatString
+    }
+
     public SString(String str) {
         super(str);
     }

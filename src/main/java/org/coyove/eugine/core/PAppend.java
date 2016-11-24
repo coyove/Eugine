@@ -33,7 +33,7 @@ public class PAppend extends SExpression {
         SValue right = this.right.evaluate(env);
 
         if (left instanceof SConcatString) {
-            if (right != ExecEnvironment.Null) {
+            if (!(right instanceof SNull)) {
                 if (right instanceof SConcatString) {
                     ((SConcatString) left).texts.addAll(((SConcatString) right).texts);
                 } else {
@@ -45,7 +45,7 @@ public class PAppend extends SExpression {
         }
 
         if (left instanceof SString) {
-            if (right != ExecEnvironment.Null) {
+            if (!(right instanceof SNull)) {
                 String text = left.get();
                 if (right instanceof SConcatString) {
                     left.underlying = text + right.<String>get();

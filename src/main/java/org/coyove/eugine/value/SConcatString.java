@@ -17,6 +17,10 @@ public class SConcatString extends SString {
         texts.addAll(Arrays.asList(text));
     }
 
+    public SConcatString() {
+        super();
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T> T get() {
@@ -29,8 +33,10 @@ public class SConcatString extends SString {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SValue clone() {
-        SConcatString ret = new SConcatString(this.texts.toArray(new String[texts.size()]));
+        SConcatString ret = new SConcatString();
+        ret.texts = (ListEx<String>) this.texts.clone();
         SValue.copyAttributes(ret, this);
         return ret;
     }

@@ -2,13 +2,12 @@ package org.coyove.eugine.core.flow;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 /**
  * Created by coyove on 2016/9/10.
  */
-public class PCond extends SExpression {
+public class PSwitch extends SExpression {
     @ReplaceableVariable
     public SExpression condition;
 
@@ -16,9 +15,9 @@ public class PCond extends SExpression {
 
     public Branch defaultBranch = null;
 
-    public PCond() {}
+    public PSwitch() {}
 
-    public PCond(Atom ha, SExpression condition, ListEx<Branch> branches, Branch db) {
+    public PSwitch(Atom ha, SExpression condition, ListEx<Branch> branches, Branch db) {
         atom = ha;
 
         this.condition = condition;
@@ -62,7 +61,7 @@ public class PCond extends SExpression {
 
     @Override
     public SExpression deepClone() throws EgException {
-        PCond ret = new PCond();
+        PSwitch ret = new PSwitch();
         ret.atom = this.atom;
         ret.condition = this.condition.deepClone();
 

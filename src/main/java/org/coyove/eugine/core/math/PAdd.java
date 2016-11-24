@@ -34,7 +34,7 @@ public class PAdd extends SExpression {
         SValue right = this.right.evaluate(env);
 
         if (left instanceof SConcatString) {
-            if (right != ExecEnvironment.Null) {
+            if (!(right instanceof SNull)) {
                 ListEx<String> t = ((SConcatString) left).texts;
                 SConcatString ret = new SConcatString(t.toArray(new String[t.size()]));
 
@@ -51,7 +51,7 @@ public class PAdd extends SExpression {
         }
 
         if (left instanceof SString) {
-            if (right != ExecEnvironment.Null) {
+            if (!(right instanceof SNull)) {
                 if (right instanceof SConcatString) {
                     SConcatString ret = new SConcatString(left.underlying.toString());
                     ret.texts.addAll(((SConcatString) right).texts);

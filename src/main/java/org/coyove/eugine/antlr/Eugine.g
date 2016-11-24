@@ -141,7 +141,7 @@ defineStmt returns [SExpression v]
         ListEx<SExpression> body = new ListEx<SExpression>(),
         ListEx<SExpression> decorators = new ListEx<SExpression>()
     ]
-    : Def Inline?
+    : Def Inline? Coroutine?
         ('[' Decorator=expr argumentsList? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
@@ -151,6 +151,7 @@ defineStmt returns [SExpression v]
             Atom a = new Atom($Get.start);
             SExpression closure = $Lambda.v;
             ((PLambda) closure).inline = $Inline != null;
+            ((PLambda) closure).coroutine = $Coroutine != null;
 
             for (SExpression d : $decorators) {
                 closure = new PCall(a, d, ListEx.build(closure));
@@ -177,7 +178,7 @@ lambdaStmt returns [PLambda v]
             }
 
             $v = new PLambda(new Atom($definitionsList.start), $definitionsList.v, $definitionsList.passByValue,
-                $body, $Description == null ? "" : $Description.text, false);
+                $body, $Description == null ? "" : $Description.text, false, false);
         }
     ;
 
@@ -199,7 +200,7 @@ switchStmt returns [SExpression v]
         }
     })* '}'
         {
-            $v = new PCond(new Atom($Switch), $Condition.v, $branches, $db);
+            $v = new PSwitch(new Atom($Switch), $Condition.v, $branches, $db);
         }
     ;
 
@@ -453,19 +454,17 @@ expr returns [SExpression v]
         { 
             $v = new PSync(new Atom($Sync), $SyncBody.v); 
         }
+    | Yield (Yielded=expr | '(' ')')
+        { 
+            $v = new PYield(new Atom($Yield), $Yielded.start != null ? $Yielded.v : ExecEnvironment.Null); 
+        }
     | Type Subject=expr
         { 
             $v = new PType(new Atom($Type), $Subject.v, PType.TYPE.TYPE); 
         }
     | For Subject=expr Do Body=expr
         {
-            if (SConfig.strictForLoop) {
-                $v = new PForStrict(new Atom($For), $Subject.v, $Body.v, 
-                    $For.text.equals("for") ? PFor.DIRECTION.ASC : PFor.DIRECTION.DESC); 
-            } else {
-                $v = new PFor(new Atom($For), $Subject.v, $Body.v, 
-                    $For.text.equals("for") ? PFor.DIRECTION.ASC : PFor.DIRECTION.DESC); 
-            }
+            $v = new PFor(new Atom($For), $Subject.v, $Body.v, $For.text.equals("for") ? PFor.ASC : PFor.DESC); 
         }
     | For Start=expr (',' Next=expr)? ('..' | '...') End=expr Do Body=expr
         {
@@ -476,11 +475,7 @@ expr returns [SExpression v]
                     $End.v
                 ));
 
-            if (SConfig.strictForLoop) {
-                $v = new PForStrict(atom, r, $Body.v, PFor.DIRECTION.ASC); 
-            } else {
-                $v = new PFor(atom, r, $Body.v, PFor.DIRECTION.ASC); 
-            }
+            $v = new PFor(atom, r, $Body.v, PFor.ASC); 
         }
     | If Condition=expr True=code (Else False=code)?
         {

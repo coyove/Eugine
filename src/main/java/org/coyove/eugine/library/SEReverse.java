@@ -41,7 +41,7 @@ public class SEReverse extends SExpression {
         } else if (subject instanceof SDouble) {
             return new SDouble(-((SDouble) subject).val());
         } else if (subject instanceof SBool) {
-            return subject == ExecEnvironment.True ? ExecEnvironment.False : ExecEnvironment.True;
+            return Utils.isBooleanTrue(subject) ? ExecEnvironment.False : ExecEnvironment.True;
         } else {
             return Utils.castBoolean(subject, atom) ? ExecEnvironment.False : ExecEnvironment.True;
         }

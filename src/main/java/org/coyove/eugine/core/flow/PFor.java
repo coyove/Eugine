@@ -17,13 +17,16 @@ public class PFor extends SExpression {
     @ReplaceableVariable
     private SExpression body;
 
-    private DIRECTION direction;
-    public enum DIRECTION {ASC, DESC}
+    private byte direction;
+
+    public final static byte ASC = 0;
+
+    public final static byte DESC = 1;
 
     public PFor() {
     }
 
-    public PFor(Atom ha, SExpression l, SExpression b, DIRECTION dir) {
+    public PFor(Atom ha, SExpression l, SExpression b, byte dir) {
         atom = ha;
         list = l;
         body = b;
@@ -31,34 +34,53 @@ public class PFor extends SExpression {
     }
 
     private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
-        ExecEnvironment env = body.outerEnv;
-        SValue[] olds = new SValue[2];
-        String name1 = "";
-        String name2 = "";
+        ExecEnvironment env = SConfig.strictForLoop ? new ExecEnvironment() : body.outerEnv;
+        SValue[] olds = null;
+        String name1 = null;
+        String name2 = null;
 
-        if (body.argNames.size() >= 1) {
-            name1 = body.argNames.head();
-            olds[0] = env.bGet(name1);
-            env.bPut(name1, v);
-        }
+        if (SConfig.strictForLoop) {
+            if (body.argNames.size() >= 1) {
+                env.put(body.argNames.head(), v);
+            }
 
-        if (body.argNames.size() >= 2) {
-            name2 = body.argNames.get(1);
-            olds[1] = env.bGet(name2);
-            env.bPut(name2, idx);
+            if (body.argNames.size() >= 2) {
+                env.put(body.argNames.get(1), idx);
+            }
+
+            env.parentEnv = body.outerEnv;
+        } else {
+            olds = new SValue[2];
+
+            if (body.argNames.size() >= 1) {
+                name1 = body.argNames.head();
+                olds[0] = env.bGet(name1);
+                env.bPut(name1, v);
+            }
+
+            if (body.argNames.size() >= 2) {
+                name2 = body.argNames.get(1);
+                olds[1] = env.bGet(name2);
+                env.bPut(name2, idx);
+            }
         }
 
         SValue ret = ExecEnvironment.Null;
         for (SExpression se : body.body) {
             ret = se.evaluate(env);
+            if (ret instanceof SYielded) {
+
+            }
         }
 
-        if (olds[0] != null) {
-            env.bPut(name1, olds[0]);
-        }
+        if (!SConfig.strictForLoop) {
+            if (olds[0] != null) {
+                env.bPut(name1, olds[0]);
+            }
 
-        if (olds[1] != null) {
-            env.bPut(name2, olds[1]);
+            if (olds[1] != null) {
+                env.bPut(name2, olds[1]);
+            }
         }
 
         return ret;
@@ -76,45 +98,41 @@ public class PFor extends SExpression {
 
         if (_list instanceof SDict) {
             HashMap<String, SValue> m = ((SDict) _list).get();
+            String[] keys = m.keySet().toArray(new String[m.size()]);
 
-            for (String s : m.keySet()) {
-                if (execLoop(body, new SString(s), m.get(s)) == ExecEnvironment.False) {
+            for (int i = 0; i < keys.length; i++) {
+                if (Utils.checkExit(execLoop(body, new SString(keys[i]), m.get(keys[i])))) {
                     break;
                 }
             }
         } else if (_list instanceof SList) {
             ListEx<SExpression> values = ((SList) _list).get();
 
-            if (direction == DIRECTION.ASC) {
+            if (direction == ASC) {
                 for (int i = 0; i < values.size(); i++) {
-                    if (execLoop(body, values.get(i).evaluate(env), new SInt(i)) ==
-                            ExecEnvironment.False) {
+                    if (Utils.checkExit(execLoop(body, values.get(i).evaluate(env), new SInt(i)))) {
                         break;
                     }
                 }
             } else {
                 for (int i = values.size() - 1; i >= 0; i--) {
-                    if (execLoop(body, values.get(i).evaluate(env), new SInt(i)) ==
-                            ExecEnvironment.False) {
+                    if (Utils.checkExit(execLoop(body, values.get(i).evaluate(env), new SInt(i)))) {
                         break;
                     }
                 }
             }
         } else if (_list instanceof SBool) {
             long i = 0;
-            while (this.list.evaluate(env) == ExecEnvironment.True) {
-                if (execLoop(body, ExecEnvironment.Null, new SLong(i++)) == ExecEnvironment.False) {
+            while (Utils.isBooleanTrue(this.list.evaluate(env))) {
+                if (Utils.checkExit(execLoop(body, ExecEnvironment.Null, new SLong(i++)))) {
                     break;
                 }
             }
         } else if (_list instanceof SRange) {
             SRange r = (SRange) _list;
-            int i = r.start;
-
-            while (i < r.end) {
+            for (int i = r.start; i < r.end; i += r.interval) {
                 SValue ret = execLoop(body, new SInt(i), new SInt(i));
-                i += r.interval;
-                if (ret == ExecEnvironment.False) {
+                if (Utils.checkExit(ret)) {
                     break;
                 }
             }

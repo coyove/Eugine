@@ -40,23 +40,27 @@ public class PGet extends SExpression {
 
             HashMap<String, SValue> d = dict.get();
 
-            if (!d.containsKey(k)) {
+            SValue dk = d.get(k);
+            if (dk == null) {
                 d.put(k, ExecEnvironment.Null);
+                dk = new SNull();
+            } else {
+                dk = Utils.denormalize(dk);
             }
 
-            SValue dk = d.get(k).evaluate(env);
             dk.refer = Utils.cast(dict, SDict.class);
             dk.refKey = k;
 
             return dk;
         } else if (dict instanceof SList) {
-            ListEx<SExpression> l = dict.get();
+            ListEx<SValue> l = dict.get();
             int idx = Utils.castInt(sk, atom);
 
-            if (idx >= l.size() || idx < 0)
+            if (idx >= l.size() || idx < 0) {
                 throw new EgException(2021, "index out of range", atom);
+            }
 
-            SValue li = l.get(idx).evaluate(env);
+            SValue li = Utils.denormalize(l.get(idx));
 
             li.refer = Utils.cast(dict, SList.class);
             li.refIndex = idx;
@@ -87,7 +91,9 @@ public class PGet extends SExpression {
             } else {
                 SValue ret = ((SClosure) dict).extra.get(k);
                 if (ret == null) {
-                    ret = ExecEnvironment.Null;
+                    ret = new SNull();
+                } else {
+                    ret = Utils.denormalize(ret);
                 }
 
                 ret.refer = dict;

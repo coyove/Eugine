@@ -59,9 +59,23 @@ public final class Utils {
         }
     }
 
-    public static boolean castBoolean(SValue num, Atom headAtom) {
+    public static SValue denormalize(SValue v) {
+        if (v == ExecEnvironment.True) {
+            return new SBool(true);
+        } else if (v == ExecEnvironment.False) {
+            return new SBool(false);
+        } else if (v == ExecEnvironment.Null) {
+            return new SNull();
+        } else {
+            return v;
+        }
+    }
+
+    public static boolean castBoolean(SValue num, Atom headAtom) throws EgException {
         if (num instanceof SLong) {
             return ((SLong) num).val() != 0;
+        } else if (num instanceof SInt) {
+            return ((SInt) num).val() != 0;
         } else if (num instanceof SDouble) {
             return Math.abs(((SDouble) num).val()) > 1e-6;
         } else if (num instanceof SBool) {
@@ -71,8 +85,7 @@ public final class Utils {
         } else if (num instanceof SString) {
             return !num.<String>get().isEmpty();
         } else {
-            ErrorHandler.print(4008, num + " is not a boolean", headAtom);
-            return false;
+            throw new EgException(4008, num + " is not a boolean", headAtom);
         }
     }
 
@@ -249,5 +262,29 @@ public final class Utils {
 
     public static <T> void quickSort(T[] arr, Comparator<T> comp) {
         quickSort(arr, 0, arr.length - 1, comp);
+    }
+
+    public static boolean checkExit(SValue v) {
+        if (v == ExecEnvironment.False) {
+            return true;
+        }
+
+        return v instanceof SBool && !((Boolean) v.underlying);
+    }
+
+    public static boolean isBooleanTrue(SValue v) {
+        if (v == ExecEnvironment.True) {
+            return true;
+        }
+
+        if (v == ExecEnvironment.False) {
+            return false;
+        }
+
+        if (v instanceof SBool) {
+            return (Boolean) v.underlying;
+        }
+
+        return false;
     }
 }

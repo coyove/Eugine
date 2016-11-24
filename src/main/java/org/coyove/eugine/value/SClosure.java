@@ -3,6 +3,7 @@ package org.coyove.eugine.value;
 import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.core.flow.PChain;
 import org.coyove.eugine.util.*;
 
 /**
@@ -10,14 +11,35 @@ import org.coyove.eugine.util.*;
  */
 public class SClosure extends SValue {
     public ExecEnvironment outerEnv;
+
     public ListEx<String> argNames;
+
     public ListEx<Boolean> passByValue;
+
     public ListEx<SExpression> body;
+
     public ExecEnvironment extra;
+
     public SClosure proto;
+
     public String doc = "";
+
+    // Used by TCO
     public boolean transparent = false;
-    public boolean inline = false;
+
+    public boolean isInline = false;
+
+    public boolean isCoroutine = false;
+
+    public volatile byte coroutineState = SUSPENDED;
+
+    public final static byte SUSPENDED = 0;
+
+    public final static byte RUNNING = 1;
+
+    public final static byte DEAD = 2;
+
+    public PChain dummyCoroutine = null;
 
     public SClosure(ExecEnvironment env, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
         super(b);
