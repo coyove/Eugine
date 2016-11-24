@@ -1,6 +1,7 @@
 package org.coyove.eugine.core.flow;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -17,11 +18,19 @@ public class PFor extends SExpression {
     @ReplaceableVariable
     private SExpression body;
 
+    private SClosure cachedClosure = null;
+
     private byte direction;
 
     public final static byte ASC = 0;
 
     public final static byte DESC = 1;
+
+    private int lastExecPointInForLoop = 0;
+
+    private ExecEnvironment lastExecEnvInForLoop = null;
+
+    private ListEx<SExpression> lastExecForLoop = null;
 
     public PFor() {
     }
@@ -66,12 +75,15 @@ public class PFor extends SExpression {
         }
 
         SValue ret = ExecEnvironment.Null;
-        for (SExpression se : body.body) {
-            ret = se.evaluate(env);
-            if (ret instanceof SYielded) {
 
-            }
+//        if (SConfig.strictForLoop) {
+
+//        } else {
+        for (int i = 0; i < body.body.size(); i++) {
+            SExpression se = body.body.get(i);
+            ret = se.evaluate(env);
         }
+//        }
 
         if (!SConfig.strictForLoop) {
             if (olds[0] != null) {
@@ -88,12 +100,24 @@ public class PFor extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue _body = this.body.evaluate(env);
-        if (!(_body instanceof SClosure)) {
-            throw new EgException(2017, "invalid loop body", atom);
+        SValue _body;
+        SClosure body;
+
+        if (this.cachedClosure != null) {
+            body = this.cachedClosure;
+        } else {
+            _body = this.body.evaluate(env);
+            if (!(_body instanceof SClosure)) {
+                throw new EgException(2017, "invalid loop body", atom);
+            }
+
+            if (this.body instanceof PLambda) {
+                this.cachedClosure = (SClosure) _body;
+            }
+
+            body = ((SClosure) _body);
         }
 
-        SClosure body = ((SClosure) _body);
         SValue _list = this.list.evaluate(env);
 
         if (_list instanceof SDict) {
@@ -150,6 +174,10 @@ public class PFor extends SExpression {
         ret.list = this.list.deepClone();
         ret.body = this.body.deepClone();
         ret.direction = this.direction;
+
+        if (this.cachedClosure != null) {
+            ret.cachedClosure = ((SClosure) this.cachedClosure.clone());
+        }
 
         return ret;
     }

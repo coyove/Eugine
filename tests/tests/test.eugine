@@ -33,7 +33,7 @@ Debug.start()
 // // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
 
 
-var N = 1600
+var N = 1000
 var Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
 var invN = 2.0/N
 for 0..N do (i) => { 
