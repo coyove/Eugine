@@ -1,69 +1,77 @@
-// import Utils
-// import HttpServer
-// import Template
+import Utils
+import HttpServer
+import Template
 
-// (def Config() => {
-//     var this.port = 8080
-//     var this.socketReadTimeout = 5000
+(def Config() => {
+    var this.port = 8080
+    var this.socketReadTimeout = 5000
 
-//     var this.siteName = "Test Site"
-//     var this.salt = "test salt"
+    var this.siteName = "Test Site"
+    var this.salt = "test salt"
 
-//     var this.openPost = false
-// })()
+    var this.openPost = false
+})()
 
-// var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
+var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
 
-// def errorHandler(ctx, msg) => {
-// 	ctx.writeCommon(200, "html")
-//     ctx.eoh()
-//     ctx.write(Template.error(msg))
-// }
+Util.makeDir(__path__ + "/data")
 
-// server.addRouter("GET", "_/", (context) => {
-//     context.writeCommon(200, "html")
-//     context.eoh()
-//     context.write(context.cookies.uid)
-//     context.write(Template.index())
-// })
-
-// server.addRouter("POST", "_/new", (context) => enter {
-// 	var uid = context.cookies.uid
-// 	var name = Cookie.get(uid)
-
-// 	if !name
-// 		if Config.openPost {
-// 			uid = Cookie.newCookie()
-// 			name = Cookie.get(uid)
-// 		} else 
-// 			exit(1)
-
-//     context.writeCommon(302, "html")
-//     context.writeHeader("Location", "/")
-//     context.writeCookie("uid", uid, { Expires: 86400 * 365 })
-//     context.eoh()
-
-//     for context.postParams do (k) =>
-//         println(k, "=", context.postParams[k])
-// } catch (e) {
-// 	switch __e__ do {
-// 		1 => errorHandler(context, "无效cookie")
-// 	}
-// })
-
-// println("listening on port ", Config.port)
-// server.start()
-
-def coroutine foo(a) => {
-    println("hello ", a)
-    yield ()
-    println("hello ", a + 1)
-    yield 1
-    println("hello ", a + 2)
+def errorHandler(ctx, msg) => {
+	ctx.writeCommon(200, "html")
+    ctx.eoh()
+    ctx.write(Template.error(msg))
 }
 
-foo(1)
-foo(1)
+server.addRouter("GET", "_/", (context) => {
+    context.writeCommon(200, "html")
+    context.eoh()
+    context.write(context.cookies.uid)
+    context.write(Template.index())
+})
+
+server.addRouter("POST", "/new/", (context) => enter {
+	var uid = context.cookies.uid
+	var name = Cookie.get(uid)
+
+	if !name
+		if Config.openPost {
+			uid = Cookie.newCookie()
+			name = Cookie.get(uid)
+		} else 
+			exit(1)
+
+    var rid = num(context.route[5..])
+    if rid == null
+        exit(2)
+
+    context.writeCommon(302, "html")
+    context.writeHeader("Location", "/")
+    context.writeCookie("uid", uid, { Expires: 86400 * 365 })
+    context.eoh()
+
+    var name    = context.postParams.name
+    var options = context.postParams.options
+    var subject = context.postParams.subject
+    var comment = context.postParams.comment
+
+    if len(comment) < 4 exit(30)
+    if !name name = "匿名"
+    if !subject subject = "无标题"
+        
+    if options {
+
+    }
+
+} catch (e) {
+	switch __e__ do {
+		1 => errorHandler(context, "无效Cookie")
+        2 => errorHandler(context, "无效Id")
+        30 => errorHandler(context, "正文内容过短（最少4字）")
+	}
+})
+
+println("listening on port ", Config.port)
+server.start()
 
 // // def struct (f, args...) => {
 // //     f(args...)

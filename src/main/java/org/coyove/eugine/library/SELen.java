@@ -28,12 +28,10 @@ public class SELen extends SExpression {
             return new SInt(obj.<String>get().length());
         } else if (obj instanceof SList) {
             return new SInt(obj.<ListEx<SValue>>get().size());
+        } else if (obj.get() instanceof byte[]) {
+            byte[] buf = obj.get();
+            return new SInt(buf.length);
         } else {
-            if (obj.get() instanceof byte[]) {
-                byte[] buf = obj.get();
-                return new SInt(buf.length);
-            }
-
             return new SInt(0);
         }
     }

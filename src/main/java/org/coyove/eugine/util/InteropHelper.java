@@ -9,6 +9,7 @@ import org.coyove.eugine.value.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -151,6 +152,8 @@ public class InteropHelper {
                         c = ClassUtils.getClass("double");
                     } else if (value instanceof SBool) {
                         c = ClassUtils.getClass("boolean");
+                    } else if (value instanceof SObject) {
+                        c = value.underlying.getClass();
                     } else {
                         throw new EgException("cannot guess the type");
                     }

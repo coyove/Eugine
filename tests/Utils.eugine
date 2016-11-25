@@ -11,6 +11,14 @@ import Cookie
     def this.decodeURI (text) => 
         javaURLDecoder::decode(text : String, "utf-8" : String)
 
+    def this.makeDir (path) => {
+        var p = (static java/nio/file/Paths)::get(path, []: java/lang/String...)
+        
+        if !File.exists(path) 
+            (static java/nio/file/Files):>createDirectories(p: java/nio/file/Path, 
+                []: java/nio/file/attribute/FileAttribute...)
+    }
+
     def this.startsWith (text, prefix) =>
         if len(text) < len(prefix)
             false
