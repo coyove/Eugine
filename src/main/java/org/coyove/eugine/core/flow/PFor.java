@@ -44,7 +44,8 @@ public class PFor extends SExpression {
 
     private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
         ExecEnvironment env = SConfig.strictForLoop ? new ExecEnvironment() : body.outerEnv;
-        SValue[] olds = null;
+        SValue old1 = null;
+        SValue old2 = null;
         String name1 = null;
         String name2 = null;
 
@@ -59,17 +60,15 @@ public class PFor extends SExpression {
 
             env.parentEnv = body.outerEnv;
         } else {
-            olds = new SValue[2];
-
             if (body.argNames.size() >= 1) {
                 name1 = body.argNames.head();
-                olds[0] = env.bGet(name1);
+                old1 = env.bGet(name1);
                 env.bPut(name1, v);
             }
 
             if (body.argNames.size() >= 2) {
                 name2 = body.argNames.get(1);
-                olds[1] = env.bGet(name2);
+                old2 = env.bGet(name2);
                 env.bPut(name2, idx);
             }
         }
@@ -86,12 +85,12 @@ public class PFor extends SExpression {
 //        }
 
         if (!SConfig.strictForLoop) {
-            if (olds[0] != null) {
-                env.bPut(name1, olds[0]);
+            if (old1 != null) {
+                env.bPut(name1, old1);
             }
 
-            if (olds[1] != null) {
-                env.bPut(name2, olds[1]);
+            if (old2 != null) {
+                env.bPut(name2, old2);
             }
         }
 
@@ -103,9 +102,9 @@ public class PFor extends SExpression {
         SValue _body;
         SClosure body;
 
-        if (this.cachedClosure != null) {
-            body = this.cachedClosure;
-        } else {
+//        if (this.cachedClosure != null) {
+//            body = this.cachedClosure;
+//        } else {
             _body = this.body.evaluate(env);
             if (!(_body instanceof SClosure)) {
                 throw new EgException(2017, "invalid loop body", atom);
@@ -116,7 +115,7 @@ public class PFor extends SExpression {
             }
 
             body = ((SClosure) _body);
-        }
+//        }
 
         SValue _list = this.list.evaluate(env);
 

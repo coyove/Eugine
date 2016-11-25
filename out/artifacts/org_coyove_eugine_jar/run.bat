@@ -1,1 +1,1 @@
-java -Xmx4g -XX:+TieredCompilation -XX:+AggressiveOpts -Dfile.encoding=utf-8 -cp "*;org.coyove.eugine.jar" org.coyove.test.main %1
+java -Xmx4g -XX:+UnlockDiagnosticVMOptions -XX:CompileCommand=print,org.coyove.eugine.core.flow.PFor.evaluate -XX:+TieredCompilation -XX:+AggressiveOpts -Dfile.encoding=utf-8 -cp "*;org.coyove.eugine.jar" org.coyove.test.main %1

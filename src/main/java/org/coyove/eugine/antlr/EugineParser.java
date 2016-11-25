@@ -11,13 +11,17 @@ import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.parser.Atom;
+import java.util.HashMap;
 import org.apache.commons.lang3.ClassUtils;
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class EugineParser extends Parser {
