@@ -1,0 +1,119 @@
+* {
+    -ms-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    font: normal 14px Arial, "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
+    line-height: 1.2;
+    padding: 0 10px;
+    background: #f0eeee;
+}
+
+hr {
+    border: dotted 1px #aaa;
+}
+
+a {
+    text-decoration:none;
+    color:#54638c;
+}
+
+a:hover, a *:hover {
+    color:#880088;
+}
+
+a[grey] {
+    color: #888;
+}
+
+a[grey]:hover {
+    color: #00207a;
+    text-decoration: none;
+}
+
+form#start-new, form#reply {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+form table {
+    width: 100%;
+}
+
+input[type=text], textarea {
+    width: 100%;
+}
+
+span[gray] {
+    color: #aaa;
+}
+
+pre, code {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    margin-bottom: 6px;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background: #f0ebe4;
+    height: 100%;
+}
+
+div.thread, div.reply {
+    padding: 4px;
+}
+
+div.reply {
+    padding-left: 32px 
+}
+
+div.omitted {
+    padding: 4px;
+    text-align: center;
+    color: cadetblue;
+    font-size: 12px;
+    border-top: dashed 1px #aaa;
+}
+
+div.bar {
+    padding: 4px;
+    margin: -4px;
+    background: #dad4cc;
+}
+
+div.reply div.bar {
+    margin-left: -32px;
+    padding-left: 32px;
+    background: #e7e4de;
+}
+
+div.bar > span {
+    display: inline-block;
+    margin: 2px 4px;
+}
+
+span.subject {
+    font-weight: bold;
+    color: #cc1105;
+}
+
+span.name {
+    font-weight: bold;
+    color: darkgreen;
+}
+
+div.comment {
+    margin-top: 10px;
+    padding: 2px;
+}
