@@ -11,6 +11,8 @@ import Thread
     var this.salt = "test salt"
 
     var this.openPost = true
+    var this.repliesDisplayedInTimeline = 10
+    var this.threadsPerPage = 20
 
     (def I18n() => {
         var INVALID_THREAD_ID = "无效串Id"
@@ -23,7 +25,9 @@ Util.makeDir((dataPath = __path__ + "/data/"))
 Util.makeFile((counterPath = __path__ + "/data/counter"), 0)
 Util.makeFile((timelinePath = __path__ + "/data/timeline"), "")
 
-File.write(__path__ + "/data/counter", "0") //test
+// File.write(counterPath, "0") //test
+// File.write(timelinePath, "")
+Util.deleteAllCache()
 
 def errorHandler(ctx, msg) => {
     ctx.writeCommon(200, "html")
@@ -31,11 +35,13 @@ def errorHandler(ctx, msg) => {
     ctx.write(Template.error(msg))
 }
 
+server.addRouter("GET", "/assets/", (ctx) => ctx.serveFile(__path__ + ctx.route))
+
 server.addRouter("GET", "_/", (context) => {
-    context.writeCommon(200, "html")
-    context.eoh()
-    context.write(context.cookies.uid)
-    context.write(Template.index())
+    if !File.exists((var page = dataPath + "1.html"))
+        Util.rebuildPage(1)
+
+    context.serveFile(page)
 })
 
 server.addRouter("GET", "/thread/", (context) => {
@@ -48,9 +54,15 @@ server.addRouter("GET", "/thread/", (context) => {
             context.notFound()            
         } else {
             var thread = Thread(File.read(threadPath))
-            context.writeCommon(200, "html")
-            context.eoh()
-            context.write(Template.thread(thread))
+            if thread.main.parent != 0 {
+                context.writeCommon(302, "html")
+                context.writeHeader("Location", "/thread/" + thread.main.parent + "#thread-" + tid)
+                context.eoh()
+            } else {
+                context.writeCommon(200, "html")
+                context.eoh()
+                context.write(Template.thread(thread))
+            }
         }
     }
 })
@@ -88,8 +100,8 @@ server.addRouter("POST", "/new/", (context) => enter {
             var repliedPath = dataPath + rid / 1000 + "/" + rid
             if !File.exists(repliedPath) exit(42)
 
-            var repliedThreadRaw = File.read(repliedPath)
-            replyTo.from(repliedThreadRaw)
+            var repliedThreadRaw = File.readLines(repliedPath)
+            replyTo.from(repliedThreadRaw[0])
 
             if replyTo.parent != 0 exit(40)
             if Bit.and(replyTo.state, ThreadState.LOCKED) exit(41)
@@ -107,18 +119,29 @@ server.addRouter("POST", "/new/", (context) => enter {
         var post.uid = uname
         var post.ip = context.ip
         var postRaw = post.toString()
+        File.write(path + "/" + id, postRaw)
+
+        var timeline = File.readLines(timelinePath)
 
         if rid == 0 {
-            var timeline = File.readLines(timelinePath)
-            List.insert(timeline, 0, postRaw)
-            File.write(timelinePath, timeline)
-            File.write(path + "/" + id, postRaw)
+            List.insert(timeline, 0, str(id))
             var redirectTo = "/"
         } else {
-            repliedThreadRaw += "\n" + postRaw
+            repliedThreadRaw <+ postRaw
             File.write(repliedPath, repliedThreadRaw)
+
+            var srid = str(rid)
+            for timeline do (item, idx) => if item == srid {
+                del(timeline, idx)
+                List.insert(timeline, 0, srid)
+                false // break
+            }
+
             var redirectTo = "/thread/" + rid
         }
+
+        File.write(timelinePath, timeline)
+        Util.deleteAllCache()
     }
 
     context.writeCommon(302, "html")

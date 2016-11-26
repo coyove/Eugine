@@ -159,6 +159,11 @@ public class SKeywords {
                         return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.WRITE);
                     }
                 });
+                put("File.delete", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.DELETE);
+                    }
+                });
                 put("File.append", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.APPEND);
@@ -262,6 +267,11 @@ public class SKeywords {
                 put("String.split", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SESplit(new Atom(tok), c);
+                    }
+                });
+                put("String.join", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEJoin(new Atom(tok), c);
                     }
                 });
                 put("String.replace", new CallableKeyword() {

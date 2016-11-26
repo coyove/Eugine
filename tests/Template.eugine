@@ -6,6 +6,8 @@
     <meta name='referrer' content='origin'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <link href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAKlBMVEVLWX3///9seJVyfZlaZ4heaopUYYS8wc7b3uVjb47x8vXT1t96hJ/8/Pwv3cUDAAAAOklEQVR4XmOgH5hsDAZmcIFGQTAQxy2wEV3AxcVHUDA0NIABDhiYBAUZGBhGrADnRSm0cGZLYKAeAABwbwqMNFT1HQAAAABJRU5ErkJggg==' rel='icon' type='image/x-icon'>
+    <link rel='stylesheet' type='text/css' href='/assets/style.css'>
+    <script type='text/javascript' src='/assets/main.js'></script>
     <title>" + title + " | " + Config.siteName + @"</title>
 </head>
 <body>
@@ -15,9 +17,9 @@
     </div>
 </body>"
 
-    def _post(action, fields) => {
+    def _post(id, action, fields) => {
         var ret = @"
-<form action='" + action + @"' method='post'>
+<form action='" + action + "' id='" + id + @"' method='post'>
     <table>"
         for fields do (f) => 
             ret <+ ("<tr><td>" + f.text + "</td><td>" + ({
@@ -36,10 +38,20 @@
 </form>"
     }
 
-    def post(endpoint, button) => {
-        _post(endpoint, [
+    def post(id, endpoint, button) => {
+        _post(id, endpoint, [
             { text: "标题", type: "text", name: "subject" },
             { text: "名称", type: "text", name: "name" },
+            { text: "选项", type: "text", name: "options" },
+            { text: "正文", type: "textarea", name: "comment", rows: 10 },
+            { text: "", type: "submit", value: button },
+        ])
+    }
+
+    def postReply(id, endpoint, button) => {
+        _post(id, endpoint, [
+            { text: "名称", type: "text", name: "name" },
+            { text: "选项", type: "text", name: "options" },
             { text: "正文", type: "textarea", name: "comment", rows: 10 },
             { text: "", type: "submit", value: button },
         ])
@@ -47,30 +59,67 @@
 
     def this.index() => {
         var ret = header("首页")
-        ret <+ post("/new/0", "提交")
+        ret <+ post("start-new", "/new/0", "提交")
+        ret <+ footer()
+        ret
+    }
+
+    def this.renderThreads(threads) => {
+        var ret = header("首页")
+        ret <+ post("start-new", "/new/0", "提交")
+
+        for threads do (t) => {
+            ret <+ "<hr>"
+            ret <+ _threadMain(t.main)
+
+            if t.omitted > 0 
+                ret <+ "<div class='omitted'>省略 " <+ t.omitted <+ " 篇回复，点击[回复]展开</div>"
+
+            for t.replies do (reply) => {
+                ret <+ _thread(reply)
+            }
+        }
+
         ret <+ footer()
         ret
     }
 
     def _thread(t) => @ret("") {
         ret <+ @"
-        <div>
-            <div><span>" <+ ((if t.subject == "untitled" "" else t.subject) + "</span> <span>" + 
-                t.name + "</span> <span>" + 
-                t.uid + "</span> <span>" + 
-                Time.utcFormat(t.ts) + "</span> <span>No." +
-                t.id) <+ @"</span></div>
-            <div>" <+ ("" + t.comment) <+ @"</div>
+        <div class='reply' id='thread-" <+ t.id <+ @"'>
+            <div class='bar'>
+                <span class='name'>" <+ (t.name + "</span><span class='uid'>" + 
+                t.uid + "</span><span class='date'>" + 
+                t.ts + "</span><span class='ref'>No.<a href='/thread/" + t.parent + "#thread-" + t.id + "'>" +
+                t.id) <+ @"</a></span></div>
+            <div class='comment'>" <+ t.comment <+ @"</div>
+        </div>"
+    }
+
+    def _threadMain(t) => @ret("") {
+        ret <+ @"
+        <div class='thread' id='thread-" <+ t.id <+ @"'>
+            <div class='bar'>
+                " <+ 
+                ("" + (if t.subject != "untitled" "<span class='subject'>" + t.subject + "</span>") + 
+                "</span><span class='name'>" + 
+                t.name + "</span><span class='uid'>" + 
+                t.uid + "</span><span class='date'>" + 
+                t.ts + "</span><span class='ref'>No." +
+                t.id) <+ "</span><span>" <+
+                "[ <a href='/thread/" <+ t.id <+ "'>回复 / <span gray>" <+ 
+                t.children <+ " 篇回复</span></a> ]" <+ @"</span>
+            </div>
+            <div class='comment'>" <+ t.comment <+ @"</div>
         </div>"
     }
 
     def this.thread(t) => {
         var ret = header("#" + t.main.id + " " + t.main.subject)
-        ret <+ post("/new/" + t.main.id, "回复")
-        ret <+ _thread(t.main)
+        ret <+ postReply("reply", "/new/" + t.main.id, "回复")
+        ret <+ _threadMain(t.main)
 
         for t.replies do (reply) => {
-            ret <+ "<hr>"
             ret <+ _thread(reply)
         }
 

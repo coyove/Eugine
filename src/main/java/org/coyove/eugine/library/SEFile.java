@@ -27,7 +27,7 @@ public class SEFile extends SExpression {
     private OPERATION fileOp;
 
     public enum OPERATION {
-        OPEN_TEXT, OPEN_BINARY, OPEN_LINES, WRITE, APPEND, EXISTS, WRITE_BINARY
+        OPEN_TEXT, OPEN_BINARY, OPEN_LINES, WRITE, APPEND, EXISTS, WRITE_BINARY, DELETE
     }
 
     public SEFile() {
@@ -37,7 +37,8 @@ public class SEFile extends SExpression {
         super(ha, args, op == OPERATION.OPEN_BINARY ||
                 op == OPERATION.OPEN_LINES ||
                 op == OPERATION.OPEN_TEXT ||
-                op == OPERATION.EXISTS ? 1 : 2);
+                op == OPERATION.EXISTS ||
+                op == OPERATION.DELETE ? 1 : 2);
 
         filename = args.get(0);
         if (args.size() == 2) {
@@ -63,6 +64,9 @@ public class SEFile extends SExpression {
         try {
             Path path = Paths.get(filename.<String>get());
             switch (fileOp) {
+                case DELETE:
+                    Files.delete(path);
+                    return ExecEnvironment.Null;
                 case OPEN_TEXT:
                     return new SString(new String(Files.readAllBytes(path)));
                 case OPEN_BINARY:

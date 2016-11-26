@@ -24,6 +24,26 @@ def [Util.struct] Thread(raw) => {
     var this.replies = []
     for List.tailOf(lines) do (line) => 
         this.replies <+ Reply(0).from(line)
+
+    this.main.children = len(this.replies)
+}
+
+def [Util.struct] ThreadInTimeline(lines) => {
+    var this.main = Reply(0)
+    this.main.from(lines[0])
+    this.main.children = len(lines) - 1
+
+    var this.replies = []
+    var this.omitted = 0
+
+    if len(lines) < Config.repliesDisplayedInTimeline {
+        for List.tailOf(lines) do (line) => 
+            this.replies <+ Reply(0).from(line)
+    } else {
+        this.omitted = len(lines) - Config.repliesDisplayedInTimeline
+        for (this.omitted)..len(lines) do (i) =>
+            this.replies <+ Reply(0).from(lines[i])
+    }
 }
 
 def [Util.struct] Reply(id) => {

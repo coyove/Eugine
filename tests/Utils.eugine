@@ -14,8 +14,33 @@ import Cookie
     def this.filterString (text) => 
         encodeURI((static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text))
 
-    def this.filterComment (text) => 
-        encodeURI((static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text))
+    def this.filterComment (text) => @ret("") {
+        text = (static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text)
+
+        var lines = String.split(text, "\n")
+        var codeFlag = false
+        def replacer (t) => {
+            t = String.regexReplace(t, @"(https?:\/\/\S+)", "<a href='$1' target='_blank'>$1</a>")
+            String.regexReplace(t, @"&gt;&gt;No\.(\d+)",
+                "<a class='aref' href='/thread/$1' target='_blank'>&gt;&gt;No.$1</a>")
+        }
+
+        for lines do (line) =>
+            if String.trim(line) == "```" { 
+                codeFlag = !codeFlag
+
+                if codeFlag
+                    ret <+ "<pre><code>"
+                else
+                    ret <+ "</pre></code>"
+            } else if codeFlag {
+                ret <+ line <+ "\n"
+            } else {
+                ret <+ "<div>" <+ replacer(line) <+ "</div>"
+            }       
+
+        ret = encodeURI(ret)
+    }
 
     def this.makeDir (path) => {
         var p = (static java/nio/file/Paths)::get(path, []: java/lang/String...)
@@ -38,6 +63,12 @@ import Cookie
             false
         else 
             text[0..len(prefix)] == prefix
+
+    def this.endsWith (text, suffix) =>
+        if (var tl = len(text)) < (var sl = len(suffix))
+            false
+        else 
+            text[(tl-sl)..tl] == suffix
 
     def this.randomString(length) => {
         var table = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -89,5 +120,37 @@ import Cookie
             rssCache[url] = { updated: Time.unix(1), rss : rss }
             ret = rss
         } do ret
+    }
+
+    def this.rebuildPage(page) => enter {
+        var timeline = File.readLines(timelinePath)
+        var total = len(timeline)
+        var start = (page - 1) * Config.threadsPerPage
+        var end = page * Config.threadsPerPage
+        var html = ""
+
+        if total <= start exit(0)
+        if total < end end = total
+
+        var threads = []
+        for start..end do (i) => {
+            var id = int(timeline[i])
+            var path = dataPath + id / 1000 + "/" + id
+
+            if File.exists(path) {
+                var data = File.readLines(path)
+                threads <+ ThreadInTimeline(data)
+            }
+        }
+
+        html = Template.renderThreads(threads)
+    } catch(e) {
+        html = Template.index()
+    } do {
+        File.write(dataPath + page + ".html", html)
+    }
+
+    def this.deleteAllCache() => {
+        for 1..21 do (i) => File.delete(dataPath + i + ".html")
     }
 })()

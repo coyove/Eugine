@@ -102,10 +102,28 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         def this.notFound() => {
             if router404 == null {
                 this.writeCommon(404, "plain")
-                this.write("\r\n")
+                this.eoh()
             } else {
                 router404(this)
             }
+        }
+
+        def this.serveFile(path) => {
+            path = String.replace(path, "..", "")
+            if File.exists(path) {
+                var _ = Util.endsWith(path)
+                switch true do {
+                    _(".html") => this.writeCommon(200, "html")
+                    _(".js")   => this.writeCommon(200, "js")
+                    _(".png")  => this.writeCommon(200, "png")
+                    _(".css")  => this.writeCommon(200, "css")
+                    _(".jpg")  => this.writeCommon(200, "jpg")
+                    _          => this.writeCommon(200, "")
+                }
+                this.eoh()
+                this.writeBytes(File.readBinary(path))
+            } else 
+                this.notFound()
         }
 
         def this.eoh() =>
