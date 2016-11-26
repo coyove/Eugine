@@ -99,6 +99,15 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             this.writeBytes(buffer(tmp))
         }
 
+        def this.notFound() => {
+            if router404 == null {
+                this.writeCommon(404, "plain")
+                this.write("\r\n")
+            } else {
+                router404(this)
+            }
+        }
+
         def this.eoh() =>
             this.writeBytes(buffer("\r\n"))
 
@@ -173,6 +182,8 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         
         context.parsePostBody()
         context.parseCookies()
+
+        context.ip = "127.0.0.1" //test
 
         switch context.method do {
             "get" => var rref = routerGET

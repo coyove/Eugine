@@ -1,6 +1,7 @@
 import Utils
 import HttpServer
 import Template
+import Thread
 
 (def Config() => {
     var this.port = 8080
@@ -9,15 +10,23 @@ import Template
     var this.siteName = "Test Site"
     var this.salt = "test salt"
 
-    var this.openPost = false
+    var this.openPost = true
+
+    (def I18n() => {
+        var INVALID_THREAD_ID = "无效串Id"
+    })
 })()
 
 var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
 
-Util.makeDir(__path__ + "/data")
+Util.makeDir((dataPath = __path__ + "/data/"))
+Util.makeFile((counterPath = __path__ + "/data/counter"), 0)
+Util.makeFile((timelinePath = __path__ + "/data/timeline"), "")
+
+File.write(__path__ + "/data/counter", "0") //test
 
 def errorHandler(ctx, msg) => {
-	ctx.writeCommon(200, "html")
+    ctx.writeCommon(200, "html")
     ctx.eoh()
     ctx.write(Template.error(msg))
 }
@@ -29,25 +38,36 @@ server.addRouter("GET", "_/", (context) => {
     context.write(Template.index())
 })
 
+server.addRouter("GET", "/thread/", (context) => {
+    var tid = int(context.route[8..])
+    if tid == null {
+        errorHandler(context, Config.I18n.INVALID_THREAD_ID)
+    } else {
+        var threadPath = dataPath + tid / 1000 + "/" + tid
+        if !File.exists(threadPath) {
+            context.notFound()            
+        } else {
+            var thread = Thread(File.read(threadPath))
+            context.writeCommon(200, "html")
+            context.eoh()
+            context.write(Template.thread(thread))
+        }
+    }
+})
+
 server.addRouter("POST", "/new/", (context) => enter {
-	var uid = context.cookies.uid
-	var name = Cookie.get(uid)
+    var uid = context.cookies.uid
+    var uname = Cookie.get(uid)
 
-	if !name
-		if Config.openPost {
-			uid = Cookie.newCookie()
-			name = Cookie.get(uid)
-		} else 
-			exit(1)
+    if !uname 
+        if Config.openPost {
+            uid = Cookie.newCookie()
+            uname = Cookie.get(uid)
+        } else 
+            exit(1)
 
-    var rid = num(context.route[5..])
-    if rid == null
-        exit(2)
-
-    context.writeCommon(302, "html")
-    context.writeHeader("Location", "/")
-    context.writeCookie("uid", uid, { Expires: 86400 * 365 })
-    context.eoh()
+    var rid = num(context.route[5..]) // rid = 0 means posting a new thread, otherwise replying to rid
+    if rid == null || rid < 0 exit(2)
 
     var name    = context.postParams.name
     var options = context.postParams.options
@@ -56,59 +76,107 @@ server.addRouter("POST", "/new/", (context) => enter {
 
     if len(comment) < 4 exit(30)
     if !name name = "匿名"
-    if !subject subject = "无标题"
+    if !subject subject = "untitled"
         
     if options {
 
     }
 
+    sync {
+        if rid > 0 {
+            var replyTo = Reply(rid)
+            var repliedPath = dataPath + rid / 1000 + "/" + rid
+            if !File.exists(repliedPath) exit(42)
+
+            var repliedThreadRaw = File.read(repliedPath)
+            replyTo.from(repliedThreadRaw)
+
+            if replyTo.parent != 0 exit(40)
+            if Bit.and(replyTo.state, ThreadState.LOCKED) exit(41)
+            if Bit.and(replyTo.state, ThreadState.DELETED) exit(42)
+        }
+    
+        var id = ThreadManager.getNextPostId()
+        var path = Util.makeDir(dataPath + id / 1000)
+
+        var post = Reply(id) // thread is a special reply
+        var post.parent = rid
+        var post.subject = subject
+        var post.name = name
+        var post.comment = comment
+        var post.uid = uname
+        var post.ip = context.ip
+        var postRaw = post.toString()
+
+        if rid == 0 {
+            var timeline = File.readLines(timelinePath)
+            List.insert(timeline, 0, postRaw)
+            File.write(timelinePath, timeline)
+            File.write(path + "/" + id, postRaw)
+            var redirectTo = "/"
+        } else {
+            repliedThreadRaw += "\n" + postRaw
+            File.write(repliedPath, repliedThreadRaw)
+            var redirectTo = "/thread/" + rid
+        }
+    }
+
+    context.writeCommon(302, "html")
+    context.writeHeader("Location", redirectTo)
+    context.writeCookie("uid", uid, { Expires: 86400 * 365, Path: "/" })
+    context.eoh()
+
 } catch (e) {
-	switch __e__ do {
-		1 => errorHandler(context, "无效Cookie")
+    switch __e__ do {
+        1 => errorHandler(context, "无效Cookie")
         2 => errorHandler(context, "无效Id")
         30 => errorHandler(context, "正文内容过短（最少4字）")
-	}
+        40 => errorHandler(context, "不能回复回复")
+        41 => errorHandler(context, "该串已锁定，不能回复")
+        42 => errorHandler(context, Config.I18n.INVALID_THREAD_ID)
+        _ => println(e)
+    }
 })
 
-println("listening on port ", Config.port)
+println("Listening on port ", Config.port)
 server.start()
 
-// // def struct (f, args...) => {
-// //     f(args...)
-// //     clone f
-// // }
+// def struct (f, args...) => {
+//     f(args...)
+//     clone f
+// }
 
-// // def [struct] st (a) => {
-// //     var this.map = {test: a}
+// def [struct] st (a) => {
+//     var this.map = {test: a}
 
-// //     def this.gg () => {
-// //         var tmp = sync doublize(this.map.test)
-// //         tmp.doo() + 0.5
-// //     }
+//     def this.gg () => {
+//         var tmp = sync doublize(this.map.test)
+//         tmp.doo() + 0.5
+//     }
 
-// //     def [struct] doublize(num) => {
-// //         var n = num
+//     def [struct] doublize(num) => {
+//         var n = num
 
-// //         def this.doo() => {
-// //             double(n)
-// //         }
-// //     }
-// // }
+//         def this.doo() => {
+//             double(n)
+//         }
+//     }
+// }
 
-// // var p = "+"
+// var p = "+"
 
-// // def foo(a) => println(p + a.gg())
+// def foo(a) => println(p + a.gg())
 
-// // def bar(a, f) => {
-// //     sleep(Math.floor(Math.random(0) * 1000))
+// def bar(a, f) => {
+//     sleep(Math.floor(Math.random(0) * 1000))
 
-// //     if a > 500 
-// //         p = "-"
+//     if a > 500 
+//         p = "-"
 
-// //     var tmp = sync st(a)
-// //     f(tmp)
-// // }
+//     var tmp = sync st(a)
+//     f(tmp)
+// }
 
-// // for 0..1000 do (i) => {
-// //     bar#(i, foo)
-// // }
+// for 0..1000 do (i) => {
+//     bar#(i, foo)
+// }

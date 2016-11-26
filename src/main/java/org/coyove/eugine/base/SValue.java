@@ -1,10 +1,7 @@
 package org.coyove.eugine.base;
 
 import org.coyove.eugine.util.*;
-import org.coyove.eugine.value.SDouble;
-import org.coyove.eugine.value.SInt;
-import org.coyove.eugine.value.SLong;
-import org.coyove.eugine.value.SString;
+import org.coyove.eugine.value.*;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -46,7 +43,9 @@ public abstract class SValue extends SExpression {
     }
 
     public String asString() {
-        if (underlying == null) {
+        if (this instanceof SConcatString) {
+            return this.get();
+        } else if (underlying == null) {
             if (this instanceof SLong) {
                 return ((Long) ((SLong) this).val()).toString();
             } else if (this instanceof SDouble) {

@@ -16,7 +16,7 @@
 </body>"
 
     def _post(action, fields) => {
-        var ret = clone @"
+        var ret = @"
 <form action='" + action + @"' method='post'>
     <table>"
         for fields do (f) => 
@@ -38,24 +38,50 @@
 
     def post(endpoint, button) => {
         _post(endpoint, [
-            { text: "标题", type: "text", name: "title" },
+            { text: "标题", type: "text", name: "subject" },
             { text: "名称", type: "text", name: "name" },
-            { text: "正文", type: "textarea", name: "content", rows: 10 },
+            { text: "正文", type: "textarea", name: "comment", rows: 10 },
             { text: "", type: "submit", value: button },
         ])
     }
 
     def this.index() => {
-        var ret = clone header("首页")
-        ret <+ post("/new", "提交")
+        var ret = header("首页")
+        ret <+ post("/new/0", "提交")
         ret <+ footer()
-        ; ret
+        ret
+    }
+
+    def _thread(t) => @ret("") {
+        ret <+ @"
+        <div>
+            <div><span>" <+ ((if t.subject == "untitled" "" else t.subject) + "</span> <span>" + 
+                t.name + "</span> <span>" + 
+                t.uid + "</span> <span>" + 
+                Time.utcFormat(t.ts) + "</span> <span>No." +
+                t.id) <+ @"</span></div>
+            <div>" <+ ("" + t.comment) <+ @"</div>
+        </div>"
+    }
+
+    def this.thread(t) => {
+        var ret = header("#" + t.main.id + " " + t.main.subject)
+        ret <+ post("/new/" + t.main.id, "回复")
+        ret <+ _thread(t.main)
+
+        for t.replies do (reply) => {
+            ret <+ "<hr>"
+            ret <+ _thread(reply)
+        }
+
+        ret <+ footer()
+        ret
     }
 
     def this.error(msg) => {
-        var ret = clone header("错误")
+        var ret = header("错误")
         ret <+ msg
         ret <+ footer()
-        ; ret
+        ret
     }
 })()

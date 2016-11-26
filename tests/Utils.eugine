@@ -11,12 +11,26 @@ import Cookie
     def this.decodeURI (text) => 
         javaURLDecoder::decode(text : String, "utf-8" : String)
 
+    def this.filterString (text) => 
+        encodeURI((static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text))
+
+    def this.filterComment (text) => 
+        encodeURI((static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text))
+
     def this.makeDir (path) => {
         var p = (static java/nio/file/Paths)::get(path, []: java/lang/String...)
         
-        if !File.exists(path) 
+        if !File.exists(path) {
             (static java/nio/file/Files):>createDirectories(p: java/nio/file/Path, 
                 []: java/nio/file/attribute/FileAttribute...)
+        }
+
+        path
+    }
+
+    def this.makeFile (path, initData) => {
+        if !File.exists(path) File.write(path, initData)
+        path
     }
 
     def this.startsWith (text, prefix) =>
@@ -37,7 +51,7 @@ import Cookie
     def this.hashString(text) =>
         Digest.hexSHA1(Digest.SHA256(text + Config.salt))
 
-    def this.struct (f, args...) => sync {
+    def this.struct (f, args...) => {
         f(args...)
         clone f
     }

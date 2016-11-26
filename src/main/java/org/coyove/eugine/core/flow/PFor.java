@@ -104,6 +104,7 @@ public class PFor extends SExpression {
 
 //        if (this.cachedClosure != null) {
 //            body = this.cachedClosure;
+//            body.outerEnv = env;
 //        } else {
             _body = this.body.evaluate(env);
             if (!(_body instanceof SClosure)) {

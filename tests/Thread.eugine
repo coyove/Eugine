@@ -1,14 +1,72 @@
-(def ThreadDB() => {
-	var db = MapDB.open("test.db")
-	var threadsTable = MapDB.table.open(db, "threads")
-
-	def this.addThread(data) => sync {
-		var counter = MapDB.table.get(threadsTable, "counter")
-		MapDB.table.put(threadsTable, "counter", counter++)
-		
-	}
-
-	// actually not happened
-	def this.close() =>
-		MapDB.close(db)
+(def ThreadManager() => {
+    def this.getNextPostId() => sync {
+        var id = int(File.read(counterPath))
+        File.write(counterPath, str(id++))
+        id
+    }
 })()
+
+(def ThreadState() => {
+    var this.NORMAL  = 1
+    var this.DELETED = 2
+    var this.SAGED   = 4
+    var this.LOCKED  = 8
+    var this.EDITED  = 16
+})()
+
+def [Util.struct] Thread(raw) => {
+    var lines = String.split(raw, "\n")
+    if len(lines) == 0 exit(9902)
+
+    var this.main = Reply(0)
+    this.main.from(lines[0])
+
+    var this.replies = []
+    for List.tailOf(lines) do (line) => 
+        this.replies <+ Reply(0).from(line)
+}
+
+def [Util.struct] Reply(id) => {
+    var this.id = id
+    var this.parent = 0
+    var this.subject = ""
+    var this.name = ""
+    var this.comment = ""
+    var this.uid = ""
+    var this.state = ThreadState.NORMAL
+    var this.ts = Time.unix(0)
+    var this.ip = ""
+    var this.children = 0
+    var this.reserved = "x"
+
+    def this.from (text) => {
+        var parts = String.split(text, " ")
+        // id, parent, name, subject, comment, uid, state, ts, ip, children, reserved
+        if len(parts) < 11 exit(9901)
+
+        var this.id       = int(parts[0])
+        var this.parent   = int(parts[1])
+        var this.subject  = Util.decodeURI(parts[2])
+        var this.name     = Util.decodeURI(parts[3])
+        var this.comment  = Util.decodeURI(parts[4])
+        var this.uid      = parts[5]
+        var this.state    = int(parts[6])
+        var this.ts       = long(parts[7])
+        var this.ip       = parts[8]
+        var this.children = int(parts[9])
+        var this.reserved = parts[10]
+
+        this
+    }
+
+    // this function is ONLY called when a new reply is posted
+    // if from() was called before, then calling toString() is forbidden
+    def this.toString () => {
+        str(this.id) + " " + this.parent + " " + 
+        Util.filterString(this.subject) + " " + 
+        Util.filterString(this.name) + " " + 
+        Util.filterComment(this.comment) + " " + 
+        this.uid + " " + this.state + " " + 
+        this.ts + " " + this.ip + " " + this.children + " " + this.reserved
+    }
+}

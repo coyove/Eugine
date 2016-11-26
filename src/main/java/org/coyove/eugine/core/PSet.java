@@ -112,10 +112,14 @@ public class PSet extends SExpression {
             } else if (refer instanceof SClosure) {
                 if (type == MUTABLE || type == IMMUTABLE) {
                     ((SClosure) refer).extra.bPut(n.refKey, value);
-                    env.bPut(n.refKey, value);
+
+                    if (this.varName instanceof PGet &&
+                            ((PGet) this.varName).sub instanceof PVariable &&
+                            ((PVariable) ((PGet) this.varName).sub).varName.equals("this")) {
+                        env.bPut(n.refKey, value);
+                    }
                 } else {
                     ((SClosure) refer).extra.put(n.refKey, value);
-                    env.put(n.refKey, value);
                 }
             } else {
                 throw new EgException(2045, "failed to set, invalid referred object: " + refer, atom);

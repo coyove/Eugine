@@ -42,8 +42,10 @@ public class SEListOp extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SList listObj = Utils.cast(this.list.evaluate(env), SList.class,
-                new EgException(3005, "subject must be list", atom));
+        SList listObj = Utils.cast(this.list.evaluate(env), SList.class);
+        if (listObj == null) {
+            throw new EgException(3005, "subject must be list", atom);
+        }
 
         ListEx<SValue> list = listObj.get();
         switch (op) {
@@ -56,9 +58,7 @@ public class SEListOp extends SExpression {
             case LAST:
                 return list.size() > 0 ? list.get(list.size() - 1).evaluate(env) : ExecEnvironment.Null;
             case INSERT:
-                SValue value = this.value.evaluate(env);
-                int pos = Utils.castInt(this.pos.evaluate(env), atom);
-                list.add(pos, value);
+                list.add(Utils.castInt(this.pos.evaluate(env), atom), this.value.evaluate(env));
                 return listObj;
             case SORT:
                 if (list.size() == 0) {
