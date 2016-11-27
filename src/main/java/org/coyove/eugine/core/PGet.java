@@ -32,8 +32,8 @@ public class PGet extends SExpression {
 
         if (dict instanceof SDict) {
             String k;
-            if (sk instanceof SString) {
-                k = sk.get();
+            if (sk instanceof SString || sk instanceof SInt || sk instanceof SLong) {
+                k = sk.asString();
             } else {
                 throw new EgException(2019, "invalid key: " + sk, atom);
             }

@@ -108,6 +108,12 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             }
         }
 
+        def this.redirect302(location) => {
+            this.writeCommon(302, "html")
+            this.writeHeader("Location", location)
+            this.eoh()
+        }
+
         def this.serveFile(path) => {
             path = String.replace(path, "..", "")
             if File.exists(path) {

@@ -24,12 +24,13 @@ public class SEListOp extends SExpression {
 
     private OPERATION op;
 
-    public enum OPERATION {HEAD, TAIL, INIT, LAST, INSERT, SORT}
+    public enum OPERATION {HEAD, TAIL, INIT, LAST, INSERT, SORT, CONCAT}
 
     public SEListOp() {}
 
     public SEListOp(Atom ha, ListEx<SExpression> args, OPERATION o) {
-        super(ha, args, o == OPERATION.INSERT ? 3 : 1);
+        super(ha, args, o == OPERATION.INSERT ? 3 :
+                (o == OPERATION.CONCAT ? 2 : 1));
 
         list = args.head();
         op = o;
@@ -37,6 +38,10 @@ public class SEListOp extends SExpression {
         if (o == OPERATION.INSERT) {
             pos = args.get(1);
             value = args.get(2);
+        }
+
+        if (o == OPERATION.CONCAT) {
+            value = args.get(1);
         }
     }
 
@@ -59,6 +64,14 @@ public class SEListOp extends SExpression {
                 return list.size() > 0 ? list.get(list.size() - 1).evaluate(env) : ExecEnvironment.Null;
             case INSERT:
                 list.add(Utils.castInt(this.pos.evaluate(env), atom), this.value.evaluate(env));
+                return listObj;
+            case CONCAT:
+                SList list2 = Utils.cast(this.value.evaluate(env), SList.class);
+                if (list2 == null) {
+                    throw new EgException(3106, "must concat a list", atom);
+                }
+
+                list.addAll(list2.<ListEx<SValue>>get());
                 return listObj;
             case SORT:
                 if (list.size() == 0) {

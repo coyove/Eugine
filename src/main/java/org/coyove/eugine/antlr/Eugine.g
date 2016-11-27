@@ -85,7 +85,7 @@ declareStmt returns [SExpression v]
         {
             $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, $act));
         }
-    )?
+    )*
         {
             $v = $multi.size() == 1 ? $multi.head() : new PChain($multi);
         }

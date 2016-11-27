@@ -13,10 +13,21 @@ import Thread
     var this.openPost = true
     var this.repliesDisplayedInTimeline = 10
     var this.threadsPerPage = 20
+    var this.maxReplies = 1000
+    var this.tooManyLines = 5
 
-    (def I18n() => {
-        var INVALID_THREAD_ID = "无效串Id"
-    })
+    var this.i18n = {INVALID_THREAD_ID: "无效串Id"}
+    var this.mods = {
+        admin: "test",
+        mod1: "modtest",
+
+        isMod: (p) => @ret {
+            for Config.mods do (name, password) => if password == p {
+                ret = name
+                false
+            }
+        },
+    }
 })()
 
 var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
@@ -24,6 +35,7 @@ var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
 Util.makeDir((dataPath = __path__ + "/data/"))
 Util.makeFile((counterPath = __path__ + "/data/counter"), 0)
 Util.makeFile((timelinePath = __path__ + "/data/timeline"), "")
+Util.makeFile((stickyPath = __path__ + "/data/sticky"), "")
 
 // File.write(counterPath, "0") //test
 // File.write(timelinePath, "")
@@ -35,19 +47,33 @@ def errorHandler(ctx, msg) => {
     ctx.write(Template.error(msg))
 }
 
+def infoHandler(ctx, msg) => {
+    ctx.writeCommon(200, "html")
+    ctx.eoh()
+    ctx.write(Template.info(msg))
+}
+
+def pageHandler(ctx, p) => {
+    if p == null || p < 1 || p > 20 {
+        ctx.notFound()
+    } else {
+        if !File.exists((var page = dataPath + p + ".html"))
+            sync Util.rebuildPage(p)
+
+        ctx.serveFile(page)
+    }
+}
+
 server.addRouter("GET", "/assets/", (ctx) => ctx.serveFile(__path__ + ctx.route))
 
-server.addRouter("GET", "_/", (context) => {
-    if !File.exists((var page = dataPath + "1.html"))
-        Util.rebuildPage(1)
+server.addRouter("GET", "_/", (context) => pageHandler(context, 1))
 
-    context.serveFile(page)
-})
+server.addRouter("GET", "/page/", (context) => pageHandler(context, int(context.route[6..])))
 
 server.addRouter("GET", "/thread/", (context) => {
     var tid = int(context.route[8..])
     if tid == null {
-        errorHandler(context, Config.I18n.INVALID_THREAD_ID)
+        errorHandler(context, Config.i18n.INVALID_THREAD_ID)
     } else {
         var threadPath = dataPath + tid / 1000 + "/" + tid
         if !File.exists(threadPath) {
@@ -55,9 +81,9 @@ server.addRouter("GET", "/thread/", (context) => {
         } else {
             var thread = Thread(File.read(threadPath))
             if thread.main.parent != 0 {
-                context.writeCommon(302, "html")
-                context.writeHeader("Location", "/thread/" + thread.main.parent + "#thread-" + tid)
-                context.eoh()
+                context.redirect302("/thread/" + thread.main.parent + "#thread-" + tid)
+            } else if Bit.and(thread.main.state, ThreadState.DELETED) {
+                context.notFound()
             } else {
                 context.writeCommon(200, "html")
                 context.eoh()
@@ -86,13 +112,72 @@ server.addRouter("POST", "/new/", (context) => enter {
     var subject = context.postParams.subject
     var comment = context.postParams.comment
 
-    if len(comment) < 4 exit(30)
     if !name name = "匿名"
     if !subject subject = "untitled"
-        
+    if len(name) > 32 exit(32)
+    if len(subject) > 32 exit(33)
+    
+    var saged = false, sticky = false, delete = false, lock = false, sagee = false
     if options {
+        if len(options) > 32 exit(34)
+        saged   = contains(options, "sage") > -1
+        sagee   = contains(options, "sagee") > -1
+        sticky  = contains(options, "sticky") > -1
+        delete  = contains(options, "delete") > -1
+        lock    = contains(options, "lock") > -1
 
+        if sticky || delete { // only admin can delete or make sticky
+            if context.cookies.aid == null exit(90)
+            if context.cookies.aid != Config.mods.admin exit(90)
+
+            if sticky sync {
+                var sid = int(comment)
+                if !sid exit(91)
+
+                var stickies = File.readLines(stickyPath)
+                var found = false
+                for stickies do (id, idx) => if id == str(sid) {
+                    del(stickies, idx)
+                    found = true
+                    false
+                }
+
+                if !found List.insert(stickies, 0, str(sid))
+                File.write(stickyPath, stickies)
+            }
+
+            if delete sync {
+                var ids = int(String.split(comment, "\n"))
+                var map = {}
+                for ids do (id) => {
+                    map[id] = true
+                    ThreadManager.delete(id)
+                }
+
+                var timeline = File.readLines(timelinePath)
+                rev timeline do (line, idx) => if contains(map, line) del(timeline, idx)
+                File.write(timelinePath, timeline)
+            }
+
+            Util.deleteAllCache()
+            exit(0)
+        }
+
+        if sagee || lock {
+            if context.cookies.aid == null exit(90)
+            if Config.mods.isMod(context.cookies.aid) == null exit(90)
+
+            var ids = int(String.split(comment, "\n"))
+            if sagee sync for ids do (id) => ThreadManager.invertState(id, ThreadState.SAGED)
+            if lock sync for ids do (id) => ThreadManager.invertState(id, ThreadState.LOCKED)
+
+            Util.deleteAllCache()
+            exit(0)
+        }
     }
+
+    if len(comment) < 4 exit(30)
+    if len(comment) > 2048 exit(31)
 
     sync {
         if rid > 0 {
@@ -118,7 +203,12 @@ server.addRouter("POST", "/new/", (context) => enter {
         var post.comment = comment
         var post.uid = uname
         var post.ip = context.ip
+        if saged {
+            var post.state = Bit.or(ThreadState.NORMAL, ThreadState.SAGED)
+        }
+
         var postRaw = post.toString()
+
         File.write(path + "/" + id, postRaw)
 
         var timeline = File.readLines(timelinePath)
@@ -127,14 +217,21 @@ server.addRouter("POST", "/new/", (context) => enter {
             List.insert(timeline, 0, str(id))
             var redirectTo = "/"
         } else {
+            if len(repliedThreadRaw) >= Config.maxReplies {
+                replyTo.state = Bit.or(replyTo.state, ThreadState.LOCKED)
+                repliedThreadRaw[0] = replyTo.toString2()
+            }
+
             repliedThreadRaw <+ postRaw
             File.write(repliedPath, repliedThreadRaw)
 
-            var srid = str(rid)
-            for timeline do (item, idx) => if item == srid {
-                del(timeline, idx)
-                List.insert(timeline, 0, srid)
-                false // break
+            if !saged && !Bit.and(replyTo.state, ThreadState.SAGED) {
+                var srid = str(rid)
+                for timeline do (item, idx) => if item == srid {
+                    del(timeline, idx)
+                    List.insert(timeline, 0, srid)
+                    false // break
+                }
             }
 
             var redirectTo = "/thread/" + rid
@@ -151,12 +248,19 @@ server.addRouter("POST", "/new/", (context) => enter {
 
 } catch (e) {
     switch __e__ do {
+        0 => infoHandler(context, "操作成功")
         1 => errorHandler(context, "无效Cookie")
         2 => errorHandler(context, "无效Id")
         30 => errorHandler(context, "正文内容过短（最少4字）")
+        31 => errorHandler(context, "正文内容过长（最多2048字）")
+        32 => errorHandler(context, "名称过长（最多32字）")
+        33 => errorHandler(context, "标题过长（最多32字）")
+        34 => errorHandler(context, "选项过长（最多32字）")
         40 => errorHandler(context, "不能回复回复")
         41 => errorHandler(context, "该串已锁定，不能回复")
-        42 => errorHandler(context, Config.I18n.INVALID_THREAD_ID)
+        42 => errorHandler(context, Config.i18n.INVALID_THREAD_ID)
+        90 => errorHandler(context, "无效权限")
+        91 => errorHandler(context, "无效串Id")
         _ => println(e)
     }
 })

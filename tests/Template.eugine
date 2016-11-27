@@ -24,9 +24,9 @@
         for fields do (f) => 
             ret <+ ("<tr><td>" + f.text + "</td><td>" + ({
                 text: 
-                    "<input type='text' name='" + f.name + "'/>",
+                    "<input type='text' name='" + f.name + "' id='" + f.name + "'/>",
                 textarea: 
-                    "<textarea name='" + f.name + "' rows='" + f.rows + "'></textarea>",
+                    "<textarea name='" + f.name + "' id='" + f.name + "' rows='" + f.rows + "'></textarea>",
                 checkbox:
                     "<input type='checkbox' name='" + f.name + "'/><label for='" + f.name + "'>" + f.label + "</label>",
                 submit:
@@ -64,7 +64,15 @@
         ret
     }
 
-    def this.renderThreads(threads) => {
+    def tState(t) => @ret("") {
+        if Bit.and(t.state, ThreadState.LOCKED)
+            ret <+ "<div class='locked'>该串已被锁定</div>"
+
+        if Bit.and(t.state, ThreadState.SAGED)
+            ret <+ "<div class='saged'>该串已被sage</div>"
+    }
+
+    def this.timeline(threads) => {
         var ret = header("首页")
         ret <+ post("start-new", "/new/0", "提交")
 
@@ -76,6 +84,8 @@
                 ret <+ "<div class='omitted'>省略 " <+ t.omitted <+ " 篇回复，点击[回复]展开</div>"
 
             for t.replies do (reply) => {
+                reply.isPO = reply.uid == t.main.uid
+
                 ret <+ _thread(reply)
             }
         }
@@ -84,12 +94,43 @@
         ret
     }
 
+    def this.thread(t) => {
+        var ret = header("No." + t.main.id)
+        if !Bit.and(t.main.state, ThreadState.LOCKED)
+            ret <+ postReply("reply", "/new/" + t.main.id, "回复")
+
+        ret <+ _threadMain(t.main)
+
+        var ips = {}
+        ips[Util.trimIP(t.main.ip)] = true
+
+        var ids = {}
+        ids[(var muid = t.main.uid)] = true
+
+        for t.replies do (reply) => {
+            reply.isPO = reply.uid == muid
+
+            ret <+ _thread(reply)
+
+            ips[Util.trimIP(reply.ip)] = true
+            ids[reply.uid] = true
+        }
+
+        ret <+ "<div class='thread-info'>" <+ len(ips) <+ " / " <+ len(ids) <+ "</div>"
+        ret <+ footer()
+        ret
+    }
+
     def _thread(t) => @ret("") {
+        if t.isPO 
+            t.name = "<span po>po</span>"
+
         ret <+ @"
         <div class='reply' id='thread-" <+ t.id <+ @"'>
             <div class='bar'>
-                <span class='name'>" <+ (t.name + "</span><span class='uid'>" + 
-                t.uid + "</span><span class='date'>" + 
+                <div class='ind'></div>
+                <span class='name'>" <+ 
+                (t.name + "</span><span class='date'>" + 
                 t.ts + "</span><span class='ref'>No.<a href='/thread/" + t.parent + "#thread-" + t.id + "'>" +
                 t.id) <+ @"</a></span></div>
             <div class='comment'>" <+ t.comment <+ @"</div>
@@ -97,38 +138,39 @@
     }
 
     def _threadMain(t) => @ret("") {
+        if t.isSticky
+            var sticky = "<div class='sticky'>置顶</div>"
+
         ret <+ @"
         <div class='thread' id='thread-" <+ t.id <+ @"'>
             <div class='bar'>
-                " <+ 
+                " <+ sticky <+ 
                 ("" + (if t.subject != "untitled" "<span class='subject'>" + t.subject + "</span>") + 
                 "</span><span class='name'>" + 
-                t.name + "</span><span class='uid'>" + 
-                t.uid + "</span><span class='date'>" + 
+                t.name + "</span><span class='date'>" + 
                 t.ts + "</span><span class='ref'>No." +
                 t.id) <+ "</span><span>" <+
-                "[ <a href='/thread/" <+ t.id <+ "'>回复 / <span gray>" <+ 
-                t.children <+ " 篇回复</span></a> ]" <+ @"</span>
+                "[ <a href='/thread/" <+ t.id <+ "'>回复 / <span class='replies'>" <+ 
+                t.children <+ " 篇</span></a> ]" <+ @"</span>
             </div>
-            <div class='comment'>" <+ t.comment <+ @"</div>
+            <div class='comment'>" <+ t.comment <+ "</div>" <+
+            tState(t) <+ @"
         </div>"
     }
 
-    def this.thread(t) => {
-        var ret = header("#" + t.main.id + " " + t.main.subject)
-        ret <+ postReply("reply", "/new/" + t.main.id, "回复")
-        ret <+ _threadMain(t.main)
-
-        for t.replies do (reply) => {
-            ret <+ _thread(reply)
-        }
-
-        ret <+ footer()
-        ret
+    def pager(curPage) => @ret("") {
+        ret <+ "<div class='pager'>"
     }
 
     def this.error(msg) => {
         var ret = header("错误")
+        ret <+ msg
+        ret <+ footer()
+        ret
+    }
+
+    def this.info(msg) => {
+        var ret = header("提示")
         ret <+ msg
         ret <+ footer()
         ret

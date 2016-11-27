@@ -5,6 +5,8 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.util.HashMap;
+
 /**
  * Created by coyove on 2016/9/10.
  */
@@ -28,6 +30,8 @@ public class SELen extends SExpression {
             return new SInt(obj.<String>get().length());
         } else if (obj instanceof SList) {
             return new SInt(obj.<ListEx<SValue>>get().size());
+        } else if (obj instanceof SDict) {
+            return new SInt(obj.<HashMap<String, SValue>>get().size());
         } else if (obj.get() instanceof byte[]) {
             byte[] buf = obj.get();
             return new SInt(buf.length);

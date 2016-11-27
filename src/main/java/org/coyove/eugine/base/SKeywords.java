@@ -360,6 +360,11 @@ public class SKeywords {
                         return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INSERT);
                     }
                 });
+                put("List.concat", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.CONCAT);
+                    }
+                });
                 put("Bit.and", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEBitOp(new Atom(tok), c, SEBitOp.AND);
@@ -368,6 +373,11 @@ public class SKeywords {
                 put("Bit.or", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEBitOp(new Atom(tok), c, SEBitOp.OR);
+                    }
+                });
+                put("Bit.xor", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEBitOp(new Atom(tok), c, SEBitOp.XOR);
                     }
                 });
                 put("Bit.not", new CallableKeyword() {

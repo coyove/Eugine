@@ -4,6 +4,45 @@
         File.write(counterPath, str(id++))
         id
     }
+
+    def this.delete(id) => sync if id {
+        var path = dataPath + id / 1000 + "/" + id
+        if File.exists(path) {
+            var t = Reply(id)
+            var raw = File.readLines(path)
+            t.from(raw[0])
+            t.state = Bit.or(t.state, ThreadState.DELETED)
+            raw[0] = t.toString2()
+            File.write(path, raw)
+
+            if t.parent != 0 {
+                path = dataPath + t.parent / 1000 + "/" + t.parent
+                raw = File.readLines(path)
+
+                for raw do (line, idx) => {
+                    var parts = String.split(line, " ")
+                    if parts[0] == str(t.id) {
+                        del(raw, idx)
+                        false
+                    }
+                }
+
+                File.write(path, raw)
+            }
+        }
+    }
+
+    def this.invertState(id, state) => sync if id {
+        var path = dataPath + id / 1000 + "/" + id
+        if File.exists(path) {
+            var t = Reply(id)
+            var raw = File.readLines(path)
+            t.from(raw[0])
+            t.state = Bit.xor(t.state, state)
+            raw[0] = t.toString2()
+            File.write(path, raw)
+        }
+    }
 })()
 
 (def ThreadState() => {
@@ -11,7 +50,7 @@
     var this.DELETED = 2
     var this.SAGED   = 4
     var this.LOCKED  = 8
-    var this.EDITED  = 16
+    var this.STICKY  = 16
 })()
 
 def [Util.struct] Thread(raw) => {
@@ -89,4 +128,14 @@ def [Util.struct] Reply(id) => {
         this.uid + " " + this.state + " " + 
         this.ts + " " + this.ip + " " + this.children + " " + this.reserved
     }
+
+    def this.toString2 () => {
+        str(this.id) + " " + this.parent + " " + 
+        Util.encodeURI(this.subject) + " " + 
+        Util.encodeURI(this.name) + " " + 
+        Util.encodeURI(this.comment) + " " + 
+        this.uid + " " + this.state + " " + 
+        this.ts + " " + this.ip + " " + this.children + " " + this.reserved
+    }
 }
+

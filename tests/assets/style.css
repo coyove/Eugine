@@ -10,11 +10,12 @@ body {
     font: normal 14px Arial, "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
     line-height: 1.2;
     padding: 0 10px;
-    background: #f0eeee;
+    background: #f0ebe4;
 }
 
 hr {
-    border: dotted 1px #aaa;
+    border: dotted 1px #ccc;
+    margin: 4px 0;
 }
 
 a {
@@ -23,16 +24,7 @@ a {
 }
 
 a:hover, a *:hover {
-    color:#880088;
-}
-
-a[grey] {
-    color: #888;
-}
-
-a[grey]:hover {
-    color: #00207a;
-    text-decoration: none;
+    color:#800080;
 }
 
 form#start-new, form#reply {
@@ -45,12 +37,21 @@ form table {
     width: 100%;
 }
 
+table td:first-child {
+    white-space: nowrap;
+    width: 1%;
+}
+
 input[type=text], textarea {
     width: 100%;
 }
 
-span[gray] {
+span.replies {
     color: #aaa;
+}
+
+span.replies:hover {
+    color: #888;
 }
 
 pre, code {
@@ -64,38 +65,54 @@ pre, code {
 
 #container {
     width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    background: #f0ebe4;
     height: 100%;
 }
 
 div.thread, div.reply {
     padding: 4px;
+    display: table;
 }
 
 div.reply {
-    padding-left: 32px 
+    margin: 4px 0 4px 32px;
+    background: #dad4cc;
+    border: solid 1px #ccc8c2;
+    border-top: none;
+    border-left: none;
+}
+
+div.reply div.ind {
+    height: 0;
+    width: 0;
+    border: solid 10px;
+    float: left;
+    border-color: transparent #dad4cc transparent transparent;
+    margin-left: -20px;
+}
+
+div.omitted, div.locked, div.saged, div.sticky {
+    font-size: 12px;
+    padding: 4px 6px 0 6px;
 }
 
 div.omitted {
-    padding: 4px;
-    text-align: center;
     color: cadetblue;
-    font-size: 12px;
-    border-top: dashed 1px #aaa;
+}
+
+div.sticky {
+    background: steelblue;
+    color: white;
+    padding: 4px;
+    display: inline-block;
+}
+
+div.locked, div.saged {
+    color: #f44336;
 }
 
 div.bar {
     padding: 4px;
     margin: -4px;
-    background: #dad4cc;
-}
-
-div.reply div.bar {
-    margin-left: -32px;
-    padding-left: 32px;
-    background: #e7e4de;
 }
 
 div.bar > span {
@@ -113,7 +130,30 @@ span.name {
     color: darkgreen;
 }
 
+div.reply span.name {
+    color: #508850;
+}
+
+span[po] {
+    color: #3F51B5;
+}
+
 div.comment {
-    margin-top: 10px;
-    padding: 2px;
+    margin-top: 4px;
+    padding: 2px 6px;
+}
+
+div.tml-toggle {
+    font-size: 12px;
+    cursor: pointer;
+    background: #966666;
+    color: white;
+    display: inline-block;
+    padding: 2px 4px;
+}
+
+@media screen and (max-width: 480px) {
+    body {
+        padding: 0;
+    }
 }

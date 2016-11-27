@@ -45,8 +45,14 @@ public class PPut extends SExpression {
             throw new EgException(2044, "subject is immutable", atom);
         }
 
-        if (refer instanceof SDict && key instanceof SString) {
-            refer.<HashMap<String, SValue>>get().put(key.<String>get(), value);
+        if (refer instanceof SDict) {
+            String k;
+            if (key instanceof SString || key instanceof SInt || key instanceof SLong) {
+                k = key.asString();
+            } else {
+                throw new EgException(2019, "invalid key: " + key, atom);
+            }
+            refer.<HashMap<String, SValue>>get().put(k, value);
         } else if (refer instanceof SList) {
             refer.<ListEx<SValue>>get().set(Utils.castInt(key, atom), value);
         } else if (refer instanceof SObject && key instanceof SString) {
