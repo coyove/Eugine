@@ -14,6 +14,22 @@ import Cookie
     def this.filterString (text) => 
         encodeURI((static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text))
 
+    def this.filterName (name) => {
+        name = (static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(String.replace(name, "!", "_"))
+
+        if contains(name, "#") > -1 {
+            var names = String.split(name, "#")
+
+            if Config.mods[names[0]] == names[1] {
+                name = "<span mod>" + names[0] + "</span>"
+            } else {
+                name = names[0] + "<span tripcode>!" + Util.hashString2(names[1])[0..4] + "</span>"
+            }
+        }
+
+        encodeURI(name)
+    }
+
     def this.filterComment (text) => @ret("") {
         text = (static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text)
 
@@ -21,8 +37,9 @@ import Cookie
         var codeFlag = false
         def replacer (t) => {
             t = String.regexReplace(t, @"(https?:\/\/\S+)", "<a class='link' href='$1' target='_blank'>$1</a>")
-            String.regexReplace(t, @"&gt;&gt;No\.(\d+)",
-                "<a class='aref' href='/thread/$1' target='_blank'>&gt;&gt;No.$1</a>")
+            t = String.regexReplace(t, @"&gt;&gt;No\.(\d+)",
+"<a class='aref' onmouseover='openref($1, this)' onmouseout='closeref($1)' href='javascript:open($1)'>&gt;&gt;No.$1</a>")
+            String.regexReplace(t, @"^&gt;(.+)", "<span quote>&gt;$1</span>")
         }
 
         var tooManyLines = false
@@ -95,6 +112,9 @@ import Cookie
     def this.hashString(text) =>
         Digest.hexSHA1(Digest.SHA256(text + Config.salt))
 
+    def this.hashString2(text) =>
+        Digest.hexSHA1(Digest.SHA256(Digest.SHA256(text + Config.salt)))
+
     def this.struct (f, args...) => {
         f(args...)
         clone f
@@ -145,7 +165,7 @@ import Cookie
         }
     }
 
-    def this.rebuildPage(page) => enter {
+    def this.rebuildPage(page, title, source) => enter {
         var threads = []
 
         if page == 1 {
@@ -161,11 +181,11 @@ import Cookie
             }
         }
 
-        var timeline = File.readLines(timelinePath)
+        var timeline = File.readLines(source)
         
         if len(timeline) > 500 {
             timeline = timeline[0..500]
-            File.write(timelinePath, timeline)
+            File.write(source, timeline)
         }
 
         var total = len(timeline)
@@ -185,15 +205,15 @@ import Cookie
                 threads <+ ThreadInTimeline(data)
             }
         }
-
-        html = Template.timeline(threads)
     } catch(e) {
-        html = Template.index()
     } do {
-        File.write(dataPath + page + ".html", html)
+        Template.timeline(page, title, threads)
     }
 
     def this.deleteAllCache() => {
-        for 1..21 do (i) => File.delete(dataPath + i + ".html")
+        for 1..21 do (i) => {
+            File.delete(dataPath + i + ".html")
+            File.delete(dataPath + i + ".report.html")
+        }
     }
 })()

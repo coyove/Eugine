@@ -1,0 +1,29 @@
+(def Config() => {
+    var this.port = 8080
+    var this.socketReadTimeout = 5000
+
+    var this.siteName = "Test Site"
+    var this.salt = "test salt"
+    var this.referer = "http://127.0.0.1"
+    var this.openPost = true
+    var this.repliesDisplayedInTimeline = 10
+    var this.threadsPerPage = 20
+    var this.maxReplies = 1000
+    var this.tooManyLines = 5
+    var this.cooldown = 15000
+
+    var this.i18n = {
+        INVALID_THREAD_ID: "无效串Id",
+    }
+    var this.mods = {
+        admin: "test",
+        mod1: "modtest",
+
+        isMod: (p) => @ret {
+            for Config.mods do (name, password) => if password == p {
+                ret = name
+                false
+            }
+        },
+    }
+})()

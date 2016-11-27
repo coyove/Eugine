@@ -14,6 +14,7 @@
             t.state = Bit.or(t.state, ThreadState.DELETED)
             raw[0] = t.toString2()
             File.write(path, raw)
+            File.delete(path + ".html")
 
             if t.parent != 0 {
                 path = dataPath + t.parent / 1000 + "/" + t.parent
@@ -28,6 +29,7 @@
                 }
 
                 File.write(path, raw)
+                File.delete(path + ".html")
             }
         }
     }
@@ -41,6 +43,7 @@
             t.state = Bit.xor(t.state, state)
             raw[0] = t.toString2()
             File.write(path, raw)
+            File.delete(path + ".html")
         }
     }
 })()
@@ -123,7 +126,7 @@ def [Util.struct] Reply(id) => {
     def this.toString () => {
         str(this.id) + " " + this.parent + " " + 
         Util.filterString(this.subject) + " " + 
-        Util.filterString(this.name) + " " + 
+        Util.filterName(this.name) + " " + 
         Util.filterComment(this.comment) + " " + 
         this.uid + " " + this.state + " " + 
         this.ts + " " + this.ip + " " + this.children + " " + this.reserved

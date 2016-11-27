@@ -1,5 +1,5 @@
 (def Template() => {
-    def header(title) => @"<!DOCTYPE html>
+    def this.header(title) => @"<!DOCTYPE html>
 <html>
 <head>
     <meta charset='utf-8'>
@@ -11,57 +11,44 @@
     <title>" + title + " | " + Config.siteName + @"</title>
 </head>
 <body>
+    <div id='header'>
+        <a href='/page/1'>[ 全部 ]</a>
+        <a href='/report/1'>[ 值班室 ]</a>
+        <a href='/assets/eula.raw.html'>[ EULA ]</a>
+    </div>
     <div id='container'>"
 
-    def footer() => @"
+    def this.footer() => @"
+    </div>
+    <hr>
+    <div id='footer'>
+        Powered by <a href='https://github.com/coyove/Eugine' target='_blank'>Eugine</a>
     </div>
 </body>"
 
-    def _post(id, action, fields) => {
-        var ret = @"
-<form action='" + action + "' id='" + id + @"' method='post'>
-    <table>"
-        for fields do (f) => 
-            ret <+ ("<tr><td>" + f.text + "</td><td>" + ({
-                text: 
-                    "<input type='text' name='" + f.name + "' id='" + f.name + "'/>",
-                textarea: 
-                    "<textarea name='" + f.name + "' id='" + f.name + "' rows='" + f.rows + "'></textarea>",
-                checkbox:
-                    "<input type='checkbox' name='" + f.name + "'/><label for='" + f.name + "'>" + f.label + "</label>",
-                submit:
-                    "<input type='submit' value='" + f.value + "'/>"
-            })[f.type] + "</td></tr>")
-
-        ret + @"
-    </table>
-</form>"
-    }
-
     def post(id, endpoint, button) => {
-        _post(id, endpoint, [
-            { text: "标题", type: "text", name: "subject" },
-            { text: "名称", type: "text", name: "name" },
-            { text: "选项", type: "text", name: "options" },
-            { text: "正文", type: "textarea", name: "comment", rows: 10 },
-            { text: "", type: "submit", value: button },
-        ])
+        @"<form action='/new/0' id='start-new' method='post'>
+            <table>
+                <tr><td>名称</td><td><input type='text' name='name' id='name' placeholder='匿名'/></td></tr>
+                <tr><td>选项</td><td><input type='text' name='options' id='options'/></td>
+                <td><a href='/assets/help.raw.html'>?</a></td></tr>
+                <tr><td>标题</td><td><input type='text' name='subject' id='subject' placeholder='无标题'/></td>
+                <td style='width: 1%'><input type='submit' value='发布'/></td></tr>
+                <tr><td>正文</td><td colspan='2'><textarea name='comment' id='comment' rows='10'></textarea></td></tr>
+            </table>
+        </form>"
     }
 
     def postReply(id, endpoint, button) => {
-        _post(id, endpoint, [
-            { text: "名称", type: "text", name: "name" },
-            { text: "选项", type: "text", name: "options" },
-            { text: "正文", type: "textarea", name: "comment", rows: 10 },
-            { text: "", type: "submit", value: button },
-        ])
-    }
-
-    def this.index() => {
-        var ret = header("首页")
-        ret <+ post("start-new", "/new/0", "提交")
-        ret <+ footer()
-        ret
+        @"<form action='" + endpoint + @"' id='reply' method='post'>
+            <table>
+                <tr><td>名称</td><td><input type='text' name='name' id='name' placeholder='匿名'/></td>
+                <td style='width: 1%; text-align: right'><a hide=hide href='javascript:void()'>[x]</a></td></tr>
+                <tr><td>选项</td><td><input type='text' name='options' id='options'/></td>
+                <td style='width: 1%'><input type='submit' value='回复'/></td></tr>
+                <tr><td>正文</td><td colspan='2'><textarea name='comment' id='comment' rows='10'></textarea></td></tr>
+            </table>
+        </form>"
     }
 
     def tState(t) => @ret("") {
@@ -72,9 +59,12 @@
             ret <+ "<div class='saged'>该串已被sage</div>"
     }
 
-    def this.timeline(threads) => {
-        var ret = header("首页")
-        ret <+ post("start-new", "/new/0", "提交")
+    def this.timeline(page, type, threads) => {
+        var title = if type == "all" "全部" else "举报"
+        var ret = header(title + " 第" + page + "页")
+
+        if type == "all"
+            ret <+ post("start-new", "/new/0", "提交")
 
         for threads do (t) => {
             ret <+ "<hr>"
@@ -86,10 +76,13 @@
             for t.replies do (reply) => {
                 reply.isPO = reply.uid == t.main.uid
 
-                ret <+ _thread(reply)
+                ret <+ _thread(reply, false)
             }
+
+            ret <+ "</div></div>"
         }
 
+        ret <+ pager(page)
         ret <+ footer()
         ret
     }
@@ -99,6 +92,7 @@
         if !Bit.and(t.main.state, ThreadState.LOCKED)
             ret <+ postReply("reply", "/new/" + t.main.id, "回复")
 
+        ret <+ "<hr>"
         ret <+ _threadMain(t.main)
 
         var ips = {}
@@ -110,30 +104,53 @@
         for t.replies do (reply) => {
             reply.isPO = reply.uid == muid
 
-            ret <+ _thread(reply)
+            ret <+ _thread(reply, true)
 
             ips[Util.trimIP(reply.ip)] = true
             ids[reply.uid] = true
         }
 
-        ret <+ "<div class='thread-info'>" <+ len(ips) <+ " / " <+ len(ids) <+ "</div>"
+        ret <+ "</div></div>"
+        ipinfo = "<span class='hint--top' aria-label='" + len(ips) + " 个IP'>" + len(ips) + "</span>"
+        idinfo = "<span class='hint--top' aria-label='" + len(ids) + " 个ID'>" + len(ids) + "</span>"
+
+        ret <+ "<hr><div class='thread-info pager'><a href='#top'>[ 顶部 ]</a> / " <+ ipinfo <+ 
+            " / " <+ idinfo <+ "</div>"
         ret <+ footer()
         ret
     }
 
-    def _thread(t) => @ret("") {
+    def this.apiThread(t) => @ret("") {
+        ret <+ @"
+        <div class='thread'>
+            <div class='bar'>
+                <span class='name'>" <+ 
+                (t.name + "</span><span class='date'>" + 
+                t.ts + "</span><span class='ref'>No." +
+                t.id) <+ @"</span></div>
+            <div class='tail'><div class='comment'>" <+ t.comment <+ @"</div></div>
+        </div>"
+    }
+
+    def _thread(t, f) => @ret("") {
         if t.isPO 
             t.name = "<span po>po</span>"
 
+        if !f
+            var refAction = "<a href='/thread/" + t.parent + "#thread-" + t.id + "'>"
+        else
+            var refAction = "<a href='javascript:floating(" + t.id + ")'>"
+
         ret <+ @"
-        <div class='reply' id='thread-" <+ t.id <+ @"'>
+        <div class='thread reply' id='thread-" <+ t.id <+ @"'>
             <div class='bar'>
                 <div class='ind'></div>
+                <span class='hider' onclick='hide(" <+ t.id <+ @")'>-</span>
                 <span class='name'>" <+ 
                 (t.name + "</span><span class='date'>" + 
-                t.ts + "</span><span class='ref'>No.<a href='/thread/" + t.parent + "#thread-" + t.id + "'>" +
+                t.ts + "</span><span class='ref'>No." + refAction +
                 t.id) <+ @"</a></span></div>
-            <div class='comment'>" <+ t.comment <+ @"</div>
+            <div class='tail'><div class='comment'>" <+ t.comment <+ @"</div></div>
         </div>"
     }
 
@@ -144,6 +161,7 @@
         ret <+ @"
         <div class='thread' id='thread-" <+ t.id <+ @"'>
             <div class='bar'>
+                <span class='hider' onclick='hide(" <+ t.id <+ @")'>-</span>
                 " <+ sticky <+ 
                 ("" + (if t.subject != "untitled" "<span class='subject'>" + t.subject + "</span>") + 
                 "</span><span class='name'>" + 
@@ -153,25 +171,44 @@
                 "[ <a href='/thread/" <+ t.id <+ "'>回复 / <span class='replies'>" <+ 
                 t.children <+ " 篇</span></a> ]" <+ @"</span>
             </div>
-            <div class='comment'>" <+ t.comment <+ "</div>" <+
-            tState(t) <+ @"
-        </div>"
+            <div class='tail'><div class='comment'>" <+ t.comment <+ "</div>" <+
+            tState(t)
     }
 
     def pager(curPage) => @ret("") {
-        ret <+ "<div class='pager'>"
+        if curPage == 1
+            var prevPage = 1
+        else
+            var prevPage = curPage - 1
+
+        if curPage == 20
+            var nextPage = 1
+        else
+            var nextPage = curPage + 1
+
+        ret <+ "<hr><div class='pager'>"
+        for 1..11 do (i) =>
+            if i == curPage
+                ret <+ "<b>[ " <+ i <+ " ]</b>"
+            else
+                ret <+ "<a href='" <+ i <+ "'>[ " <+ i <+ " ]</a>"
+
+        if curPage > 10
+            ret <+ "<b>[ " <+ curPage <+ " ]</b>"
+
+        ret <+ "<a href='" <+ prevPage <+ "'>[ 前一页 ]</a><a href='" <+ nextPage <+ "'>[ 后一页 ]</a><a href='#top'>[ 顶部 ]</a></div>"
     }
 
     def this.error(msg) => {
         var ret = header("错误")
-        ret <+ msg
+        ret <+ "<div class='info error'>" <+ msg <+ "<br><a href='javascript:history.back()'>后退</a></div>"
         ret <+ footer()
         ret
     }
 
     def this.info(msg) => {
         var ret = header("提示")
-        ret <+ msg
+        ret <+ "<div class='info'>" <+ msg <+ "<br><a href='javascript:history.back()'>后退</a></div>"
         ret <+ footer()
         ret
     }

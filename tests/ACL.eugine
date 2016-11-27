@@ -1,0 +1,22 @@
+var ipMap = {}
+
+def accessControl(ip, rate) => {
+    var now = Time.unix(0)
+    if contains(ipMap, ip) {
+        if now - ipMap[ip].ts > rate {
+            del(ipMap, ip)
+            true
+        } else {
+            false
+        }
+    } else {
+        ipMap[ip] = {ts: now, rate: rate}
+        true
+    }
+}
+
+(() => {
+    var now = Time.unix(0)
+    for ipMap do (ip, data) => if now - data.ts > data.rate del(ipMap, ip)
+    sleep(10000)
+})#()

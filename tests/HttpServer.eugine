@@ -116,6 +116,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
 
         def this.serveFile(path) => {
             path = String.replace(path, "..", "")
+
             if File.exists(path) {
                 var _ = Util.endsWith(path)
                 switch true do {
@@ -127,7 +128,14 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                     _          => this.writeCommon(200, "")
                 }
                 this.eoh()
-                this.writeBytes(File.readBinary(path))
+
+                if _(".raw.html") {
+                    this.write(Template.header(""))
+                    this.write(File.read(path))
+                    this.write(Template.footer())
+                } else {
+                    this.writeBytes(File.readBinary(path))
+                }
             } else 
                 this.notFound()
         }
@@ -207,7 +215,9 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         context.parsePostBody()
         context.parseCookies()
 
-        context.ip = "127.0.0.1" //test
+        var context.ip = context.headers["x-forwarded-for"]
+        if !context.ip
+            context.ip = "un:kn:ow:n"
 
         switch context.method do {
             "get" => var rref = routerGET
