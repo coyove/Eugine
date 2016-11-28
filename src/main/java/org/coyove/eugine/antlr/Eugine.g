@@ -39,6 +39,10 @@ code returns [SExpression v]
     {
         $v = $B1.ctx == null ? $B2.v : $B1.v;
     }
+    | '{' '}'
+        {
+            $v = ExecEnvironment.Null;
+        }
     ;
 
 block returns [PChain v = new PChain()]

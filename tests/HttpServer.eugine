@@ -13,6 +13,11 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
 
         var this.headers = {}
 
+        def this.parseMultiPartBody() => {
+            var parts = parsePairs(this.headers["content-type"], ";")
+            println(parts.boundary)
+        }
+
         def this.parsePostBody () => {
             var this.postParams = parsePairs(this.data, "&")
             if this.route != null {
@@ -183,9 +188,9 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             !(totalLength == totalRead || Util.isEndOfStream(rawRequest))
         } catch (e)
             if rawRequest != ""
-                println("timeout:\n", e, "\n", rawRequest)
+                Log.warn("timeout:\n", e, "\n", rawRequest)
 
-            // println(rawRequest)
+        var context.raw = rawRequest
 
         var requests = String.split(rawRequest, "\r\n")
         for requests do (request) => {
@@ -202,8 +207,11 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                     "cookie:" =>
                         var context.rawCookie = request[7..]
 
-                    _ =>
-                        context.headers[String.replace(p, ":", "")] = String.trim(request[len(parts[0])..])
+                    _ => {
+                        var key = String.replace(p, ":", "")
+                        if !contains(context.headers, key)
+                            context.headers[key] = String.trim(request[len(parts[0])..])
+                    }
                 }
         }
 
@@ -211,8 +219,17 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             exit("invalid request (" + rawRequest + ")")
 
         var context.data = rawRequest[headerLength..]
-        
-        context.parsePostBody()
+        if context.method == "post" {
+            var ctype = context.headers["content-type"]
+            if ctype == "application/x-www-form-urlencoded" {
+                context.parsePostBody()
+            } else if contains(ctype, "multipart/form-data") > -1 {
+                context.parseMultiPartBody()
+            } else {
+                exit(0)
+            }
+        }
+
         context.parseCookies()
 
         var context.ip = context.headers["x-forwarded-for"]
@@ -222,40 +239,41 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         switch context.method do {
             "get" => var rref = routerGET
             "post" => var rref = routerPOST
+            _ => exit(1)
         }
 
-        if context.method == "post" && context.headers["content-type"] != "application/x-www-form-urlencoded" {
-            context.writeCommon(403, "plain")
-            context.write("\r\n")
+        // if context.method == "post" && false { // context.headers["content-type"] != "" {
+        //     context.writeCommon(403, "plain")
+        //     context.write("\r\n")
+        // } else {
+        var found = false
+        var tester = context.route
+        if contains(rref, "_" + tester) {
+            rref["_" + tester](context)
+            found = true
         } else {
-            var found = false
-            var tester = context.route
-            if contains(rref, "_" + tester) {
-                rref["_" + tester](context)
-                found = true
-            } else {
-                for rref do (route, router) => {
-                    if Util.startsWith(tester, route) {
-                        found = true
-                        router(context)
-                        false
-                    }
-                }
-            }
-
-            if !found {
-                if router404 == null {
-                    context.writeCommon(404, "plain")
-                    context.write("\r\n")
-                } else {
-                    router404(context)
+            for rref do (route, router) => {
+                if Util.startsWith(tester, route) {
+                    found = true
+                    router(context)
+                    false
                 }
             }
         }
+
+        if !found {
+            if router404 == null {
+                context.writeCommon(404, "plain")
+                context.write("\r\n")
+            } else {
+                router404(context)
+            }
+        }
+        // }
 
         // end of enter
         } catch(e) {
-            println(e)
+            Log.error(__e__, e)
         } do {
             is:>close()
             context.close()

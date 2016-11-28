@@ -3,6 +3,7 @@ package org.coyove.eugine;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.ExecEnvironment;
+import org.coyove.cli.main;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ public class Eugine implements Serializable {
     public ExecEnvironment environment = new ExecEnvironment() {{
         put("__comparator__", new SString("__comparator__", true));
         put("__doc__", new SString("__doc__", true));
+        put("__version__", new SString(main.VERSION, true));
         put("__integer_max__", new SInt(Integer.MAX_VALUE, true));
         put("__integer_min__", new SInt(Integer.MIN_VALUE, true));
         put("__long_max__", new SLong(Long.MAX_VALUE, true));

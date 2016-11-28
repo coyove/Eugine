@@ -1,4 +1,4 @@
-package org.coyove.test;
+package org.coyove.cli;
 
 import java.io.*;
 import java.util.concurrent.atomic.*;

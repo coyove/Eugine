@@ -31,7 +31,7 @@
     </select>"
 
     def post(id, endpoint, button) => {
-        @"<form action='/new/0' id='start-new' method='post'>
+        @"<form action='/new/0' id='start-new' method='post' enctype='multipart/form-data'>
             <table>
                 <tr><td>名称</td><td><input type='text' name='name' id='name' placeholder='匿名'/></td></tr>
                 <tr><td>选项</td><td><input type='text' name='options' id='options'/></td>
@@ -40,6 +40,7 @@
                 <td style='width: 1%'><input type='submit' value='发布'/></td></tr>
                 <tr><td>正文</td><td colspan='2'><textarea name='comment' id='comment' rows='10'></textarea></td></tr>
                 <tr><td></td><td>" + emoji + @"</td></tr>
+                <tr><td></td><td><input type='file' name='image'></td></tr>
             </table>
         </form>"
     }

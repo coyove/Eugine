@@ -7,6 +7,7 @@ def accessControl(ip, rate) => {
             del(ipMap, ip)
             true
         } else {
+            Log.warn("Frequent access found:", ip)
             false
         }
     } else {

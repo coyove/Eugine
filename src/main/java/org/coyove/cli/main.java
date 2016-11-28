@@ -1,24 +1,30 @@
-package org.coyove.test;
+package org.coyove.cli;
 
 import java.awt.*;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.lang.System;
-import java.nio.file.Paths;
 
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SConfig;
 import org.coyove.eugine.util.*;
 
 public class main {
+    public final static String VERSION = "1.0.0rc";
+
     public static ArgumentsParser.Arguments options = null;
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
+        System.setProperty("file.encoding", "utf-8");
         options = ArgumentsParser.read(args);
 
-        if (!options.isEnabled("core")) {
-            Utils.importExportables();
+        if (options.verbose) {
+            System.out.println("Eugine started");
+        }
+
+        for (String cn : options.imports) {
+            Utils.loadExportables(cn);
         }
 
         if (options.isEnabled("aggressive")) {
@@ -131,6 +137,8 @@ public class main {
                 } else if (s.charAt(i) == '\t') {
                     r.keyPress(9);
                     r.keyRelease(9);
+                } else {
+                    break;
                 }
             }
         } catch(Exception aex) {

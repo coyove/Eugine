@@ -20,16 +20,27 @@ public class SEMath extends SExpression {
 
     private static Random defaultRandom = new Random(new Date().getTime());
 
-    private OPERATION func;
+    private byte func;
 
-    public enum OPERATION {SIN, COS, TAN, ASIN, ACOS, ATAN,
-        ROUND, FLOOR, ABS, SGN, SQRT, RANDOM, POW}
+    public final static byte SIN = 0;
+    public final static byte COS = 1;
+    public final static byte TAN = 2;
+    public final static byte ASIN = 3;
+    public final static byte ACOS = 4;
+    public final static byte ATAN = 5;
+    public final static byte ROUND = 6;
+    public final static byte FLOOR = 7;
+    public final static byte ABS = 8;
+    public final static byte SGN = 9;
+    public final static byte SQRT = 10;
+    public final static byte RANDOM = 11;
+    public final static byte POW = 12;
 
     public SEMath() {
     }
 
-    public SEMath(Atom ha, ListEx<SExpression> args, OPERATION f) {
-        super(ha, args, 1);
+    public SEMath(Atom ha, ListEx<SExpression> args, byte f) {
+        super(ha, args, f == POW ? 2 : 1);
 
         argument = args.head();
         if (args.size() > 1) {

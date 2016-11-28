@@ -296,11 +296,11 @@ server.addRouter("POST", "/new/", (context) => enter {
         42 => errorHandler(context, Config.i18n.INVALID_THREAD_ID)
         90 => errorHandler(context, "无效权限")
         91 => errorHandler(context, "无效串Id")
-        _ => println(e)
+        _ => Log.error(e)
     }
 })
 
-println("Listening on port ", Config.port)
+Log.info("Listening on port:", Config.port)
 server.start()
 
 // def struct (f, args...) => {

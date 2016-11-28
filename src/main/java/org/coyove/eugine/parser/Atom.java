@@ -1,5 +1,7 @@
 package org.coyove.eugine.parser;
 
+import org.coyove.eugine.util.Utils;
+
 /**
  * Created by coyove on 2016/9/9.
  */
@@ -16,6 +18,7 @@ public class Atom {
         token.line = tok.getLine() - 1;
         token.lineIndex = tok.getCharPositionInLine();
         token.source = tok.getTokenSource().getSourceName();
+        token.filename = Utils.getFileName(token.source).replace(".eugine", ".e");
         token.value = tok.getText();
     }
 

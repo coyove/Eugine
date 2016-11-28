@@ -1,13 +1,13 @@
 package org.coyove.eugine.library;
 
-import com.google.gson.*;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -24,62 +24,53 @@ public class SEJsonDecoder extends SExpression {
         subject = args.head();
     }
 
-    private SValue decode(JsonElement obj) {
-        if (obj instanceof JsonObject) {
+    private SValue decode(Object root) throws EgException {
+        if (root == JSONObject.NULL) {
+            return ExecEnvironment.Null;
+        } else if (root instanceof JSONObject) {
             HashMap<String, SValue> ret = new HashMap<String, SValue>();
 
-            for (Map.Entry<String, JsonElement> elem : ((JsonObject) obj).entrySet()) {
-                ret.put(elem.getKey(), decode(elem.getValue()));
+            for (String s : ((JSONObject) root).keySet()) {
+                ret.put(s, decode(((JSONObject) root).get(s)));
             }
 
             return new SDict(ret);
-        } else if (obj instanceof JsonArray) {
-            ListEx<SValue> ret = new ListEx<SValue>(((JsonArray) obj).size());
-
-            for (JsonElement elem : ((JsonArray) obj)) {
-                ret.add(decode(elem));
+        } else if (root instanceof JSONArray) {
+            ListEx<SValue> ret = new ListEx<SValue>(((JSONArray) root).length());
+            for (Object o : ((JSONArray) root)) {
+                ret.add(decode(o));
             }
-
             return new SList(ret);
-        } else if (obj instanceof JsonPrimitive) {
-            JsonPrimitive p = ((JsonPrimitive) obj);
-            if (p.isBoolean()) {
-                return p.getAsBoolean() ? ExecEnvironment.True : ExecEnvironment.False;
-            } else if (p.isString()) {
-                return new SString(p.getAsString());
-            } else if (p.isNumber()) {
-                double num = p.getAsDouble();
-                if (num % 1 == 0) {
-                    return new SLong(p.getAsLong());
-                } else {
-                    return new SDouble(num);
-                }
-            } else {
-                // never happen
-                return null;
-            }
-        } else if (obj instanceof JsonNull) {
-            return ExecEnvironment.Null;
+        } else if (root instanceof Integer) {
+            return new SInt((Integer) root);
+        } else if (root instanceof Long) {
+            return new SLong((Long) root);
+        } else if (root instanceof Double) {
+            return new SDouble((Double) root);
+        } else if (root instanceof String) {
+            return new SString((String) root);
+        } else if (root instanceof Boolean) {
+            return ((Boolean) root) ? ExecEnvironment.True : ExecEnvironment.False;
         } else {
-            // never happen
-            return null;
+            throw new EgException(8099, "invalid json node: " + root, atom);
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String json = Utils.cast(subject.evaluate(env), SString.class,
-                new EgException(7032, "invalid json text", atom)).get();
-        Gson g = new Gson();
-        return decode(g.fromJson(json, JsonElement.class));
+        String json = Utils.castString(subject.evaluate(env), atom);
+        if (json.trim().charAt(0) == '[') {
+            return decode(new JSONArray(json));
+        } else {
+            return decode(new JSONObject(json));
+        }
     }
 
     @Override
     public SExpression deepClone() throws EgException {
         SEJsonDecoder ret = new SEJsonDecoder();
         ret.atom = this.atom;
-
         ret.subject = this.subject.deepClone();
         return ret;
     }

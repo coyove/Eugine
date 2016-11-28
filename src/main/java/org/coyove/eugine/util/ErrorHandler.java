@@ -1,7 +1,7 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.parser.Atom;
-import org.coyove.test.main;
+import org.coyove.cli.main;
 
 /**
  * Created by coyove on 2016/10/30.

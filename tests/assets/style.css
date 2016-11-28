@@ -226,6 +226,10 @@ div.pager {
     margin: 0 2px;
 }
 
+div.info {
+    padding: 0 4px;
+}
+
 div.error {
     color: red;
 }

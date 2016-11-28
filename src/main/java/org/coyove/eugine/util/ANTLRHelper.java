@@ -2,6 +2,7 @@ package org.coyove.eugine.util;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.coyove.cli.main;
 import org.coyove.eugine.antlr.EugineImportListener;
 import org.coyove.eugine.antlr.EugineLexer;
 import org.coyove.eugine.antlr.EugineParser;
@@ -16,11 +17,15 @@ import java.io.InputStream;
  */
 public class ANTLRHelper {
     public static SValue executeFile(String source, ExecEnvironment env) {
+        if (main.options.verbose) {
+            System.out.println("Parsing " + source);
+        }
+
         CharStream afs = null;
         try {
             afs = new ANTLRFileStream(source);
         } catch (IOException e) {
-            System.out.println("file not found: " + source);
+            System.out.println("File not found: " + source);
             System.exit(1);
         }
 

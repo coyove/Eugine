@@ -94,7 +94,7 @@ def worker () => {
 }
 
 var threads = []
-for 0..8 do () =>
+for 0..4 do () =>
 	threads <+ worker#()
 
 for threads do (t) => wait(t)

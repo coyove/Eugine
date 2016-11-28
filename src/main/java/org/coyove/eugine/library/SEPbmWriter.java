@@ -4,8 +4,6 @@ import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;

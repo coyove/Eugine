@@ -42,8 +42,8 @@ public class PFor extends SExpression {
         direction = dir;
     }
 
-    private SValue execLoop(SClosure body, SValue v, SValue idx) throws EgException {
-        ExecEnvironment env = SConfig.strictForLoop ? new ExecEnvironment() : body.outerEnv;
+    private SValue execLoop(SClosure body, ExecEnvironment _env, SValue v, SValue idx) throws EgException {
+        ExecEnvironment env = SConfig.strictForLoop ? new ExecEnvironment() : _env;
         SValue old1 = null;
         SValue old2 = null;
         String name1 = null;
@@ -58,7 +58,7 @@ public class PFor extends SExpression {
                 env.put(body.argNames.get(1), idx);
             }
 
-            env.parentEnv = body.outerEnv;
+            env.parentEnv = _env;
         } else {
             if (body.argNames.size() >= 1) {
                 name1 = body.argNames.head();
@@ -102,10 +102,10 @@ public class PFor extends SExpression {
         SValue _body;
         SClosure body;
 
-//        if (this.cachedClosure != null) {
-//            body = this.cachedClosure;
+        if (this.cachedClosure != null) {
+            body = this.cachedClosure;
 //            body.outerEnv = env;
-//        } else {
+        } else {
             _body = this.body.evaluate(env);
             if (!(_body instanceof SClosure)) {
                 throw new EgException(2017, "invalid loop body", atom);
@@ -116,7 +116,7 @@ public class PFor extends SExpression {
             }
 
             body = ((SClosure) _body);
-//        }
+        }
 
         SValue _list = this.list.evaluate(env);
 
@@ -125,7 +125,7 @@ public class PFor extends SExpression {
             String[] keys = m.keySet().toArray(new String[m.size()]);
 
             for (int i = 0; i < keys.length; i++) {
-                if (Utils.checkExit(execLoop(body, new SString(keys[i]), m.get(keys[i])))) {
+                if (Utils.checkExit(execLoop(body, env, new SString(keys[i]), m.get(keys[i])))) {
                     break;
                 }
             }
@@ -134,13 +134,13 @@ public class PFor extends SExpression {
 
             if (direction == ASC) {
                 for (int i = 0; i < values.size(); i++) {
-                    if (Utils.checkExit(execLoop(body, values.get(i).evaluate(env), new SInt(i)))) {
+                    if (Utils.checkExit(execLoop(body, env, values.get(i).evaluate(env), new SInt(i)))) {
                         break;
                     }
                 }
             } else {
                 for (int i = values.size() - 1; i >= 0; i--) {
-                    if (Utils.checkExit(execLoop(body, values.get(i).evaluate(env), new SInt(i)))) {
+                    if (Utils.checkExit(execLoop(body, env, values.get(i).evaluate(env), new SInt(i)))) {
                         break;
                     }
                 }
@@ -148,14 +148,14 @@ public class PFor extends SExpression {
         } else if (_list instanceof SBool) {
             long i = 0;
             while (Utils.isBooleanTrue(this.list.evaluate(env))) {
-                if (Utils.checkExit(execLoop(body, ExecEnvironment.Null, new SLong(i++)))) {
+                if (Utils.checkExit(execLoop(body, env, ExecEnvironment.Null, new SLong(i++)))) {
                     break;
                 }
             }
         } else if (_list instanceof SRange) {
             SRange r = (SRange) _list;
             for (int i = r.start; i < r.end; i += r.interval) {
-                SValue ret = execLoop(body, new SInt(i), new SInt(i));
+                SValue ret = execLoop(body, env, new SInt(i), new SInt(i));
                 if (Utils.checkExit(ret)) {
                     break;
                 }

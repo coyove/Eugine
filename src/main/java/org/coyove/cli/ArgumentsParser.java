@@ -1,4 +1,6 @@
-package org.coyove.test;
+package org.coyove.cli;
+
+import org.coyove.eugine.util.ListEx;
 
 import java.util.HashMap;
 
@@ -7,6 +9,9 @@ import java.util.HashMap;
  */
 public class ArgumentsParser {
     public static class Arguments extends HashMap<String, Object> {
+        public ListEx<String> imports = new ListEx<String>();
+        public boolean verbose = false;
+
         public boolean isEnabled(String key) {
             Object v = super.get(key);
             return v instanceof Boolean ? ((Boolean) v) : false;
@@ -27,11 +32,17 @@ public class ArgumentsParser {
             } else if (args[i].equals("--aggressive")) {
                 ret.put("aggressive", true);
                 i++;
-            } else if (args[i].equals("--core-only")) {
-                ret.put("core", true);
-                i++;
+            } else if (args[i].equals("--load")) {
+                ret.imports.add(args[i + 1]);
+                i+=2;
             } else if (args[i].equals("--no-robot")) {
                 ret.put("no-robot", true);
+                i++;
+            } else if (args[i].equals("--version")) {
+                System.out.println("Eugine " + main.VERSION);
+                System.exit(0);
+            } else if (args[i].equals("--verbose")) {
+                ret.verbose = true;
                 i++;
             } else {
                 ret.put("source", args[i]);

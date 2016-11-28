@@ -29,6 +29,31 @@ public class SKeywords {
                         return new SEPrint(new Atom(tok), arguments, "\n");
                     }
                 });
+                put("Log.debug", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.DEBUG);
+                    }
+                });
+                put("Log.info", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.INFO);
+                    }
+                });
+                put("Log.warn", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.WARN);
+                    }
+                });
+                put("Log.error", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.ERROR);
+                    }
+                });
+                put("Log.level", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.SET_LEVEL);
+                    }
+                });
                 put("==", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new PCompare(new Atom(tok), arguments, "==");
@@ -176,52 +201,52 @@ public class SKeywords {
                 });
                 put("Math.sin", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SIN);
+                        return new SEMath(new Atom(tok), c, SEMath.SIN);
                     }
                 });
                 put("Math.cos", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.COS);
+                        return new SEMath(new Atom(tok), c, SEMath.COS);
                     }
                 });
                 put("Math.tan", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.TAN);
+                        return new SEMath(new Atom(tok), c, SEMath.TAN);
                     }
                 });
                 put("Math.abs", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ABS);
+                        return new SEMath(new Atom(tok), c, SEMath.ABS);
                     }
                 });
                 put("Math.asin", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ASIN);
+                        return new SEMath(new Atom(tok), c, SEMath.ASIN);
                     }
                 });
                 put("Math.acos", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ACOS);
+                        return new SEMath(new Atom(tok), c, SEMath.ACOS);
                     }
                 });
                 put("Math.atan", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ATAN);
+                        return new SEMath(new Atom(tok), c, SEMath.ATAN);
                     }
                 });
                 put("Math.sqrt", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SQRT);
+                        return new SEMath(new Atom(tok), c, SEMath.SQRT);
                     }
                 });
                 put("Math.sgn", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.SGN);
+                        return new SEMath(new Atom(tok), c, SEMath.SGN);
                     }
                 });
                 put("Math.pow", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.POW);
+                        return new SEMath(new Atom(tok), c, SEMath.POW);
                     }
                 });
                 put("Time.unix", new CallableKeyword() {
@@ -241,17 +266,17 @@ public class SKeywords {
                 });
                 put("Math.round", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.ROUND);
+                        return new SEMath(new Atom(tok), c, SEMath.ROUND);
                     }
                 });
                 put("Math.floor", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.FLOOR);
+                        return new SEMath(new Atom(tok), c, SEMath.FLOOR);
                     }
                 });
                 put("Math.random", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMath(new Atom(tok), c, SEMath.OPERATION.RANDOM);
+                        return new SEMath(new Atom(tok), c, SEMath.RANDOM);
                     }
                 });
                 put("buffer", new CallableKeyword() {

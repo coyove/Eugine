@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
+import org.coyove.cli.main;
 import org.coyove.eugine.base.SKeywords;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
@@ -43,8 +44,11 @@ public class EugineImportListener extends EugineBaseListener {
             }
 
         } else {
-            ANTLRHelper.executeFile(Utils.getDirectoryName(source) +
-                    StringUtils.join(importPath, "/") + ".eugine", this.env);
+            source = Utils.getDirectoryName(source) + StringUtils.join(importPath, "/");
+            if (main.options.verbose) {
+                System.out.println("Importing " + source);
+            }
+            ANTLRHelper.executeFile(source + ".eugine", this.env);
         }
     }
 }

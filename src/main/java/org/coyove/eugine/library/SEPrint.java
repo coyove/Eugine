@@ -30,14 +30,14 @@ public class SEPrint extends SExpression {
         delim = d;
     }
 
-    private String print(SValue re, ExecEnvironment env, int padding, boolean quote) throws EgException {
+    public static String format(SValue re, int padding, boolean quote) throws EgException {
         String ret = "";
         if (re instanceof SList) {
             ListEx<SValue> lv = re.get();
             String[] values = new String[lv.size()];
 
             for (int i = 0; i < lv.size(); i++) {
-                values[i] = print(lv.get(i), env, padding, true);
+                values[i] = format(lv.get(i), padding, true);
             }
 
             ret += "[" + StringUtils.join(values, ", ") + "]";
@@ -49,7 +49,7 @@ public class SEPrint extends SExpression {
 
             for (String key : keys) {
                 values[i++] = String.format("%1$" + padding + "s\"%2$s\": %3$s,\n", " ", key,
-                        print(map.get(key), env, padding + 2, true));
+                        format(map.get(key), padding + 2, true));
             }
 
             ret += "{\n" + StringUtils.join(values, "") + StringUtils.leftPad("}", padding - 1);
@@ -81,7 +81,7 @@ public class SEPrint extends SExpression {
         SValue ret = ExecEnvironment.Null;
         for (SValue v : SExpression.eval(arguments, env, atom)) {
             ret = v;
-            System.out.print(print(v, env, 2, false));
+            System.out.print(format(v, 2, false));
         }
         System.out.print(delim);
 

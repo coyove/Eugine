@@ -13,6 +13,7 @@ public class Token implements java.io.Serializable {
     public int line;
     public int lineIndex;
     public String source;
+    public String filename;
 
     public Token() {
     }
