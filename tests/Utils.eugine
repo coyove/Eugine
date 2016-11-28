@@ -156,11 +156,11 @@ import Cookie
     }
 
     def this.trimIP(ip) => {
-        if contains(ip, ":") {
+        if contains(ip, ":") > -1 {
             var parts = String.split(ip, ":") // buggy, abbreviation is not considered
             String.join(parts[0..len(parts)/2], ".")
         } else {
-            var parts = String.split(ip, ".")
+            var parts = String.split(ip, @"\.")
             String.join(List.initOf(parts), ".")
         }
     }

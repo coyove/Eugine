@@ -176,6 +176,11 @@ window.onload = function() {
         document.getElementById('comment').value = ">>No." + location.href.match(/\#thread\-(\d+)$/)[1] + "\n";
     }
 
+    document.getElementById("emoji").onchange = function(e) {
+        document.getElementById('comment').value += this.value;
+        document.getElementById('comment').focus();
+    }
+
     var hiddens = purgeStorage("hidden_threads");
     var threads = document.querySelectorAll(".thread");
 
