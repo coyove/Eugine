@@ -20,7 +20,8 @@ public class PSub extends SExpression {
     @ReplaceableVariable
     private SExpression end;
 
-    public PSub() {}
+    public PSub() {
+    }
 
     public PSub(Atom ha, SExpression sub, SExpression s, SExpression e) {
         atom = ha;
@@ -28,6 +29,67 @@ public class PSub extends SExpression {
         end = e;
         subject = sub;
     }
+
+//    private static boolean sliceSegment(StringBuilder sb, boolean append, int start, int end, String text, int idx, int len) {
+//        String t = "";
+//        boolean b = true;
+//        if (idx + len < start) {
+//                    /*
+//                    idx   idx+len
+//                     [#######]---//---|
+//                                    start
+//                     */
+//            b = !append;
+//        } else if (end < idx) {
+//                    /*
+//                             idx   idx+len
+//                     |---//---[#######]
+//                    end
+//                     */
+//            b = !append;
+//            sb.subSequence()
+//        } else if (idx <= start && start <= idx + len && end >= idx + len) {
+//                    /*
+//                    idx         idx+len
+//                     [######|######]---//---|
+//                          start            end
+//                     */
+//            t = (text.substring(start - idx));
+//            b = true;
+//        } else if (start < idx && end >= idx && idx + len >= end) {
+//                    /*
+//                             idx         idx+len
+//                     |---//---[######|######]
+//                   start            end
+//                     */
+//            t = (text.substring(0, end - idx));
+//            b = !append;
+//        } else if (idx >= start && end >= idx + len) {
+//                    /*
+//                            idx  idx+len
+//                    |---//---[######]---//---|
+//                  start                     end
+//                     */
+//            t = (text);
+//            b = true;
+//        } else if (idx <= start && end <= idx + len) {
+//                    /*
+//                    idx          idx+len
+//                     [###|######|###]
+//                       start   end
+//                     */
+//            t = (text.substring(start - idx, end - idx));
+//            b = false;
+//        }
+//
+//        if (append) {
+//            sb.append(t);
+//        } else {
+//            sb.insert(0, t);
+//        }
+//
+//        return b;
+//    }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
@@ -40,17 +102,26 @@ public class PSub extends SExpression {
 
         int end = this.end != null ? Utils.castInt(this.end.evaluate(env), atom) : 0;
 
-        if (subObj instanceof SString) {
-            SString subStr = (SString) subObj;
-
+        if (subObj instanceof SConcatString) {
             if (this.end == null) {
-                return new SString(subStr.<String>get().substring(start));
-            } else {
-                try {
-                    return new SString(subStr.<String>get().substring(start, end));
-                } catch (StringIndexOutOfBoundsException se) {
-                    throw new EgException(3013, "string index out of range", atom);
+                end = ((SConcatString) subObj).length();
+            }
+            try {
+                return new SString(((SConcatString) subObj).substring(start, end));
+            } catch (StringIndexOutOfBoundsException se) {
+                throw new EgException(3013, "string index out of range", atom);
+            }
+        } else if (subObj instanceof SString) {
+            String subStr = Utils.castString(subObj, atom);
+
+            try {
+                if (this.end == null) {
+                    return new SString(subStr.substring(start));
+                } else {
+                    return new SString(subStr.substring(start, end));
                 }
+            } catch (StringIndexOutOfBoundsException se) {
+                throw new EgException(3013, "string index out of range", atom);
             }
 
         } else if (subObj instanceof SList) {

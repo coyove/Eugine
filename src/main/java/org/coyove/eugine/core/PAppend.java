@@ -1,5 +1,6 @@
 package org.coyove.eugine.core;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
@@ -35,9 +36,9 @@ public class PAppend extends SExpression {
         if (left instanceof SConcatString) {
             if (!(right instanceof SNull)) {
                 if (right instanceof SConcatString) {
-                    ((SConcatString) left).texts.addAll(((SConcatString) right).texts);
+                    ((SConcatString) left).append(((SConcatString) right).text);
                 } else {
-                    ((SConcatString) left).texts.add(right.asString());
+                    ((SConcatString) left).append(right.asString());
                 }
             }
 
@@ -65,6 +66,13 @@ public class PAppend extends SExpression {
 
             list.add(right);
             return left;
+        }
+
+        if (left.underlying instanceof byte[] && right.underlying instanceof byte[]) {
+            byte[] l = (byte[]) left.underlying;
+            byte[] r = (byte[]) right.underlying;
+
+            left.underlying = ArrayUtils.addAll(l, r);
         }
 
         return ExecEnvironment.Null;

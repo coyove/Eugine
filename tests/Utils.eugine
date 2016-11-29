@@ -160,7 +160,7 @@ import Cookie
             var parts = String.split(ip, ":") // buggy, abbreviation is not considered
             String.join(parts[0..len(parts)/2], ".")
         } else {
-            var parts = String.split(ip, @"\.")
+            var parts = String.splitRaw(ip, ".")
             String.join(List.initOf(parts), ".")
         }
     }

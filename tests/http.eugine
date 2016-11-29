@@ -126,6 +126,8 @@ server.addRouter("POST", "/new/", (context) => enter {
     var subject = context.postParams.subject
     var comment = context.postParams.comment
 
+    File.writeBinary(__path__ + Time.unix(0), context.postParams.image.payload)
+
     if !name name = "匿名"
     if !subject subject = "untitled"
     if len(name) > 32 exit(32)

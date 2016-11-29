@@ -101,6 +101,9 @@ public class PGet extends SExpression {
 
                 return ret;
             }
+        } else if (dict.underlying instanceof byte[]) {
+            byte[] buf = ((byte[]) dict.underlying);
+            return new SInt(buf[Utils.castInt(sk, atom)]);
         } else if (dict instanceof SObject) {
             String field = Utils.castString(sk, atom);
 

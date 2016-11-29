@@ -24,7 +24,7 @@ public class SEBytesBuffer extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue src =this.src.evaluate(env);
+        SValue src = this.src.evaluate(env);
         if (src instanceof SString) {
             return new SObject(src.<String>get().getBytes(Charset.forName("UTF-8")));
         } else if (src instanceof SInt) {

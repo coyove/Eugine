@@ -91,7 +91,11 @@ public class SEFile extends SExpression {
                                     StandardOpenOption.WRITE};
 
                     if (data instanceof SString) {
-                        Files.write(path, data.<String>get().getBytes("utf-8"), oo);
+                        if (fileOp == OPERATION.WRITE_BINARY) {
+                            Files.write(path, data.<String>get().getBytes("US-ASCII"), oo);
+                        } else {
+                            Files.write(path, data.<String>get().getBytes("utf-8"), oo);
+                        }
                     } else if (data instanceof SObject && data.get() instanceof byte[]) {
                         Files.write(path, ((byte[]) data.get()), oo);
                     } else if (data instanceof SList) {

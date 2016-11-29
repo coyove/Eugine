@@ -154,11 +154,13 @@ public class PFor extends SExpression {
             }
         } else if (_list instanceof SRange) {
             SRange r = (SRange) _list;
-            for (int i = r.start; i < r.end; i += r.interval) {
+            int i = r.start;
+            while (i != r.end) {
                 SValue ret = execLoop(body, env, new SInt(i), new SInt(i));
                 if (Utils.checkExit(ret)) {
                     break;
                 }
+                i += r.interval;
             }
         } else {
             throw new EgException(2018, "invalid loop condition", atom);

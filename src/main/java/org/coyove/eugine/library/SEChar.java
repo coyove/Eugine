@@ -5,6 +5,8 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
+import java.nio.charset.Charset;
+
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -38,8 +40,17 @@ public class SEChar extends SExpression {
                     throw new EgException(3002, "string index out of range", atom);
                 }
             case CHR:
-                int i = Utils.castInt(arg, atom);
-                return new SString(String.valueOf((char) i));
+                if (arg.underlying instanceof byte[]) {
+                    byte[] buf = ((byte[]) arg.underlying);
+                    StringBuilder sb = new StringBuilder();
+                    for (byte b : buf) {
+                        sb.append((char) b);
+                    }
+                    return new SString(new String(buf, Charset.forName("US-ASCII")));
+                } else {
+                    int i = Utils.castInt(arg, atom);
+                    return new SString(String.valueOf((char) i));
+                }
             default:
                 throw new EgException(3004, "unknown operation", atom);
         }

@@ -26,7 +26,9 @@ public class SELen extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
 
         SValue obj = argument.evaluate(env);
-        if (obj instanceof SString) {
+        if (obj instanceof SConcatString) {
+            return new SInt(((SConcatString) obj).length());
+        } else if (obj instanceof SString) {
             return new SInt(obj.<String>get().length());
         } else if (obj instanceof SList) {
             return new SInt(obj.<ListEx<SValue>>get().size());
