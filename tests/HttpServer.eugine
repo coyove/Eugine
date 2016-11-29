@@ -8,10 +8,13 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
     var router404 = null
 
     var this.mimeMapper = {
-        "image/jpeg": ".jpg",
-        "image/jpg": ".jpg",
-        "image/png": ".png",
-        "image/gif": ".gif",
+        "image/jpeg" : ".jpg",
+        "image/jpg"  : ".jpg",
+        "image/pjpeg": ".jpg",
+        "image/png"  : ".png",
+        "image/gif"  : ".gif",
+        "image/x-png": ".png",
+        "application/octet-stream": ".jpg",
     }
 
     def [Util.struct] this.HttpContext (socket) => {
@@ -23,40 +26,48 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         def this.parseMultiPartBody() => {
             var this.postParams = {}
             var parts = parsePairs(this.headers["content-type"], ";")
-            var offset = 0
-            var boundary = "--" + parts.boundary + "\r\n"
+            var boundary = "--" + parts.boundary
 
-            for String.splitRaw(this.data, boundary) do (payload) => {
-                var ps = String.splitRaw(payload, "\r\n\r\n")
-                offset += len(boundary)
+            var curBoundaryPos = 0
+            enter for true do () => {
+                var nextBoundary = contains(this.rawData, boundary, curBoundaryPos)
+                if nextBoundary == -1 exit(0)
+
+                var pos = curBoundaryPos + len(boundary) + 2 // 2 = \r\n
+                var bod = contains(this.rawData, "\r\n\r\n", pos)
+                if bod == -1 exit(0)
+
+                var lines = String.splitRaw(chr(this.rawData[pos..bod]), "\r\n")
+                var tmp = parsePairs(lines[0], ";")
+                var key = tmp.name[1..len(tmp.name)-1]
+
+                bod += 4
+                var eod = contains(this.rawData, "\r\n" + boundary, pos)
+                if eod == -1 exit(0)
                 
-                Log.info(offset, ps)
-                if len(ps) == 2 {
-                    var lines = String.splitRaw(ps[0], "\r\n")
-                    var tmp = parsePairs(lines[0], ";")
-                    var key = tmp.name[1..len(tmp.name)-1]
+                lines = List.tailOf(lines)
 
-                    offset += len(ps[0]) + 4
-                    Log.info(offset)
-
-                    if len(lines) == 2 && Util.startsWith(lines[1], "Content-Type") {
-                        var ctype = String.trim(lines[1][13..])::toLowerCase()
-                        
-                        this.postParams[key] = {
-                            type: ctype,
-                            values: tmp,
-                            payload: this.rawData[offset..offset + len(ps[1]) - 2],
+                if lines != null for lines do (line) => {
+                    if Util.startsWith(line, "Content-Type") {
+                        var ctype = String.trim(line[13..])::toLowerCase()
+                        Log.info(ctype)
+                        if contains(mimeMapper, ctype) {
+                            this.postParams[key] = {
+                                type: ctype,
+                                values: tmp,
+                                payload: this.rawData[bod..eod],
+                            }
                         }
-                    } else {
-                        this.postParams[key] = ps[1][0..len(ps[1])-2]
                     }
-
-                    offset += len(ps[1])
-                } else {
-                    offset += len(payload)
                 }
+
+                if !contains(this.postParams, key)
+                    this.postParams[key] = Util.decodeURI(new java/lang/String(this.rawData[bod..eod]: byte[]))
+                
+                curBoundaryPos = eod
+            } catch(e) {
+                //     Log.warn(e)
             }
-            // Log.info(this.postParams)
         }
 
         def this.parsePostBody () => {
@@ -131,7 +142,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                         payload += "; " + k + "=" + v
                     }
                 }
-
+                Log.info(str(buffer(payload)))
             this.writeHeader("Set-Cookie", payload)
         }
 
@@ -139,9 +150,8 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
             this.writeBytes(buffer(key + ": " + value + "\r\n"))
 
         def this.write(text...) => {
-            var tmp = clone ""
+            var tmp = ""
             for text do (t) => tmp <+ t
-
             this.writeBytes(buffer(tmp))
         }
 
@@ -205,66 +215,75 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         var context = _HttpServer.HttpContext(client)
 
         enter {
-        var buf  = buffer(1024), 
-            read = 0
-        var totalRead    = 0
-        var rawRequest   = ""
-        var rawBuf = buffer(0)
-        var bodyLength   = 0
-        var headerLength = 0
-        var totalLength  = 0
+        var buf    = buffer(1024 * 128), 
+            rawBuf = buffer(0),
+            read   = 0
+
+        var totalRead    = 0,
+            bodyLength   = 0,
+            headerLength = 0,
+            totalLength  = 0
 
         enter for read != -1 do () => {
             totalRead += (read = is::read(buf : byte[]))
-            rawRequest <+ chr(buf)
             rawBuf <+ buf[0..read]
+            // rawRequest <+ chr(buf)
 
             if !bodyLength {
-                var m = String.match(rawRequest, @"(?i)content-length:\s?(\d+)")
+                var m = String.match(chr(rawBuf), @"(?i)content-length:\s?(\d+)")
                 if len(m) > 0
                     bodyLength = num(String.split(m[0].text, ":")[1]) // we found Content-Length header
             }
 
             if !headerLength {
-                m = String.match(rawRequest, @"(\r\n\r\n)")
+                m = String.match(chr(rawBuf), @"(\r\n\r\n)")
                 if len(m) > 0
                     totalLength = (headerLength = m[0].end) + bodyLength // we reach the end of HTTP request headers
             }
 
-            !(totalLength == totalRead) // || Util.isEndOfStream(rawRequest))
+            totalLength != totalRead // || Util.isEndOfStream(rawRequest))
         } catch (e)
-            if rawRequest != ""
-                Log.warn("timeout:\n", e, "\n", rawRequest)
+            Log.warn("Timeout:", e)
 
-        var context.raw = rawRequest
+        // var requests = String.split(rawRequest[0..headerLength], "\r\n")
+        var requests = rawBuf[0..headerLength]
+        // for requests do (request) => {
+        var eol = 0
+        for true do () => {
+            var nextEOL = contains(requests, "\r\n", eol)
 
-        var requests = String.split(rawRequest[0..headerLength], "\r\n")
-        for requests do (request) => {
-            var parts = String.split(request, " ")
-            var p = null
-            if len(parts) > 1
-                switch p = parts[0]::toLowerCase() do {
-                    "get" =>
-                        var context.route = parts[1], context.method = "get"
+            if nextEOL == -1 {
+                false
+            } else {
+                var request = chr(requests[eol..nextEOL])
+                var parts = String.split(request, " ")
+                eol = nextEOL + 2
 
-                    "post" =>
-                        var context.route = parts[1], context.method = "post"   
+                var p = null
+                if len(parts) > 1
+                    switch p = parts[0]::toLowerCase() do {
+                        "get" =>
+                            var context.route = parts[1], context.method = "get"
 
-                    "cookie:" =>
-                        var context.rawCookie = request[7..]
+                        "post" =>
+                            var context.route = parts[1], context.method = "post"   
 
-                    _ => {
-                        var key = String.replace(p, ":", "")
-                        if !contains(context.headers, key)
-                            context.headers[key] = String.trim(request[len(parts[0])..])
+                        "cookie:" =>
+                            var context.rawCookie = request[7..]
+
+                        _ => {
+                            var key = String.replace(p, ":", "")
+                            if !contains(context.headers, key)
+                                context.headers[key] = String.trim(request[len(parts[0])..])
+                        }
                     }
-                }
+            }
         }
 
         if context.method == null
-            exit("invalid request (" + rawRequest + ")")
+            exit("invalid request (" + chr(rawBuf) + ")")
 
-        var context.data = rawRequest[headerLength..]
+        // var context.data = rawRequest[headerLength..]
         var context.rawData = rawBuf[headerLength..]
         if context.method == "post" {
             var ctype = context.headers["content-type"]

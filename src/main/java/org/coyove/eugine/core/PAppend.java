@@ -35,11 +35,7 @@ public class PAppend extends SExpression {
 
         if (left instanceof SConcatString) {
             if (!(right instanceof SNull)) {
-                if (right instanceof SConcatString) {
-                    ((SConcatString) left).append(((SConcatString) right).text);
-                } else {
-                    ((SConcatString) left).append(right.asString());
-                }
+                ((SConcatString) left).append(right.asString());
             }
 
             return left;
@@ -48,11 +44,7 @@ public class PAppend extends SExpression {
         if (left instanceof SString) {
             if (!(right instanceof SNull)) {
                 String text = left.get();
-                if (right instanceof SConcatString) {
-                    left.underlying = text + right.<String>get();
-                } else {
-                    left.underlying = text + right.asString();
-                }
+                left.underlying = text + right.asString();
             }
 
             return left;

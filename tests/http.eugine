@@ -7,11 +7,14 @@ import Config
 
 var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
 
-Util.makeDir((dataPath = __path__ + "/data/"))
-Util.makeFile((counterPath = __path__ + "/data/counter"), "0")
-Util.makeFile((timelinePath = __path__ + "/data/timeline"), "")
-Util.makeFile((reportPath = __path__ + "/data/report"), "")
-Util.makeFile((stickyPath = __path__ + "/data/sticky"), "")
+Util.makeDir((dataPath = __path__ + "data/"))
+Util.makeDir((imagesPath = __path__ + "data/images/"))
+Util.makeDir((thumbsPath = __path__ + "data/thumbs/"))
+
+Util.makeFile((counterPath = __path__ + "data/counter"), "0")
+Util.makeFile((timelinePath = __path__ + "data/timeline"), "")
+Util.makeFile((reportPath = __path__ + "data/report"), "")
+Util.makeFile((stickyPath = __path__ + "data/sticky"), "")
 
 // File.write(counterPath, "0") //test
 // File.write(timelinePath, "")
@@ -52,6 +55,10 @@ def reportHandler(ctx, p) => {
 }
 
 server.addRouter("GET", "/assets/", (ctx) => ctx.serveFile(__path__ + ctx.route))
+
+server.addRouter("GET", "/thumbs/", (ctx) => ctx.serveFile(__path__ + "data" + ctx.route))
+
+server.addRouter("GET", "/images/", (ctx) => ctx.serveFile(__path__ + "data" + ctx.route))
 
 server.addRouter("GET", "_/", (context) => context.serveFile(__path__ + "assets/index.raw.html"))
 
@@ -126,14 +133,12 @@ server.addRouter("POST", "/new/", (context) => enter {
     var subject = context.postParams.subject
     var comment = context.postParams.comment
 
-    File.writeBinary(__path__ + Time.unix(0), context.postParams.image.payload)
-
     if !name name = "匿名"
     if !subject subject = "untitled"
     if len(name) > 32 exit(32)
     if len(subject) > 32 exit(33)
     
-    var saged = false, report = false, sticky = false, delete = false, lock = false, sagee = false
+    var saged = false, report = false, sticky = false, delete = false, lock = false, sagee = false, delimg = false
     if options {
         if len(options) > 32 exit(34)
         saged   = contains(options, "sage") > -1
@@ -141,6 +146,7 @@ server.addRouter("POST", "/new/", (context) => enter {
         sagee   = contains(options, "sagee") > -1
         sticky  = contains(options, "sticky") > -1
         delete  = contains(options, "delete") > -1
+        delimg  = contains(options, "delimg") > -1
         lock    = contains(options, "lock") > -1
 
         if sticky || delete { // only admin can delete or make sticky
@@ -202,10 +208,36 @@ server.addRouter("POST", "/new/", (context) => enter {
             Util.deleteAllCache()
             exit(0)
         }
+
+        if delimg {
+            if uname == null exit(90)
+
+            var ids = int(String.split(comment, "\n"))
+            sync for ids do (id) => ThreadManager.deleteImage(id, uname)
+
+            Util.deleteAllCache()
+            exit(0)
+        }
     }
 
     if len(comment) < 4 exit(30)
     if len(comment) > 2048 exit(31)
+    if (var size = len(context.postParams.image.payload)) > 1024 * 5120 exit(80)
+    if size > 0 {
+        var fn = Time.unix(0)
+        var dir = str(fn / 86400000) + "/"
+        fn = dir + size + "." + fn + 
+            (if contains(server.mimeMapper, context.postParams.image.type)
+                server.mimeMapper[context.postParams.image.type]
+            else
+                exit(81))
+
+        Util.makeDir(imagesPath + dir)
+        Util.makeDir(thumbsPath + dir)
+        File.write(imagesPath + fn, context.postParams.image.payload)
+        File.write(thumbsPath + fn, context.postParams.image.payload)
+        // System.exec("copy \"" + imagesPath + fn + "\" \"" + thumbsPath + fn + "\"")
+    }
 
     sync {
         if rid > 0 {
@@ -233,6 +265,9 @@ server.addRouter("POST", "/new/", (context) => enter {
         var post.ip = context.ip
         if saged {
             var post.state = Bit.or(ThreadState.NORMAL, ThreadState.SAGED)
+        }
+        if fn {
+            var post.reserved = fn
         }
 
         var postRaw = post.toString()
@@ -296,6 +331,8 @@ server.addRouter("POST", "/new/", (context) => enter {
         40 => errorHandler(context, "不能回复回复")
         41 => errorHandler(context, "该串已锁定，不能回复")
         42 => errorHandler(context, Config.i18n.INVALID_THREAD_ID)
+        80 => errorHandler(context, "图片过大")
+        81 => errorHandler(context, "无效图片")
         90 => errorHandler(context, "无效权限")
         91 => errorHandler(context, "无效串Id")
         _ => Log.error(e)

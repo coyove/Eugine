@@ -1,3 +1,8 @@
+function DomReady(a, b, c) {
+    b=document,c='addEventListener';
+    b[c]?b[c]('DOMContentLoaded',a):window.attachEvent('onload',a);
+}
+
 function ajax(url, callback, data, x) {
     try {
         x = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
@@ -136,7 +141,7 @@ function purgeStorage(name) {
     return hiddens;
 }
 
-window.onload = function() {
+DomReady(function() {
     var dates = document.querySelectorAll("span.date");
     for (var i = 0; i < dates.length; i++) {
         dates[i].setAttribute("title", fd2(dates[i].innerHTML));
@@ -192,4 +197,4 @@ window.onload = function() {
             hide(id, true);
         }
     }
-}
+});

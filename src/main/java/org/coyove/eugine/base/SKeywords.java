@@ -19,6 +19,16 @@ public class SKeywords {
 
     public static HashMap<String, CallableKeyword> Lookup =
             new HashMap<String, CallableKeyword>() {{
+                put("System.exec", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SECommand(new Atom(tok), arguments, false);
+                    }
+                });
+                put("System.execa", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SECommand(new Atom(tok), arguments, true);
+                    }
+                });
                 put("print", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEPrint(new Atom(tok), arguments, "");

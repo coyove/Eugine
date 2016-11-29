@@ -40,13 +40,13 @@
                 <td style='width: 1%'><input type='submit' value='发布'/></td></tr>
                 <tr><td>正文</td><td colspan='2'><textarea name='comment' id='comment' rows='10'></textarea></td></tr>
                 <tr><td></td><td>" + emoji + @"</td></tr>
-                <tr><td></td><td><input type='file' name='image'></td></tr>
+                <tr><td>附图</td><td><input type='file' name='image'></td></tr>
             </table>
         </form>"
     }
 
     def postReply(id, endpoint, button) => {
-        @"<form action='" + endpoint + @"' id='reply' method='post'>
+        @"<form action='" + endpoint + @"' id='reply' method='post' enctype='multipart/form-data'>
             <table>
                 <tr><td>名称</td><td><input type='text' name='name' id='name' placeholder='匿名'/></td>
                 <td style='width: 1%; text-align: right'><a hide=hide href='javascript:void()'>[x]</a></td></tr>
@@ -54,6 +54,7 @@
                 <td style='width: 1%'><input type='submit' value='回复'/></td></tr>
                 <tr><td>正文</td><td colspan='2'><textarea name='comment' id='comment' rows='10'></textarea></td></tr>
                 <tr><td></td><td>" + emoji + @"</td></tr>
+                <tr><td>附图</td><td><input type='file' name='image'></td></tr>
             </table>
         </form>"
     }
@@ -86,7 +87,7 @@
                 ret <+ _thread(reply, false)
             }
 
-            ret <+ "</div></div>"
+            ret <+ "</div></div><span class='sep'></span>"
         }
 
         ret <+ pager(page)
@@ -117,7 +118,7 @@
             ids[reply.uid] = true
         }
 
-        ret <+ "</div></div>"
+        ret <+ "</div></div><span class='sep'></span>"
         ipinfo = "<span class='hint--top' aria-label='" + len(ips) + " 个IP'>" + len(ips) + "</span>"
         idinfo = "<span class='hint--top' aria-label='" + len(ids) + " 个ID'>" + len(ids) + "</span>"
 
@@ -139,6 +140,11 @@
         </div>"
     }
 
+    def _image(img) => @ret("")
+        if img != "x" {
+            ret = "<a href='/images/" + img + "'><img class='image' src='/thumbs/" + img + "'></a>"
+        }
+
     def _thread(t, f) => @ret("") {
         if t.isPO 
             t.name = "<span po>po</span>"
@@ -157,7 +163,11 @@
                 (t.name + "</span><span class='date'>" + 
                 t.ts + "</span><span class='ref'>No." + refAction +
                 t.id) <+ @"</a></span></div>
-            <div class='tail'><div class='comment'>" <+ t.comment <+ @"</div></div>
+            <div class='tail'>
+                <div class='comment'>
+                    " <+ _image(t.reserved) <+ t.comment <+ @"
+                </div>
+            </div>
         </div>"
     }
 
@@ -166,7 +176,7 @@
             var sticky = "<div class='sticky'>置顶</div>"
 
         ret <+ @"
-        <div class='thread' id='thread-" <+ t.id <+ @"'>
+        <div class='thread main' id='thread-" <+ t.id <+ @"'>
             <div class='bar'>
                 <span class='hider' onclick='hide(" <+ t.id <+ @")'>-</span>
                 " <+ sticky <+ 
@@ -178,7 +188,9 @@
                 "[ <a href='/thread/" <+ t.id <+ "'>回复 / <span class='replies'>" <+ 
                 t.children <+ " 篇</span></a> ]" <+ @"</span>
             </div>
-            <div class='tail'><div class='comment'>" <+ t.comment <+ "</div>" <+
+            <div class='tail'>
+                <div class='comment'>
+                    " <+ _image(t.reserved) <+  t.comment <+ "</div>" <+
             tState(t)
     }
 

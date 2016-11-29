@@ -46,6 +46,25 @@
             File.delete(path + ".html")
         }
     }
+
+    def this.deleteImage(id, uid) => sync if id {
+        var path = dataPath + id / 1000 + "/" + id
+        if File.exists(path) {
+            var t = Reply(id)
+            var raw = File.readLines(path)
+            t.from(raw[0])
+
+            if t.uid == uid && t.reserved != "x" {
+                var fn = t.reserved
+                t.reserved = "x"
+                raw[0] = t.toString2()
+                File.write(path, raw)
+                File.delete(path + ".html")
+                File.delete(imagesPath + fn)
+                File.delete(thumbsPath + fn)
+            }
+        }
+    }
 })()
 
 (def ThreadState() => {
@@ -98,8 +117,8 @@ def [Util.struct] Reply(id) => {
     var this.state = ThreadState.NORMAL
     var this.ts = Time.unix(0)
     var this.ip = ""
-    var this.children = 0
-    var this.reserved = "x"
+    var this.children = 0 
+    var this.reserved = "x" // this column has been changed to holding the image path
 
     def this.from (text) => {
         var parts = String.split(text, " ")

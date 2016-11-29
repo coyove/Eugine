@@ -36,12 +36,7 @@ public class PAdd extends SExpression {
         if (left instanceof SConcatString) {
             if (!(right instanceof SNull)) {
                 SConcatString ret = (SConcatString) left.clone();
-
-                if (right instanceof SConcatString) {
-                    ret.append(((SConcatString) right).text);
-                } else {
-                    ret.append(right.asString());
-                }
+                ret.append(right.asString());
 
                 return ret;
             } else {
@@ -53,7 +48,7 @@ public class PAdd extends SExpression {
             if (!(right instanceof SNull)) {
                 if (right instanceof SConcatString) {
                     SConcatString ret = new SConcatString(left.underlying.toString());
-                    ret.append(((SConcatString) right).text);
+                    ret.append(right.<String>get());
                     return ret;
                 } else {
                     return new SConcatString(left.underlying.toString(), right.asString());

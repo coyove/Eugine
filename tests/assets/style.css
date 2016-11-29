@@ -134,6 +134,11 @@ hr {
     margin: 4px 0;
 }
 
+span.sep {
+    clear: both;
+    display: block;
+}
+
 a {
     text-decoration:none;
     color:#54638c;
@@ -240,12 +245,40 @@ div.thread, div.reply, div.pager {
     word-break: break-all;
 }
 
+div.thread.main {
+    display: block;
+    width: 100%;
+}
+
 div.reply {
     margin: 4px 0 4px 32px;
     background: #dad4cc;
     border: solid 1px #bbb;
     border-top: none;
     border-left: none;
+}
+
+div.reply div.comment {
+    display: block;
+}
+
+div.reply div.comment div {
+    float: left;
+    margin-bottom: 2px;
+}
+
+div.thread.main .image {
+    max-width: 200px;
+    max-height: 200px;
+    float: left;
+    margin-right: 32px;
+}
+
+div.reply .image {
+    max-width: 150px;
+    max-height: 150px;
+    float: left;
+    margin-right: 8px !important;
 }
 
 div.reply div.ind {
@@ -318,7 +351,12 @@ div.comment {
     padding: 2px 6px;
 }
 
+div.tml {
+    float: none !important;
+}
+
 div.tml-toggle {
+    float: none !important;
     font-size: 12px;
     cursor: pointer;
     background: #966666;
