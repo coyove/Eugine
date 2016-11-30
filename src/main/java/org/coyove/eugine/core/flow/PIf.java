@@ -40,7 +40,7 @@ public class PIf extends SExpression {
     }
 
     public boolean evaluateCondition(ExecEnvironment env) throws EgException {
-        return Utils.castBoolean(condition.evaluate(env), atom);
+        return EgCast.toBoolean(condition.evaluate(env), atom);
     }
 
     @Override

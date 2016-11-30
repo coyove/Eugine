@@ -95,12 +95,12 @@ public class PSub extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subObj = subject.evaluate(env);
 
-        int start = Utils.castInt(this.start.evaluate(env), atom);
+        int start = EgCast.toInt(this.start.evaluate(env), atom);
         if (start < 0) {
             throw new EgException(3015, "start cannot be negative", atom);
         }
 
-        int end = this.end != null ? Utils.castInt(this.end.evaluate(env), atom) : 0;
+        int end = this.end != null ? EgCast.toInt(this.end.evaluate(env), atom) : 0;
 
         if (subObj instanceof SConcatString) {
             if (this.end == null) {
@@ -112,7 +112,7 @@ public class PSub extends SExpression {
                 throw new EgException(3013, "string index out of range", atom);
             }
         } else if (subObj instanceof SString) {
-            String subStr = Utils.castString(subObj, atom);
+            String subStr = EgCast.toString(subObj, atom);
 
             try {
                 if (this.end == null) {

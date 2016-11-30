@@ -54,10 +54,10 @@ public class PPut extends SExpression {
             }
             refer.<HashMap<String, SValue>>get().put(k, value);
         } else if (refer instanceof SList) {
-            refer.<ListEx<SValue>>get().set(Utils.castInt(key, atom), value);
+            refer.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value);
         } else if (refer instanceof SObject && key instanceof SString) {
             Object sub = refer.get();
-            InteropHelper.setField(sub, key.<String>get(), value);
+            EgInterop.setField(sub, key.<String>get(), value);
         } else if (refer instanceof SClosure && key instanceof SString) {
             String k = key.get();
             if (decl == DECLARE.DECLARE) {

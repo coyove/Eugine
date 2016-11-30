@@ -43,18 +43,18 @@ public class SERange extends SExpression {
         SValue _end = this.end.evaluate(env);
 
         if (_start instanceof SLong || _start instanceof SInt) {
-            int interval = Utils.castInt(_interval, atom);
+            int interval = EgCast.toInt(_interval, atom);
 
             if (interval == 0) {
-                int len = Utils.castInt(_start, atom);
+                int len = EgCast.toInt(_start, atom);
                 SValue[] arr = new SValue[len];
                 Arrays.fill(arr, _end);
                 ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
                 return new SList(ret);
             }
 
-            int start = Utils.castInt(_start, atom);
-            int end = Utils.castInt(_end, atom);
+            int start = EgCast.toInt(_start, atom);
+            int end = EgCast.toInt(_end, atom);
 
             ListEx<SValue> ret = new ListEx<SValue>(end - start);
             for (int i = start; i < end; i += interval) {

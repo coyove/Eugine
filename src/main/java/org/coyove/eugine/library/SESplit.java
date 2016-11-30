@@ -30,8 +30,8 @@ public class SESplit extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String text = Utils.castString(this.text.evaluate(env), atom);
-        String delim = Utils.castString(this.delim.evaluate(env), atom);
+        String text = EgCast.toString(this.text.evaluate(env), atom);
+        String delim = EgCast.toString(this.delim.evaluate(env), atom);
 
         ListEx<SValue> ret = new ListEx<SValue>();
 

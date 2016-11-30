@@ -31,15 +31,15 @@ public class PGreatEqual extends SExpression {
         boolean ret;
 
         if (left instanceof SDouble) {
-            ret = ((SDouble) left).val() >= Utils.castDouble(right, atom);
+            ret = ((SDouble) left).val() >= EgCast.toDouble(right, atom);
         } else if (left instanceof SInt) {
             if (right instanceof SInt) {
                 ret = ((SInt) left).val() >= ((SInt) right).val();
             } else {
-                ret = ((SInt) left).val() >= Utils.castLong(right, atom);
+                ret = ((SInt) left).val() >= EgCast.toLong(right, atom);
             }
         } else if (left instanceof SLong) {
-            ret = ((SLong) left).val() >= Utils.castLong(right, atom);
+            ret = ((SLong) left).val() >= EgCast.toLong(right, atom);
         } else {
             throw new EgException(7056, left + " is not a number", atom);
         }

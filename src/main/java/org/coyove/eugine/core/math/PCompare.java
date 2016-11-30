@@ -30,19 +30,19 @@ public class PCompare extends SExpression {
 
     private int compareNumber(SValue left, SValue right) throws EgException {
         if (left instanceof SDouble) {
-            return (int) Math.signum(((SDouble) left).val() - Utils.castDouble(right, atom));
+            return (int) Math.signum(((SDouble) left).val() - EgCast.toDouble(right, atom));
         }
 
         if (left instanceof SInt) {
             if (right instanceof SInt) {
                 return (int) Math.signum(((SInt) left).val() - ((SInt) right).val());
             } else {
-                return (int) Math.signum(((SInt) left).val() - Utils.castLong(right, atom));
+                return (int) Math.signum(((SInt) left).val() - EgCast.toLong(right, atom));
             }
         }
 
         if (left instanceof SLong) {
-            return (int) Math.signum(((SLong) left).val() - Utils.castLong(right, atom));
+            return (int) Math.signum(((SLong) left).val() - EgCast.toLong(right, atom));
         }
 
         throw new EgException(7056, left + " is not a number", atom);

@@ -39,7 +39,7 @@ public class PInteropNew extends SExpression {
 
         Object[] ret;
         try {
-            ret = InteropHelper.buildArguments(definition, arguments, env);
+            ret = EgInterop.buildArguments(definition, arguments, env);
         } catch (EgException ex) {
             throw new EgException(ex.errorCode, ex.getMessage(), atom);
         }
@@ -53,7 +53,7 @@ public class PInteropNew extends SExpression {
             Constructor ctor = cls.getDeclaredConstructor(classes.toArray(new Class[classes.size()]));
 
             ctor.setAccessible(true);
-            return InteropHelper.castJavaType(ctor.newInstance(passArgs.toArray()));
+            return EgInterop.castJavaType(ctor.newInstance(passArgs.toArray()));
 
         } catch (InvocationTargetException ie) {
             throw new EgException(2035, "error caused by the constructor: " + ie.getCause(), atom);

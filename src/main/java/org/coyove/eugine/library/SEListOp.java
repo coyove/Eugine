@@ -47,7 +47,7 @@ public class SEListOp extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SList listObj = Utils.cast(this.list.evaluate(env), SList.class);
+        SList listObj = EgCast.to(this.list.evaluate(env), SList.class);
         if (listObj == null) {
             throw new EgException(3005, "subject must be list", atom);
         }
@@ -63,10 +63,10 @@ public class SEListOp extends SExpression {
             case LAST:
                 return list.size() > 0 ? list.get(list.size() - 1).evaluate(env) : ExecEnvironment.Null;
             case INSERT:
-                list.add(Utils.castInt(this.pos.evaluate(env), atom), this.value.evaluate(env));
+                list.add(EgCast.toInt(this.pos.evaluate(env), atom), this.value.evaluate(env));
                 return listObj;
             case CONCAT:
-                SList list2 = Utils.cast(this.value.evaluate(env), SList.class);
+                SList list2 = EgCast.to(this.value.evaluate(env), SList.class);
                 if (list2 == null) {
                     throw new EgException(3106, "must concat a list", atom);
                 }
@@ -121,8 +121,8 @@ public class SEListOp extends SExpression {
                             }
 
                             try {
-                                double num1 = Utils.castDouble(v1, atom);
-                                double num2 = Utils.castDouble(v2, atom);
+                                double num1 = EgCast.toDouble(v1, atom);
+                                double num2 = EgCast.toDouble(v2, atom);
                                 double sign = Math.signum(num1 - num2);
                                 return ((int) sign);
                             } catch (Exception e) {

@@ -2,6 +2,8 @@ package org.coyove.eugine.util;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.core.PVariable;
@@ -49,24 +51,6 @@ public final class Utils {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T cast(Object obj, Class<T> cls) {
-        if (cls.isInstance(obj)) {
-            return (T) obj;
-        } else {
-            return null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T cast(Object obj, Class<T> cls, EgException ex) throws EgException {
-        if (cls.isInstance(obj)) {
-            return (T) obj;
-        } else {
-            throw ex;
-        }
-    }
-
     public static SValue denormalize(SValue v) {
         if (v == ExecEnvironment.True) {
             return new SBool(true);
@@ -76,76 +60,6 @@ public final class Utils {
             return new SNull();
         } else {
             return v;
-        }
-    }
-
-    public static boolean castBoolean(SValue num, Atom headAtom) throws EgException {
-        if (num instanceof SLong) {
-            return ((SLong) num).val() != 0;
-        } else if (num instanceof SInt) {
-            return ((SInt) num).val() != 0;
-        } else if (num instanceof SDouble) {
-            return Math.abs(((SDouble) num).val()) > 1e-6;
-        } else if (num instanceof SBool) {
-            return num.get();
-        } else if (num instanceof SNull) {
-            return false;
-        } else if (num instanceof SString) {
-            return !num.<String>get().isEmpty();
-        } else {
-            throw new EgException(4008, num + " is not a boolean", headAtom);
-        }
-    }
-
-    public static double castDouble(SValue num, Atom headAtom) throws EgException {
-        double ret;
-
-        if (num instanceof SLong) {
-            ret = ((SLong) num).val();
-        } else if (num instanceof SDouble) {
-            ret = ((SDouble) num).val();
-        } else if (num instanceof SInt) {
-            ret = ((SInt) num).val();
-        } else {
-            throw new EgException(4007, num + " is not a double", headAtom);
-        }
-
-        return ret;
-    }
-
-    public static long castLong(SValue num, Atom headAtom) throws EgException {
-        long ret;
-
-        if (num instanceof SLong) {
-            ret = ((SLong) num).val();
-        } else if (num instanceof SInt) {
-            ret = ((SInt) num).val();
-        } else if (num instanceof SDouble) {
-            ret = (long) ((SDouble) num).val();
-        } else {
-            throw new EgException(4007, num + " is not a long", headAtom);
-        }
-
-        return ret;
-    }
-
-    public static int castInt(SValue num, Atom headAtom) throws EgException {
-        if (num instanceof SLong) {
-            return (int) ((SLong) num).val();
-        } else if (num instanceof SDouble) {
-            return (int) ((SDouble) num).val();
-        } else if (num instanceof SInt) {
-            return ((SInt) num).val();
-        } else {
-            throw new EgException(4007, num + " is not an integer", headAtom);
-        }
-    }
-
-    public static String castString(SValue num, Atom headAtom) throws EgException {
-        if (num instanceof SString) {
-            return num.get();
-        } else {
-            throw new EgException(4007, num + " is not a string", headAtom);
         }
     }
 
@@ -270,6 +184,15 @@ public final class Utils {
 
     public static <T> void quickSort(T[] arr, Comparator<T> comp) {
         quickSort(arr, 0, arr.length - 1, comp);
+    }
+
+    public static void print(String text, int pad) {
+        System.out.println(DateFormatUtils.format(System.currentTimeMillis(), "[hh:mm:ss] ") +
+                StringUtils.leftPad("", pad, " ") + text);
+    }
+
+    public static void print(String text) {
+        print(text, 0);
     }
 
     public static boolean checkExit(SValue v) {

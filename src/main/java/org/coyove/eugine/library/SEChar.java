@@ -32,7 +32,7 @@ public class SEChar extends SExpression {
         switch (action) {
             case ASC:
                 try {
-                    SString str = Utils.cast(arg, SString.class,
+                    SString str = EgCast.to(arg, SString.class,
                             new EgException(3001, "invalid argument", atom));
 
                     return new SInt(str.<String>get().charAt(0));
@@ -48,7 +48,7 @@ public class SEChar extends SExpression {
                     }
                     return new SString(new String(buf, Charset.forName("US-ASCII")));
                 } else {
-                    int i = Utils.castInt(arg, atom);
+                    int i = EgCast.toInt(arg, atom);
                     return new SString(String.valueOf((char) i));
                 }
             default:

@@ -1,6 +1,6 @@
 import Utils
 import HttpServer
-import Template
+reload Template
 import Thread
 import ACL
 import Config

@@ -76,7 +76,7 @@ public class SELog extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         if (level == SET_LEVEL) {
-            logLevel = (byte) Utils.castInt(arguments.head().evaluate(env), atom);
+            logLevel = (byte) EgCast.toInt(arguments.head().evaluate(env), atom);
             return ExecEnvironment.Null;
         } else {
             ListEx<SValue> values = SExpression.eval(arguments, env, atom);

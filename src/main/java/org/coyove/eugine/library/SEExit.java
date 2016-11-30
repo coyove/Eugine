@@ -22,10 +22,10 @@ public class SEExit extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SString msg = Utils.cast(argument.evaluate(env), SString.class);
+        SString msg = EgCast.to(argument.evaluate(env), SString.class);
 
         if (msg == null) {
-            SInt num = Utils.cast(argument.evaluate(env), SInt.class);
+            SInt num = EgCast.to(argument.evaluate(env), SInt.class);
             if (num == null) {
                 throw new EgException(2016, "message must be string or integer", atom);
             }

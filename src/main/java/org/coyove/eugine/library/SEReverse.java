@@ -43,7 +43,7 @@ public class SEReverse extends SExpression {
         } else if (subject instanceof SBool) {
             return Utils.isBooleanTrue(subject) ? ExecEnvironment.False : ExecEnvironment.True;
         } else {
-            return Utils.castBoolean(subject, atom) ? ExecEnvironment.False : ExecEnvironment.True;
+            return EgCast.toBoolean(subject, atom) ? ExecEnvironment.False : ExecEnvironment.True;
         }
     }
 

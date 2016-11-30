@@ -13,7 +13,7 @@
 <body>
     <div id='header'>
         <a href='/page/1'>[ 全部 ]</a>
-        <a href='/report/1'>[ 值班室 ]</a>
+        <a href='/report/1'>[ 问题反馈 ]</a>
         <a href='/assets/eula.raw.html'>[ EULA ]</a>
     </div>
     <div id='container'>"

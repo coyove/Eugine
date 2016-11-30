@@ -59,7 +59,7 @@ stmt returns [SExpression v]
     ;
 
 importStmt 
-    : 'import' (Identifier ('.' Identifier)*)
+    : ('import' | 'reload') (Identifier ('.' Identifier)*)
     ;
 
 enterStmt returns [SExpression v]

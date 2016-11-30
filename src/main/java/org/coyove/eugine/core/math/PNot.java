@@ -2,7 +2,6 @@ package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 /**
@@ -22,7 +21,7 @@ public class PNot extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        boolean ret = Utils.castBoolean(this.right.evaluate(env), atom);
+        boolean ret = EgCast.toBoolean(this.right.evaluate(env), atom);
         return !ret ? ExecEnvironment.True : ExecEnvironment.False;
     }
 

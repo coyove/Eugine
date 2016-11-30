@@ -7,7 +7,6 @@ import org.coyove.eugine.util.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -29,7 +28,7 @@ public class SECommand extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String cmd = Utils.castString(argument.evaluate(env), atom);
+        String cmd = EgCast.toString(argument.evaluate(env), atom);
         try {
             ProcessBuilder pb = new ProcessBuilder("sh", "-c", cmd);
             Process p = pb.start();

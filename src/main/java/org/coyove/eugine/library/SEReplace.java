@@ -34,9 +34,9 @@ public class SEReplace extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String text = Utils.castString(this.text.evaluate(env), atom);
-        String oldText = Utils.castString(this.oldText.evaluate(env), atom);
-        String newText = Utils.castString(this.newText.evaluate(env), atom);
+        String text = EgCast.toString(this.text.evaluate(env), atom);
+        String oldText = EgCast.toString(this.oldText.evaluate(env), atom);
+        String newText = EgCast.toString(this.newText.evaluate(env), atom);
 
         if (op == OPERATION.NORMAL) {
             return new SString(text.replace(oldText, newText));

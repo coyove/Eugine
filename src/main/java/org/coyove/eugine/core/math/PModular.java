@@ -4,9 +4,9 @@ import org.coyove.eugine.base.ReplaceableVariable;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
+import org.coyove.eugine.util.EgCast;
 import org.coyove.eugine.util.EgException;
 import org.coyove.eugine.util.ExecEnvironment;
-import org.coyove.eugine.util.Utils;
 import org.coyove.eugine.value.SDouble;
 import org.coyove.eugine.value.SInt;
 import org.coyove.eugine.value.SLong;
@@ -35,7 +35,7 @@ public class PModular extends SExpression {
         SValue right = this.right.evaluate(env);
 
         if (left instanceof SDouble) {
-            double r = Utils.castDouble(right, atom);
+            double r = EgCast.toDouble(right, atom);
             if (Math.abs(r) < 1e-6) {
                 throw new EgException(1001, "moded by zero", atom);
             }
@@ -50,7 +50,7 @@ public class PModular extends SExpression {
                 }
                 return new SInt(((SInt) left).val() / r);
             } else {
-                long r = Utils.castLong(right, atom);
+                long r = EgCast.toLong(right, atom);
                 if (r == 0) {
                     throw new EgException(1001, "moded by zero", atom);
                 }
@@ -59,7 +59,7 @@ public class PModular extends SExpression {
         }
 
         if (left instanceof SLong) {
-            long r = Utils.castLong(right, atom);
+            long r = EgCast.toLong(right, atom);
             if (r == 0) {
                 throw new EgException(1001, "moded by zero", atom);
             }

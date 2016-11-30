@@ -59,19 +59,19 @@ public class PAdd extends SExpression {
         }
 
         if (left instanceof SDouble) {
-            return new SDouble(((SDouble) left).val() + Utils.castDouble(right, atom));
+            return new SDouble(((SDouble) left).val() + EgCast.toDouble(right, atom));
         }
 
         if (left instanceof SInt) {
             if (right instanceof SInt) {
                 return new SInt(((SInt) left).val() + ((SInt) right).val());
             } else {
-                return new SLong(((SInt) left).val() + Utils.castLong(right, atom));
+                return new SLong(((SInt) left).val() + EgCast.toLong(right, atom));
             }
         }
 
         if (left instanceof SLong) {
-            return new SLong(((SLong) left).val() + Utils.castLong(right, atom));
+            return new SLong(((SLong) left).val() + EgCast.toLong(right, atom));
         }
 
         if (left instanceof SList) {

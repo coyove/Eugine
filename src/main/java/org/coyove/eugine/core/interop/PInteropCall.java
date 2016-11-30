@@ -49,7 +49,7 @@ public class PInteropCall extends SExpression {
 
         Object[] ret;
         try {
-            ret = InteropHelper.buildArguments(definition, arguments, env);
+            ret = EgInterop.buildArguments(definition, arguments, env);
         } catch (EgException ex) {
             throw new EgException(ex.errorCode, ex.getMessage(), atom);
         }
@@ -69,7 +69,7 @@ public class PInteropCall extends SExpression {
             if (this.type == RETURN_TYPE.DIRECT_RETURN) {
                 return new SObject(result);
             } else {
-                return InteropHelper.castJavaType(result);
+                return EgInterop.castJavaType(result);
             }
 
         } catch (InvocationTargetException ie) {

@@ -2,7 +2,6 @@ package org.coyove.eugine.library;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 /**
@@ -22,7 +21,7 @@ public class SESleep extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        long time = Utils.castLong(this.time.evaluate(env), atom);
+        long time = EgCast.toLong(this.time.evaluate(env), atom);
 
         try {
             Thread.sleep(time);

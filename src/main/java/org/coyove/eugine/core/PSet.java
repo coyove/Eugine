@@ -108,7 +108,7 @@ public class PSet extends SExpression {
                 ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, value);
             } else if (refer instanceof SObject) {
                 Object sub = ((SObject) refer).get();
-                InteropHelper.setField(sub, n.refKey, value);
+                EgInterop.setField(sub, n.refKey, value);
             } else if (refer instanceof SClosure) {
                 if (type == MUTABLE || type == IMMUTABLE) {
                     ((SClosure) refer).extra.bPut(n.refKey, value);

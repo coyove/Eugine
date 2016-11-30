@@ -42,18 +42,18 @@ public class SETime extends SExpression {
 
         switch (func) {
             case TIME:
-                long div = Utils.castLong(arg, atom);
+                long div = EgCast.toLong(arg, atom);
                 if (div == 0) {
                     div++;
                 }
 
                 return new SLong(new Date().getTime() / div);
             case UTC_TIME:
-                return new SString(DateFormatUtils.formatUTC(Utils.castLong(arg, atom),
+                return new SString(DateFormatUtils.formatUTC(EgCast.toLong(arg, atom),
                         "EEE, dd MMM yyyy HH:mm:ss zzz", new Locale("us")));
             case FORMAT_TIME:
-                long millis = Utils.castLong(arg, atom);
-                String format = Utils.cast(argument2.evaluate(env), SString.class,
+                long millis = EgCast.toLong(arg, atom);
+                String format = EgCast.to(argument2.evaluate(env), SString.class,
                         new EgException(7034, "invalid time format", atom)).get();
 
                 return new SString(DateFormatUtils.formatUTC(millis, format, new Locale("us")));

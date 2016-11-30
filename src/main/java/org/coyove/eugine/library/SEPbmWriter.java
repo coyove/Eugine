@@ -36,9 +36,9 @@ public class SEPbmWriter extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String filename = Utils.castString(this.filename.evaluate(env), atom);
-        Long sizeX = Utils.castLong(this.sizeX.evaluate(env), atom);
-        Long sizeY = Utils.castLong(this.sizeY.evaluate(env), atom);
+        String filename = EgCast.toString(this.filename.evaluate(env), atom);
+        Long sizeX = EgCast.toLong(this.sizeX.evaluate(env), atom);
+        Long sizeY = EgCast.toLong(this.sizeY.evaluate(env), atom);
 
         SValue _data = this.data.evaluate(env);
         if (!(_data instanceof SList)) {
@@ -50,7 +50,7 @@ public class SEPbmWriter extends SExpression {
             OutputStream stream = new FileOutputStream(filename);
             stream.write(("P4\n" + sizeX + " " + sizeY + "\n").getBytes());
             for (SValue v : list) {
-                stream.write(((int) Utils.castLong(v, atom)));
+                stream.write(((int) EgCast.toLong(v, atom)));
             }
             stream.close();
         } catch (Exception e) {

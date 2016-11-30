@@ -40,7 +40,7 @@ public class PThread extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SClosure closure = Utils.cast(this.closure.evaluate(env), SClosure.class);
+        SClosure closure = EgCast.to(this.closure.evaluate(env), SClosure.class);
         if (closure == null) {
             throw new EgException(3020, "invalid function to go", atom);
         }

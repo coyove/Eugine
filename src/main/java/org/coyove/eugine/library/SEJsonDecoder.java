@@ -59,7 +59,7 @@ public class SEJsonDecoder extends SExpression {
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String json = Utils.castString(subject.evaluate(env), atom);
+        String json = EgCast.toString(subject.evaluate(env), atom);
         if (json.trim().charAt(0) == '[') {
             return decode(new JSONArray(json));
         } else {

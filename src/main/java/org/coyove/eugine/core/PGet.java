@@ -48,13 +48,13 @@ public class PGet extends SExpression {
                 dk = Utils.denormalize(dk);
             }
 
-            dk.refer = Utils.cast(dict, SDict.class);
+            dk.refer = EgCast.to(dict, SDict.class);
             dk.refKey = k;
 
             return dk;
         } else if (dict instanceof SList) {
             ListEx<SValue> l = dict.get();
-            int idx = Utils.castInt(sk, atom);
+            int idx = EgCast.toInt(sk, atom);
 
             if (idx >= l.size() || idx < 0) {
                 throw new EgException(2021, "index out of range", atom);
@@ -62,13 +62,13 @@ public class PGet extends SExpression {
 
             SValue li = Utils.denormalize(l.get(idx));
 
-            li.refer = Utils.cast(dict, SList.class);
+            li.refer = EgCast.to(dict, SList.class);
             li.refIndex = idx;
 
             return li;
         } else if (dict instanceof SString) {
             String str = dict.get();
-            int idx = Utils.castInt(sk, atom);
+            int idx = EgCast.toInt(sk, atom);
 
             if (idx >= str.length()) {
                 throw new EgException(2023, "index out of range", atom);
@@ -77,7 +77,7 @@ public class PGet extends SExpression {
             return new SString(String.valueOf(str.charAt(idx)));
 
         } else if (dict instanceof SClosure) {
-            String k = Utils.castString(sk, atom);
+            String k = EgCast.toString(sk, atom);
 
             if (k.equals("__extra__")) {
                 HashMap<String, SValue> ret = new HashMap<String, SValue>();
@@ -103,14 +103,14 @@ public class PGet extends SExpression {
             }
         } else if (dict.underlying instanceof byte[]) {
             byte[] buf = ((byte[]) dict.underlying);
-            return new SInt(buf[Utils.castInt(sk, atom)]);
+            return new SInt(buf[EgCast.toInt(sk, atom)]);
         } else if (dict instanceof SObject) {
-            String field = Utils.castString(sk, atom);
+            String field = EgCast.toString(sk, atom);
 
             try {
                 Object obj = dict.get();
 
-                SValue n = InteropHelper.getField(obj, field);
+                SValue n = EgInterop.getField(obj, field);
                 n.refer = dict;
                 n.refKey = field;
 

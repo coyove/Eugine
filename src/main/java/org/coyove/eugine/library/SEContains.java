@@ -38,7 +38,7 @@ public class SEContains extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue key = this.key.evaluate(env);
         SValue sub = this.map.evaluate(env);
-        int start = this.start == null ? 0 : Utils.castInt(this.start.evaluate(env), atom);
+        int start = this.start == null ? 0 : EgCast.toInt(this.start.evaluate(env), atom);
 
         if (sub instanceof SDict && key instanceof SString) {
             HashMap<String, SValue> map = sub.get();
@@ -62,7 +62,7 @@ public class SEContains extends SExpression {
             if (key.underlying instanceof byte[]) {
                 k = ((byte[]) key.underlying);
             } else {
-                k = Utils.castString(key, atom).getBytes();
+                k = EgCast.toString(key, atom).getBytes();
             }
 
             if (s.length >= k.length) {

@@ -30,8 +30,8 @@ public class SERegexMatch extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        String text = Utils.castString(this.text.evaluate(env), atom);
-        String regex = Utils.castString(this.regex.evaluate(env), atom);
+        String text = EgCast.toString(this.text.evaluate(env), atom);
+        String regex = EgCast.toString(this.regex.evaluate(env), atom);
 
         Matcher m = Pattern.compile(regex).matcher(text);
 

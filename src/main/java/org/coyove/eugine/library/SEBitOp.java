@@ -60,11 +60,11 @@ public class SEBitOp extends SExpression {
 
         if (_left instanceof SLong || _right instanceof SLong) {
             if (op == AND) {
-                return new SLong(Utils.castLong(_left, atom) & Utils.castLong(_right, atom));
+                return new SLong(EgCast.toLong(_left, atom) & EgCast.toLong(_right, atom));
             } else if (op == OR) {
-                return new SLong(Utils.castLong(_left, atom) | Utils.castLong(_right, atom));
+                return new SLong(EgCast.toLong(_left, atom) | EgCast.toLong(_right, atom));
             } else {
-                return new SLong(Utils.castLong(_left, atom) ^ Utils.castLong(_right, atom));
+                return new SLong(EgCast.toLong(_left, atom) ^ EgCast.toLong(_right, atom));
             }
         }
 

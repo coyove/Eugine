@@ -9,13 +9,12 @@ import org.coyove.eugine.value.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
  * Created by coyove on 2016/9/11.
  */
-public class InteropHelper {
+public class EgInterop {
     public static HashMap<String, String> generalJavaTypes = new HashMap<String, String>() {{
         put("String", "java.lang.String");
         put("String[]", "java.lang.String[]");
@@ -162,7 +161,7 @@ public class InteropHelper {
                 }
 
                 classes.add(c);
-                Object ret = InteropHelper.castSValue(value, c);
+                Object ret = EgInterop.castSValue(value, c);
 
                 if (value instanceof SObject) {
                     passArgs.add(value.get());
@@ -205,7 +204,7 @@ public class InteropHelper {
         try {
             Field f = (obj instanceof Class ? (Class) obj : obj.getClass()).getDeclaredField(field);
             f.setAccessible(true);
-            return InteropHelper.castJavaType(f.get(obj));
+            return EgInterop.castJavaType(f.get(obj));
         } catch (Exception e) {
             throw new EgException(4005, "failed to get '" + field + "': " + e);
         }

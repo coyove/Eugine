@@ -5,9 +5,7 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +48,7 @@ public class SEFile extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SString filename = Utils.cast(this.filename.evaluate(env), SString.class);
+        SString filename = EgCast.to(this.filename.evaluate(env), SString.class);
         SValue data = null;
 
         if (filename == null) {

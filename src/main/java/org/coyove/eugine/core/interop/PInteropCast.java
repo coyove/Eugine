@@ -26,7 +26,7 @@ public class PInteropCast extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue sub = subject.evaluate(env);
-        String className = InteropHelper.expandJavaCassName(toType);
+        String className = EgInterop.expandJavaCassName(toType);
 
         try {
             Class tt = ClassUtils.getClass(className);

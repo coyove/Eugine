@@ -30,7 +30,7 @@ public class PLogic extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        boolean ret = Utils.castBoolean(left.evaluate(env), atom);
+        boolean ret = EgCast.toBoolean(left.evaluate(env), atom);
 
         if (ret && log == OR) {
             return ExecEnvironment.True;
@@ -40,7 +40,7 @@ public class PLogic extends SExpression {
             return ExecEnvironment.False;
         }
 
-        boolean next = Utils.castBoolean(right.evaluate(env), atom);
+        boolean next = EgCast.toBoolean(right.evaluate(env), atom);
         if (log == AND) {
             ret = ret && next;
         } else {

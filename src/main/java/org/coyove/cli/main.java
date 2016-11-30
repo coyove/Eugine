@@ -7,35 +7,43 @@ import java.lang.System;
 
 import org.coyove.eugine.*;
 import org.coyove.eugine.base.SConfig;
+import org.coyove.eugine.parser.Parser;
 import org.coyove.eugine.util.*;
 
 public class main {
     public final static String VERSION = "1.0.0rc";
 
-    public static ArgumentsParser.Arguments options = null;
+    public static OptionsHost.Options options = null;
+
+    public static ExecEnvironment globalStaticEnv = null;
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         System.setProperty("file.encoding", "utf-8");
-        options = ArgumentsParser.read(args);
+        options = OptionsHost.read(args);
 
         if (options.verbose) {
-            System.out.println("Eugine started");
+            Utils.print("Eugine started");
         }
 
         for (String cn : options.imports) {
             Utils.loadExportables(cn);
         }
 
-        if (options.isEnabled("aggressive")) {
+        if (options.aggressiveOpt) {
             SConfig.strictForLoop = false;
         }
 
-        if (options.getSource() != null) {
+        if (options.delayExec || options.reloadable) {
+            OptionsHost.addHUPHandler();
+        }
+
+        if (options.source != null) {
             try {
 //                Thread.sleep(10000);
                 Eugine e = new Eugine();
-                System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
+                globalStaticEnv = e.environment;
+                System.out.println(Parser.executeFile(args[0], globalStaticEnv));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -43,7 +51,7 @@ public class main {
             return;
         }
 
-        if (options.isEnabled("repl")) {
+        if (options.repl) {
             Integer lineCount = 0;
             Eugine e = new Eugine();
             String indicator = "";
@@ -99,7 +107,7 @@ public class main {
 
                 if (code.endsWith(";")) {
                     code = code.substring(0, code.length() - 1);
-                    System.out.println(ANTLRHelper.executeCode(code, e.environment));
+                    System.out.println(Parser.executeCode(code, e.environment));
                     flag = false;
                     totalCode += code + "\n";
                     code = "";
@@ -125,7 +133,7 @@ public class main {
     }
 
     private static void fakeInput(String s) {
-        if (options.isEnabled("no-robot")) {
+        if (options.noRobot) {
             return;
         }
 

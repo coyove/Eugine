@@ -53,7 +53,7 @@ public class SEMath extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue arg = argument.evaluate(env);
-        double n = Utils.castDouble(arg, atom);
+        double n = EgCast.toDouble(arg, atom);
 
         switch (func) {
             case SIN:
@@ -79,7 +79,7 @@ public class SEMath extends SExpression {
             case SQRT:
                 return new SDouble(Math.sqrt(n));
             case POW:
-                double p = Utils.castDouble(argument2.evaluate(env), atom);
+                double p = EgCast.toDouble(argument2.evaluate(env), atom);
                 return new SDouble(Math.pow(n, p));
             case RANDOM:
                 if (n != 0) {

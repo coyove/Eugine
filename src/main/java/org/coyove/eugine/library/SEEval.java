@@ -31,11 +31,11 @@ public class SEEval extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
 
-        String text = Utils.cast(this.text.evaluate(env), SString.class,
+        String text = EgCast.to(this.text.evaluate(env), SString.class,
                 new EgException(2014, "must eval string", atom)).get();
 
         if (this.env != null) {
-            SDict e = Utils.cast(this.env.evaluate(env), SDict.class,
+            SDict e = EgCast.to(this.env.evaluate(env), SDict.class,
                     new EgException(2015, "environment must be a dict", atom));
 
             env = new ExecEnvironment();
@@ -46,7 +46,7 @@ public class SEEval extends SExpression {
             }
         }
 
-        return ANTLRHelper.executeCode(text, env);
+        return Parser.executeCode(text, env);
     }
 
     @Override

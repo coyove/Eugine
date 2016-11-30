@@ -8,16 +8,16 @@ import org.coyove.cli.main;
  */
 public class ErrorHandler {
     public static void print(int errCode, String errMessage, Atom ha) {
-        System.out.println((new EgException(errCode, errMessage, ha)).toString());
+        Utils.print((new EgException(errCode, errMessage, ha)).toString());
 
-        if (!main.options.isEnabled("repl")) {
+        if (!main.options.repl) {
             System.exit(errCode);
         }
     }
 
     public static void print(EgException ex) {
-        System.out.println(ex.toString());
-        if (!main.options.isEnabled("repl")) {
+        Utils.print(ex.toString());
+        if (!main.options.repl) {
             System.exit(ex.errorCode);
         }
     }

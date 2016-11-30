@@ -1,13 +1,10 @@
 package org.coyove.eugine.library;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
-
-import java.util.Arrays;
 
 /**
  * Created by zezhong on 2016/9/10.
@@ -30,7 +27,7 @@ public class SEJoin extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subject = this.sub.evaluate(env);
-        String delim = Utils.castString(this.delim.evaluate(env), atom);
+        String delim = EgCast.toString(this.delim.evaluate(env), atom);
 
         if (subject instanceof SList) {
             ListEx<SValue> l = subject.get();
