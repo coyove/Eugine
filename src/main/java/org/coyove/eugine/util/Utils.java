@@ -31,14 +31,22 @@ public final class Utils {
     }
 
     public static String getFileName(String path) {
-        Path p = Paths.get(path);
-        return p.getFileName().toString();
+        try {
+            Path p = Paths.get(path);
+            return p.getFileName().toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static String getDirectoryName(String path) {
-        Path p = Paths.get(path);
-        String name = p.getFileName().toString();
-        return path.substring(0, path.length() - name.length());
+        try {
+            Path p = Paths.get(path);
+            String name = p.getFileName().toString();
+            return path.substring(0, path.length() - name.length());
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     @SuppressWarnings("unchecked")

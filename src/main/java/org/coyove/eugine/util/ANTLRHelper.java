@@ -1,6 +1,7 @@
 package org.coyove.eugine.util;
 
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.coyove.cli.main;
 import org.coyove.eugine.antlr.EugineImportListener;
@@ -18,7 +19,7 @@ import java.io.InputStream;
 public class ANTLRHelper {
     public static SValue executeFile(String source, ExecEnvironment env) {
         if (main.options.verbose) {
-            System.out.println("Parsing " + source);
+            System.out.println("Loading " + source);
         }
 
         CharStream afs = null;
@@ -30,8 +31,16 @@ public class ANTLRHelper {
         }
 
         EugineLexer lexer = new EugineLexer(afs);
+        if (main.options.verbose) {
+            System.out.println("    Lexer");
+        }
+
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         EugineParser parser = new EugineParser(tokens);
+        if (main.options.verbose) {
+            System.out.println("    Parsing");
+        }
+
         EugineParser.ProgContext pc = parser.prog();
 
         ParseTreeWalker walk = new ParseTreeWalker();
@@ -43,13 +52,21 @@ public class ANTLRHelper {
         eil.env = env;
         eil.env.put("__path__", new SString(Utils.getDirectoryName(source)));
         eil.env.put("__file__", new SString(Utils.getFileName(source)));
+
+        if (main.options.verbose) {
+            System.out.println("    Walking");
+        }
         walk.walk(eil, pc);
-//System.out.println(pc.toStringTree(parser));
+
         try {
             SValue ret = pc.v.execute(eil.env);
 
             env.put("__path__", oldPath);
             env.put("__file__", oldFile);
+
+            if (main.options.verbose) {
+                System.out.println("Finished " + source);
+            }
 
             return ret;
         } catch (EgException e) {

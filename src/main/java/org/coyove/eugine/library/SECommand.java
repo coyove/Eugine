@@ -31,7 +31,8 @@ public class SECommand extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         String cmd = Utils.castString(argument.evaluate(env), atom);
         try {
-            Process p = Runtime.getRuntime().exec(cmd);
+            ProcessBuilder pb = new ProcessBuilder("sh", "-c", cmd);
+            Process p = pb.start();
             if (async) {
                 return ExecEnvironment.Null;
             }

@@ -33,6 +33,7 @@ public class main {
 
         if (options.getSource() != null) {
             try {
+//                Thread.sleep(10000);
                 Eugine e = new Eugine();
                 System.out.println(ANTLRHelper.executeFile(args[0], e.environment));
             } catch (Exception e) {

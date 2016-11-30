@@ -3,6 +3,7 @@ package org.coyove.eugine.value;
 import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.core.flow.PChain;
 import org.coyove.eugine.util.*;
 
@@ -105,7 +106,18 @@ public class SClosure extends SValue {
 
     @Override
     public String toString() {
-        return "Closure = (" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
-                body.size() + "}";
+        SValue ts = this.extra.get("__to_string__");
+        if (ts instanceof SClosure) {
+            try {
+                SValue ret = (new PCall(atom, ts, new ListEx<SExpression>())).evaluate(outerEnv);
+                return ret.toString();
+            } catch (EgException e) {
+                ErrorHandler.print(e);
+                return null;
+            }
+        } else {
+            return "Closure = (" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
+                    body.size() + "}";
+        }
     }
 }

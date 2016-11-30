@@ -1,5 +1,7 @@
 package org.coyove.eugine.base;
 
+import org.coyove.eugine.core.flow.PCall;
+import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
 
@@ -111,6 +113,25 @@ public abstract class SValue extends SExpression {
 
         if (this instanceof SString && right instanceof SString) {
             return this.<String>get().equals(((SString) right).<String>get());
+        }
+
+        if (this instanceof SClosure) {
+            SValue eq = ((SClosure) this).extra.get("__equals__");
+            if (eq != null && eq instanceof SClosure) {
+                try {
+                    Atom atom = ((SClosure) eq).atom;
+                    SValue ret = (new PCall(atom, eq, ListEx.build(right)))
+                            .evaluate(((SClosure) eq).outerEnv);
+                    if (ret instanceof SBool) {
+                        return (Boolean) ret.underlying;
+                    } else {
+                        throw new EgException(8082, "invalid __equals__ function", atom);
+                    }
+                } catch (EgException e) {
+                    ErrorHandler.print(e);
+                    return false;
+                }
+            }
         }
 
         Object lo = this.get();

@@ -13,6 +13,14 @@
             t.from(raw[0])
             t.state = Bit.or(t.state, ThreadState.DELETED)
             raw[0] = t.toString2()
+
+            if t.reserved != "x" {
+                var fn = t.reserved
+                t.reserved = "x"
+                File.delete(imagesPath + fn)
+                File.delete(thumbsPath + fn)
+            }
+
             File.write(path, raw)
             File.delete(path + ".html")
 

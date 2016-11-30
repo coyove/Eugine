@@ -179,6 +179,7 @@ form table {
 table td:first-child {
     white-space: nowrap;
     width: 1%;
+    padding-right: 4px;
 }
 
 input[type=text], textarea {
@@ -271,7 +272,8 @@ div.thread.main .image {
     max-width: 200px;
     max-height: 200px;
     float: left;
-    margin-right: 32px;
+    margin-right: 16px;
+    margin-bottom: 8px;
 }
 
 div.reply .image {
@@ -279,6 +281,7 @@ div.reply .image {
     max-height: 150px;
     float: left;
     margin-right: 8px !important;
+    margin-bottom: 8px;
 }
 
 div.reply div.ind {
