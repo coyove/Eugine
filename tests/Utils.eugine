@@ -38,12 +38,13 @@ import Cookie
         def replacer (t) => {
             t = String.regexReplace(t, @"(https?:\/\/\S+)", "<a class='link' href='$1' target='_blank'>$1</a>")
             t = String.regexReplace(t, @"&gt;&gt;No\.(\d+)",
-"<a class='aref' onmouseover='openref($1, this)' onmouseout='closeref($1)' href='javascript:open($1)'>&gt;&gt;No.$1</a>")
+"<a class='aref' onmouseover='openref($1, this)' onmouseout='closeref($1, this)' href='javascript:open($1)'>&gt;&gt;No.$1</a>")
             String.regexReplace(t, @"^&gt;(.+)", "<span quote>&gt;$1</span>")
         }
 
         var tooManyLines = false
-        for lines do (line, i) =>
+        for lines do (line, i) => {
+
             if String.trim(line) == "```" { 
                 codeFlag = !codeFlag
 
@@ -64,6 +65,7 @@ import Cookie
                 }
                 ret <+ "<div>" <+ replacer(line) <+ "</div>"
             }
+        }
 
         if tooManyLines {
             ret <+ "</div>"

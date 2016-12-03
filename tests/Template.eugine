@@ -30,10 +30,11 @@
         <option>插入颜文字</option><option>|∀ﾟ</option><option>(´ﾟДﾟ`)</option><option>(;´Д`)</option><option>(｀･ω･)</option><option>(=ﾟωﾟ)=</option><option>| ω・´)</option><option>|-` )</option><option>|д` )</option><option>|ー` )</option><option>|∀` )</option><option>(つд⊂)</option><option>(ﾟДﾟ≡ﾟДﾟ)</option><option>(＾o＾)ﾉ</option><option>(|||ﾟДﾟ)</option><option>( ﾟ∀ﾟ)</option><option>( ´∀`)</option><option>(*´∀`)</option><option>(*ﾟ∇ﾟ)</option><option>(*ﾟーﾟ)</option><option>(　ﾟ 3ﾟ)</option><option>( ´ー`)</option><option>( ・_ゝ・)</option><option>( ´_ゝ`)</option><option>(*´д`)</option><option>(・ー・)</option><option>(・∀・)</option><option>(ゝ∀･)</option><option>(〃∀〃)</option><option>(*ﾟ∀ﾟ*)</option><option>( ﾟ∀。)</option><option>( `д´)</option><option>(`ε´ )</option><option>(`ヮ´ )</option><option>σ`∀´)</option><option> ﾟ∀ﾟ)σ</option><option>ﾟ ∀ﾟ)ノ</option><option>(╬ﾟдﾟ)</option><option>(|||ﾟдﾟ)</option><option>( ﾟдﾟ)</option><option>Σ( ﾟдﾟ)</option><option>( ;ﾟдﾟ)</option><option>( ;´д`)</option><option>(　д ) ﾟ ﾟ</option><option>( ☉д⊙)</option><option>(((　ﾟдﾟ)))</option><option>( ` ・´)</option><option>( ´д`)</option><option>( -д-)</option><option>(&gt;д&lt;)</option><option>･ﾟ( ﾉд`ﾟ)</option><option>( TдT)</option><option>(￣∇￣)</option><option>(￣3￣)</option><option>(￣ｰ￣)</option><option>(￣ . ￣)</option><option>(￣皿￣)</option><option>(￣艸￣)</option><option>(￣︿￣)</option><option>(￣︶￣)</option><option>ヾ(´ωﾟ｀)</option><option>(*´ω`*)</option><option>(・ω・)</option><option>( ´・ω)</option><option>(｀・ω)</option><option>(´・ω・`)</option><option>(`・ω・´)</option><option>( `_っ´)</option><option>( `ー´)</option><option>( ´_っ`)</option><option>( ´ρ`)</option><option>( ﾟωﾟ)</option><option>(oﾟωﾟo)</option><option>(　^ω^)</option><option>ヾ(´ε`ヾ)</option><option>(ノﾟ∀ﾟ)ノ</option><option>(σﾟдﾟ)σ</option><option>(σﾟ∀ﾟ)σ</option><option>|дﾟ )</option><option>┃電柱┃</option><option>ﾟ(つд`ﾟ)</option><option>ﾟÅﾟ )　</option><option>⊂彡☆))д`)</option><option>⊂彡☆))д´)</option><option>⊂彡☆))∀`)</option><option>(´∀((☆ミつ</option>
     </select>"
 
-    var rule = "附图最大5M，支持jpg, png, gif"
+    var rule = "<div class='rule'>附图最大5M，支持jpg, png, gif</div>"
 
     def post(id, endpoint, button) => {
-        @"<form action='/new/0' id='start-new' method='post' enctype='multipart/form-data'>
+        @"<div id='post-toggle'><a href='javascript:toggle()'>[ 发表新串 ]</a></div>
+        <form action='/new/0' id='start-new' method='post' enctype='multipart/form-data'>
             <table>
                 <tr><td>名称</td><td><input type='text' name='name' id='name' placeholder='匿名'/></td></tr>
                 <tr><td>选项</td><td><input type='text' name='options' id='options'/></td>
@@ -49,7 +50,8 @@
     }
 
     def postReply(id, endpoint, button) => {
-        @"<form action='" + endpoint + @"' id='reply' method='post' enctype='multipart/form-data'>
+        @"<div id='post-toggle'><a href='javascript:toggle()'>[ 回复 ]</a></div>
+        <form action='" + endpoint + @"' id='reply' method='post' enctype='multipart/form-data'>
             <table>
                 <tr><td>名称</td><td><input type='text' name='name' id='name' placeholder='匿名'/></td>
                 <td style='width: 1%; text-align: right'><a hide=hide href='javascript:void()'>[x]</a></td></tr>
@@ -79,7 +81,7 @@
 
         for threads do (t) => {
             ret <+ "<hr>"
-            ret <+ _threadMain(t.main)
+            ret <+ _threadMain(t.main, true)
 
             if t.omitted > 0 
                 ret <+ "<div class='omitted'>省略 " <+ t.omitted <+ " 篇回复，点击[回复]展开</div>"
@@ -104,7 +106,7 @@
             ret <+ postReply("reply", "/new/" + t.main.id, "回复")
 
         ret <+ "<hr>"
-        ret <+ _threadMain(t.main)
+        ret <+ _threadMain(t.main, false)
 
         var ips = {}
         ips[Util.trimIP(t.main.ip)] = true
@@ -174,7 +176,7 @@
         </div>"
     }
 
-    def _threadMain(t) => @ret("") {
+    def _threadMain(t, f) => @ret("") {
         if t.isSticky
             var sticky = "<div class='sticky'>置顶</div>"
 
@@ -187,9 +189,12 @@
                 "</span><span class='name'>" + 
                 t.name + "</span><span class='date'>" + 
                 t.ts + "</span><span class='ref'>No." +
-                t.id) <+ "</span><span>" <+
-                "[ <a href='/thread/" <+ t.id <+ "'>回复 / <span class='replies'>" <+ 
-                t.children <+ " 篇</span></a> ]" <+ @"</span>
+                t.id) <+ "</span>" <+
+                (if f 
+                    "<span>[ <a class='reply' href='/thread/" + t.id + 
+                    "'>回复 / <span class='replies'>" +  t.children + " 篇</span></a> ]</span>"
+                else
+                    "<span>[ <span class='replies'>" +  t.children + " 篇回复</span></a> ]</span>") <+ @"
             </div>
             <div class='tail'>
                 <div class='comment'>
@@ -218,7 +223,7 @@
         if curPage > 10
             ret <+ "<b>[ " <+ curPage <+ " ]</b>"
 
-        ret <+ "<a href='" <+ prevPage <+ "'>[ 前一页 ]</a><a href='" <+ nextPage <+ "'>[ 后一页 ]</a><a href='#top'>[ 顶部 ]</a></div>"
+        ret <+ "<a href='" <+ prevPage <+ "'>[ 上一页 ]</a><a href='" <+ nextPage <+ "'>[ 下一页 ]</a><a href='#top'>[ 顶部 ]</a></div>"
     }
 
     def this.error(msg) => {

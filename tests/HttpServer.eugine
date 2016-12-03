@@ -62,7 +62,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
                 }
 
                 if !contains(this.postParams, key)
-                    this.postParams[key] = Util.decodeURI(new java/lang/String(this.rawData[bod..eod]: byte[]))
+                    this.postParams[key] = new java/lang/String(this.rawData[bod..eod]: byte[])
                 
                 curBoundaryPos = eod
             } catch(e) {

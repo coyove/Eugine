@@ -192,7 +192,7 @@ span.replies {
     color: #aaa;
 }
 
-span.replies:hover {
+a.reply:hover span.replies {
     color: #888;
 }
 
@@ -268,20 +268,30 @@ div.reply div.comment div {
     margin-bottom: 2px;
 }
 
+.image-info {
+    position: absolute;
+    padding: 4px;
+    background: black;
+    color: white !important;
+    font-size: 10px;
+}
+
 div.thread.main .image {
     max-width: 200px;
     max-height: 200px;
     float: left;
     margin-right: 16px;
     margin-bottom: 8px;
+    border: none;
 }
 
 div.reply .image {
-    max-width: 150px;
-    max-height: 150px;
+    max-width: 150px !important;
+    max-height: 150px !important;
     float: left;
     margin-right: 8px !important;
     margin-bottom: 8px;
+    border: none;
 }
 
 div.reply div.ind {
@@ -374,6 +384,15 @@ div.tml-toggle:hover {
     -moz-opacity: 0.8;
     -khtml-opacity: 0.8;
     opacity: 0.8;
+}
+
+div#post-toggle {
+    text-align: center;
+    font-size: 18px;
+}
+
+div#post-toggle + form {
+    display: none;
 }
 
 div.reft {

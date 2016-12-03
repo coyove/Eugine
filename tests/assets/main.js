@@ -34,6 +34,13 @@ function isElementInViewport (el) {
     );
 }
 
+function toggle() {
+    try {
+        (document.getElementById('start-new') || document.getElementById('reply')).style.display = "block";
+        document.getElementById('post-toggle').style.display = "none";
+    } catch (e) {}
+}
+
 function fd(ts) {
     var d = new Date(parseInt(ts));
     var pad = function(num) {
@@ -56,6 +63,7 @@ function fd2(ts) {
 }
 
 function floating(id) {
+    toggle();
     var panel = document.getElementById('reply');
     var thread = document.getElementById('thread-' + id);
     var rect = thread.getBoundingClientRect();
@@ -82,8 +90,13 @@ function open(id) {
 
 function openref(id, a) {
     var rect = a.getBoundingClientRect();
+    a.setAttribute("opened", "true");
 
     ajax("/api/" + id, function(html) {
+        if (a.getAttribute("opened") != "true") {
+            return;
+        }
+
         var div = document.createElement("div");
         div.className = "thread reply reft";
         div.id = "ref-div-" + id;
@@ -98,8 +111,10 @@ function openref(id, a) {
     });
 }
 
-function closeref(id) {
+function closeref(id, a) {
     var refs = document.querySelectorAll("div.reft");
+    a.setAttribute("opened", "false");
+
     for (var i = 0; i <refs.length; i++) {
         refs[i].parentNode.removeChild(refs[i]);
     }
@@ -175,6 +190,16 @@ DomReady(function() {
         })(tmls[i]);
 
         tmls[i].parentNode.appendChild(toggle);
+    }
+
+    var imgs = document.querySelectorAll(".image");
+    for (var i = 0; i < imgs.length; i++) {
+        var src = imgs[i].getAttribute("src");
+        var div = document.createElement("div");
+        div.className = "image-info opacity50";
+        var size = parseInt(src.split("/")[3].split(".")[0]) / 1024;
+        div.innerHTML = size > 1024 ? ((size / 1024).toFixed(2) + " MiB") : (parseInt(size) + " KiB");
+        imgs[i].parentNode.insertBefore(div, imgs[i]);
     }
 
     if (/\#thread\-(\d+)$/.test(location.href)) {
