@@ -95,31 +95,38 @@ declareStmt returns [SExpression v]
         }
     ;
 
-definitionsList returns [ 
+parametersList returns [ 
     ListEx<String> v = new ListEx<String>(),
     ListEx<Boolean> passByValue = new ListEx<Boolean>()
     ]
-    : '(' (InitStyle='&'? InitArg=Identifier ',' { 
-        $v.add($InitArg.text); 
-        $passByValue.add($InitStyle == null);
-    } )* LastStyle='&'? LastArg=Identifier ')' 
-    {
-        $v.add($LastArg.text);
-        $passByValue.add($LastStyle == null);
-    }
-    | '(' ')'
+    :   '(' 
+            LastStyle='&'? LastArg=Identifier
+            (',' InitStyle='&'? InitArg=Identifier { 
+                $v.add($InitArg.text); 
+                $passByValue.add($InitStyle == null);
+            })*
+        ')'
+
+        {
+            $v.add(0, $LastArg.text);
+            $passByValue.add(0, $LastStyle == null);
+        }
+    |   '(' ')'
     ;
 
 argumentsList returns [ ListEx<SExpression> v = new ListEx<SExpression>() ]
-    : '(' (InitExpr=expr ',' { $v.add($InitExpr.v); } )* LastExpr=expr ')'
-    {
-        $v.add($LastExpr.v);
-    }
-    | '(' ')'
+    :   '(' 
+            LastExpr=expr 
+            (',' InitExpr=expr { $v.add($InitExpr.v); } )*
+        ')'
+        {
+            $v.add(0, $LastExpr.v);
+        }
+    |   '(' ')'
     ;
 
 interopArgumentDeclaration returns [SExpression v, String c]
-    : InitExpr=expr (':' InitDef=(JavaFullName | Identifier))?
+    :   InitExpr=expr (':' InitDef=(JavaFullName | Identifier))?
         {
             $v = $InitExpr.v;
             $c = $InitDef.text == null ? "" : $InitDef.text.replace("/", ".");
@@ -145,43 +152,47 @@ defineStmt returns [SExpression v]
         ListEx<SExpression> body = new ListEx<SExpression>(),
         ListEx<SExpression> decorators = new ListEx<SExpression>()
     ]
-    : Def Inline? Coroutine?
+    :   Def Inline? Coroutine? Struct?
         ('[' Decorator=expr argumentsList? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
         })*
-        Get=expr Lambda=lambdaStmt
+        FunctionName=expr Lambda=lambdaStmt
         {
-            Atom a = new Atom($Get.start);
+            Atom a = new Atom($FunctionName.start);
             SExpression closure = $Lambda.v;
             ((PLambda) closure).inline = $Inline != null;
             ((PLambda) closure).coroutine = $Coroutine != null;
+
+            if ($Struct != null) {
+                ((PLambda) closure).body.add(new PClone(a, new PVariable("this")));
+            }
 
             for (SExpression d : $decorators) {
                 closure = new PCall(a, d, ListEx.build(closure));
             }
             
-            $v = new PSet(a, $Get.v, closure, PSet.IMMUTABLE);
+            $v = new PSet(a, $FunctionName.v, closure, PSet.IMMUTABLE);
         }
     ;
 
 lambdaStmt returns [PLambda v]
-    locals [ ListEx<SExpression> body = new ListEx<SExpression>(), PVariable ret]
-    : definitionsList 
-    Description=(RawString | StringLiteral)?
-    '=>' 
-    ('@' Identifier ('(' InitValue=expr ')')? {
-        $ret = new PVariable($Identifier.text);
-        $body.add(new PSet(new Atom($Identifier), $ret, 
-            $InitValue.start == null ? ExecEnvironment.Null : $InitValue.v, PSet.MUTABLE)); 
-    })?
-    ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
+    locals [ListEx<SExpression> body = new ListEx<SExpression>(), PVariable ret]
+    :   Parameters=parametersList 
+        Description=(RawString | StringLiteral)?
+        '=>' 
+        ('@' Identifier ('(' InitValue=expr ')')? {
+            $ret = new PVariable($Identifier.text);
+            $body.add(new PSet(new Atom($Identifier), $ret, 
+                $InitValue.start == null ? ExecEnvironment.Null : $InitValue.v, PSet.MUTABLE)); 
+        })?
+        ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
         {
             if ($ret != null) {
                 $body.add($ret);
             }
 
-            $v = new PLambda(new Atom($definitionsList.start), $definitionsList.v, $definitionsList.passByValue,
+            $v = new PLambda(new Atom($Parameters.start), $Parameters.v, $Parameters.passByValue,
                 $body, $Description == null ? "" : $Description.text, false, false);
         }
     ;
@@ -191,18 +202,18 @@ switchStmt returns [SExpression v]
         ListEx<Branch> branches = new ListEx<Branch>(),
         Branch db = null
     ]
-    : Switch Condition=expr Do '{' (Tester=expr '=>' Code=code {
-        Branch b = new Branch();
-        b.recv = $Tester.v;
-        b.body = new ListEx<SExpression>();
-        b.body.add($Code.v);
+    :   Switch Condition=expr Do '{' (Tester=expr '=>' Code=code {
+            Branch b = new Branch();
+            b.recv = $Tester.v;
+            b.body = new ListEx<SExpression>();
+            b.body.add($Code.v);
 
-        if ($Tester.text.equals("_")) {
-            $db = b;
-        } else {
-            $branches.add(b);
-        }
-    })* '}'
+            if ($Tester.text.equals("_")) {
+                $db = b;
+            } else {
+                $branches.add(b);
+            }
+        })* '}'
         {
             $v = new PSwitch(new Atom($Switch), $Condition.v, $branches, $db);
         }

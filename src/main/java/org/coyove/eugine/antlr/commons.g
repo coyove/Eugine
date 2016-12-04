@@ -5,6 +5,7 @@ Const: 'const';
 Def: 'def';
 Inline: 'inline';
 Coroutine: 'coroutine';
+Struct: 'struct';
 For: ('for' | 'rev');
 If: 'if';
 Switch: 'switch';

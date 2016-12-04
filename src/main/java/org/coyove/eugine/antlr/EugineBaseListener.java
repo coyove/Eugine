@@ -126,13 +126,13 @@ public class EugineBaseListener implements EugineListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefinitionsList(EugineParser.DefinitionsListContext ctx) { }
+	@Override public void enterParametersList(EugineParser.ParametersListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDefinitionsList(EugineParser.DefinitionsListContext ctx) { }
+	@Override public void exitParametersList(EugineParser.ParametersListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

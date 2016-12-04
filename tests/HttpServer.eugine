@@ -1,4 +1,4 @@
-def [Util.struct] HttpServer(addr, port, timeout) => {
+def struct HttpServer(addr, port, timeout) => {
     var listenAddress = addr
     var listenPort = port
     var readTimeout = timeout
@@ -17,7 +17,7 @@ def [Util.struct] HttpServer(addr, port, timeout) => {
         "application/octet-stream": ".jpg",
     }
 
-    def [Util.struct] this.HttpContext (socket) => {
+    def struct this.HttpContext (socket) => {
         var responseSocket = socket
         var responseStream = socket::getOutputStream()
 

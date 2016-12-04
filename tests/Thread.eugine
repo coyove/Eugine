@@ -83,7 +83,7 @@
     var this.STICKY  = 16
 })()
 
-def [Util.struct] Thread(raw) => {
+def struct Thread(raw) => {
     var lines = String.split(raw, "\n")
     if len(lines) == 0 exit(9902)
 
@@ -97,7 +97,7 @@ def [Util.struct] Thread(raw) => {
     this.main.children = len(this.replies)
 }
 
-def [Util.struct] ThreadInTimeline(lines) => {
+def struct ThreadInTimeline(lines) => {
     var this.main = Reply(0)
     this.main.from(lines[0])
     this.main.children = len(lines) - 1
@@ -115,7 +115,7 @@ def [Util.struct] ThreadInTimeline(lines) => {
     }
 }
 
-def [Util.struct] Reply(id) => {
+def struct Reply(id) => {
     var this.id = id
     var this.parent = 0
     var this.subject = ""

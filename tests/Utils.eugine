@@ -63,7 +63,7 @@ import Cookie
                     tooManyLines = true
                     ret <+ "<div class='tml'>"
                 }
-                ret <+ "<div>" <+ replacer(line) <+ "</div>"
+                ret <+ "<span>" <+ replacer(line) <+ "</span><br>"
             }
         }
 
@@ -116,11 +116,6 @@ import Cookie
 
     def this.hashString2(text) =>
         Digest.hexSHA1(Digest.SHA256(Digest.SHA256(text + Config.salt)))
-
-    def this.struct (f, args...) => {
-        f(args...)
-        clone f
-    }
 
     def this.isEndOfStream (stream) => {
         var length = len(stream);
