@@ -180,6 +180,12 @@ public class PCall extends SExpression {
             this.arguments = body;
         }
 
+        SClosure returnAsStruct = null;
+        if (closure.isStruct) {
+            closure = closure.getCopy();
+            returnAsStruct = closure;
+        }
+
         Execute_Next_Closure:
         while (true) {
             // Curry
@@ -204,23 +210,22 @@ public class PCall extends SExpression {
             }
 
             // Prepare the environment
-            ExecEnvironment newEnv = prepareEE(closure, arguments);
-            newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
-            newEnv.put("__atom__", new SObject(atom));
-
-            if (closure.refer instanceof SClosure) {
-                newEnv.put("this", (SClosure) closure.refer);
-                newEnv.put("__this__", closure);
+            ExecEnvironment newEnv;
+            if (closure.isTransparent) {
+                newEnv = closure.outerEnv;
             } else {
-                newEnv.put("this", closure);
-            }
+                newEnv = prepareEE(closure, arguments);
+                newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
+                newEnv.put("__atom__", new SObject(atom));
 
-            if (closure.outerEnv != null) {
-                if (closure.transparent) {
-                    newEnv = closure.outerEnv;
+                if (closure.refer instanceof SClosure && !closure.isStruct) {
+                    newEnv.put("this", (SClosure) closure.refer);
+                    newEnv.put("__this__", closure);
                 } else {
-                    newEnv.parentEnv = closure.outerEnv;
+                    newEnv.put("this", closure);
                 }
+
+                newEnv.parentEnv = closure.outerEnv;
             }
 
             // Execute the closure body
@@ -248,9 +253,14 @@ public class PCall extends SExpression {
                     ret = se.evaluate(newEnv);
                 }
 
-                return ret;
+                if (returnAsStruct != null) {
+                    return returnAsStruct;
+                } else {
+                    return ret;
+                }
             }
         }
+        // End of while
     }
 
     private SValue execCoroutine(SClosure closure, ExecEnvironment env) throws EgException {

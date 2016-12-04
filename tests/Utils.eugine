@@ -5,6 +5,11 @@ import Cookie
     var javaURLEncoder = static java/net/URLEncoder
     var thisUtil = this
 
+    def this.struct1 (f, args...) => {       
+        f(args...)
+        clone f
+    }     
+
     def this.encodeURI (text) => 
         javaURLEncoder::encode(text : String, "utf-8" : String)
 
@@ -199,12 +204,14 @@ import Cookie
 
             if File.exists(path) {
                 var data = File.readLines(path)
+                // var tit = 
                 threads <+ ThreadInTimeline(data)
             }
         }
     } catch(e) {
+
     } do {
-        Template.timeline(page, title, threads)
+        Template.renderTimeline(page, title, threads)
     }
 
     def this.deleteAllCache() => {

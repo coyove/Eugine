@@ -1303,12 +1303,9 @@ public class EugineParser extends Parser {
 
 			            Atom a = new Atom((((DefineStmtContext)_localctx).FunctionName!=null?(((DefineStmtContext)_localctx).FunctionName.start):null));
 			            SExpression closure = ((DefineStmtContext)_localctx).Lambda.v;
-			            ((PLambda) closure).inline = ((DefineStmtContext)_localctx).Inline != null;
+			            ((PLambda) closure).inline    = ((DefineStmtContext)_localctx).Inline != null;
 			            ((PLambda) closure).coroutine = ((DefineStmtContext)_localctx).Coroutine != null;
-
-			            if (((DefineStmtContext)_localctx).Struct != null) {
-			                ((PLambda) closure).body.add(new PClone(a, new PVariable("this")));
-			            }
+			            ((PLambda) closure).struct    = ((DefineStmtContext)_localctx).Struct != null;
 
 			            for (SExpression d : _localctx.decorators) {
 			                closure = new PCall(a, d, ListEx.build(closure));
@@ -1463,7 +1460,7 @@ public class EugineParser extends Parser {
 			            }
 
 			            ((LambdaStmtContext)_localctx).v =  new PLambda(new Atom((((LambdaStmtContext)_localctx).Parameters!=null?(((LambdaStmtContext)_localctx).Parameters.start):null)), ((LambdaStmtContext)_localctx).Parameters.v, ((LambdaStmtContext)_localctx).Parameters.passByValue,
-			                _localctx.body, ((LambdaStmtContext)_localctx).Description == null ? "" : (((LambdaStmtContext)_localctx).Description!=null?((LambdaStmtContext)_localctx).Description.getText():null), false, false);
+			                _localctx.body, ((LambdaStmtContext)_localctx).Description == null ? "" : (((LambdaStmtContext)_localctx).Description!=null?((LambdaStmtContext)_localctx).Description.getText():null));
 			        
 			}
 		}

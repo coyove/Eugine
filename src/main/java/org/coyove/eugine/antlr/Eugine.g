@@ -161,12 +161,9 @@ defineStmt returns [SExpression v]
         {
             Atom a = new Atom($FunctionName.start);
             SExpression closure = $Lambda.v;
-            ((PLambda) closure).inline = $Inline != null;
+            ((PLambda) closure).inline    = $Inline != null;
             ((PLambda) closure).coroutine = $Coroutine != null;
-
-            if ($Struct != null) {
-                ((PLambda) closure).body.add(new PClone(a, new PVariable("this")));
-            }
+            ((PLambda) closure).struct    = $Struct != null;
 
             for (SExpression d : $decorators) {
                 closure = new PCall(a, d, ListEx.build(closure));
@@ -193,7 +190,7 @@ lambdaStmt returns [PLambda v]
             }
 
             $v = new PLambda(new Atom($Parameters.start), $Parameters.v, $Parameters.passByValue,
-                $body, $Description == null ? "" : $Description.text, false, false);
+                $body, $Description == null ? "" : $Description.text);
         }
     ;
 

@@ -26,18 +26,17 @@ public class SClosure extends SValue {
     public String doc = "";
 
     // Used by TCO
-    public boolean transparent = false;
+    public boolean isTransparent = false;
 
     public boolean isInline = false;
 
     public boolean isCoroutine = false;
 
+    public boolean isStruct = false;
+
     public volatile byte coroutineState = SUSPENDED;
-
     public final static byte SUSPENDED = 0;
-
     public final static byte RUNNING = 1;
-
     public final static byte DEAD = 2;
 
     public PChain dummyCoroutine = null;
@@ -66,12 +65,12 @@ public class SClosure extends SValue {
         body.add(single);
 
         extra = new ExecEnvironment();
-        transparent = true;
+        isTransparent = true;
     }
 
     public SClosure(ExecEnvironment env, ListEx<SExpression> multi) {
         this(env, new ListEx<String>(), new ListEx<Boolean>(), multi);
-        transparent = true;
+        isTransparent = true;
     }
 
     @Override
@@ -81,24 +80,33 @@ public class SClosure extends SValue {
 
             ret.extra = this.extra.clone();
             ret.proto = this.proto;
+
             ret.doc = this.doc;
-            ret.transparent = this.transparent;
+            ret.isCoroutine = this.isCoroutine;
+            ret.isInline = this.isInline;
+            ret.isStruct = this.isStruct;
+            ret.isTransparent = this.isTransparent;
 
             SValue.copyAttributes(ret, this);
             return ret;
         } catch (EgException ex) {
+            // Never happen
             ErrorHandler.print(ex);
             return this;
         }
     }
 
-    public SValue getCopy() throws EgException {
+    public SClosure getCopy() throws EgException {
         SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
 
         ret.extra.parentEnv = this.extra;
-        ret.transparent = this.transparent;
-        ret.doc = this.doc;
         ret.proto = this;
+
+        ret.isTransparent = this.isTransparent;
+        ret.doc = this.doc;
+        ret.isCoroutine = this.isCoroutine;
+        ret.isInline = this.isInline;
+        ret.isStruct = this.isStruct;
 
         SValue.copyAttributes(ret, this);
         return ret;

@@ -238,7 +238,7 @@ server.addRouter("POST", "/new/", (context) => enter {
         File.write(thumbsPath + fn, context.postParams.image.payload)
         var cmd = "convert " + imagesPath + fn + "[0] -quality 90 -thumbnail '200x200>' " + thumbsPath + fn
         // Log.info(cmd)
-        System.exec(cmd)
+        // System.exec(cmd)
     }
 
     sync {

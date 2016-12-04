@@ -45,15 +45,15 @@ public class PSet extends SExpression {
             value = v.clone();
         }
 
-        if (type == MUTABLE && v.immutable) {
-            /**
-             * (const b ...) (set a b)
-             * b is immutable, a should be mutable
-             * note that "clone" is shallow copy
-             */
-            value = v.clone();
-            value.immutable = false;
-        }
+//        if (type == MUTABLE && v.immutable) {
+//            /**
+//             * (const b ...) (set a b)
+//             * b is immutable, a should be mutable
+//             * note that "clone" is shallow copy
+//             */
+//            value = v.clone();
+//            value.immutable = false;
+//        }
 
         if (type == IMMUTABLE) {
             value.immutable = true;

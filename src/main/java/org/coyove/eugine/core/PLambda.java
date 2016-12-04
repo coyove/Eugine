@@ -18,26 +18,25 @@ public class PLambda extends SExpression {
 
     public String description;
 
-    public boolean inline;
+    public boolean inline = false;
 
-    public boolean coroutine;
+    public boolean coroutine = false;
+
+    public boolean struct = false;
 
     public PLambda() {
     }
 
     public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
-        this(ha, args, pass, b, "", false, false);
+        this(ha, args, pass, b, "");
     }
 
-    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b,
-                   String d, boolean i, boolean c) {
+    public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b, String d) {
         atom = ha;
         arguments = args;
         body = b;
         passByValue = pass;
         description = d;
-        inline = i;
-        coroutine = c;
     }
 
     @Override
@@ -48,6 +47,7 @@ public class PLambda extends SExpression {
         cls.doc = description;
         cls.isInline = inline;
         cls.isCoroutine = coroutine;
+        cls.isStruct = struct;
         return cls;
     }
 
@@ -58,6 +58,9 @@ public class PLambda extends SExpression {
 
         ret.body = ListEx.deepClone(this.body);
         ret.arguments = this.arguments;
+        ret.inline = this.inline;
+        ret.struct = this.struct;
+        ret.coroutine = this.coroutine;
         ret.passByValue = this.passByValue;
         ret.description = this.description;
 

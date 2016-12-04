@@ -72,7 +72,7 @@
             ret <+ "<div class='saged'>该串已被sage</div>"
     }
 
-    def this.timeline(page, type, threads) => {
+    def this.renderTimeline(page, type, threads) => {
         var title = if type == "all" "全部" else "举报"
         var ret = header(title + " 第" + page + "页")
 
