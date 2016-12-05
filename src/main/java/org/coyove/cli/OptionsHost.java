@@ -16,7 +16,7 @@ public class OptionsHost {
         public String source = null;
         public boolean verbose = false;
         public boolean repl = false;
-        public boolean aggressiveOpt = false;
+        public boolean optimization = false;
         public boolean noRobot = false;
         public boolean reloadable = false;
 
@@ -31,8 +31,8 @@ public class OptionsHost {
             if (args[i].equals("--repl") || args[i].equals("-r")) {
                 ret.repl = true;
                 i++;
-            } else if (args[i].equals("--aggressive")) {
-                ret.aggressiveOpt = true;
+            } else if (args[i].equals("--opt")) {
+                ret.optimization = true;
                 i++;
             } else if (args[i].equals("--jar")) {
                 ret.imports.add(args[i + 1]);
@@ -41,7 +41,7 @@ public class OptionsHost {
                 ret.noRobot = true;
                 i++;
             } else if (args[i].equals("--version")) {
-                System.out.println("Eugine " + main.VERSION);
+                Utils.print("Eugine " + main.VERSION);
                 System.exit(0);
             } else if (args[i].equals("--verbose")) {
                 ret.verbose = true;

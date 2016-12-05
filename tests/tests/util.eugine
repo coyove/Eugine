@@ -1,8 +1,3 @@
-def struct (f, args...) => {
-	f(args...)
-	clone f
-}
-
 def map (f, list) => {
 	for list do (elem, i) =>{
 		list[i] = f(elem)

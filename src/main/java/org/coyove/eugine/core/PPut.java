@@ -1,6 +1,7 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -58,15 +59,22 @@ public class PPut extends SExpression {
         } else if (refer instanceof SObject && key instanceof SString) {
             Object sub = refer.get();
             EgInterop.setField(sub, key.<String>get(), value);
-        } else if (refer instanceof SClosure && key instanceof SString) {
-            String k = key.get();
-            if (decl == DECLARE.DECLARE) {
-                ((SClosure) refer).extra.bPut(k, value);
-                env.bPut(k, value);
-            } else {
-                ((SClosure) refer).extra.put(k, value);
-                env.put(k, value);
+        } else if (refer instanceof SClosure) {
+            if (key instanceof SString) {
+                String k = key.get();
+                if (decl == DECLARE.DECLARE) {
+                    ((SClosure) refer).extra.bPut(k, value);
+                    env.bPut(k, value);
+                } else {
+                    ((SClosure) refer).extra.put(k, value);
+                    env.put(k, value);
+                }
             }
+//            else if (key instanceof SClosure) {
+//                (new PCall(atom, (SClosure) n.refKey, ListEx.build(value))).evaluate(env);
+//            } else {
+//                throw new EgException(2045, "invalid setter", atom);
+//            }
         } else {
             throw new EgException(2045, "invalid object: " + refer + ", key: " + key, atom);
         }

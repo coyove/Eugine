@@ -1,6 +1,7 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -91,14 +92,22 @@ public class PGet extends SExpression {
             } else {
                 SValue ret = ((SClosure) dict).extra.get(k);
                 if (ret == null) {
-                    ret = new SNull();
+                    SValue getter = ((SClosure) dict).extra.get("__get__" + k);
+                    if (getter == null) {
+                        ret = new SNull();
+                        ret.refKey = k;
+                    } else if (getter instanceof SClosure) {
+                        ret = (new PCall(atom, getter, new ListEx<SExpression>())).evaluate(env);
+                        ret.refKey = ((SClosure) dict).extra.get("__set__" + k);
+                    } else {
+                        throw new EgException(8456, "invalid getter", atom);
+                    }
                 } else {
                     ret = Utils.denormalize(ret);
+                    ret.refKey = k;
                 }
 
                 ret.refer = dict;
-                ret.refKey = k;
-
                 return ret;
             }
         } else if (dict.underlying instanceof byte[]) {

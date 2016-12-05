@@ -49,6 +49,6 @@ public class SInt extends SValue {
 
     @Override
     public String toString() {
-        return "Integer = " + value;
+        return "Int = " + value;
     }
 }

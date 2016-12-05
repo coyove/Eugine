@@ -437,7 +437,7 @@ assignExpr returns [SExpression v]
         }
     | Subject=assignExpr '=' Value=expr
         {
-            if ($Subject.v instanceof PGet) {
+            if ($Subject.v instanceof PGet && SConfig.enablePPut) {
                 PGet get = (PGet) $Subject.v;
                 $v = new PPut(new Atom($Subject.start), get.sub, get.key, $Value.v, PPut.DECLARE.SET);
             } else {

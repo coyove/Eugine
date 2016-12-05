@@ -30,8 +30,9 @@ public class main {
             Utils.loadExportables(cn);
         }
 
-        if (options.aggressiveOpt) {
+        if (options.optimization) {
             SConfig.strictForLoop = false;
+            SConfig.enablePPut = true;
         }
 
         if (options.delayExec || options.reloadable) {
@@ -43,7 +44,7 @@ public class main {
 //                Thread.sleep(10000);
                 Eugine e = new Eugine();
                 globalStaticEnv = e.environment;
-                System.out.println(Parser.executeFile(args[0], globalStaticEnv));
+                Utils.print(Parser.executeFile(args[0], globalStaticEnv).toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -1,16 +1,21 @@
 package org.coyove.eugine.base;
 
+import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by coyove on 2016/9/9.
  */
 public abstract class SValue extends SExpression {
     public Object refer;
-    public String refKey;
+    public Object refKey;
     public int refIndex;
 
     public Object underlying;
@@ -41,7 +46,21 @@ public abstract class SValue extends SExpression {
     @Override
     public String toString() {
         String valType = this.getClass().getSimpleName().substring(1);
-        return valType + " = " + (underlying == null ? "null" : underlying.toString());
+        if (this instanceof SNull) {
+            return "Null";
+        } else if (this instanceof SDict) {
+            HashMap<String, SValue> map = this.get();
+            Set<String> keySet = map.keySet();
+            String[] sets = new String[keySet.size()];
+            int i = 0;
+            for (String s : keySet) {
+                sets[i++] = s + ": " + map.get(s).toString();
+            }
+
+            return "Dict = {" + StringUtils.join(sets, ", ") + "}";
+        } else {
+            return valType + " = " + underlying.toString();
+        }
     }
 
     public String asString() {

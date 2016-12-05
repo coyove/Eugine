@@ -34,6 +34,11 @@ public class SClosure extends SValue {
 
     public boolean isStruct = false;
 
+//    public final static byte TRANSPARENT = 1;
+//    public final static byte INLINE = 2;
+//    public final static byte COROUTINE = 4;
+//    public final static byte STRUCT = 8;
+
     public volatile byte coroutineState = SUSPENDED;
     public final static byte SUSPENDED = 0;
     public final static byte RUNNING = 1;

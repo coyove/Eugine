@@ -3136,7 +3136,7 @@ public class EugineParser extends Parser {
 					setState(587);
 					((AssignExprContext)_localctx).Value = expr();
 
-					                      if (((AssignExprContext)_localctx).Subject.v instanceof PGet) {
+					                      if (((AssignExprContext)_localctx).Subject.v instanceof PGet && SConfig.enablePPut) {
 					                          PGet get = (PGet) ((AssignExprContext)_localctx).Subject.v;
 					                          ((AssignExprContext)_localctx).v =  new PPut(new Atom((((AssignExprContext)_localctx).Subject!=null?(((AssignExprContext)_localctx).Subject.start):null)), get.sub, get.key, ((AssignExprContext)_localctx).Value.v, PPut.DECLARE.SET);
 					                      } else {

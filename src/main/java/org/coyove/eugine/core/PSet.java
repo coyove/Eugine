@@ -1,6 +1,7 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -13,8 +14,6 @@ import java.util.HashMap;
 public class PSet extends SExpression {
     @ReplaceableVariable
     private SExpression varName;
-
-    private boolean directName;
 
     @ReplaceableVariable
     private SExpression varValue;
@@ -60,7 +59,7 @@ public class PSet extends SExpression {
         }
 
         if (varName instanceof PVariable) {
-            String sn = directName ? n.get().toString() : ((PVariable) varName).varName;
+            String sn = ((PVariable) varName).varName;
             PVariable var = (PVariable) varName;
 
             if (type == SET) {
@@ -103,23 +102,30 @@ public class PSet extends SExpression {
             }
 
             if (refer instanceof SDict) {
-                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey, value);
+                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey.toString(), value);
             } else if (refer instanceof SList) {
                 ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, value);
             } else if (refer instanceof SObject) {
                 Object sub = ((SObject) refer).get();
-                EgInterop.setField(sub, n.refKey, value);
+                EgInterop.setField(sub, n.refKey.toString(), value);
             } else if (refer instanceof SClosure) {
-                if (type == MUTABLE || type == IMMUTABLE) {
-                    ((SClosure) refer).extra.bPut(n.refKey, value);
+                if (n.refKey instanceof String) {
+                    String k = n.refKey.toString();
+                    if (type == MUTABLE || type == IMMUTABLE) {
+                        ((SClosure) refer).extra.bPut(k, value);
 
-                    if (this.varName instanceof PGet &&
-                            ((PGet) this.varName).sub instanceof PVariable &&
-                            ((PVariable) ((PGet) this.varName).sub).varName.equals("this")) {
-                        env.bPut(n.refKey, value);
+                        if (this.varName instanceof PGet &&
+                                ((PGet) this.varName).sub instanceof PVariable &&
+                                ((PVariable) ((PGet) this.varName).sub).varName.equals("this")) {
+                            env.bPut(k, value);
+                        }
+                    } else {
+                        ((SClosure) refer).extra.put(k, value);
                     }
+                } else if (n.refKey instanceof SClosure) {
+                    (new PCall(atom, (SClosure) n.refKey, ListEx.build(value))).evaluate(env);
                 } else {
-                    ((SClosure) refer).extra.put(n.refKey, value);
+                    throw new EgException(2045, "invalid setter", atom);
                 }
             } else {
                 throw new EgException(2045, "failed to set, invalid referred object: " + refer, atom);
@@ -136,10 +142,7 @@ public class PSet extends SExpression {
 
         ret.varName = this.varName.deepClone();
         ret.varValue = this.varValue.deepClone();
-
-        ret.directName = this.directName;
         ret.type = this.type;
-
         return ret;
     }
 }
