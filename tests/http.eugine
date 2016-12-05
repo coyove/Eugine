@@ -1,17 +1,20 @@
-def struct test() => {
-    var dummy = 0
+// def struct test() => {
+//     var dummy = 0
 
-    def this.__get__ZZZ() => dummy * 2
-    def this.__set__ZZZ(value) => if value < 2 println("too small") else dummy = value
-}
+//     def this.__get__ZZZ() => dummy * 2
+//     def this.__set__ZZZ(value) => if value < 2 println("too small") else dummy = value
+// }
 
-var a = test()
-println(a.ZZZ)
-a.ZZZ = 1
-println(a.ZZZ)
+// var a = test()
+// println(a.ZZZ)
+// a.ZZZ = 1
+// println(a.ZZZ)
 
-var b = test()
-println({a:b.ZZZ})
+// var b = test()
+// println({a:b.ZZZ})
+var m = (static org/coyove/ifc/Model)::load("C:/Users/coyove/Downloads/main.ifc")
+println(typeof m)
+
 
 // import Utils
 // import HttpServer

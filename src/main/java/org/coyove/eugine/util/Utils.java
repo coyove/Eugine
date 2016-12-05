@@ -218,4 +218,13 @@ public final class Utils {
 
         return false;
     }
+
+    public static SValue tryGuessBits(String text) {
+        long num = Long.parseLong(text);
+        if (num < Integer.MAX_VALUE && num > Integer.MIN_VALUE) {
+            return new SInt((int) num);
+        } else {
+            return new SLong(num);
+        }
+    }
 }

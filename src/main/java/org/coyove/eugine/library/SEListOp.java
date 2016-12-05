@@ -22,25 +22,31 @@ public class SEListOp extends SExpression {
     @ReplaceableVariable
     private SExpression value = null;
 
-    private OPERATION op;
+    private byte op;
 
-    public enum OPERATION {HEAD, TAIL, INIT, LAST, INSERT, SORT, CONCAT}
+    public final static byte HEAD = 0;
+    public final static byte TAIL = 1;
+    public final static byte INIT = 2;
+    public final static byte LAST = 3;
+    public final static byte INSERT = 4;
+    public final static byte SORT = 5;
+    public final static byte CONCAT = 6;
+    public final static byte FILTER = 7;
 
     public SEListOp() {}
 
-    public SEListOp(Atom ha, ListEx<SExpression> args, OPERATION o) {
-        super(ha, args, o == OPERATION.INSERT ? 3 :
-                (o == OPERATION.CONCAT ? 2 : 1));
+    public SEListOp(Atom ha, ListEx<SExpression> args, byte o) {
+        super(ha, args, o == INSERT ? 3 : (o == CONCAT || o == FILTER ? 2 : 1));
 
         list = args.head();
         op = o;
 
-        if (o == OPERATION.INSERT) {
+        if (o == INSERT) {
             pos = args.get(1);
             value = args.get(2);
         }
 
-        if (o == OPERATION.CONCAT) {
+        if (o == CONCAT || o == FILTER) {
             value = args.get(1);
         }
     }
@@ -72,6 +78,28 @@ public class SEListOp extends SExpression {
                 }
 
                 list.addAll(list2.<ListEx<SValue>>get());
+                return listObj;
+            case FILTER:
+                SClosure pred = EgCast.to(this.value.evaluate(env), SClosure.class);
+                if (pred == null || pred.argNames.size() < 1) {
+                    throw new EgException(3107, "invalid predicate function", atom);
+                }
+
+                String name = pred.argNames.head();
+                ExecEnvironment newEnv = new ExecEnvironment();
+                newEnv.parentEnv = env;
+
+                for (int i = list.size() - 1; i >= 0; i--) {
+                    newEnv.bPut(name, list.get(i));
+                    SValue ret = ExecEnvironment.Null;
+                    for (SExpression se : pred.body) {
+                        ret = se.evaluate(newEnv);
+                    }
+
+                    if (!Utils.isBooleanTrue(ret)) {
+                        list.remove(i);
+                    }
+                }
                 return listObj;
             case SORT:
                 if (list.size() == 0) {
@@ -149,8 +177,11 @@ public class SEListOp extends SExpression {
         ret.op = this.op;
         ret.list = this.list.deepClone();
 
-        if (this.pos != null && this.value != null) {
+        if (this.pos != null) {
             ret.pos = this.pos.deepClone();
+        }
+
+        if (this.value != null) {
             ret.value = this.value.deepClone();
         }
 

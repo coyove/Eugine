@@ -377,37 +377,42 @@ public class SKeywords {
                 });
                 put("List.headOf", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.HEAD);
+                        return new SEListOp(new Atom(tok), c, SEListOp.HEAD);
                     }
                 });
                 put("List.tailOf", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.TAIL);
+                        return new SEListOp(new Atom(tok), c, SEListOp.TAIL);
                     }
                 });
                 put("List.initOf", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INIT);
+                        return new SEListOp(new Atom(tok), c, SEListOp.INIT);
                     }
                 });
                 put("List.lastOf", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.LAST);
+                        return new SEListOp(new Atom(tok), c, SEListOp.LAST);
                     }
                 });
                 put("List.sort", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.SORT);
+                        return new SEListOp(new Atom(tok), c, SEListOp.SORT);
                     }
                 });
                 put("List.insert", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.INSERT);
+                        return new SEListOp(new Atom(tok), c, SEListOp.INSERT);
                     }
                 });
                 put("List.concat", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.OPERATION.CONCAT);
+                        return new SEListOp(new Atom(tok), c, SEListOp.CONCAT);
+                    }
+                });
+                put("List.filter", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEListOp(new Atom(tok), c, SEListOp.FILTER);
                     }
                 });
                 put("Bit.and", new CallableKeyword() {

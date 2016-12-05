@@ -20,36 +20,37 @@ AddressOf: 'addressof';
 New: 'new';
 Static: 'static';
 Do: 'do';
-Add : '+' ;
-Sub : '-' ;
-Not: '!';
-AryOp: ('-'|'*'|'/'|'%'|'=='|'!='|'>'|'<'|'>='|'<=') ;
 
 Integer
-    : [0-9]+
+    :   [0-9]+
     ;
 
 Double
-    : ([0-9]+ '.' [0-9]+ | ([0-9]+ '.' [0-9]+ [eE] [\+\-]? [0-9]+))
+    :   ([0-9]+ '.' [0-9]+ | ([0-9]+ '.' [0-9]+ [eE] [\+\-]? [0-9]+))
     ;
 
-NEWLINE:'\r'? '\n' -> skip  ;
-WS: [ \t]+ -> skip ;
+NEWLINE
+    :   '\r'? '\n' -> skip
+    ;
+
+WS  :   [ \t]+ -> skip 
+    ;
+
 Semi
-    : ';' 
+    :   ';' 
     ;
     
 Identifier 
-    : (Letter | '_')(Letter | '_' | [0-9])* '...'?
+    :   (Letter | '_')(Letter | '_' | [0-9])* '...'?
     ;
 
 JavaFullName
-    : Identifier ('/' Identifier)* '[]'? '...'?
+    :   Identifier ('/' Identifier)* '[]'? '...'?
     ;
 
 Letter
-	: ('A'..'Z' | 'a'..'z')
-	;
+    :   ('A'..'Z' | 'a'..'z')
+    ;
 
 BlockComment
     :   '/*' .*? '*/'

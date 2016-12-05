@@ -51,6 +51,7 @@ public class Parser {
         }
 
         EugineParser.ProgContext pc = parser.prog();
+//        Utils.print(pc.toStringTree(parser));
 
         ParseTreeWalker walk = new ParseTreeWalker();
         EugineImportListener eil = new EugineImportListener();
