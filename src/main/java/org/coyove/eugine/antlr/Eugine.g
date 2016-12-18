@@ -147,7 +147,7 @@ defineStmt returns [SExpression v]
         ListEx<SExpression> body = new ListEx<SExpression>(),
         ListEx<SExpression> decorators = new ListEx<SExpression>()
     ]
-    :   Def Inline? Coroutine? Struct?
+    :   Def Inline? Coroutine? Struct? Operator? Get? Set?
         ('[' Decorator=expr argumentsList? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
@@ -155,16 +155,26 @@ defineStmt returns [SExpression v]
         FunctionName=expr Lambda=lambdaStmt
         {
             Atom a = new Atom($FunctionName.start);
+            SExpression name = $FunctionName.v;
             SExpression closure = $Lambda.v;
+
             ((PLambda) closure).inline    = $Inline != null;
             ((PLambda) closure).coroutine = $Coroutine != null;
             ((PLambda) closure).struct    = $Struct != null;
+
+            if ($Operator != null) {
+                ((PLambda) closure).operator = true;
+                name = new PGet(a, new PVariable("this"), new SString("__" + $FunctionName.text + "__"));
+            }
+
+            if ($Get != null) name = new PGet(a, new PVariable("this"), new SString("__get__" + $FunctionName.text));
+            if ($Set != null) name = new PGet(a, new PVariable("this"), new SString("__set__" + $FunctionName.text));
 
             for (SExpression d : $decorators) {
                 closure = new PCall(a, d, ListEx.build(closure));
             }
             
-            $v = new PSet(a, $FunctionName.v, closure, PSet.IMMUTABLE);
+            $v = new PSet(a, name, closure, PSet.IMMUTABLE);
         }
     ;
 

@@ -32,7 +32,7 @@ public class SETrim extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SETrim ret = new SETrim();
         ret.atom = this.atom;
         ret.argument = this.argument.deepClone();

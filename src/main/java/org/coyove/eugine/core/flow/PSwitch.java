@@ -60,7 +60,7 @@ public class PSwitch extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PSwitch ret = new PSwitch();
         ret.atom = this.atom;
         ret.condition = this.condition.deepClone();

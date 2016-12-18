@@ -56,6 +56,9 @@ public class SEContains extends SExpression {
         } else if (sub instanceof SString && key instanceof SString) {
             String text = sub.get();
             return new SInt(StringUtils.indexOf(text, key.<String>get(), start));
+        } else if (sub instanceof SClosure && key instanceof SString) {
+            String text = sub.get();
+            return ((SClosure) sub).extra.containsKey(text) ? ExecEnvironment.True : ExecEnvironment.False;
         } else if (sub.underlying instanceof byte[]) {
             byte[] s = ((byte[]) sub.underlying);
             byte[] k;
@@ -86,7 +89,7 @@ public class SEContains extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEContains ret = new SEContains();
         ret.atom = this.atom;
         ret.map = this.map.deepClone();

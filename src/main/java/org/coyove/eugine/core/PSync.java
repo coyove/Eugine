@@ -26,7 +26,7 @@ public class PSync extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         // Sync cannot be cloned
         return this;
     }

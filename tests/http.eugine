@@ -1,403 +1,385 @@
-// def struct test() => {
-//     var dummy = 0
+import Utils
+import HttpServer
+reload Template
+import Thread
+import ACL
+import Config
 
-//     def this.__get__ZZZ() => dummy * 2
-//     def this.__set__ZZZ(value) => if value < 2 println("too small") else dummy = value
-// }
+var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
 
-// var a = test()
-// println(a.ZZZ)
-// a.ZZZ = 1
-// println(a.ZZZ)
+Util.makeDir((dataPath = __path__ + "data/"))
+Util.makeDir((imagesPath = __path__ + "data/images/"))
+Util.makeDir((thumbsPath = __path__ + "data/thumbs/"))
 
-// var b = test()
-// println({a:b.ZZZ})
-var m = (static org/coyove/ifc/Model)::load("C:/Users/coyove/Downloads/main.ifc")
-println(typeof m)
+Util.makeFile((counterPath = __path__ + "data/counter"), "0")
+Util.makeFile((timelinePath = __path__ + "data/timeline"), "")
+Util.makeFile((reportPath = __path__ + "data/report"), "")
+Util.makeFile((stickyPath = __path__ + "data/sticky"), "")
 
+// File.write(counterPath, "0") //test
+// File.write(timelinePath, "")
+Util.deleteAllCache()
 
-// import Utils
-// import HttpServer
-// reload Template
-// import Thread
-// import ACL
-// import Config
+def errorHandler(ctx, msg) => {
+    ctx.writeCommon(200, "html")
+    ctx.eoh()
+    ctx.write(Template.error(msg))
+}
 
-// var server = HttpServer("127.0.0.1", Config.port, Config.socketReadTimeout)
+def infoHandler(ctx, msg) => {
+    ctx.writeCommon(200, "html")
+    ctx.eoh()
+    ctx.write(Template.info(msg))
+}
 
-// Util.makeDir((dataPath = __path__ + "data/"))
-// Util.makeDir((imagesPath = __path__ + "data/images/"))
-// Util.makeDir((thumbsPath = __path__ + "data/thumbs/"))
+def pageHandler(ctx, p) => {
+    if p == null || p < 1 || p > 20 {
+        ctx.notFound()
+    } else {
+        if !File.exists((var page = dataPath + p + ".html"))
+            sync File.write(page, Util.rebuildPage(p, "all", timelinePath))
 
-// Util.makeFile((counterPath = __path__ + "data/counter"), "0")
-// Util.makeFile((timelinePath = __path__ + "data/timeline"), "")
-// Util.makeFile((reportPath = __path__ + "data/report"), "")
-// Util.makeFile((stickyPath = __path__ + "data/sticky"), "")
+        ctx.serveFile(page)
+    }
+}
 
-// // File.write(counterPath, "0") //test
-// // File.write(timelinePath, "")
-// Util.deleteAllCache()
+def reportHandler(ctx, p) => {
+    if p == null || p < 1 || p > 20 {
+        ctx.notFound()
+    } else {
+        if !File.exists((var page = dataPath + p + ".report.html"))
+            sync File.write(page, Util.rebuildPage(p, "report", reportPath))
 
-// def errorHandler(ctx, msg) => {
-//     ctx.writeCommon(200, "html")
-//     ctx.eoh()
-//     ctx.write(Template.error(msg))
-// }
+        ctx.serveFile(page)
+    }
+}
 
-// def infoHandler(ctx, msg) => {
-//     ctx.writeCommon(200, "html")
-//     ctx.eoh()
-//     ctx.write(Template.info(msg))
-// }
+server.addRouter("GET", "/assets/", (ctx) => ctx.serveFile(__path__ + ctx.route))
 
-// def pageHandler(ctx, p) => {
-//     if p == null || p < 1 || p > 20 {
-//         ctx.notFound()
-//     } else {
-//         if !File.exists((var page = dataPath + p + ".html"))
-//             sync File.write(page, Util.rebuildPage(p, "all", timelinePath))
+server.addRouter("GET", "/thumbs/", (ctx) => ctx.serveFile(__path__ + "data" + ctx.route))
 
-//         ctx.serveFile(page)
-//     }
-// }
+server.addRouter("GET", "/images/", (ctx) => ctx.serveFile(__path__ + "data" + ctx.route))
 
-// def reportHandler(ctx, p) => {
-//     if p == null || p < 1 || p > 20 {
-//         ctx.notFound()
-//     } else {
-//         if !File.exists((var page = dataPath + p + ".report.html"))
-//             sync File.write(page, Util.rebuildPage(p, "report", reportPath))
+server.addRouter("GET", "_/", (context) => context.serveFile(__path__ + "assets/index.raw.html"))
 
-//         ctx.serveFile(page)
-//     }
-// }
+server.addRouter("GET", "/page/", (context) => pageHandler(context, int(context.route[6..])))
 
-// server.addRouter("GET", "/assets/", (ctx) => ctx.serveFile(__path__ + ctx.route))
+server.addRouter("GET", "/report/", (context) => reportHandler(context, int(context.route[8..])))
 
-// server.addRouter("GET", "/thumbs/", (ctx) => ctx.serveFile(__path__ + "data" + ctx.route))
+server.addRouter("GET", "/thread/", (context) => {
+    var tid = int(context.route[8..])
+    if tid == null {
+        errorHandler(context, Config.i18n.INVALID_THREAD_ID)
+    } else {
+        var threadPath = dataPath + tid / 1000 + "/" + tid
+        if !File.exists(threadPath) {
+            context.notFound()            
+        } else if File.exists((var cache = threadPath + ".html")) {
+            context.serveFile(cache)
+        } else {
+            var thread = Thread(File.read(threadPath))
+            if thread.main.parent != 0 {
+                context.redirect302("/thread/" + thread.main.parent + "#thread-" + tid)
+            } else if Bit.and(thread.main.state, ThreadState.DELETED) {
+                context.notFound()
+            } else {
+                context.writeCommon(200, "html")
+                context.eoh()
+                var html = Template.thread(thread)
+                File.write(cache, html)
+                context.write(html)
+            }
+        }
+    }
+})
 
-// server.addRouter("GET", "/images/", (ctx) => ctx.serveFile(__path__ + "data" + ctx.route))
+server.addRouter("GET", "/api/", (context) => {
+    context.writeCommon(200, "html")
+    context.eoh()
 
-// server.addRouter("GET", "_/", (context) => context.serveFile(__path__ + "assets/index.raw.html"))
+    var tid = int(context.route[5..])
+    if tid != null {
+        var threadPath = dataPath + tid / 1000 + "/" + tid
+        if File.exists(threadPath) {
+            var thread = Thread(File.read(threadPath))
+            if !Bit.and(thread.main.state, ThreadState.DELETED) {
+                context.write(Template.apiThread(thread.main))
+            }
+        }
+    }
+})
 
-// server.addRouter("GET", "/page/", (context) => pageHandler(context, int(context.route[6..])))
+server.addRouter("POST", "/new/", (context) => enter {
+    if !Util.startsWith(context.headers.referer, Config.referer) exit(3)
 
-// server.addRouter("GET", "/report/", (context) => reportHandler(context, int(context.route[8..])))
+    var uid = context.cookies.uid
+    var uname = Cookie.get(uid)
 
-// server.addRouter("GET", "/thread/", (context) => {
-//     var tid = int(context.route[8..])
-//     if tid == null {
-//         errorHandler(context, Config.i18n.INVALID_THREAD_ID)
-//     } else {
-//         var threadPath = dataPath + tid / 1000 + "/" + tid
-//         if !File.exists(threadPath) {
-//             context.notFound()            
-//         } else if File.exists((var cache = threadPath + ".html")) {
-//             context.serveFile(cache)
-//         } else {
-//             var thread = Thread(File.read(threadPath))
-//             if thread.main.parent != 0 {
-//                 context.redirect302("/thread/" + thread.main.parent + "#thread-" + tid)
-//             } else if Bit.and(thread.main.state, ThreadState.DELETED) {
-//                 context.notFound()
-//             } else {
-//                 context.writeCommon(200, "html")
-//                 context.eoh()
-//                 var html = Template.thread(thread)
-//                 File.write(cache, html)
-//                 context.write(html)
-//             }
-//         }
-//     }
-// })
+    if !uname 
+        if Config.openPost {
+            uid = Cookie.newCookie()
+            uname = Cookie.get(uid)
+        } else 
+            exit(1)
 
-// server.addRouter("GET", "/api/", (context) => {
-//     context.writeCommon(200, "html")
-//     context.eoh()
+    var rid = num(context.route[5..]) // rid = 0 means posting a new thread, otherwise replying to rid
+    if rid == null || rid < 0 exit(2)
 
-//     var tid = int(context.route[5..])
-//     if tid != null {
-//         var threadPath = dataPath + tid / 1000 + "/" + tid
-//         if File.exists(threadPath) {
-//             var thread = Thread(File.read(threadPath))
-//             if !Bit.and(thread.main.state, ThreadState.DELETED) {
-//                 context.write(Template.apiThread(thread.main))
-//             }
-//         }
-//     }
-// })
+    var isAdmin = context.cookies.aid == Config.mods.admin
+    if !accessControl(context.ip, Config.cooldown) && !isAdmin exit(4)
 
-// server.addRouter("POST", "/new/", (context) => enter {
-//     if !Util.startsWith(context.headers.referer, Config.referer) exit(3)
+    var name    = context.postParams.name
+    var options = context.postParams.options
+    var subject = context.postParams.subject
+    var comment = context.postParams.comment
 
-//     var uid = context.cookies.uid
-//     var uname = Cookie.get(uid)
-
-//     if !uname 
-//         if Config.openPost {
-//             uid = Cookie.newCookie()
-//             uname = Cookie.get(uid)
-//         } else 
-//             exit(1)
-
-//     var rid = num(context.route[5..]) // rid = 0 means posting a new thread, otherwise replying to rid
-//     if rid == null || rid < 0 exit(2)
-
-//     var isAdmin = context.cookies.aid == Config.mods.admin
-//     if !accessControl(context.ip, Config.cooldown) && !isAdmin exit(4)
-
-//     var name    = context.postParams.name
-//     var options = context.postParams.options
-//     var subject = context.postParams.subject
-//     var comment = context.postParams.comment
-
-//     if !name name = "匿名"
-//     if !subject subject = "untitled"
-//     if len(name) > 32 exit(32)
-//     if len(subject) > 32 exit(33)
+    if !name name = "匿名"
+    if !subject subject = "untitled"
+    if len(name) > 32 exit(32)
+    if len(subject) > 32 exit(33)
     
-//     var saged = false, report = false, sticky = false, delete = false, lock = false, sagee = false, delimg = false
-//     if options {
-//         if len(options) > 32 exit(34)
-//         saged   = contains(options, "sage") > -1
-//         report  = contains(options, "report") > -1
-//         sagee   = contains(options, "sagee") > -1
-//         sticky  = contains(options, "sticky") > -1
-//         delete  = contains(options, "delete") > -1
-//         delimg  = contains(options, "delimg") > -1
-//         lock    = contains(options, "lock") > -1
+    var saged = false, report = false, sticky = false, delete = false, lock = false, sagee = false, delimg = false
+    if options {
+        if len(options) > 32 exit(34)
+        saged   = contains(options, "sage") > -1
+        report  = contains(options, "report") > -1
+        sagee   = contains(options, "sagee") > -1
+        sticky  = contains(options, "sticky") > -1
+        delete  = contains(options, "delete") > -1
+        delimg  = contains(options, "delimg") > -1
+        lock    = contains(options, "lock") > -1
 
-//         if sticky || delete { // only admin can delete or make sticky
-//             if !isAdmin exit(90)
+        if sticky || delete { // only admin can delete or make sticky
+            if !isAdmin exit(90)
 
-//             if sticky sync {
-//                 var sid = int(comment)
-//                 if !sid exit(91)
+            if sticky sync {
+                var sid = int(comment)
+                if !sid exit(91)
 
-//                 var stickies = File.readLines(stickyPath)
-//                 var found = false
-//                 for stickies do (id, idx) => if id == str(sid) {
-//                     del(stickies, idx)
-//                     found = true
-//                     false
-//                 }
+                var stickies = File.readLines(stickyPath)
+                var found = false
+                for stickies do (id, idx) => if id == str(sid) {
+                    del(stickies, idx)
+                    found = true
+                    false
+                }
 
-//                 if !found {
-//                     List.insert(stickies, 0, str(sid))
-//                     var timeline = File.readLines(timelinePath)
-//                     rev timeline do (line, idx) => if line == str(sid) del(timeline, idx)
-//                     File.write(timelinePath, timeline)
-//                 }
+                if !found {
+                    List.insert(stickies, 0, str(sid))
+                    var timeline = File.readLines(timelinePath)
+                    rev timeline do (line, idx) => if line == str(sid) del(timeline, idx)
+                    File.write(timelinePath, timeline)
+                }
 
-//                 File.write(stickyPath, stickies)
-//             }
+                File.write(stickyPath, stickies)
+            }
 
-//             if delete sync {
-//                 var ids = int(String.split(comment, "\n"))
-//                 var map = {}
-//                 for ids do (id) => {
-//                     if id map[id] = true
-//                     ThreadManager.delete(id)
-//                 }
+            if delete sync {
+                var ids = int(String.split(comment, "\n"))
+                var map = {}
+                for ids do (id) => {
+                    if id map[id] = true
+                    ThreadManager.delete(id)
+                }
 
-//                 var timeline = File.readLines(timelinePath)
-//                 rev timeline do (line, idx) => if contains(map, line) del(timeline, idx)
-//                 File.write(timelinePath, timeline)
+                var timeline = File.readLines(timelinePath)
+                rev timeline do (line, idx) => if contains(map, line) del(timeline, idx)
+                File.write(timelinePath, timeline)
 
-//                 if report {
-//                     var report = File.readLines(reportPath)
-//                     rev report do (line, idx) => if contains(map, line) del(report, idx)
-//                     File.write(reportPath, report)
-//                 }
-//             }
+                if report {
+                    var report = File.readLines(reportPath)
+                    rev report do (line, idx) => if contains(map, line) del(report, idx)
+                    File.write(reportPath, report)
+                }
+            }
 
-//             Util.deleteAllCache()
-//             exit(0)
-//         }
+            Util.deleteAllCache()
+            exit(0)
+        }
 
-//         if sagee || lock {
-//             if context.cookies.aid == null exit(90)
-//             if Config.mods.isMod(context.cookies.aid) == null exit(90)
+        if sagee || lock {
+            if context.cookies.aid == null exit(90)
+            if Config.mods.isMod(context.cookies.aid) == null exit(90)
 
-//             var ids = int(String.split(comment, "\n"))
-//             if sagee sync for ids do (id) => ThreadManager.invertState(id, ThreadState.SAGED)
-//             if lock sync for ids do (id) => ThreadManager.invertState(id, ThreadState.LOCKED)
+            var ids = int(String.split(comment, "\n"))
+            if sagee sync for ids do (id) => ThreadManager.invertState(id, ThreadState.SAGED)
+            if lock sync for ids do (id) => ThreadManager.invertState(id, ThreadState.LOCKED)
 
-//             Util.deleteAllCache()
-//             exit(0)
-//         }
+            Util.deleteAllCache()
+            exit(0)
+        }
 
-//         if delimg {
-//             if uname == null exit(90)
+        if delimg {
+            if uname == null exit(90)
 
-//             var ids = int(String.split(comment, "\n"))
-//             sync for ids do (id) => ThreadManager.deleteImage(id, uname)
+            var ids = int(String.split(comment, "\n"))
+            sync for ids do (id) => ThreadManager.deleteImage(id, uname)
 
-//             Util.deleteAllCache()
-//             exit(0)
-//         }
-//     }
+            Util.deleteAllCache()
+            exit(0)
+        }
+    }
 
-//     if len(comment) < 4 exit(30)
-//     if len(comment) > 2048 exit(31)
-//     if (var size = len(context.postParams.image.payload)) > 1024 * 5120 exit(80)
-//     if size > 0 {
-//         var fn = Time.unix(0)
-//         var dir = str(fn / 86400000) + "/"
-//         fn = dir + size + "." + fn + 
-//             (if contains(server.mimeMapper, context.postParams.image.type)
-//                 server.mimeMapper[context.postParams.image.type]
-//             else
-//                 exit(81))
+    if len(comment) < 4 exit(30)
+    if len(comment) > 2048 exit(31)
+    if (var size = len(context.postParams.image.payload)) > 1024 * 5120 exit(80)
+    if size > 0 {
+        var fn = Time.unix(0)
+        var dir = str(fn / 86400000) + "/"
+        fn = dir + size + "." + fn + 
+            (if contains(server.mimeMapper, context.postParams.image.type)
+                server.mimeMapper[context.postParams.image.type]
+            else
+                exit(81))
 
-//         Util.makeDir(imagesPath + dir)
-//         Util.makeDir(thumbsPath + dir)
-//         File.write(imagesPath + fn, context.postParams.image.payload)
-//         File.write(thumbsPath + fn, context.postParams.image.payload)
-//         var cmd = "convert " + imagesPath + fn + "[0] -quality 90 -thumbnail '200x200>' " + thumbsPath + fn
-//         // Log.info(cmd)
-//         // System.exec(cmd)
-//     }
+        Util.makeDir(imagesPath + dir)
+        Util.makeDir(thumbsPath + dir)
+        File.write(imagesPath + fn, context.postParams.image.payload)
+        File.write(thumbsPath + fn, context.postParams.image.payload)
+        var cmd = "convert " + imagesPath + fn + "[0] -quality 90 -thumbnail '200x200>' " + thumbsPath + fn
+        // Log.info(cmd)
+        // System.exec(cmd)
+    }
 
-//     sync {
-//         if rid > 0 {
-//             var replyTo = Reply(rid)
-//             var repliedPath = dataPath + rid / 1000 + "/" + rid
-//             if !File.exists(repliedPath) exit(42)
+    sync {
+        if rid > 0 {
+            var replyTo = Reply(rid)
+            var repliedPath = dataPath + rid / 1000 + "/" + rid
+            if !File.exists(repliedPath) exit(42)
 
-//             var repliedThreadRaw = File.readLines(repliedPath)
-//             replyTo.from(repliedThreadRaw[0])
+            var repliedThreadRaw = File.readLines(repliedPath)
+            replyTo.from(repliedThreadRaw[0])
 
-//             if replyTo.parent != 0 exit(40)
-//             if Bit.and(replyTo.state, ThreadState.LOCKED) exit(41)
-//             if Bit.and(replyTo.state, ThreadState.DELETED) exit(42)
-//         }
+            if replyTo.parent != 0 exit(40)
+            if Bit.and(replyTo.state, ThreadState.LOCKED) exit(41)
+            if Bit.and(replyTo.state, ThreadState.DELETED) exit(42)
+        }
     
-//         var id = ThreadManager.getNextPostId()
-//         var path = Util.makeDir(dataPath + id / 1000)
+        var id = ThreadManager.getNextPostId()
+        var path = Util.makeDir(dataPath + id / 1000)
 
-//         var post = Reply(id) // thread is a special reply
-//         var post.parent = rid
-//         var post.subject = subject
-//         var post.name = name
-//         var post.comment = comment
-//         var post.uid = uname
-//         var post.ip = context.ip
-//         if saged {
-//             var post.state = Bit.or(ThreadState.NORMAL, ThreadState.SAGED)
-//         }
-//         if fn {
-//             var post.reserved = fn
-//         }
+        var post = Reply(id) // thread is a special reply
+        var post.parent = rid
+        var post.subject = subject
+        var post.name = name
+        var post.comment = comment
+        var post.uid = uname
+        var post.ip = context.ip
+        if saged {
+            var post.state = Bit.or(ThreadState.NORMAL, ThreadState.SAGED)
+        }
+        if fn {
+            var post.reserved = fn
+        }
 
-//         var postRaw = post.toString()
-//         File.write(path + "/" + id, postRaw)
+        var postRaw = post.toString()
+        File.write(path + "/" + id, postRaw)
 
-//         var timeline = File.readLines(timelinePath)
-//         if rid == 0 {
-//             if report {
-//                 var report = File.readLines(reportPath)
-//                 List.insert(report, 0, str(id))
-//                 File.write(reportPath, report)
+        var timeline = File.readLines(timelinePath)
+        if rid == 0 {
+            if report {
+                var report = File.readLines(reportPath)
+                List.insert(report, 0, str(id))
+                File.write(reportPath, report)
 
-//                 var redirectTo = "/report/1"
-//             } else {
-//                 List.insert(timeline, 0, str(id))
-//                 var redirectTo = "/page/1"
-//             }
-//         } else {
-//             if len(repliedThreadRaw) >= Config.maxReplies {
-//                 replyTo.state = Bit.or(replyTo.state, ThreadState.LOCKED)
-//                 repliedThreadRaw[0] = replyTo.toString2()
-//             }
+                var redirectTo = "/report/1"
+            } else {
+                List.insert(timeline, 0, str(id))
+                var redirectTo = "/page/1"
+            }
+        } else {
+            if len(repliedThreadRaw) >= Config.maxReplies {
+                replyTo.state = Bit.or(replyTo.state, ThreadState.LOCKED)
+                repliedThreadRaw[0] = replyTo.toString2()
+            }
 
-//             repliedThreadRaw <+ postRaw
-//             File.write(repliedPath, repliedThreadRaw)
-//             File.delete(repliedPath + ".html")
+            repliedThreadRaw <+ postRaw
+            File.write(repliedPath, repliedThreadRaw)
+            File.delete(repliedPath + ".html")
 
-//             if !saged && !Bit.and(replyTo.state, ThreadState.SAGED) {
-//                 var srid = str(rid)
-//                 for timeline do (item, idx) => if item == srid {
-//                     del(timeline, idx)
-//                     List.insert(timeline, 0, srid)
-//                     false // break
-//                 }
-//             }
+            if !saged && !Bit.and(replyTo.state, ThreadState.SAGED) {
+                var srid = str(rid)
+                for timeline do (item, idx) => if item == srid {
+                    del(timeline, idx)
+                    List.insert(timeline, 0, srid)
+                    false // break
+                }
+            }
 
-//             var redirectTo = "/thread/" + rid
-//         }
+            var redirectTo = "/thread/" + rid
+        }
 
-//         File.write(timelinePath, timeline)
-//         Util.deleteAllCache()
+        File.write(timelinePath, timeline)
+        Util.deleteAllCache()
+    }
+
+    context.writeCommon(302, "html")
+    context.writeHeader("Location", redirectTo)
+    context.writeCookie("uid", uid, { Expires: 86400 * 365, Path: "/" })
+    context.eoh()
+
+} catch (e) {
+    switch __e__ do {
+        0 => infoHandler(context, "操作成功")
+        1 => errorHandler(context, "无效Cookie")
+        2 => errorHandler(context, "无效Id")
+        3 => errorHandler(context, "CSRF错误")
+        4 => errorHandler(context, "发串频率过快")
+        30 => errorHandler(context, "正文内容过短（最少4字）")
+        31 => errorHandler(context, "正文内容过长（最多2048字）")
+        32 => errorHandler(context, "名称过长（最多32字）")
+        33 => errorHandler(context, "标题过长（最多32字）")
+        34 => errorHandler(context, "选项过长（最多32字）")
+        40 => errorHandler(context, "不能回复回复")
+        41 => errorHandler(context, "该串已锁定，不能回复")
+        42 => errorHandler(context, Config.i18n.INVALID_THREAD_ID)
+        80 => errorHandler(context, "图片过大")
+        81 => errorHandler(context, "无效图片")
+        90 => errorHandler(context, "无效权限")
+        91 => errorHandler(context, "无效串Id")
+        _ => Log.error(e)
+    }
+})
+
+Log.info("Listening on port:", Config.port)
+server.start()
+
+// def struct (f, args...) => {
+//     f(args...)
+//     clone f
+// }
+
+// def [struct] st (a) => {
+//     var this.map = {test: a}
+
+//     def this.gg () => {
+//         var tmp = sync doublize(this.map.test)
+//         tmp.doo() + 0.5
 //     }
 
-//     context.writeCommon(302, "html")
-//     context.writeHeader("Location", redirectTo)
-//     context.writeCookie("uid", uid, { Expires: 86400 * 365, Path: "/" })
-//     context.eoh()
+//     def [struct] doublize(num) => {
+//         var n = num
 
-// } catch (e) {
-//     switch __e__ do {
-//         0 => infoHandler(context, "操作成功")
-//         1 => errorHandler(context, "无效Cookie")
-//         2 => errorHandler(context, "无效Id")
-//         3 => errorHandler(context, "CSRF错误")
-//         4 => errorHandler(context, "发串频率过快")
-//         30 => errorHandler(context, "正文内容过短（最少4字）")
-//         31 => errorHandler(context, "正文内容过长（最多2048字）")
-//         32 => errorHandler(context, "名称过长（最多32字）")
-//         33 => errorHandler(context, "标题过长（最多32字）")
-//         34 => errorHandler(context, "选项过长（最多32字）")
-//         40 => errorHandler(context, "不能回复回复")
-//         41 => errorHandler(context, "该串已锁定，不能回复")
-//         42 => errorHandler(context, Config.i18n.INVALID_THREAD_ID)
-//         80 => errorHandler(context, "图片过大")
-//         81 => errorHandler(context, "无效图片")
-//         90 => errorHandler(context, "无效权限")
-//         91 => errorHandler(context, "无效串Id")
-//         _ => Log.error(e)
+//         def this.doo() => {
+//             double(n)
+//         }
 //     }
-// })
+// }
 
-// Log.info("Listening on port:", Config.port)
-// server.start()
+// var p = "+"
 
-// // def struct (f, args...) => {
-// //     f(args...)
-// //     clone f
-// // }
+// def foo(a) => println(p + a.gg())
 
-// // def [struct] st (a) => {
-// //     var this.map = {test: a}
+// def bar(a, f) => {
+//     sleep(Math.floor(Math.random(0) * 1000))
 
-// //     def this.gg () => {
-// //         var tmp = sync doublize(this.map.test)
-// //         tmp.doo() + 0.5
-// //     }
+//     if a > 500 
+//         p = "-"
 
-// //     def [struct] doublize(num) => {
-// //         var n = num
+//     var tmp = sync st(a)
+//     f(tmp)
+// }
 
-// //         def this.doo() => {
-// //             double(n)
-// //         }
-// //     }
-// // }
-
-// // var p = "+"
-
-// // def foo(a) => println(p + a.gg())
-
-// // def bar(a, f) => {
-// //     sleep(Math.floor(Math.random(0) * 1000))
-
-// //     if a > 500 
-// //         p = "-"
-
-// //     var tmp = sync st(a)
-// //     f(tmp)
-// // }
-
-// // for 0..1000 do (i) => {
-// //     bar#(i, foo)
-// // }
+// for 0..1000 do (i) => {
+//     bar#(i, foo)
+// }

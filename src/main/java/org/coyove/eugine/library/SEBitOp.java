@@ -72,7 +72,7 @@ public class SEBitOp extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEBitOp ret = new SEBitOp();
         ret.atom = this.atom;
         ret.op = this.op;

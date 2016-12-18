@@ -80,7 +80,7 @@ public class PInteropCall extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PInteropCall ret = new PInteropCall();
         ret.atom = this.atom;
 

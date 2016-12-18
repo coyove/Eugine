@@ -6,9 +6,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Created by coyove on 2016/9/10.
  */
@@ -71,7 +68,7 @@ public class PAppend extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PAppend ret = new PAppend();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

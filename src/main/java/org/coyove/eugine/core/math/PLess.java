@@ -48,7 +48,7 @@ public class PLess extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PLess ret = new PLess();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

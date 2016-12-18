@@ -51,7 +51,7 @@ public class PChain extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PChain ret = new PChain();
         ret.expressions = ListEx.deepClone(this.expressions);
         return ret;

@@ -55,7 +55,7 @@ public class SERegexMatch extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SERegexMatch ret = new SERegexMatch();
         ret.atom = this.atom;
 

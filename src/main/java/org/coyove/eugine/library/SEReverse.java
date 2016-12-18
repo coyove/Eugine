@@ -48,7 +48,7 @@ public class SEReverse extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEReverse ret = new SEReverse();
         ret.atom = this.atom;
         ret.sub = this.sub.deepClone();

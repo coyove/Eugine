@@ -171,7 +171,7 @@ public class SEListOp extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEListOp ret = new SEListOp();
         ret.atom = this.atom;
         ret.op = this.op;

@@ -48,7 +48,7 @@ public class PGreat extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PGreat ret = new PGreat();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

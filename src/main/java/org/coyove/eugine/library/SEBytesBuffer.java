@@ -5,8 +5,6 @@ import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
-import java.nio.charset.Charset;
-
 /**
  * Created by zezhong on 2016/9/10.
  */
@@ -35,7 +33,7 @@ public class SEBytesBuffer extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEBytesBuffer ret = new SEBytesBuffer();
         ret.atom = this.atom;
         ret.src = this.src.deepClone();

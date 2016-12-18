@@ -49,7 +49,7 @@ public class SESplit extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SESplit ret = new SESplit();
         ret.atom = this.atom;
 

@@ -85,7 +85,7 @@ public class SELog extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SELog ret = new SELog();
         ret.atom = this.atom;
         ret.arguments = ListEx.deepClone(this.arguments);

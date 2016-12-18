@@ -79,7 +79,7 @@ public class PCompare extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PCompare ret = new PCompare();
         ret.atom = this.atom;
         ret.action = this.action;

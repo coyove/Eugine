@@ -52,7 +52,7 @@ public class SECommand extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SECommand ret = new SECommand();
         ret.atom = this.atom;
         ret.argument = this.argument.deepClone();

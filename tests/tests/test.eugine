@@ -1,4 +1,38 @@
 import util
+Log.info("begin")
+def struct test() => {
+    var dummy = 0
+
+    def get ZZZ() => dummy * 2
+    def set ZZZ(value) => if value < 2 println("too small") else dummy = value
+}
+
+var a = test()
+println(a.ZZZ)
+a.ZZZ = 1
+println(a.ZZZ)
+
+var b = test()
+println({a:b.ZZZ})
+// def struct complex(r, i) => {
+//     var this.real = r
+//     var this.image = i
+
+//     def operator add(left, right) => @ret(complex(left.real, left.image)) {
+//         ret.real += right.real
+//         ret.image += right.image
+//     }
+
+//     def operator tostring(this) => str(this.real) + "+" + this.image + "i"
+// }
+
+// var a = complex(0.0, 0.0)
+// for 0..2000 do (i) => 
+//     for 0..2000 do (j) => 
+//         a += complex(i, j)
+
+// Log.info(a)
+exit()
 
 Debug.start()
 // for 0..10000000 do () => {

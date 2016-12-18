@@ -48,7 +48,7 @@ public class PGreatEqual extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PGreatEqual ret = new PGreatEqual();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

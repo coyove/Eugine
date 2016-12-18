@@ -26,18 +26,13 @@ public class SClosure extends SValue {
     public String doc = "";
 
     // Used by TCO
-    public boolean isTransparent = false;
+    public final static byte TRANSPARENT = 1;
+    public final static byte INLINE = 2;
+    public final static byte COROUTINE = 4;
+    public final static byte STRUCT = 8;
+    public final static byte OPERATOR = 16;
 
-    public boolean isInline = false;
-
-    public boolean isCoroutine = false;
-
-    public boolean isStruct = false;
-
-//    public final static byte TRANSPARENT = 1;
-//    public final static byte INLINE = 2;
-//    public final static byte COROUTINE = 4;
-//    public final static byte STRUCT = 8;
+    public byte type;
 
     public volatile byte coroutineState = SUSPENDED;
     public final static byte SUSPENDED = 0;
@@ -70,59 +65,48 @@ public class SClosure extends SValue {
         body.add(single);
 
         extra = new ExecEnvironment();
-        isTransparent = true;
+//        isTransparent = true;
+        type |= TRANSPARENT;
     }
 
     public SClosure(ExecEnvironment env, ListEx<SExpression> multi) {
         this(env, new ListEx<String>(), new ListEx<Boolean>(), multi);
-        isTransparent = true;
+//        isTransparent = true;
+        type |= TRANSPARENT;
     }
 
     @Override
     public SValue clone() {
-        try {
-            SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
+        SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
 
-            ret.extra = this.extra.clone();
-            ret.proto = this.proto;
+        ret.extra = this.extra.clone();
+        ret.proto = this.proto;
+        ret.doc = this.doc;
+        ret.type = this.type;
 
-            ret.doc = this.doc;
-            ret.isCoroutine = this.isCoroutine;
-            ret.isInline = this.isInline;
-            ret.isStruct = this.isStruct;
-            ret.isTransparent = this.isTransparent;
-
-            SValue.copyAttributes(ret, this);
-            return ret;
-        } catch (EgException ex) {
-            // Never happen
-            ErrorHandler.print(ex);
-            return this;
-        }
+        SValue.copyAttributes(ret, this);
+        return ret;
     }
 
     public SClosure getCopy() throws EgException {
-        SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
+        SClosure ret = new SClosure(outerEnv, argNames, passByValue, body);
 
         ret.extra.parentEnv = this.extra;
         ret.proto = this;
-
-        ret.isTransparent = this.isTransparent;
         ret.doc = this.doc;
-        ret.isCoroutine = this.isCoroutine;
-        ret.isInline = this.isInline;
-        ret.isStruct = this.isStruct;
+        ret.type = this.type;
 
         SValue.copyAttributes(ret, this);
         return ret;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public String toString() {
-        SValue ts = this.extra.get("__to_string__");
+        SValue ts = this.extra.get("__tostring__");
         if (ts instanceof SClosure) {
             try {
-                SValue ret = (new PCall(atom, ts, new ListEx<SExpression>())).evaluate(outerEnv);
+                SValue ret = (new PCall(atom, ts, ListEx.build(this))).evaluate(outerEnv);
                 return ret.toString();
             } catch (EgException e) {
                 ErrorHandler.print(e);

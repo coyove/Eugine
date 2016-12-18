@@ -24,6 +24,8 @@ public class PLambda extends SExpression {
 
     public boolean struct = false;
 
+    public boolean operator = false;
+
     public PLambda() {
     }
 
@@ -45,14 +47,15 @@ public class PLambda extends SExpression {
         cls.atom = this.atom;
         cls.immutable = true;
         cls.doc = description;
-        cls.isInline = inline;
-        cls.isCoroutine = coroutine;
-        cls.isStruct = struct;
+        cls.type |= inline ? SClosure.INLINE : 0;
+        cls.type |= coroutine? SClosure.COROUTINE : 0;
+        cls.type |= struct ? SClosure.STRUCT : 0;
+        cls.type |= operator ? SClosure.OPERATOR : 0;
         return cls;
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PLambda ret = new PLambda();
         ret.atom = this.atom;
 
@@ -61,6 +64,7 @@ public class PLambda extends SExpression {
         ret.inline = this.inline;
         ret.struct = this.struct;
         ret.coroutine = this.coroutine;
+        ret.operator = this.operator;
         ret.passByValue = this.passByValue;
         ret.description = this.description;
 

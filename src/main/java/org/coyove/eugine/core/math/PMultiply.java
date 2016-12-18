@@ -73,7 +73,7 @@ public class PMultiply extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PMultiply ret = new PMultiply();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

@@ -52,7 +52,7 @@ public class PLogic extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PLogic ret = new PLogic();
         ret.atom = this.atom;
 

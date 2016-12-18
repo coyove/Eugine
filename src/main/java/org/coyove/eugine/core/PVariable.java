@@ -2,7 +2,6 @@ package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 /**
@@ -35,7 +34,7 @@ public class PVariable extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PVariable ret = new PVariable();
         ret.atom = this.atom;
         ret.varName = this.varName;

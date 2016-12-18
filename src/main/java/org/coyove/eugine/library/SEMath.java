@@ -94,7 +94,7 @@ public class SEMath extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEMath ret = new SEMath();
         ret.atom = this.atom;
 

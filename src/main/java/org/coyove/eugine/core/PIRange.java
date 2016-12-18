@@ -38,7 +38,7 @@ public class PIRange extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PIRange ret = new PIRange();
         ret.atom = this.atom;
 

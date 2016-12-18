@@ -54,7 +54,7 @@ public class PSubtract extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PSubtract ret = new PSubtract();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

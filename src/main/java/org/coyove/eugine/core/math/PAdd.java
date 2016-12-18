@@ -1,6 +1,7 @@
 package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -15,7 +16,8 @@ public class PAdd extends SExpression {
     @ReplaceableVariable
     private SExpression right;
 
-    public PAdd() {}
+    public PAdd() {
+    }
 
     public PAdd(Atom ha, SExpression l, SExpression r) {
         atom = ha;
@@ -80,11 +82,36 @@ public class PAdd extends SExpression {
             return new SList(list);
         }
 
+        if (left instanceof SClosure) {
+            SValue adder = ((SClosure) left).extra.get("__add__");
+            if (adder != null && adder instanceof SClosure) {
+                return (new PCall(this.atom, adder, ListEx.build(left, right))).evaluate(env);
+            } else if (right instanceof SClosure) {
+//                int as;
+//                if ((as = ((SClosure) left).argNames.size()) == ((SClosure) right).argNames.size()) {
+//                    ListEx<SExpression> args = new ListEx<SExpression>(as);
+//                    for (String name : ((SClosure) left).argNames) {
+//                        args.add(new PVariable(name));
+//                    }
+//
+//                    SClosure ret = new SClosure(env, ((SClosure) left).argNames,
+//                            ((SClosure) left).passByValue,
+//                            ListEx.build(
+//                                    new PCall(this.atom, left, args),
+//                                    new PCall(this.atom, right, args)
+//                            ));
+//
+//                    ret.atom = this.atom;
+//                    return ret;
+//                }
+            }
+        }
+
         return ExecEnvironment.Null;
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PAdd ret = new PAdd();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

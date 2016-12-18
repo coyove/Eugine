@@ -43,7 +43,7 @@ public class SELen extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SELen ret = new SELen();
         ret.atom = this.atom;
 

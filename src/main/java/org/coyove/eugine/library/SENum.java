@@ -96,7 +96,7 @@ public class SENum extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SENum ret = new SENum();
         ret.atom = this.atom;
         ret.op = this.op;

@@ -57,7 +57,7 @@ public class SEChar extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEChar ret = new SEChar();
         ret.atom = this.atom;
 

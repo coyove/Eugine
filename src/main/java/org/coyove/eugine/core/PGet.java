@@ -133,7 +133,7 @@ public class PGet extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PGet ret = new PGet();
         ret.atom = this.atom;
 

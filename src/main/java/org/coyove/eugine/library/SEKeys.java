@@ -42,7 +42,7 @@ public class SEKeys extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEKeys ret = new SEKeys();
         ret.atom = this.atom;
 

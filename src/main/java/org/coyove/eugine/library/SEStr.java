@@ -47,7 +47,7 @@ public class SEStr extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEStr ret = new SEStr();
         ret.atom = this.atom;
         ret.argument = this.argument.deepClone();

@@ -25,7 +25,7 @@ public class PYield extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PYield ret = new PYield();
         ret.expression = this.expression.deepClone();
         return ret;

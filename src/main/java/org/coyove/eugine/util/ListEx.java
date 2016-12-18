@@ -1,7 +1,6 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SExpression;
-import org.coyove.eugine.base.SValue;
 
 import java.util.Collection;
 
@@ -73,7 +72,7 @@ public class ListEx<T> extends java.util.ArrayList<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> ListEx<T> deepClone(ListEx<T> src) throws EgException {
+    public static <T> ListEx<T> deepClone(ListEx<T> src) {
         if (src == null) {
             return null;
         }

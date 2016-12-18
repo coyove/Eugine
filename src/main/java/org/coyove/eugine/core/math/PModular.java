@@ -70,7 +70,7 @@ public class PModular extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PModular ret = new PModular();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

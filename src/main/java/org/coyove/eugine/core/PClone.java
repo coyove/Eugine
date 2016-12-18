@@ -31,7 +31,7 @@ public class PClone extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PClone ret = new PClone();
         ret.atom = this.atom;
         ret.varName = this.varName.deepClone();

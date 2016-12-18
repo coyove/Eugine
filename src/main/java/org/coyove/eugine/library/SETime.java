@@ -63,7 +63,7 @@ public class SETime extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SETime ret = new SETime();
         ret.atom = this.atom;
 

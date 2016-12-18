@@ -2,7 +2,6 @@ package org.coyove.eugine.library;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 /**
@@ -35,7 +34,7 @@ public class SEWait extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEWait ret = new SEWait();
         ret.atom = this.atom;
         ret.argument = this.argument.deepClone();

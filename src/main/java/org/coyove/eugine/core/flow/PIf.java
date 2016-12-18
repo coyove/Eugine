@@ -44,7 +44,7 @@ public class PIf extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PIf ret = new PIf();
         ret.atom = this.atom;
 

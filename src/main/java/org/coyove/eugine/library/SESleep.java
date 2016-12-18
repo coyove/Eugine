@@ -33,7 +33,7 @@ public class SESleep extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SESleep ret = new SESleep();
         ret.atom = this.atom;
         ret.time = this.time.deepClone();

@@ -145,7 +145,7 @@ public class PSub extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PSub ret = new PSub();
         ret.atom = this.atom;
 

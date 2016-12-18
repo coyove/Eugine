@@ -2,7 +2,6 @@ package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 /**
@@ -32,7 +31,7 @@ public class PEqual extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PEqual ret = new PEqual();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();

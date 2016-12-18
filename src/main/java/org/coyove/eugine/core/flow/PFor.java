@@ -170,7 +170,7 @@ public class PFor extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PFor ret = new PFor();
         ret.atom = this.atom;
         ret.list = this.list.deepClone();

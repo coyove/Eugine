@@ -44,7 +44,7 @@ public class SEJoin extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEJoin ret = new SEJoin();
         ret.atom = this.atom;
         ret.sub = this.sub.deepClone();

@@ -118,7 +118,7 @@ public class SEFile extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEFile ret = new SEFile();
         ret.atom = this.atom;
 

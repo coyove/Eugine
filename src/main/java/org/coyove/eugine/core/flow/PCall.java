@@ -145,7 +145,8 @@ public class PCall extends SExpression {
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);
 
         // Inline: expand the inline code to upper level
-        if (closure.isInline && this.arguments.size() >= closure.argNames.size()) {
+        if ((closure.type & SClosure.INLINE) > 0 &&
+                this.arguments.size() >= closure.argNames.size()) {
             expanded = true;
             ListEx<SExpression> body = ListEx.deepClone(closure.body);
             if (closure.argNames.size() > 0) {
@@ -181,7 +182,7 @@ public class PCall extends SExpression {
         }
 
         SClosure returnAsStruct = null;
-        if (closure.isStruct) {
+        if ((closure.type & SClosure.STRUCT) > 0) {
             closure = closure.getCopy();
             returnAsStruct = closure;
         }
@@ -211,25 +212,27 @@ public class PCall extends SExpression {
 
             // Prepare the environment
             ExecEnvironment newEnv;
-            if (closure.isTransparent) {
+            if ((closure.type & SClosure.TRANSPARENT) > 0) {
                 newEnv = closure.outerEnv;
             } else {
                 newEnv = prepareEE(closure, arguments);
                 newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
                 newEnv.put("__atom__", new SObject(atom));
 
-                if (closure.refer instanceof SClosure && !closure.isStruct) {
-                    newEnv.put("this", (SClosure) closure.refer);
-                    newEnv.put("__this__", closure);
-                } else {
-                    newEnv.put("this", closure);
+                if ((closure.type & SClosure.OPERATOR) == 0) {
+                    if (closure.refer instanceof SClosure && (closure.type & SClosure.STRUCT) == 0) {
+                        newEnv.put("this", (SClosure) closure.refer);
+                        newEnv.put("__this__", closure);
+                    } else {
+                        newEnv.put("this", closure);
+                    }
                 }
 
                 newEnv.parentEnv = closure.outerEnv;
             }
 
             // Execute the closure body
-            if (closure.isCoroutine) {
+            if ((closure.type & SClosure.COROUTINE) > 0) {
                 return execCoroutine(closure, newEnv);
             } else {
                 SValue ret = ExecEnvironment.Null;
@@ -294,7 +297,7 @@ public class PCall extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PCall ret = new PCall();
         ret.atom = this.atom;
         ret.arguments = ListEx.deepClone(this.arguments);

@@ -61,7 +61,7 @@ public class SEPbmWriter extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEPbmWriter ret = new SEPbmWriter();
         ret.sizeX = this.sizeX.deepClone();
         ret.sizeY = this.sizeY.deepClone();

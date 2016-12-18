@@ -39,7 +39,7 @@ public class PType extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PType ret = new PType();
         ret.atom = this.atom;
 

@@ -26,7 +26,7 @@ public class PNot extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PNot ret = new PNot();
         ret.atom = this.atom;
         ret.right = this.right.deepClone();

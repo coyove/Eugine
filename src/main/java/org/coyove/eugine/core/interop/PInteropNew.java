@@ -64,7 +64,7 @@ public class PInteropNew extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PInteropNew ret = new PInteropNew();
         ret.atom = this.atom;
 

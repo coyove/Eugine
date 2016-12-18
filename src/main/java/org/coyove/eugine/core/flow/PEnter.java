@@ -49,7 +49,7 @@ public class PEnter extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PEnter ret = new PEnter();
         ret.atom = this.atom;
 

@@ -50,7 +50,7 @@ public class SEEval extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEEval ret = new SEEval();
         ret.atom = this.atom;
 

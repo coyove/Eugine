@@ -55,7 +55,7 @@ public class SEDel extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEDel ret = new SEDel();
         ret.atom = this.atom;
 

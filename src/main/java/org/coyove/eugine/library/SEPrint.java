@@ -89,7 +89,7 @@ public class SEPrint extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEPrint ret = new SEPrint();
         ret.atom = this.atom;
         ret.delim = this.delim;

@@ -7,7 +7,6 @@ import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -84,7 +83,7 @@ public abstract class SValue extends SExpression {
     public abstract SValue clone();
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         return this.clone();
     }
 

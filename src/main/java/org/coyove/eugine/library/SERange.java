@@ -73,7 +73,7 @@ public class SERange extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SERange ret = new SERange();
         ret.atom = this.atom;
 

@@ -60,5 +60,5 @@ public abstract class SExpression implements java.io.Serializable {
 
     public abstract SValue evaluate(ExecEnvironment env) throws EgException;
 
-    public abstract SExpression deepClone() throws EgException;
+    public abstract SExpression deepClone();
 }

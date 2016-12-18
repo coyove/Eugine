@@ -37,7 +37,7 @@ public class PDict extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PDict ret = new PDict();
         ret.atom = this.atom;
         ret.keys = this.keys;

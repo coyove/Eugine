@@ -68,7 +68,7 @@ public class SEDigest extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEDigest ret = new SEDigest();
         ret.atom = this.atom;
 

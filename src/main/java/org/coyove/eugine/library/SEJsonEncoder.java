@@ -69,7 +69,7 @@ public class SEJsonEncoder extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEJsonEncoder ret = new SEJsonEncoder();
         ret.atom = this.atom;
 

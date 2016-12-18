@@ -56,7 +56,7 @@ public class PThread extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PThread ret = new PThread();
         ret.atom = this.atom;
 

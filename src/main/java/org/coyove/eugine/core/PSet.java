@@ -136,7 +136,7 @@ public class PSet extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PSet ret = new PSet();
         ret.atom = this.atom;
 

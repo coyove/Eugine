@@ -46,7 +46,7 @@ public class SEReplace extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         SEReplace ret = new SEReplace();
         ret.atom = this.atom;
 

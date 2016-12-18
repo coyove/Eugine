@@ -70,7 +70,7 @@ public class PDivide extends SExpression {
     }
 
     @Override
-    public SExpression deepClone() throws EgException {
+    public SExpression deepClone() {
         PDivide ret = new PDivide();
         ret.atom = this.atom;
         ret.left = this.left.deepClone();
