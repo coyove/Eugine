@@ -14,14 +14,16 @@ import org.coyove.eugine.util.ListEx;
 import org.coyove.eugine.value.*;
 
 import java.io.FileInputStream;
-import java.util.HashMap;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 import org.ifc.ifc2x3tc1.ClassInterface;
+import org.ifc.ifc2x3tc1.IfcRoot;
+import org.ifc.ifc2x3tc1.RootInterface;
 import org.ifc.ifcmodel.IfcModel;
+import org.ifc.step.parser.ParameterLookup;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -40,22 +42,58 @@ public class LoadModel extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         String path = EgCast.toString(argument.evaluate(env), this.atom);
-        IfcModel model = new IfcModel();
+        final IfcModel model = new IfcModel();
         try {
             model.readStepFile(new FileInputStream(path));
-            SClosure m = new SClosure(env,
-                    new ListEx<String>(),
-                    new ListEx<Boolean>(),
-                    new ListEx<SExpression>(),
-                    "Ifc model at: " + path);
+            SClosure m = SClosure.makeEmptyClosure(env);
+            m.doc = "Ifc model at: " + path;
 
-            ListEx<SValue> objects = new ListEx<SValue>(model.getIfcObjects().size());
+            final ListEx<SValue> objects = new ListEx<SValue>(model.getIfcObjects().size());
             for (ClassInterface ci : model.getIfcObjects()) {
-                objects.add(new SObject(ci));
+                if (ci != null) {
+                    objects.add(new SObject(ci));
+                }
             }
             m.extra.put("objects", new SList(objects));
 
-//            m.extra.put("forEach", new SClosure(env, ));
+            m.extra.put("find", new SNativeCall(new NativeCallInterface() {
+                public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
+                        throws EgException {
+                    String id = EgCast.toString(arguments.head(), atom);
+                    return Model.decorateObject(new SObject(
+                            model.getIfcObjectByEntityInstanceName(Integer.valueOf(id))), env);
+                }
+            }, 1));
+
+            m.extra.put("walk", new SNativeCall(new NativeCallInterface() {
+                public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
+                        throws EgException {
+
+                    SClosure pred = EgCast.to(arguments.head(), SClosure.class);
+                    if (pred == null || pred.argNames.size() == 0) {
+                        throw new EgException(6987, "invalid predicate", atom);
+                    }
+
+                    ExecEnvironment newEnv = new ExecEnvironment();
+                    newEnv.parentEnv = env;
+
+                    SClosure newObject = SClosure.makeEmptyClosure(env);
+                    newObject.extra.put("get",
+                            new SNativeCall(new ForEachObjectGetDummy(), 1));
+
+                    String arg = pred.argNames.head();
+                    for (SValue object : objects) {
+                        Model.decorateObject(object, newObject);
+                        newEnv.bPut(arg, newObject);
+
+                        for (SExpression se : pred.body) {
+                            se.evaluate(newEnv);
+                        }
+                    }
+
+                    return ExecEnvironment.Null;
+                }
+            }, 1));
 
             return m;
         } catch(Exception e) {
@@ -69,5 +107,41 @@ public class LoadModel extends SExpression {
         ret.atom = this.atom;
         ret.argument = this.argument.deepClone();
         return ret;
+    }
+}
+
+class ForEachObjectGetDummy implements NativeCallInterface {
+    protected Object object;
+
+    public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
+        if (arguments.size() == 0) {
+            throw new EgException(2000, "not enough arguments", atom);
+        }
+
+        String name = EgCast.toString(arguments.head(), atom);
+
+        if (name.equals("Id")) {
+            return new SString(((IfcRoot) object).getGlobalId().getDecodedValue());
+        } else {
+//            Object v = ParameterLookup.getFieldRawValue(object, name);
+//
+//            if (v instanceof ClassInterface) {
+//                return Model.decorateObject(new SObject(v), env);
+//            } else if (v == null) {
+//                return new SString("");
+//            } else if (v.getClass().isArray()) {
+//                int len = Array.getLength(v);
+//                ListEx<SValue> ret = new ListEx<SValue>(len);
+//
+//                for (int i = 0; i < len; i++) {
+//                    ret.add(Model.decorateObject(new SObject(Array.get(v, i)), env));
+//                }
+//
+//                return new SList(ret);
+//            } else {
+//                return EgInterop.castJavaType(v);
+//            }
+            return Model.getField(object, name, env);
+        }
     }
 }

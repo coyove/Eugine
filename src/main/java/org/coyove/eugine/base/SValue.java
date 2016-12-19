@@ -57,6 +57,8 @@ public abstract class SValue extends SExpression {
             }
 
             return "Dict = {" + StringUtils.join(sets, ", ") + "}";
+        } else if (this instanceof SNativeCall) {
+            return this.toString();
         } else {
             return valType + " = " + underlying.toString();
         }

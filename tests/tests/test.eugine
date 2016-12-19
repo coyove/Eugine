@@ -1,7 +1,21 @@
 import util
+import ifc
+
 Log.info("begin")
-var model = Ifc.read("C:/Users/zezhong/Dropbox/ifc/main.ifc")
+var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
 Log.info(len(model.objects))
+
+// model.walk((obj) => 
+//     if Ifc.isRelGroup(obj) {
+//         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
+
+//         for obj.get<RelatedObjects> do (robj, i) =>
+//             println("  ", i, ": ", robj.get<Name>)
+//     })
+
+List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
+
+Log.info("end")
 
 // def struct complex(r, i) => {
 //     var this.real = r

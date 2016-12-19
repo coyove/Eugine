@@ -84,7 +84,8 @@ public class SEContains extends SExpression {
 
             return new SInt(-1);
         } else {
-            throw new EgException(3010, "invalid subject or key", atom);
+            // throw new EgException(3010, "invalid subject or key", atom);
+            return ExecEnvironment.False;
         }
     }
 

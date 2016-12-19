@@ -313,6 +313,10 @@ postfixExpr returns [SExpression v]
                 $v = new PCall(new Atom($Called.start), $Called.v, $argumentsList.v);
             }
         }
+    |   Called=postfixExpr '<' Identifier '>'
+        {
+            $v = new PCall(new Atom($Called.start), $Called.v, ListEx.build(new SString($Identifier.text)));
+        }
     ;
 
 unaryExpr returns [SExpression v]

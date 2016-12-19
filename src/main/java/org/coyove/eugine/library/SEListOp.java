@@ -85,21 +85,31 @@ public class SEListOp extends SExpression {
                     throw new EgException(3107, "invalid predicate function", atom);
                 }
 
-                String name = pred.argNames.head();
-                ExecEnvironment newEnv = new ExecEnvironment();
-                newEnv.parentEnv = env;
-
-                for (int i = list.size() - 1; i >= 0; i--) {
-                    newEnv.bPut(name, list.get(i));
-                    SValue ret = ExecEnvironment.Null;
-                    for (SExpression se : pred.body) {
-                        ret = se.evaluate(newEnv);
+                if (pred instanceof SNativeCall) {
+                    for (int i = list.size() - 1; i >= 0; i--) {
+                        if (!Utils.isBooleanTrue(((SNativeCall) pred)
+                                .call(atom, env, ListEx.build(list.get(i))))) {
+                            list.remove(i);
+                        }
                     }
+                } else {
+                    String name = pred.argNames.head();
+                    ExecEnvironment newEnv = new ExecEnvironment();
+                    newEnv.parentEnv = env;
 
-                    if (!Utils.isBooleanTrue(ret)) {
-                        list.remove(i);
+                    for (int i = list.size() - 1; i >= 0; i--) {
+                        newEnv.bPut(name, list.get(i));
+                        SValue ret = ExecEnvironment.Null;
+                        for (SExpression se : pred.body) {
+                            ret = se.evaluate(newEnv);
+                        }
+
+                        if (!Utils.isBooleanTrue(ret)) {
+                            list.remove(i);
+                        }
                     }
                 }
+
                 return listObj;
             case SORT:
                 if (list.size() == 0) {

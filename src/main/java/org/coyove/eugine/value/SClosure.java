@@ -41,6 +41,14 @@ public class SClosure extends SValue {
 
     public PChain dummyCoroutine = null;
 
+    public static SClosure makeEmptyClosure(ExecEnvironment env) {
+        return new SClosure(env, new ListEx<String>(), new ListEx<Boolean>(), new ListEx<SExpression>());
+    }
+
+    public SClosure() {
+
+    }
+
     public SClosure(ExecEnvironment env, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b) {
         super(b);
         outerEnv = env;

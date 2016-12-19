@@ -136,12 +136,12 @@ public class PCall extends SExpression {
             return ret;
         }
 
-        SValue closure_ = closureObject.evaluate(env);
-        if (!(closure_ instanceof SClosure)) {
-            throw new EgException(7031, "invalid calling closure: " + closure_, atom);
+        SValue _closure = closureObject.evaluate(env);
+        if (!(_closure instanceof SClosure)) {
+            throw new EgException(7031, "invalid calling closure: " + _closure, atom);
         }
 
-        SClosure closure = (SClosure) closure_;
+        SClosure closure = (SClosure) _closure;
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);
 
         // Inline: expand the inline code to upper level
@@ -208,6 +208,10 @@ public class PCall extends SExpression {
                 body.add(newBody);
 
                 return new SClosure(env, argNames, passByValue, body);
+            }
+
+            if (closure instanceof SNativeCall) {
+                return ((SNativeCall) closure).call(atom, env, arguments);
             }
 
             // Prepare the environment
