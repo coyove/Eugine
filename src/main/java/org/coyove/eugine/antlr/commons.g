@@ -7,8 +7,6 @@ Inline: 'inline';
 Coroutine: 'coroutine';
 Struct: 'struct';
 Operator: 'operator';
-Get: 'get';
-Set: 'set';
 For: ('for' | 'rev');
 If: 'if';
 Switch: 'switch';

@@ -147,7 +147,7 @@ defineStmt returns [SExpression v]
         ListEx<SExpression> body = new ListEx<SExpression>(),
         ListEx<SExpression> decorators = new ListEx<SExpression>()
     ]
-    :   Def Inline? Coroutine? Struct? Operator? Get? Set?
+    :   Def Inline? Coroutine? Struct? Operator? Get='getter'? Set='setter'?
         ('[' Decorator=expr argumentsList? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));

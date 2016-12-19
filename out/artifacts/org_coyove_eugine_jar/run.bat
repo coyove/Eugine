@@ -1,1 +1,1 @@
-java -Xmx4g -XX:+TieredCompilation -XX:+AggressiveOpts -Dfile.encoding=utf-8 -cp "*;org.coyove.eugine.jar" org.coyove.cli.main %1 %2
+java -Xmx4g -XX:+TieredCompilation -XX:+AggressiveOpts -Dfile.encoding=utf-8 -cp "*;org.coyove.eugine.jar" org.coyove.cli.main %1 %2 %3

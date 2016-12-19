@@ -26,6 +26,9 @@ public class main {
             Utils.print("Eugine started");
         }
 
+        Eugine e = new Eugine();
+        globalStaticEnv = e.environment;
+
         for (String cn : options.imports) {
             Utils.loadExportables(cn);
         }
@@ -42,11 +45,9 @@ public class main {
         if (options.source != null) {
             try {
 //                Thread.sleep(10000);
-                Eugine e = new Eugine();
-                globalStaticEnv = e.environment;
                 Utils.print(Parser.executeFile(args[0], globalStaticEnv).toString());
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
 
             return;
@@ -54,7 +55,6 @@ public class main {
 
         if (options.repl) {
             Integer lineCount = 0;
-            Eugine e = new Eugine();
             String indicator = "";
             boolean flag = false;
             String code = "";

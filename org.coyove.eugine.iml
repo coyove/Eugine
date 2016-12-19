@@ -13,5 +13,6 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="antlr4" level="project" />
     <orderEntry type="library" name="ifc2x3javatoolbox" level="project" />
+    <orderEntry type="library" name="IfcLibrary" level="project" />
   </component>
 </module>

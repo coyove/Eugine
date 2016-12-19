@@ -123,6 +123,7 @@ public class PSet extends SExpression {
                         ((SClosure) refer).extra.put(k, value);
                     }
                 } else if (n.refKey instanceof SClosure) {
+                    // TODO: avoid new PCall, make it static
                     (new PCall(atom, (SClosure) n.refKey, ListEx.build(value))).evaluate(env);
                 } else {
                     throw new EgException(2045, "invalid setter", atom);

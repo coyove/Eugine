@@ -94,8 +94,14 @@ public class PGet extends SExpression {
                 if (ret == null) {
                     SValue getter = ((SClosure) dict).extra.get("__get__" + k);
                     if (getter == null) {
+//                        SValue indexer = ((SClosure) dict).extra.get("__getindex__");
+//                        if (indexer == null) {
                         ret = new SNull();
                         ret.refKey = k;
+//                        } else {
+//                            ret = (new PCall(atom, indexer, ListEx.build(sk))).evaluate(env);
+//                            ret.refKey = ((SClosure) dict).extra.get("__setindex__" + k);
+//                        }
                     } else if (getter instanceof SClosure) {
                         ret = (new PCall(atom, getter, new ListEx<SExpression>())).evaluate(env);
                         ret.refKey = ((SClosure) dict).extra.get("__set__" + k);

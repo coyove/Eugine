@@ -1,19 +1,8 @@
 import util
 Log.info("begin")
-def struct test() => {
-    var dummy = 0
+var model = Ifc.read("C:/Users/zezhong/Dropbox/ifc/main.ifc")
+Log.info(len(model.objects))
 
-    def get ZZZ() => dummy * 2
-    def set ZZZ(value) => if value < 2 println("too small") else dummy = value
-}
-
-var a = test()
-println(a.ZZZ)
-a.ZZZ = 1
-println(a.ZZZ)
-
-var b = test()
-println({a:b.ZZZ})
 // def struct complex(r, i) => {
 //     var this.real = r
 //     var this.image = i

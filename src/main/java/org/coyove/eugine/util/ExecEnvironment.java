@@ -39,16 +39,19 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     @Override
     public SValue get(Object key) {
         SValue v = super.get(key);
+
         if (parentEnv != null && v == null) {
-            return parentEnv.get(key);
-        } else {
-            return v;
+            v = parentEnv.get(key);
         }
+
+        return v;
     }
 
     @Override
     public SValue put(String key, SValue value) {
         if (value == null) {
+            Utils.print("trying to put a null value");
+            System.exit(1);
             return null;
         }
 
