@@ -450,5 +450,20 @@ public class SKeywords {
                         return new SEPbmWriter(new Atom(tok), c);
                     }
                 });
+                put("Meta.add", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEMeta(new Atom(tok), c, SEMeta.ADD);
+                    }
+                });
+                put("Meta.set", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEMeta(new Atom(tok), c, SEMeta.SET);
+                    }
+                });
+                put("Meta.remove", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEMeta(new Atom(tok), c, SEMeta.REMOVE);
+                    }
+                });
             }};
 }

@@ -13,6 +13,8 @@ import org.coyove.eugine.util.*;
 public class SClosure extends SValue {
     public ExecEnvironment outerEnv;
 
+    public ExecEnvironment precastEnv;
+
     public ListEx<String> argNames;
 
     public ListEx<Boolean> passByValue;
@@ -73,13 +75,11 @@ public class SClosure extends SValue {
         body.add(single);
 
         extra = new ExecEnvironment();
-//        isTransparent = true;
         type |= TRANSPARENT;
     }
 
     public SClosure(ExecEnvironment env, ListEx<SExpression> multi) {
         this(env, new ListEx<String>(), new ListEx<Boolean>(), multi);
-//        isTransparent = true;
         type |= TRANSPARENT;
     }
 
@@ -88,6 +88,7 @@ public class SClosure extends SValue {
         SClosure ret = new SClosure(outerEnv, argNames, passByValue, ListEx.deepClone(body));
 
         ret.extra = this.extra.clone();
+        ret.precastEnv = this.precastEnv;
         ret.proto = this.proto;
         ret.doc = this.doc;
         ret.type = this.type;
@@ -100,6 +101,7 @@ public class SClosure extends SValue {
         SClosure ret = new SClosure(outerEnv, argNames, passByValue, body);
 
         ret.extra.parentEnv = this.extra;
+        ret.precastEnv = this.precastEnv;
         ret.proto = this;
         ret.doc = this.doc;
         ret.type = this.type;

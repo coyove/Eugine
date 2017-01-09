@@ -62,6 +62,10 @@ public class PCall extends SExpression {
             }
         }
 
+        if (cls.precastEnv != null) {
+            newEnv.putAll(cls.precastEnv);
+        }
+
         return newEnv;
     }
 
@@ -127,6 +131,7 @@ public class PCall extends SExpression {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
         if (expanded) {
             SValue ret = ExecEnvironment.Null;
@@ -193,21 +198,37 @@ public class PCall extends SExpression {
             if (closure.argNames.size() > arguments.size()) {
                 ListEx<String> argNames = closure.argNames.skip(arguments.size());
                 ListEx<Boolean> passByValue = closure.passByValue.skip(arguments.size());
-                ListEx<SExpression> newArgs = new ListEx<SExpression>();
+//                ListEx<SExpression> newArgs = new ListEx<SExpression>();
+//
+//                for (SValue v : arguments) {
+//                    newArgs.add(v);
+//                }
+//
+//                for (String a : argNames) {
+//                    newArgs.add(new PVariable(atom, a));
+//                }
+//
+//                PCall newBody = new PCall(atom, closure, newArgs);
+//                ListEx<SExpression> body = new ListEx<SExpression>();
+//                body.add(newBody);
 
-                for (SValue v : arguments) {
-                    newArgs.add(v);
+                SClosure curry = new SClosure(env, argNames, passByValue,
+                        (ListEx<SExpression>) closure.body.clone());
+                if (closure.precastEnv == null) {
+                    curry.precastEnv = new ExecEnvironment();
+                } else {
+                    curry.precastEnv = new ExecEnvironment(closure.precastEnv);
                 }
 
-                for (String a : argNames) {
-                    newArgs.add(new PVariable(atom, a));
+                for (int i = 0; i < arguments.size(); i++) {
+                    if (closure.passByValue.get(i)) {
+                        curry.precastEnv.put(closure.argNames.get(i), arguments.get(i).clone());
+                    } else {
+                        curry.precastEnv.put(closure.argNames.get(i), arguments.get(i));
+                    }
                 }
 
-                PCall newBody = new PCall(atom, closure, newArgs);
-                ListEx<SExpression> body = new ListEx<SExpression>();
-                body.add(newBody);
-
-                return new SClosure(env, argNames, passByValue, body);
+                return curry;
             }
 
             if (closure instanceof SNativeCall) {

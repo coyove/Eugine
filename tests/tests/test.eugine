@@ -1,21 +1,42 @@
-import util
-import ifc
+// import util
+// // import ifc
 
-Log.info("begin")
-var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
-Log.info(len(model.objects))
+// Log.info("begin")
+// var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
+// Log.info(len(model.objects))
 
-// model.walk((obj) => 
-//     if Ifc.isRelGroup(obj) {
-//         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
+// // model.walk((obj) => 
+// //     if Ifc.isRelGroup(obj) {
+// //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
 
-//         for obj.get<RelatedObjects> do (robj, i) =>
-//             println("  ", i, ": ", robj.get<Name>)
-//     })
+// //         for obj.get<RelatedObjects> do (robj, i) =>
+// //             println("  ", i, ": ", robj.get<Name>)
+// //     })
 
-List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
+// List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
+def curry(a, b, c) => a + b + c
 
-Log.info("end")
+var zzz  =curry(1)
+var zzz2  =zzz(2)
+println(zzz2(1))
+println(zzz2(2))
+println(zzz(10, 2))
+println(curry(2, 10)(3))
+
+def add(args...) => if len(args) == 2 args[0] + args[1] else {
+    var b = args[1..]
+    args[0] + add(b...)
+}
+
+println(add(1, 2))
+println(add(1, 2, 10))
+
+Meta.set(add, 0, () => {args <+ "zzz" println(args)})
+println(add(1, 2, 10, 90))
+
+println(@switch true do { true => 1 false => 0})
+
+// Log.info("end")
 
 // def struct complex(r, i) => {
 //     var this.real = r

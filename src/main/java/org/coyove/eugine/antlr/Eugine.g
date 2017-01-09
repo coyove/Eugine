@@ -454,6 +454,10 @@ assignExpr returns [SExpression v]
 
 expr returns [SExpression v]
     : assignExpr { $v = $assignExpr.v; }
+    | '@' MetaExpression=expr
+        {
+            $v = new PMeta(new Atom($MetaExpression.start), $MetaExpression.v);
+        }
     | New JavaFullName interopArgumentsList
         {
             String classname = $JavaFullName.text.replace("/", ".");

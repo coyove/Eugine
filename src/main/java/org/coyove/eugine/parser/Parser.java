@@ -46,6 +46,8 @@ public class Parser {
 
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         EugineParser parser = new EugineParser(tokens);
+        // parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+
         if (main.options.verbose) {
             Utils.print("Enter parsing stage", pad + 2);
         }
