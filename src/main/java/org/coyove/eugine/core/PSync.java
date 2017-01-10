@@ -9,19 +9,19 @@ import org.coyove.eugine.util.*;
  */
 public class PSync extends SExpression {
     @ReplaceableVariable
-    public SExpression expression;
+    public SExpression expr;
 
     public PSync() {}
 
     public PSync(Atom ha, SExpression e) {
         atom = ha;
-        expression = e;
+        expr = e;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         synchronized (this) {
-            return expression.evaluate(env);
+            return expr.evaluate(env);
         }
     }
 

@@ -2,7 +2,6 @@ package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.core.PVariable;
-import org.coyove.eugine.util.Utils;
 
 /**
  * Created by coyove on 2016/11/7.
@@ -18,7 +17,7 @@ public class Branch implements java.io.Serializable {
 
     public void replaceBranch(ListEx<String> from, ListEx<SExpression> to) {
         if (recv instanceof PVariable) {
-            String name = ((PVariable) recv).varName;
+            String name = ((PVariable) recv).name;
             int idx = from.indexOf(name);
             if (idx > -1) {
                 recv = to.get(idx);
@@ -31,7 +30,7 @@ public class Branch implements java.io.Serializable {
             SExpression se = body.get(i);
 
             if (se instanceof PVariable) {
-                String name = ((PVariable) se).varName;
+                String name = ((PVariable) se).name;
                 int idx = from.indexOf(name);
                 if (idx > -1) {
                     body.set(i, to.get(idx));

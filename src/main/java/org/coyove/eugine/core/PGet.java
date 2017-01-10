@@ -13,7 +13,7 @@ import java.util.HashMap;
  */
 public class PGet extends SExpression {
     @ReplaceableVariable
-    public SExpression sub;
+    public SExpression subject;
 
     @ReplaceableVariable
     public SExpression key;
@@ -22,13 +22,13 @@ public class PGet extends SExpression {
 
     public PGet(Atom ha, SExpression d, SExpression k) {
         atom = ha;
-        sub = d;
+        subject = d;
         key = k;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue dict = this.sub.evaluate(env);
+        SValue dict = this.subject.evaluate(env);
         SValue sk = this.key.evaluate(env);
 
         if (dict instanceof SDict) {
@@ -143,7 +143,7 @@ public class PGet extends SExpression {
         PGet ret = new PGet();
         ret.atom = this.atom;
 
-        ret.sub = this.sub.deepClone();
+        ret.subject = this.subject.deepClone();
         ret.key = this.key.deepClone();
 
         return ret;

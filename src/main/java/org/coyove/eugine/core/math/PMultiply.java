@@ -33,7 +33,7 @@ public class PMultiply extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         if (this.left instanceof PVariable && this.right instanceof PVariable) {
-            if (((PVariable) this.left).varName.equals(((PVariable) this.right).varName)) {
+            if (((PVariable) this.left).name.equals(((PVariable) this.right).name)) {
                 SValue left = this.left.evaluate(env);
                 if (left instanceof SLong) {
                     long v = ((SLong) left).val();

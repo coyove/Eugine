@@ -70,7 +70,7 @@ public class SEPrint extends SExpression {
         } else if (re instanceof SInt) {
             ret = String.format("%d", ((SInt) re).val());
         } else {
-            ret = String.format("%1$s", re.underlying.toString());
+            ret = String.format("%1$s", re.toString());
         }
 
         return ret;

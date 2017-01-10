@@ -13,18 +13,18 @@ import java.util.Arrays;
  */
 public class SEReverse extends SExpression {
     @ReplaceableVariable
-    private SExpression sub;
+    private SExpression subject;
 
     public SEReverse() {}
 
     public SEReverse(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
-        sub = args.head();
+        subject = args.head();
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue subject = this.sub.evaluate(env);
+        SValue subject = this.subject.evaluate(env);
 
         if (subject instanceof SList) {
             ListEx<SValue> l = subject.get();
@@ -51,7 +51,7 @@ public class SEReverse extends SExpression {
     public SExpression deepClone() {
         SEReverse ret = new SEReverse();
         ret.atom = this.atom;
-        ret.sub = this.sub.deepClone();
+        ret.subject = this.subject.deepClone();
         return ret;
     }
 }

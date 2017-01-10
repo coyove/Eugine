@@ -47,6 +47,11 @@ public class SKeywords {
                         return new SEPrint(new Atom(tok), arguments, "\n");
                     }
                 });
+                put("typeof", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SEType(new Atom(tok), arguments);
+                    }
+                });
                 put("Log.debug", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SELog(new Atom(tok), arguments, SELog.DEBUG);
@@ -476,6 +481,11 @@ public class SKeywords {
                 put("Meta.get", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMeta(new Atom(tok), c, SEMeta.GET);
+                    }
+                });
+                put("Meta.body", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEMeta(new Atom(tok), c, SEMeta.BODY);
                     }
                 });
             }};

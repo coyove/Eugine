@@ -10,7 +10,7 @@ import org.coyove.eugine.util.*;
  */
 public class SENum extends SExpression {
     @ReplaceableVariable
-    private SExpression argument;
+    private SExpression subject;
 
     private byte op;
     public final static byte INT = 0;
@@ -23,7 +23,7 @@ public class SENum extends SExpression {
     public SENum(Atom ha, ListEx<SExpression> args, byte o) {
         super(ha, args, 1);
 
-        argument = args.head();
+        subject = args.head();
         op = o;
     }
 
@@ -92,7 +92,7 @@ public class SENum extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        return convert(argument.evaluate(env), env);
+        return convert(subject.evaluate(env), env);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class SENum extends SExpression {
         SENum ret = new SENum();
         ret.atom = this.atom;
         ret.op = this.op;
-        ret.argument = this.argument.deepClone();
+        ret.subject = this.subject.deepClone();
 
         return ret;
     }

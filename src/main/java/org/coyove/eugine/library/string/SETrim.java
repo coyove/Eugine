@@ -11,19 +11,20 @@ import org.coyove.eugine.util.*;
  */
 public class SETrim extends SExpression {
     @ReplaceableVariable
-    private SExpression argument;
+    private SExpression subject;
 
-    public SETrim() {}
+    public SETrim() {
+    }
 
     public SETrim(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
-        argument = args.head();
+        subject = args.head();
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue arg = argument.evaluate(env);
+        SValue arg = subject.evaluate(env);
         if (arg instanceof SString) {
             return new SString(StringUtils.trim(arg.<String>get()));
         } else {
@@ -35,7 +36,7 @@ public class SETrim extends SExpression {
     public SExpression deepClone() {
         SETrim ret = new SETrim();
         ret.atom = this.atom;
-        ret.argument = this.argument.deepClone();
+        ret.subject = this.subject.deepClone();
         return ret;
     }
 }

@@ -1,7 +1,7 @@
-// import util
+import util
 // // import ifc
 
-// Log.info("begin")
+Log.info("begin")
 // var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
 // Log.info(len(model.objects))
 
@@ -34,12 +34,19 @@ println(add(1, 2, 10))
 Meta.set(add, 0, @println(args))
 println(add(1, 2, 10, 90))
 
+def foo(a,b)=>println(a)
+foo(1, 2)
 
-var a = @println(1, 2, "zzz", null)
-a.arguments = [[1,2], {a:1}, @[null]]
-eval(a)
+Meta.get(foo, 0).arguments = [@b ]
+foo(1, 2)
 
-// Log.info("end")
+for Meta.body(Debug) do (expr) => 
+    if typeof(expr.varValue) == "core.PLambda" &&
+        typeof(expr.varValue.body[0]) == "library.SEPrint" {
+    Log.info(expr.varValue.body[0].arguments)
+}
+
+Log.info("end")
 
 // def struct complex(r, i) => {
 //     var this.real = r

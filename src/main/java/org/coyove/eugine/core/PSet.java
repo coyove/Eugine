@@ -59,7 +59,7 @@ public class PSet extends SExpression {
         }
 
         if (varName instanceof PVariable) {
-            String sn = ((PVariable) varName).varName;
+            String sn = ((PVariable) varName).name;
             PVariable var = (PVariable) varName;
 
             if (type == SET) {
@@ -115,8 +115,8 @@ public class PSet extends SExpression {
                         ((SClosure) refer).extra.bPut(k, value);
 
                         if (this.varName instanceof PGet &&
-                                ((PGet) this.varName).sub instanceof PVariable &&
-                                ((PVariable) ((PGet) this.varName).sub).varName.equals("this")) {
+                                ((PGet) this.varName).subject instanceof PVariable &&
+                                ((PVariable) ((PGet) this.varName).subject).name.equals("this")) {
                             env.bPut(k, value);
                         }
                     } else {

@@ -1,5 +1,6 @@
 package org.coyove.eugine.value;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.ListEx;
 
@@ -88,6 +89,6 @@ public class SConcatString extends SString {
 
     @Override
     public String toString() {
-        return "String = " + this.get();
+        return "String = \"" + StringEscapeUtils.escapeJava(underlying.toString()) + "\"";
     }
 }

@@ -7,7 +7,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.core.PVariable;
-import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.value.*;
 
@@ -99,7 +98,7 @@ public final class Utils {
                 if (f.getAnnotation(ReplaceableVariable.class) != null) {
                     SExpression se = (SExpression) obj;
                     if (se instanceof PVariable) {
-                        String name = ((PVariable) se).varName;
+                        String name = ((PVariable) se).name;
                         int idx = from.indexOf(name);
                         if (idx > -1) {
                             f.set(expr, to.get(idx));
@@ -114,7 +113,7 @@ public final class Utils {
                     if (expr instanceof PLambda) {
                         _from = (ListEx<String>) from.clone();
                         _to = (ListEx<SExpression>) to.clone();
-                        for (String la : ((PLambda) expr).arguments) {
+                        for (String la : ((PLambda) expr).argNames) {
                             for (int i = 0; i < _from.size(); i++) {
                                 if (_from.get(i).equals(la)) {
                                     _from.remove(i);
@@ -129,7 +128,7 @@ public final class Utils {
                     for (int i = 0; i < ses.size(); i++) {
                         SExpression se = ses.get(i);
                         if (se instanceof PVariable) {
-                            String name = ((PVariable) se).varName;
+                            String name = ((PVariable) se).name;
                             int idx = _from.indexOf(name);
                             if (idx > -1) {
                                 ses.set(i, _to.get(idx));

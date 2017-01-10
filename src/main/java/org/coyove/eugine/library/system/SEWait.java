@@ -9,19 +9,19 @@ import org.coyove.eugine.util.*;
  */
 public class SEWait extends SExpression {
     @ReplaceableVariable
-    private SExpression argument;
+    private SExpression subject;
 
     public SEWait() {}
 
     public SEWait(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
-        argument = args.head();
+        subject = args.head();
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        Object t = this.argument.evaluate(env).underlying;
+        Object t = this.subject.evaluate(env).underlying;
         if (t instanceof Thread) {
             try {
                 ((Thread) t).join();
@@ -37,7 +37,7 @@ public class SEWait extends SExpression {
     public SExpression deepClone() {
         SEWait ret = new SEWait();
         ret.atom = this.atom;
-        ret.argument = this.argument.deepClone();
+        ret.subject = this.subject.deepClone();
         return ret;
     }
 }

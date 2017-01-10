@@ -12,7 +12,7 @@ public class PLambda extends SExpression {
     @ReplaceableVariables
     public ListEx<SExpression> body;
 
-    public ListEx<String> arguments;
+    public ListEx<String> argNames;
 
     public ListEx<Boolean> passByValue;
 
@@ -35,7 +35,7 @@ public class PLambda extends SExpression {
 
     public PLambda(Atom ha, ListEx<String> args, ListEx<Boolean> pass, ListEx<SExpression> b, String d) {
         atom = ha;
-        arguments = args;
+        argNames = args;
         body = b;
         passByValue = pass;
         description = d;
@@ -43,7 +43,7 @@ public class PLambda extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) {
-        SClosure cls = new SClosure(env, arguments, passByValue, body, description);
+        SClosure cls = new SClosure(env, argNames, passByValue, body, description);
         cls.atom = this.atom;
         cls.immutable = true;
         cls.doc = description;
@@ -60,7 +60,7 @@ public class PLambda extends SExpression {
         ret.atom = this.atom;
 
         ret.body = ListEx.deepClone(this.body);
-        ret.arguments = this.arguments;
+        ret.argNames = this.argNames;
         ret.inline = this.inline;
         ret.struct = this.struct;
         ret.coroutine = this.coroutine;

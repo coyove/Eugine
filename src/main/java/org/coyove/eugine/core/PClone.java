@@ -10,18 +10,18 @@ import org.coyove.eugine.value.*;
  */
 public class PClone extends SExpression {
     @ReplaceableVariable
-    private SExpression varName;
+    private SExpression subject;
 
     public PClone() {}
 
     public PClone(Atom ha, SExpression sub) {
         atom = ha;
-        varName = sub;
+        subject = sub;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue n = varName.evaluate(env);
+        SValue n = subject.evaluate(env);
 
         if (n instanceof SClosure) {
             return ((SClosure) n).getCopy();
@@ -34,7 +34,7 @@ public class PClone extends SExpression {
     public SExpression deepClone() {
         PClone ret = new PClone();
         ret.atom = this.atom;
-        ret.varName = this.varName.deepClone();
+        ret.subject = this.subject.deepClone();
 
         return ret;
     }

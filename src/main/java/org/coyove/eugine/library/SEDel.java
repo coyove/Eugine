@@ -12,7 +12,7 @@ import java.util.HashMap;
  */
 public class SEDel extends SExpression {
     @ReplaceableVariable
-    private SExpression host;
+    private SExpression subject;
 
     @ReplaceableVariable
     private SExpression index;
@@ -22,13 +22,13 @@ public class SEDel extends SExpression {
     public SEDel(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
-        host = args.get(0);
+        subject = args.get(0);
         index = args.get(1);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue subObj = host.evaluate(env);
+        SValue subObj = subject.evaluate(env);
         SValue idx = this.index.evaluate(env);
 
         if (idx instanceof SInt && subObj instanceof SList) {
@@ -59,7 +59,7 @@ public class SEDel extends SExpression {
         SEDel ret = new SEDel();
         ret.atom = this.atom;
 
-        ret.host = this.host.deepClone();
+        ret.subject = this.subject.deepClone();
         ret.index = this.index.deepClone();
         return ret;
     }

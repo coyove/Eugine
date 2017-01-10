@@ -13,7 +13,7 @@ import java.util.HashMap;
  */
 public class SEContains extends SExpression {
     @ReplaceableVariable
-    private SExpression map;
+    private SExpression subject;
 
     @ReplaceableVariable
     private SExpression key;
@@ -26,7 +26,7 @@ public class SEContains extends SExpression {
     public SEContains(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
 
-        map = args.get(0);
+        subject = args.get(0);
         key = args.get(1);
 
         if (args.size() > 2) {
@@ -37,7 +37,7 @@ public class SEContains extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue key = this.key.evaluate(env);
-        SValue sub = this.map.evaluate(env);
+        SValue sub = this.subject.evaluate(env);
         int start = this.start == null ? 0 : EgCast.toInt(this.start.evaluate(env), atom);
 
         if (sub instanceof SDict && key instanceof SString) {
@@ -93,7 +93,7 @@ public class SEContains extends SExpression {
     public SExpression deepClone() {
         SEContains ret = new SEContains();
         ret.atom = this.atom;
-        ret.map = this.map.deepClone();
+        ret.subject = this.subject.deepClone();
         ret.key = this.key.deepClone();
         if (this.start != null) {
             ret.start = this.start.deepClone();
