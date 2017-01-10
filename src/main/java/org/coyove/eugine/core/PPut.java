@@ -55,8 +55,9 @@ public class PPut extends SExpression {
             refer.<HashMap<String, SValue>>get().put(k, value);
         } else if (refer instanceof SList) {
             refer.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value);
-        } else if (refer instanceof SObject && key instanceof SString) {
-            Object sub = refer.get();
+        } else if ((refer instanceof SObject || refer instanceof SMetaExpression) &&
+                key instanceof SString) {
+            Object sub = refer.underlying;
             EgInterop.setField(sub, key.<String>get(), value);
         } else if (refer instanceof SClosure) {
             if (key instanceof SString) {

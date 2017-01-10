@@ -105,8 +105,8 @@ public class PSet extends SExpression {
                 ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey.toString(), value);
             } else if (refer instanceof SList) {
                 ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, value);
-            } else if (refer instanceof SObject) {
-                Object sub = ((SObject) refer).get();
+            } else if (refer instanceof SObject || refer instanceof SMetaExpression) {
+                Object sub = ((SValue) refer).underlying;
                 EgInterop.setField(sub, n.refKey.toString(), value);
             } else if (refer instanceof SClosure) {
                 if (n.refKey instanceof String) {

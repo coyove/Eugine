@@ -31,10 +31,13 @@ def add(args...) => if len(args) == 2 args[0] + args[1] else {
 println(add(1, 2))
 println(add(1, 2, 10))
 
-Meta.set(add, 0, () => {args <+ "zzz" println(args)})
+Meta.set(add, 0, @println(args))
 println(add(1, 2, 10, 90))
 
-println(@switch true do { true => 1 false => 0})
+
+var a = @println(1, 2, "zzz", null)
+a.arguments = [[1,2], {a:1}, @[null]]
+eval(a)
 
 // Log.info("end")
 

@@ -3,6 +3,7 @@ package org.coyove.eugine.core.math;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
+import org.coyove.eugine.value.SMetaExpression;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -27,7 +28,15 @@ public class PEqual extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue left = this.left.evaluate(env);
         SValue right = this.right.evaluate(env);
-        return left.equals(right) ? ExecEnvironment.True : ExecEnvironment.False;
+
+        boolean flag;
+        if (left instanceof SMetaExpression && right instanceof SMetaExpression) {
+            flag = left.underlying.getClass().equals(right.underlying.getClass());
+        } else {
+            flag = left.equals(right);
+        }
+
+        return flag ? ExecEnvironment.True : ExecEnvironment.False;
     }
 
     @Override

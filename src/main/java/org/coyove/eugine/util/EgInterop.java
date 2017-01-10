@@ -8,6 +8,7 @@ import org.coyove.eugine.value.*;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -70,6 +71,8 @@ public class EgInterop {
             return new SDict(map);
         } else if (value instanceof SValue) {
             return ((SValue) value);
+        } else if (value instanceof SExpression) {
+            return new SMetaExpression((SExpression) value);
         }
 
         return new SObject(value);
@@ -214,7 +217,31 @@ public class EgInterop {
         try {
             Field f = obj.getClass().getDeclaredField(field);
             f.setAccessible(true);
-            f.set(obj, castSValue(value, f.getType()));
+
+            if (obj instanceof SExpression) {
+                if (value instanceof SList && ListEx.class.equals(f.getType())) {
+                    Class ct = (Class) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+                    ListEx<SValue> list = value.get();
+                    ListEx<SExpression> exprs = new ListEx<SExpression>(list.size());
+
+                    for (SValue expr : list) {
+                        if (expr instanceof SMetaExpression) {
+                            exprs.add((SExpression) expr.underlying);
+                        } else {
+                            exprs.add(expr);
+                        }
+                    }
+
+                    f.set(obj, exprs);
+                } else if (value instanceof SMetaExpression) {
+                    f.set(obj, value.underlying);
+                } else {
+                    f.set(obj, value);
+                }
+            } else {
+                f.set(obj, castSValue(value, f.getType()));
+            }
+
             return value;
         } catch (Exception e) {
             throw new EgException(4006, "failed to set '" + field + "': " + e);

@@ -4,6 +4,14 @@ import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.core.*;
 import org.coyove.eugine.core.math.PCompare;
 import org.coyove.eugine.library.*;
+import org.coyove.eugine.library.image.SEPbmWriter;
+import org.coyove.eugine.library.json.SEJsonDecoder;
+import org.coyove.eugine.library.json.SEJsonEncoder;
+import org.coyove.eugine.library.math.SEBitOp;
+import org.coyove.eugine.library.math.SEMath;
+import org.coyove.eugine.library.meta.SEMeta;
+import org.coyove.eugine.library.string.*;
+import org.coyove.eugine.library.system.*;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.ListEx;
 
@@ -463,6 +471,11 @@ public class SKeywords {
                 put("Meta.remove", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMeta(new Atom(tok), c, SEMeta.REMOVE);
+                    }
+                });
+                put("Meta.get", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEMeta(new Atom(tok), c, SEMeta.GET);
                     }
                 });
             }};

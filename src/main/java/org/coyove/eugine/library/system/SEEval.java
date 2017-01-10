@@ -1,4 +1,4 @@
-package org.coyove.eugine.library;
+package org.coyove.eugine.library.system;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
@@ -12,7 +12,7 @@ import java.util.HashMap;
  */
 public class SEEval extends SExpression {
     @ReplaceableVariable
-    private SExpression text;
+    private SExpression subject;
 
     @ReplaceableVariable
     private SExpression env = null;
@@ -22,7 +22,7 @@ public class SEEval extends SExpression {
     public SEEval(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
-        text = args.head();
+        subject = args.head();
         if (args.size() > 1) {
             env = args.get(1);
         }
@@ -30,10 +30,7 @@ public class SEEval extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-
-        String text = EgCast.to(this.text.evaluate(env), SString.class,
-                new EgException(2014, "must eval string", atom)).get();
-
+        SValue text = this.subject.evaluate(env);
         if (this.env != null) {
             SDict e = EgCast.to(this.env.evaluate(env), SDict.class,
                     new EgException(2015, "environment must be a dict", atom));
@@ -46,7 +43,25 @@ public class SEEval extends SExpression {
             }
         }
 
-        return Parser.executeCode(text, env);
+        if (text instanceof SString) {
+            return Parser.executeCode(text.<String>get(), env);
+        } else if (text instanceof SMetaExpression) {
+            return ((SExpression) text.underlying).evaluate(env);
+        } else {
+            if (text instanceof SList) {
+                ListEx<SValue> list = ((SList) text).get();
+                if (list.head() instanceof SMetaExpression) {
+                    SValue ret = ExecEnvironment.Null;
+                    for (SValue expr : list) {
+                        ret = ((SExpression) expr.underlying).evaluate(env);
+                    }
+
+                    return ret;
+                }
+            }
+
+            throw new EgException(2014, "invalid object to eval", atom);
+        }
     }
 
     @Override
@@ -54,7 +69,7 @@ public class SEEval extends SExpression {
         SEEval ret = new SEEval();
         ret.atom = this.atom;
 
-        ret.text = this.text.deepClone();
+        ret.subject = this.subject.deepClone();
         if (this.env != null) {
             ret.env = this.env.deepClone();
         }

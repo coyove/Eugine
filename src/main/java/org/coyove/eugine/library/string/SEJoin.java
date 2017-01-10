@@ -1,4 +1,4 @@
-package org.coyove.eugine.library;
+package org.coyove.eugine.library.string;
 
 import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.*;

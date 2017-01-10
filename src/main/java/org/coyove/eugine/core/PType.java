@@ -33,6 +33,12 @@ public class PType extends SExpression {
 
         if (v instanceof SObject) {
             return new SString(v.underlying.getClass().getName());
+        } else if (v instanceof SMetaExpression) {
+            String name = v.underlying.getClass().getName().replace(".", "/");
+            if (name.startsWith("org/coyove/eugine")) {
+                name = name.substring(18);
+            }
+            return new SString(name);
         } else {
             return new SString(v.getClass().getSimpleName().substring(1));
         }

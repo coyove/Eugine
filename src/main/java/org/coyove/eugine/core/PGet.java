@@ -119,7 +119,7 @@ public class PGet extends SExpression {
         } else if (dict.underlying instanceof byte[]) {
             byte[] buf = ((byte[]) dict.underlying);
             return new SInt(buf[EgCast.toInt(sk, atom)]);
-        } else if (dict instanceof SObject) {
+        } else if (dict instanceof SObject || dict instanceof SMetaExpression) {
             String field = EgCast.toString(sk, atom);
 
             try {

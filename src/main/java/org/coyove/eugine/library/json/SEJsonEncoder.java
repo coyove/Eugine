@@ -1,4 +1,4 @@
-package org.coyove.eugine.library;
+package org.coyove.eugine.library.json;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
