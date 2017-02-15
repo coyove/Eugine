@@ -1,43 +1,43 @@
-// import util
-// // import ifc
+import util
+// // // import ifc
 
-// Log.info("begin")
-// var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
-// Log.info(len(model.objects))
+// // Log.info("begin")
+// // var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
+// // Log.info(len(model.objects))
 
-// // model.walk((obj) => 
-// //     if Ifc.isRelGroup(obj) {
-// //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
+// // // model.walk((obj) => 
+// // //     if Ifc.isRelGroup(obj) {
+// // //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
 
-// //         for obj.get<RelatedObjects> do (robj, i) =>
-// //             println("  ", i, ": ", robj.get<Name>)
-// //     })
+// // //         for obj.get<RelatedObjects> do (robj, i) =>
+// // //             println("  ", i, ": ", robj.get<Name>)
+// // //     })
 
-// List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
-def curry(a, b, c) => a + b + c
+// // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
+// def curry(a, b, c) => a + b + c
 
-var zzz  =curry(1)
-var zzz2  =zzz(2)
-println(zzz2(1))
-println(zzz2(2))
-println(zzz(10, 2))
-println(curry(2, 10)(3))
+// var zzz  =curry(1)
+// var zzz2  =zzz(2)
+// println(zzz2(1))
+// println(zzz2(2))
+// println(zzz(10, 2))
+// println(curry(2, 10)(3))
 
-def add(args...) => if len(args) == 2 args[0] + args[1] else {
-    var b = args[1..]
-    args[0] + add(b...)
-}
+// def add(args...) => if len(args) == 2 args[0] + args[1] else {
+//     var b = args[1..]
+//     args[0] + add(b...)
+// }
 
-println(add(1, 2))
-println(add(1, 2, 10))
+// println(add(1, 2))
+// println(add(1, 2, 10))
 
-Meta.set(add, 0, @println(args))
-println(add(1, 2, 10, 90))
+// Meta.set(add, 0, @println(args))
+// println(add(1, 2, 10, 90))
 
 
-var a = @println(1, 2, "zzz", null)
-a.arguments = [[1,2], {a:1}, @[null]]
-eval(a)
+// var a = @println(1, 2, "zzz", null)
+// a.arguments = [[1,2], {a:1}, @[null]]
+// eval(a)
 
 // Log.info("end")
 
@@ -59,7 +59,7 @@ eval(a)
 //         a += complex(i, j)
 
 // Log.info(a)
-exit()
+// exit()
 
 Debug.start()
 // for 0..10000000 do () => {

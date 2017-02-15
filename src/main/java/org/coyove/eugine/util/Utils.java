@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.HashMap;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -83,7 +84,7 @@ public final class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    public static void replaceVariables(SExpression expr, ListEx<String> from, ListEx<SExpression> to) {
+    public static void replaceVariables(SExpression expr, HashMap<String, SExpression> replacer) {
         if (expr == null) {
             return;
         }
@@ -99,28 +100,21 @@ public final class Utils {
                 if (f.getAnnotation(ReplaceableVariable.class) != null) {
                     SExpression se = (SExpression) obj;
                     if (se instanceof PVariable) {
-                        String name = ((PVariable) se).varName;
-                        int idx = from.indexOf(name);
-                        if (idx > -1) {
-                            f.set(expr, to.get(idx));
+                        SExpression r = replacer.get(((PVariable) se).varName);
+                        if (r != null) {
+                            f.set(expr, r);
                         }
                     } else {
-                        replaceVariables(se, from, to);
+                        replaceVariables(se, replacer);
                     }
                 } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
                     // special case, lambda's arguments may collide with the names in "from"
-                    ListEx<String> _from = from;
-                    ListEx<SExpression> _to = to;
+                    HashMap<String, SExpression> _replacer = replacer;
                     if (expr instanceof PLambda) {
-                        _from = (ListEx<String>) from.clone();
-                        _to = (ListEx<SExpression>) to.clone();
+                        _replacer = (HashMap<String, SExpression>) replacer.clone();
                         for (String la : ((PLambda) expr).arguments) {
-                            for (int i = 0; i < _from.size(); i++) {
-                                if (_from.get(i).equals(la)) {
-                                    _from.remove(i);
-                                    _to.remove(i);
-                                    break;
-                                }
+                            if (_replacer.containsKey(la)) {
+                                _replacer.remove(la);
                             }
                         }
                     }
@@ -129,22 +123,21 @@ public final class Utils {
                     for (int i = 0; i < ses.size(); i++) {
                         SExpression se = ses.get(i);
                         if (se instanceof PVariable) {
-                            String name = ((PVariable) se).varName;
-                            int idx = _from.indexOf(name);
-                            if (idx > -1) {
-                                ses.set(i, _to.get(idx));
+                            SExpression r = _replacer.get(((PVariable) se).varName);
+                            if (r != null) {
+                                ses.set(i, r);
                             }
                         } else {
-                            replaceVariables(se, _from, _to);
+                            replaceVariables(se, _replacer);
                             ses.set(i, se);
                         }
                     }
                 } else if (obj instanceof Branch) {
-                    ((Branch) obj).replaceBranch(from, to);
+                    ((Branch) obj).replaceBranch(replacer);
                 } else if (f.getName().equals("branches")) {
                     // special case of switch ... do {}
                     for (Branch b : ((ListEx<Branch>) obj)) {
-                        b.replaceBranch(from, to);
+                        b.replaceBranch(replacer);
                     }
                 }
             }

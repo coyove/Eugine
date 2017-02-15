@@ -45,7 +45,7 @@ T__43=44
 T__44=45
 T__45=46
 Var=47
-Const=48
+Let=48
 Def=49
 Inline=50
 Coroutine=51
@@ -124,7 +124,7 @@ StringLiteral=79
 '*='=45
 '/='=46
 'var'=47
-'const'=48
+'let'=48
 'def'=49
 'inline'=50
 'coroutine'=51

@@ -1,7 +1,7 @@
 lexer grammar CommonLexerRules;
 
 Var: 'var';
-Const: 'const';
+Let: 'let';
 Def: 'def';
 Inline: 'inline';
 Coroutine: 'coroutine';

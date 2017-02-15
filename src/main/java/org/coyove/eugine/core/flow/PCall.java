@@ -7,7 +7,6 @@ import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.core.PList;
 import org.coyove.eugine.core.PSet;
-import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
@@ -150,41 +149,41 @@ public class PCall extends SExpression {
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);
 
         // Inline: expand the inline code to upper level
-        if ((closure.type & SClosure.INLINE) > 0 &&
-                this.arguments.size() >= closure.argNames.size()) {
-            expanded = true;
-            ListEx<SExpression> body = ListEx.deepClone(closure.body);
-            if (closure.argNames.size() > 0) {
-                if (closure.argNames.last().endsWith("...")) {
-                    String varargName = closure.argNames.last();
-                    varargName = varargName.substring(0, varargName.length() - 3);
-
-                    ListEx<String> argNames = new ListEx<String>();
-                    for (int i = 0; i < closure.argNames.size() - 1; i++) {
-                        argNames.add(closure.argNames.get(i));
-                    }
-
-                    PList vararg = new PList(atom);
-                    for (int i = closure.argNames.size() - 1; i < this.arguments.size(); i++) {
-                        vararg.values.add(this.arguments.get(i));
-                    }
-
-                    PSet tmp = new PSet(atom, new SString(varargName), vararg, PSet.MUTABLE);
-
-                    for (SExpression b : body) {
-                        Utils.replaceVariables(b, argNames, this.arguments);
-                    }
-
-                    body.add(0, tmp);
-                } else {
-                    for (SExpression b : body) {
-                        Utils.replaceVariables(b, closure.argNames, this.arguments);
-                    }
-                }
-            }
-
-            this.arguments = body;
-        }
+//        if ((closure.type & SClosure.INLINE) > 0 &&
+//                this.arguments.size() >= closure.argNames.size()) {
+//            expanded = true;
+//            ListEx<SExpression> body = ListEx.deepClone(closure.body);
+//            if (closure.argNames.size() > 0) {
+//                if (closure.argNames.last().endsWith("...")) {
+//                    String varargName = closure.argNames.last();
+//                    varargName = varargName.substring(0, varargName.length() - 3);
+//
+//                    ListEx<String> argNames = new ListEx<String>();
+//                    for (int i = 0; i < closure.argNames.size() - 1; i++) {
+//                        argNames.add(closure.argNames.get(i));
+//                    }
+//
+//                    PList vararg = new PList(atom);
+//                    for (int i = closure.argNames.size() - 1; i < this.arguments.size(); i++) {
+//                        vararg.values.add(this.arguments.get(i));
+//                    }
+//
+//                    PSet tmp = new PSet(atom, new SString(varargName), vararg, PSet.VAR);
+//
+//                    for (SExpression b : body) {
+//                        Utils.replaceVariables(b, new Utils.ExprReplacer(argNames, this.arguments));
+//                    }
+//
+//                    body.add(0, tmp);
+//                } else {
+//                    for (SExpression b : body) {
+//                        Utils.replaceVariables(b, closure.argNames, this.arguments);
+//                    }
+//                }
+//            }
+//
+//            this.arguments = body;
+//        }
 
         SClosure returnAsStruct = null;
         if ((closure.type & SClosure.STRUCT) > 0) {

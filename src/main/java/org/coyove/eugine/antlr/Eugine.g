@@ -77,9 +77,9 @@ syncStmt returns [SExpression v]
 
 declareStmt returns [SExpression v]
     locals [ ListEx<SExpression> multi = new ListEx<SExpression>(), byte act ]
-    :   Action=(Var | Const) 
+    :   Action=(Var | Let) 
         {
-            $act = $Action.text.equals("var") ? PSet.MUTABLE : PSet.IMMUTABLE;
+            $act = $Action.text.equals("var") ? PSet.VAR : PSet.LET;
         }
         Head=unaryExpr '=' HeadValue=expr
         {
@@ -174,7 +174,7 @@ defineStmt returns [SExpression v]
                 closure = new PCall(a, d, ListEx.build(closure));
             }
             
-            $v = new PSet(a, name, closure, PSet.IMMUTABLE);
+            $v = new PSet(a, name, closure, PSet.VAR);
         }
     ;
 
@@ -186,7 +186,7 @@ lambdaStmt returns [PLambda v]
         ('@' Identifier ('(' InitValue=expr ')')? {
             $ret = new PVariable($Identifier.text);
             $body.add(new PSet(new Atom($Identifier), $ret, 
-                $InitValue.start == null ? ExecEnvironment.Null : $InitValue.v, PSet.MUTABLE)); 
+                $InitValue.start == null ? ExecEnvironment.Null : $InitValue.v, PSet.VAR)); 
         })?
         ('{' (stmt { $body.add($stmt.v); })* '}'| stmt { $body.add($stmt.v); })
         {

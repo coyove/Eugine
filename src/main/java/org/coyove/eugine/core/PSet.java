@@ -13,15 +13,15 @@ import java.util.HashMap;
  */
 public class PSet extends SExpression {
     @ReplaceableVariable
-    private SExpression varName;
+    private SExpression name;
 
     @ReplaceableVariable
-    private SExpression varValue;
+    private SExpression value;
 
-    private byte type;
+    public byte type;
 
-    public final static byte MUTABLE = 0;
-    public final static byte IMMUTABLE = 1;
+    public final static byte VAR = 0;
+    public final static byte LET = 1;
     public final static byte SET = 2;
 
     public PSet() {
@@ -29,15 +29,15 @@ public class PSet extends SExpression {
 
     public PSet(Atom ha, SExpression name, SExpression value, byte a) {
         atom = ha;
-        varName = name;
-        varValue = value;
+        this.name = name;
+        this.value = value;
         type = a;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue n = varName.evaluate(env);
-        SValue v = varValue.evaluate(env);
+        SValue n = name.evaluate(env);
+        SValue v = value.evaluate(env);
         SValue value = v;
 
         if (v instanceof SString) {
@@ -54,13 +54,12 @@ public class PSet extends SExpression {
 //            value.immutable = false;
 //        }
 
-        if (type == IMMUTABLE) {
+        if (type == LET) {
             value.immutable = true;
         }
 
-        if (varName instanceof PVariable) {
-            String sn = ((PVariable) varName).varName;
-            PVariable var = (PVariable) varName;
+        if (name instanceof PVariable) {
+            String sn = ((PVariable) name).varName;
 
             if (type == SET) {
                 // TODO: find a more elegant way to deal with immutable variable checking
@@ -70,29 +69,8 @@ public class PSet extends SExpression {
 //                }
 
                 env.put(sn, value);
-                if (SConfig.cacheVariables) {
-                    if (var.cacheIndex >= 0) {
-                        SCache.slots[var.cacheIndex] = value;
-                    } else {
-                        Short ci = env.cacheReverseLookupGet(sn);
-                        if (ci != null) {
-                            var.cacheIndex = ci;
-                        } else {
-                            // set a variable who was not declared
-                        }
-                    }
-                }
             } else {
                 env.bPut(sn, value);
-                if (SConfig.cacheVariables) {
-                    if (var.cacheIndex >= 0) {
-                        SCache.slots[var.cacheIndex] = value;
-                    } else {
-                        short ci = SCache.put(value, env, sn);
-                        var.cacheIndex = ci;
-                        env.cacheReverseLookup.put(sn, ci);
-                    }
-                }
             }
         } else {
             Object refer = n.refer;
@@ -111,12 +89,12 @@ public class PSet extends SExpression {
             } else if (refer instanceof SClosure) {
                 if (n.refKey instanceof String) {
                     String k = n.refKey.toString();
-                    if (type == MUTABLE || type == IMMUTABLE) {
+                    if (type == VAR || type == LET) {
                         ((SClosure) refer).extra.bPut(k, value);
 
-                        if (this.varName instanceof PGet &&
-                                ((PGet) this.varName).sub instanceof PVariable &&
-                                ((PVariable) ((PGet) this.varName).sub).varName.equals("this")) {
+                        if (this.name instanceof PGet &&
+                                ((PGet) this.name).sub instanceof PVariable &&
+                                ((PVariable) ((PGet) this.name).sub).varName.equals("this")) {
                             env.bPut(k, value);
                         }
                     } else {
@@ -141,8 +119,8 @@ public class PSet extends SExpression {
         PSet ret = new PSet();
         ret.atom = this.atom;
 
-        ret.varName = this.varName.deepClone();
-        ret.varValue = this.varValue.deepClone();
+        ret.name = this.name.deepClone();
+        ret.value = this.value.deepClone();
         ret.type = this.type;
         return ret;
     }
