@@ -1,5 +1,6 @@
 package org.coyove.eugine.value;
 
+import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.util.*;
@@ -28,5 +29,17 @@ public class SList extends SValue {
         SList ret = new SList(n);
         SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        ListEx<SValue> list = this.get();
+        String[] items = new String[list.size()];
+        int i = 0;
+        for (SValue s : list) {
+            items[i++] = s.toString();
+        }
+
+        return "List = [" + StringUtils.join(items, ", ") + "]";
     }
 }

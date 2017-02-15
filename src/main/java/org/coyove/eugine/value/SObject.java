@@ -21,4 +21,9 @@ public class SObject extends SValue {
         SValue.copyAttributes(ret, this);
         return ret;
     }
+
+    @Override
+    public String toString() {
+        return "Object = " + underlying.toString();
+    }
 }

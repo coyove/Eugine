@@ -19,4 +19,9 @@ public class SNull extends SValue {
     public SValue clone() {
         return ExecEnvironment.Null;
     }
+
+    @Override
+    public String toString() {
+        return "Null = Null";
+    }
 }

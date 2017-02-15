@@ -1,5 +1,6 @@
 package org.coyove.eugine.value;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.coyove.eugine.base.SValue;
 
 /**
@@ -24,5 +25,10 @@ public class SString extends SValue {
         SString ret = new SString((String) underlying);
         SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        return "String = \"" + StringEscapeUtils.escapeJava(underlying.toString()) + "\"";
     }
 }

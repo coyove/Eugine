@@ -445,7 +445,7 @@ assignExpr returns [SExpression v]
         {
             if ($Subject.v instanceof PGet && SConfig.enablePPut) {
                 PGet get = (PGet) $Subject.v;
-                $v = new PPut(new Atom($Subject.start), get.sub, get.key, $Value.v, PPut.DECLARE.SET);
+                $v = new PPut(new Atom($Subject.start), get.subject, get.key, $Value.v, PPut.DECLARE.SET);
             } else {
                 $v = new PSet(new Atom($Subject.start), $Subject.v, $Value.v, PSet.SET);
             }
@@ -479,10 +479,6 @@ expr returns [SExpression v]
     | Yield (Yielded=expr | '(' ')')
         { 
             $v = new PYield(new Atom($Yield), $Yielded.start != null ? $Yielded.v : ExecEnvironment.Null); 
-        }
-    | Type Subject=expr
-        { 
-            $v = new PType(new Atom($Type), $Subject.v, PType.TYPE.TYPE); 
         }
     | For Subject=expr Do Body=expr
         {

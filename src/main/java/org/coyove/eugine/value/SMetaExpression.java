@@ -15,4 +15,17 @@ public class SMetaExpression extends SValue {
     public SValue clone() {
         return this;
     }
+
+    public String getSimpleName() {
+        String name = underlying.getClass().getName();
+        if (name.startsWith("org.coyove.eugine")) {
+            name = name.substring(18);
+        }
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "Meta = " + getSimpleName();
+    }
 }

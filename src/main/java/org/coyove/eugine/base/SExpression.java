@@ -29,8 +29,8 @@ public abstract class SExpression implements java.io.Serializable {
         ListEx<SValue> ret = new ListEx<SValue>();
         for (SExpression e : arguments) {
             if (e != null) {
-                if (e instanceof PVariable && ((PVariable) e).varName.endsWith("...")) {
-                    String varName = ((PVariable) e).varName;
+                if (e instanceof PVariable && ((PVariable) e).name.endsWith("...")) {
+                    String varName = ((PVariable) e).name;
                     varName = varName.substring(0, varName.length() - 3);
 
                     SValue v = env.get(varName);

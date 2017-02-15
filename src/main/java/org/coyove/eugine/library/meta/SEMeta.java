@@ -24,11 +24,12 @@ public class SEMeta extends SExpression {
     public final static byte SET = 1;
     public final static byte REMOVE = 2;
     public final static byte GET = 3;
+    public final static byte BODY = 4;
 
     public SEMeta() {}
 
     public SEMeta(Atom ha, ListEx<SExpression> args, byte op) {
-        super(ha, args, op == SET ? 3 : 2);
+        super(ha, args, op == SET ? 3 : (op == BODY ? 1 : 2));
 
         this.closure = args.head();
         this.op = op;
@@ -76,6 +77,13 @@ public class SEMeta extends SExpression {
                 } else {
                     throw new EgException(6792, "index out of range", atom);
                 }
+            case BODY:
+                ListEx<SValue> ret = new ListEx<SValue>(closure.body.size());
+                for (SExpression e : closure.body) {
+                    ret.add(new SMetaExpression(e));
+                }
+
+                return new SList(ret);
         }
 
         SValue expr = this.expr.evaluate(env);

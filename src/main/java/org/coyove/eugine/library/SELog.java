@@ -66,7 +66,7 @@ public class SELog extends SExpression {
             System.out.print(sb.toString());
             for (SValue v : values) {
                 ret = v;
-                System.out.print(SEPrint.format(v, 2, false) + " ");
+                System.out.print(v.toString() + " ");
             }
             System.out.print("\n");
             return ret;

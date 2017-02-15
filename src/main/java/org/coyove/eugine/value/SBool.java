@@ -18,4 +18,9 @@ public class SBool extends SValue {
     public SValue clone() {
         return this;
     }
+
+    @Override
+    public String toString() {
+        return ((Boolean) underlying) ? "Bool = True" : "Bool = False";
+    }
 }

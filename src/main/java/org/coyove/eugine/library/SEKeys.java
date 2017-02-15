@@ -12,19 +12,19 @@ import java.util.HashMap;
  */
 public class SEKeys extends SExpression {
     @ReplaceableVariable
-    private SExpression dict;
+    private SExpression subject;
 
     public SEKeys() {}
 
     public SEKeys(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
-        dict = args.head();
+        subject = args.head();
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
 
-        SValue dict = this.dict.evaluate(env);
+        SValue dict = this.subject.evaluate(env);
         ListEx<SValue> ret = new ListEx<SValue>();
         if (dict instanceof SDict) {
             for (String k : dict.<HashMap<String, SValue>>get().keySet()) {
@@ -46,7 +46,7 @@ public class SEKeys extends SExpression {
         SEKeys ret = new SEKeys();
         ret.atom = this.atom;
 
-        ret.dict = this.dict.deepClone();
+        ret.subject = this.subject.deepClone();
         return ret;
     }
 }

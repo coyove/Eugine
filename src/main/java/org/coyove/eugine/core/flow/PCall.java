@@ -16,7 +16,7 @@ import org.coyove.eugine.value.*;
  */
 public class PCall extends SExpression {
     @ReplaceableVariable
-    private SExpression closureObject;
+    private SExpression called;
 
     @ReplaceableVariables
     private ListEx<SExpression> arguments;
@@ -32,7 +32,7 @@ public class PCall extends SExpression {
 
     public PCall(Atom ha, SExpression cls, ListEx<SExpression> args) {
         atom = ha;
-        closureObject = cls;
+        called = cls;
         arguments = args == null ? new ListEx<SExpression>() : args;
     }
 
@@ -76,7 +76,7 @@ public class PCall extends SExpression {
 
         if (se instanceof PCall) {
             PCall call = (PCall) se;
-            SValue cls_ = call.closureObject.evaluate(env);
+            SValue cls_ = call.called.evaluate(env);
 
             if (cls_ instanceof SClosure) {
                 retCls = (SClosure) cls_;
@@ -140,7 +140,7 @@ public class PCall extends SExpression {
             return ret;
         }
 
-        SValue _closure = closureObject.evaluate(env);
+        SValue _closure = called.evaluate(env);
         if (!(_closure instanceof SClosure)) {
             throw new EgException(7031, "invalid calling closure: " + _closure, atom);
         }
@@ -326,7 +326,7 @@ public class PCall extends SExpression {
         ret.atom = this.atom;
         ret.arguments = ListEx.deepClone(this.arguments);
         ret.expanded = this.expanded;
-        ret.closureObject = this.closureObject.deepClone();
+        ret.called = this.called.deepClone();
 
         return ret;
     }

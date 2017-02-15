@@ -7,7 +7,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.core.PVariable;
-import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.value.*;
 
@@ -16,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Formatter;
-import java.util.HashMap;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -84,7 +82,7 @@ public final class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    public static void replaceVariables(SExpression expr, HashMap<String, SExpression> replacer) {
+    public static void replaceVariables(SExpression expr, ListEx<String> from, ListEx<SExpression> to) {
         if (expr == null) {
             return;
         }
@@ -100,21 +98,28 @@ public final class Utils {
                 if (f.getAnnotation(ReplaceableVariable.class) != null) {
                     SExpression se = (SExpression) obj;
                     if (se instanceof PVariable) {
-                        SExpression r = replacer.get(((PVariable) se).varName);
-                        if (r != null) {
-                            f.set(expr, r);
+                        String name = ((PVariable) se).name;
+                        int idx = from.indexOf(name);
+                        if (idx > -1) {
+                            f.set(expr, to.get(idx));
                         }
                     } else {
-                        replaceVariables(se, replacer);
+                        replaceVariables(se, from, to);
                     }
                 } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
                     // special case, lambda's arguments may collide with the names in "from"
-                    HashMap<String, SExpression> _replacer = replacer;
+                    ListEx<String> _from = from;
+                    ListEx<SExpression> _to = to;
                     if (expr instanceof PLambda) {
-                        _replacer = (HashMap<String, SExpression>) replacer.clone();
-                        for (String la : ((PLambda) expr).arguments) {
-                            if (_replacer.containsKey(la)) {
-                                _replacer.remove(la);
+                        _from = (ListEx<String>) from.clone();
+                        _to = (ListEx<SExpression>) to.clone();
+                        for (String la : ((PLambda) expr).argNames) {
+                            for (int i = 0; i < _from.size(); i++) {
+                                if (_from.get(i).equals(la)) {
+                                    _from.remove(i);
+                                    _to.remove(i);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -123,21 +128,22 @@ public final class Utils {
                     for (int i = 0; i < ses.size(); i++) {
                         SExpression se = ses.get(i);
                         if (se instanceof PVariable) {
-                            SExpression r = _replacer.get(((PVariable) se).varName);
-                            if (r != null) {
-                                ses.set(i, r);
+                            String name = ((PVariable) se).name;
+                            int idx = _from.indexOf(name);
+                            if (idx > -1) {
+                                ses.set(i, _to.get(idx));
                             }
                         } else {
-                            replaceVariables(se, _replacer);
+                            replaceVariables(se, _from, _to);
                             ses.set(i, se);
                         }
                     }
                 } else if (obj instanceof Branch) {
-                    ((Branch) obj).replaceBranch(replacer);
+                    ((Branch) obj).replaceBranch(from, to);
                 } else if (f.getName().equals("branches")) {
                     // special case of switch ... do {}
                     for (Branch b : ((ListEx<Branch>) obj)) {
-                        b.replaceBranch(replacer);
+                        b.replaceBranch(from, to);
                     }
                 }
             }

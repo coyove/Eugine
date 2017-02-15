@@ -12,20 +12,20 @@ import java.util.HashMap;
  */
 public class SELen extends SExpression {
     @ReplaceableVariable
-    private SExpression argument;
+    private SExpression subject;
 
     public SELen() {}
 
     public SELen(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
-        argument = args.head();
+        subject = args.head();
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
 
-        SValue obj = argument.evaluate(env);
+        SValue obj = subject.evaluate(env);
         if (obj instanceof SConcatString) {
             return new SInt(((SConcatString) obj).length());
         } else if (obj instanceof SString) {
@@ -47,7 +47,7 @@ public class SELen extends SExpression {
         SELen ret = new SELen();
         ret.atom = this.atom;
 
-        ret.argument = this.argument.deepClone();
+        ret.subject = this.subject.deepClone();
         return ret;
     }
 }

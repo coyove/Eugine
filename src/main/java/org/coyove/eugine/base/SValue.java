@@ -42,27 +42,27 @@ public abstract class SValue extends SExpression {
         return this;
     }
 
-    @Override
-    public String toString() {
-        String valType = this.getClass().getSimpleName().substring(1);
-        if (this instanceof SNull) {
-            return "Null";
-        } else if (this instanceof SDict) {
-            HashMap<String, SValue> map = this.get();
-            Set<String> keySet = map.keySet();
-            String[] sets = new String[keySet.size()];
-            int i = 0;
-            for (String s : keySet) {
-                sets[i++] = s + ": " + map.get(s).toString();
-            }
-
-            return "Dict = {" + StringUtils.join(sets, ", ") + "}";
-        } else if (this instanceof SNativeCall) {
-            return this.toString();
-        } else {
-            return valType + " = " + underlying.toString();
-        }
-    }
+//    @Override
+//    public String toString() {
+//        String valType = this.getClass().getSimpleName().substring(1);
+//        if (this instanceof SNull) {
+//            return "Null = Null";
+//        } else if (this instanceof SDict) {
+//            HashMap<String, SValue> map = this.get();
+//            Set<String> keySet = map.keySet();
+//            String[] sets = new String[keySet.size()];
+//            int i = 0;
+//            for (String s : keySet) {
+//                sets[i++] = s + ": " + map.get(s).toString();
+//            }
+//
+//            return "Dict = {" + StringUtils.join(sets, ", ") + "}";
+//        } else if (this instanceof SNativeCall || this instanceof SMetaExpression) {
+//            return this.toString();
+//        } else {
+//            return valType + " = " + underlying.toString();
+//        }
+//    }
 
     public String asString() {
         if (this instanceof SConcatString) {

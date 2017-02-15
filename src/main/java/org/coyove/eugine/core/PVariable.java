@@ -8,22 +8,28 @@ import org.coyove.eugine.util.*;
  * Created by coyove on 2016/9/9.
  */
 public class PVariable extends SExpression {
-    public String varName;
+    public String name;
+
+    public short cacheIndex = -1;
 
     public PVariable() {}
 
     public PVariable(String n) {
-        varName = n;
+        name = n;
     }
 
     public PVariable(Atom ha, String n) {
         atom = ha;
-        varName = n;
+        name = n;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue tmp = env.get(varName);
+        if (this.cacheIndex >= 0) {
+            return SCache.slots[this.cacheIndex];
+        }
+
+        SValue tmp = env.get(name);
         return tmp == null ? ExecEnvironment.Null : tmp;
     }
 
@@ -31,7 +37,8 @@ public class PVariable extends SExpression {
     public SExpression deepClone() {
         PVariable ret = new PVariable();
         ret.atom = this.atom;
-        ret.varName = this.varName;
+        ret.name = this.name;
+        ret.cacheIndex = this.cacheIndex;
         return ret;
     }
 }

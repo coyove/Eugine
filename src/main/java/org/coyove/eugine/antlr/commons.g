@@ -16,8 +16,6 @@ Catch: 'catch';
 Clone: 'clone';
 Sync: 'sync';
 Yield: 'yield';
-Type: 'typeof';
-AddressOf: 'addressof';
 New: 'new';
 Static: 'static';
 Do: 'do';

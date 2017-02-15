@@ -11,7 +11,7 @@ import org.coyove.eugine.util.*;
  */
 public class SEJoin extends SExpression {
     @ReplaceableVariable
-    private SExpression sub;
+    private SExpression subject;
 
     @ReplaceableVariable
     private SExpression delim;
@@ -20,13 +20,13 @@ public class SEJoin extends SExpression {
 
     public SEJoin(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 2);
-        sub = args.head();
+        subject = args.head();
         delim = args.get(1);
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue subject = this.sub.evaluate(env);
+        SValue subject = this.subject.evaluate(env);
         String delim = EgCast.toString(this.delim.evaluate(env), atom);
 
         if (subject instanceof SList) {
@@ -47,7 +47,7 @@ public class SEJoin extends SExpression {
     public SExpression deepClone() {
         SEJoin ret = new SEJoin();
         ret.atom = this.atom;
-        ret.sub = this.sub.deepClone();
+        ret.subject = this.subject.deepClone();
         ret.delim = this.delim.deepClone();
         return ret;
     }

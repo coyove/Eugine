@@ -27,4 +27,9 @@ public class SRange extends SValue {
         SValue.copyAttributes(ret, this);
         return ret;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Range = {%d, %d, %d}", start, interval, end);
+    }
 }

@@ -14,7 +14,7 @@ def map (f, list) => {
 			var ret = true
 
 			for list1 do (elem, i) => {
-				if (typeof elem) == "List" && (typeof list2[i]) == "List"
+				if typeof(elem) == "List" && typeof(list2[i]) == "List"
 					ret = _this_.deepCompareList(elem, list2[i])
 				else
 					ret = elem == list2[i]

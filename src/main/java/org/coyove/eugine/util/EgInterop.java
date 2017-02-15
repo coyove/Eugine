@@ -222,13 +222,18 @@ public class EgInterop {
                 if (value instanceof SList && ListEx.class.equals(f.getType())) {
                     Class ct = (Class) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
                     ListEx<SValue> list = value.get();
-                    ListEx<SExpression> exprs = new ListEx<SExpression>(list.size());
+
+                    ListEx<Object> exprs = new ListEx<Object>(list.size());
 
                     for (SValue expr : list) {
-                        if (expr instanceof SMetaExpression) {
-                            exprs.add((SExpression) expr.underlying);
+                        if (SExpression.class.equals(ct)) {
+                            if (expr instanceof SMetaExpression) {
+                                exprs.add(expr.underlying);
+                            } else {
+                                exprs.add(expr);
+                            }
                         } else {
-                            exprs.add(expr);
+                            exprs.add(castSValue(expr, ct));
                         }
                     }
 
