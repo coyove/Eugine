@@ -10,7 +10,14 @@ public class CascadeHashMap<K, V> extends HashMap<K, V> {
     public CascadeHashMap<K, V> parent = null;
 
     public CascadeHashMap() {
+    }
 
+    public CascadeHashMap(int cap) {
+        super(cap);
+    }
+
+    public CascadeHashMap(CascadeHashMap<K, V> map) {
+        this.parent = map;
     }
 
     @Override
@@ -46,5 +53,15 @@ public class CascadeHashMap<K, V> extends HashMap<K, V> {
         }
 
         return value;
+    }
+
+    public CascadeHashMap<K, V> clone() {
+        CascadeHashMap<K, V> ret = new CascadeHashMap<K, V>(this.size());
+        for (Entry<K, V> entry : super.entrySet()) {
+            ret.put(entry.getKey(), entry.getValue());
+        }
+
+        ret.parent = this.parent;
+        return ret;
     }
 }

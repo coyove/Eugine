@@ -10,7 +10,9 @@ import org.coyove.eugine.util.*;
 public class PVariable extends SExpression {
     public String name;
 
-    public short cacheIndex = -1;
+    public boolean isShared = false;
+
+    public SValue shared = null;
 
     public PVariable() {}
 
@@ -25,9 +27,7 @@ public class PVariable extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        if (this.cacheIndex >= 0) {
-            return SCache.slots[this.cacheIndex];
-        }
+        if (shared != null) return shared;
 
         SValue tmp = env.get(name);
         return tmp == null ? ExecEnvironment.Null : tmp;
@@ -38,7 +38,6 @@ public class PVariable extends SExpression {
         PVariable ret = new PVariable();
         ret.atom = this.atom;
         ret.name = this.name;
-        ret.cacheIndex = this.cacheIndex;
         return ret;
     }
 }

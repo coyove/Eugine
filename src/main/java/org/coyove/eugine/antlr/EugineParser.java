@@ -37,7 +37,7 @@ public class EugineParser extends Parser {
 		T__24=25, T__25=26, T__26=27, T__27=28, T__28=29, T__29=30, T__30=31, 
 		T__31=32, T__32=33, T__33=34, T__34=35, T__35=36, T__36=37, T__37=38, 
 		T__38=39, T__39=40, T__40=41, T__41=42, T__42=43, T__43=44, T__44=45, 
-		T__45=46, Var=47, Const=48, Def=49, Inline=50, Coroutine=51, Struct=52, 
+		T__45=46, Var=47, Let=48, Def=49, Inline=50, Coroutine=51, Struct=52, 
 		Operator=53, For=54, If=55, Switch=56, Else=57, Enter=58, Catch=59, Clone=60, 
 		Sync=61, Yield=62, New=63, Static=64, Do=65, Integer=66, Double=67, NEWLINE=68, 
 		WS=69, Semi=70, Identifier=71, JavaFullName=72, Letter=73, BlockComment=74, 
@@ -64,7 +64,7 @@ public class EugineParser extends Parser {
 		"'true'", "'false'", "'null'", "'++'", "'--'", "'..'", "'...'", "'::'", 
 		"':>'", "'#'", "'<'", "'>'", "'-'", "'!'", "'*'", "'/'", "'%'", "'+'", 
 		"'<+'", "'<='", "'>='", "'=='", "'!='", "'&&'", "'||'", "'+='", "'-='", 
-		"'*='", "'/='", "'var'", "'const'", "'def'", "'inline'", "'coroutine'", 
+		"'*='", "'/='", "'var'", "'let'", "'def'", "'inline'", "'coroutine'", 
 		"'struct'", "'operator'", null, "'if'", "'switch'", "'else'", "'enter'", 
 		"'catch'", "'clone'", "'sync'", "'yield'", "'new'", "'static'", "'do'", 
 		null, null, null, null, "';'"
@@ -74,7 +74,7 @@ public class EugineParser extends Parser {
 		null, null, null, null, null, null, null, null, null, null, null, null, 
 		null, null, null, null, null, null, null, null, null, null, null, null, 
 		null, null, null, null, null, null, null, null, null, null, null, "Var", 
-		"Const", "Def", "Inline", "Coroutine", "Struct", "Operator", "For", "If", 
+		"Let", "Def", "Inline", "Coroutine", "Struct", "Operator", "For", "If", 
 		"Switch", "Else", "Enter", "Catch", "Clone", "Sync", "Yield", "New", "Static", 
 		"Do", "Integer", "Double", "NEWLINE", "WS", "Semi", "Identifier", "JavaFullName", 
 		"Letter", "BlockComment", "LineComment", "RawString", "StringLiteral"
@@ -183,7 +183,7 @@ public class EugineParser extends Parser {
 			case T__29:
 			case T__30:
 			case Var:
-			case Const:
+			case Let:
 			case Def:
 			case For:
 			case If:
@@ -216,7 +216,7 @@ public class EugineParser extends Parser {
 					setState(61); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__3) | (1L << T__5) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__29) | (1L << T__30) | (1L << Var) | (1L << Const) | (1L << Def) | (1L << For) | (1L << If) | (1L << Switch) | (1L << Enter) | (1L << Clone) | (1L << Sync) | (1L << Yield) | (1L << New))) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & ((1L << (Static - 64)) | (1L << (Integer - 64)) | (1L << (Double - 64)) | (1L << (Semi - 64)) | (1L << (Identifier - 64)) | (1L << (RawString - 64)) | (1L << (StringLiteral - 64)))) != 0) );
+				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__3) | (1L << T__5) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__29) | (1L << T__30) | (1L << Var) | (1L << Let) | (1L << Def) | (1L << For) | (1L << If) | (1L << Switch) | (1L << Enter) | (1L << Clone) | (1L << Sync) | (1L << Yield) | (1L << New))) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & ((1L << (Static - 64)) | (1L << (Integer - 64)) | (1L << (Double - 64)) | (1L << (Semi - 64)) | (1L << (Identifier - 64)) | (1L << (RawString - 64)) | (1L << (StringLiteral - 64)))) != 0) );
 				}
 				break;
 			case EOF:
@@ -450,7 +450,7 @@ public class EugineParser extends Parser {
 				}
 				break;
 			case Var:
-			case Const:
+			case Let:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(94);
@@ -748,7 +748,7 @@ public class EugineParser extends Parser {
 			return getRuleContext(ExprContext.class,i);
 		}
 		public TerminalNode Var() { return getToken(EugineParser.Var, 0); }
-		public TerminalNode Const() { return getToken(EugineParser.Const, 0); }
+		public TerminalNode Let() { return getToken(EugineParser.Let, 0); }
 		public DeclareStmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -774,13 +774,13 @@ public class EugineParser extends Parser {
 			setState(135);
 			((DeclareStmtContext)_localctx).Action = _input.LT(1);
 			_la = _input.LA(1);
-			if ( !(_la==Var || _la==Const) ) {
+			if ( !(_la==Var || _la==Let) ) {
 				((DeclareStmtContext)_localctx).Action = (Token)_errHandler.recoverInline(this);
 			} else {
 				consume();
 			}
 
-			            ((DeclareStmtContext)_localctx).act =  (((DeclareStmtContext)_localctx).Action!=null?((DeclareStmtContext)_localctx).Action.getText():null).equals("var") ? PSet.MUTABLE : PSet.IMMUTABLE;
+			            ((DeclareStmtContext)_localctx).act =  (((DeclareStmtContext)_localctx).Action!=null?((DeclareStmtContext)_localctx).Action.getText():null).equals("var") ? PSet.VAR : PSet.LET;
 			        
 			setState(137);
 			((DeclareStmtContext)_localctx).Head = unaryExpr();
@@ -1349,7 +1349,7 @@ public class EugineParser extends Parser {
 			                closure = new PCall(a, d, ListEx.build(closure));
 			            }
 			            
-			            ((DefineStmtContext)_localctx).v =  new PSet(a, name, closure, PSet.IMMUTABLE);
+			            ((DefineStmtContext)_localctx).v =  new PSet(a, name, closure, PSet.VAR);
 			        
 			}
 		}
@@ -1454,7 +1454,7 @@ public class EugineParser extends Parser {
 
 				            ((LambdaStmtContext)_localctx).ret =  new PVariable((((LambdaStmtContext)_localctx).Identifier!=null?((LambdaStmtContext)_localctx).Identifier.getText():null));
 				            _localctx.body.add(new PSet(new Atom(((LambdaStmtContext)_localctx).Identifier), _localctx.ret, 
-				                (((LambdaStmtContext)_localctx).InitValue!=null?(((LambdaStmtContext)_localctx).InitValue.start):null) == null ? ExecEnvironment.Null : ((LambdaStmtContext)_localctx).InitValue.v, PSet.MUTABLE)); 
+				                (((LambdaStmtContext)_localctx).InitValue!=null?(((LambdaStmtContext)_localctx).InitValue.start):null) == null ? ExecEnvironment.Null : ((LambdaStmtContext)_localctx).InitValue.v, PSet.VAR)); 
 				        
 				}
 				break;
@@ -1469,7 +1469,7 @@ public class EugineParser extends Parser {
 				setState(277);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__3) | (1L << T__5) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__29) | (1L << T__30) | (1L << Var) | (1L << Const) | (1L << Def) | (1L << For) | (1L << If) | (1L << Switch) | (1L << Enter) | (1L << Clone) | (1L << Sync) | (1L << Yield) | (1L << New))) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & ((1L << (Static - 64)) | (1L << (Integer - 64)) | (1L << (Double - 64)) | (1L << (Semi - 64)) | (1L << (Identifier - 64)) | (1L << (RawString - 64)) | (1L << (StringLiteral - 64)))) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__3) | (1L << T__5) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__29) | (1L << T__30) | (1L << Var) | (1L << Let) | (1L << Def) | (1L << For) | (1L << If) | (1L << Switch) | (1L << Enter) | (1L << Clone) | (1L << Sync) | (1L << Yield) | (1L << New))) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & ((1L << (Static - 64)) | (1L << (Integer - 64)) | (1L << (Double - 64)) | (1L << (Semi - 64)) | (1L << (Identifier - 64)) | (1L << (RawString - 64)) | (1L << (StringLiteral - 64)))) != 0)) {
 					{
 					{
 					setState(272);
@@ -2183,7 +2183,7 @@ public class EugineParser extends Parser {
 						setState(402);
 						((PostfixExprContext)_localctx).Op = match(T__20);
 
-						                      ((PostfixExprContext)_localctx).v =  new PSet(new Atom(((PostfixExprContext)_localctx).Op), ((PostfixExprContext)_localctx).Left.v, new PAdd(new Atom(((PostfixExprContext)_localctx).Op), ((PostfixExprContext)_localctx).Left.v, new SInt(1)), PSet.SET);
+						                      ((PostfixExprContext)_localctx).v =  new PAssign(new Atom(((PostfixExprContext)_localctx).Op), ((PostfixExprContext)_localctx).Left.v, new SInt(1), PAdd.class);
 						                  
 						}
 						break;
@@ -2198,7 +2198,7 @@ public class EugineParser extends Parser {
 						setState(405);
 						((PostfixExprContext)_localctx).Op = match(T__21);
 
-						                      ((PostfixExprContext)_localctx).v =  new PSet(new Atom(((PostfixExprContext)_localctx).Op), ((PostfixExprContext)_localctx).Left.v, new PSubtract(new Atom(((PostfixExprContext)_localctx).Op), ((PostfixExprContext)_localctx).Left.v, new SInt(1)), PSet.SET);
+						                      ((PostfixExprContext)_localctx).v =  new PAssign(new Atom(((PostfixExprContext)_localctx).Op), ((PostfixExprContext)_localctx).Left.v, new SInt(1), PSubtract.class);
 						                  
 						}
 						break;
@@ -3110,7 +3110,7 @@ public class EugineParser extends Parser {
 				setState(583);
 				((AssignExprContext)_localctx).Right = assignExpr(5);
 
-				            ((AssignExprContext)_localctx).v =  new PSet(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, new PAdd(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v), PSet.SET);
+				            ((AssignExprContext)_localctx).v =  new PAssign(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v, PAdd.class);
 				        
 				}
 				break;
@@ -3123,7 +3123,7 @@ public class EugineParser extends Parser {
 				setState(588);
 				((AssignExprContext)_localctx).Right = assignExpr(4);
 
-				            ((AssignExprContext)_localctx).v =  new PSet(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, new PSubtract(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v), PSet.SET);
+				            ((AssignExprContext)_localctx).v =  new PAssign(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v, PSubtract.class);
 				        
 				}
 				break;
@@ -3136,7 +3136,7 @@ public class EugineParser extends Parser {
 				setState(593);
 				((AssignExprContext)_localctx).Right = assignExpr(3);
 
-				            ((AssignExprContext)_localctx).v =  new PSet(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, new PMultiply(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v), PSet.SET);
+				            ((AssignExprContext)_localctx).v =  new PAssign(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v, PMultiply.class);
 				        
 				}
 				break;
@@ -3149,7 +3149,7 @@ public class EugineParser extends Parser {
 				setState(598);
 				((AssignExprContext)_localctx).Right = assignExpr(2);
 
-				            ((AssignExprContext)_localctx).v =  new PSet(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, new PDivide(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v), PSet.SET);
+				            ((AssignExprContext)_localctx).v =  new PAssign(new Atom(((AssignExprContext)_localctx).Op), ((AssignExprContext)_localctx).Left.v, ((AssignExprContext)_localctx).Right.v, PDivide.class);
 				        
 				}
 				break;

@@ -278,11 +278,11 @@ postfixExpr returns [SExpression v]
     :   Top=topExpr { $v = $Top.v; }
     |   Left=postfixExpr Op='++' 
         {
-            $v = new PSet(new Atom($Op), $Left.v, new PAdd(new Atom($Op), $Left.v, new SInt(1)), PSet.SET);
+            $v = new PAssign(new Atom($Op), $Left.v, new SInt(1), PAdd.class);
         }
     |   Left=postfixExpr Op='--' 
         {
-            $v = new PSet(new Atom($Op), $Left.v, new PSubtract(new Atom($Op), $Left.v, new SInt(1)), PSet.SET);
+            $v = new PAssign(new Atom($Op), $Left.v, new SInt(1), PSubtract.class);
         }
     |   Subject=postfixExpr '[' Key=expr ']'
         {
@@ -427,19 +427,19 @@ assignExpr returns [SExpression v]
     : Top=logicExpr { $v = $Top.v; }
     | Left=unaryExpr Op='+=' Right=assignExpr
         {
-            $v = new PSet(new Atom($Op), $Left.v, new PAdd(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PAdd.class);
         }
     | Left=unaryExpr Op='-=' Right=assignExpr
         {
-            $v = new PSet(new Atom($Op), $Left.v, new PSubtract(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PSubtract.class);
         }
     | Left=unaryExpr Op='*=' Right=assignExpr
         {
-            $v = new PSet(new Atom($Op), $Left.v, new PMultiply(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PMultiply.class);
         }
     | Left=unaryExpr Op='/=' Right=assignExpr
         {
-            $v = new PSet(new Atom($Op), $Left.v, new PDivide(new Atom($Op), $Left.v, $Right.v), PSet.SET);
+            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PDivide.class);
         }
     | Subject=assignExpr '=' Value=expr
         {

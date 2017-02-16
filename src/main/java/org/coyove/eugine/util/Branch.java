@@ -3,6 +3,8 @@ package org.coyove.eugine.util;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.core.PVariable;
 
+import java.util.HashMap;
+
 /**
  * Created by coyove on 2016/11/7.
  */
@@ -15,28 +17,27 @@ public class Branch implements java.io.Serializable {
         body = n.body;
     }
 
-    public void replaceBranch(ListEx<String> from, ListEx<SExpression> to) {
+    public void replaceBranch(CascadeHashMap<String, SExpression> replacer) {
         if (recv instanceof PVariable) {
-            String name = ((PVariable) recv).name;
-            int idx = from.indexOf(name);
-            if (idx > -1) {
-                recv = to.get(idx);
+            SExpression r = replacer.get(((PVariable) recv).name);
+            if (r != null) {
+                recv = r;
             }
         } else {
-            Utils.replaceVariables(recv, from, to);
+            Utils.replaceVariables(recv, replacer);
         }
 
         for (int i = 0; i < body.size(); i++) {
             SExpression se = body.get(i);
 
             if (se instanceof PVariable) {
-                String name = ((PVariable) se).name;
-                int idx = from.indexOf(name);
-                if (idx > -1) {
-                    body.set(i, to.get(idx));
+                SExpression r = replacer.get(((PVariable) se).name);
+                if (r != null) {
+                    body.set(i, r);
                 }
             } else {
-                Utils.replaceVariables(se, from, to);
+                Utils.replaceVariables(se, replacer);
+                Utils.addLetExprToReplacer(se, replacer);
             }
         }
     }

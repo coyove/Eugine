@@ -1,56 +1,56 @@
 import util
 // // import ifc
 
-Log.info("begin")
-// var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
-// Log.info(len(model.objects))
+// Log.info("begin")
+// // let model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
+// // Log.info(len(model.objects))
 
-// // model.walk((obj) => 
-// //     if Ifc.isRelGroup(obj) {
-// //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
+// // // model.walk((obj) => 
+// // //     if Ifc.isRelGroup(obj) {
+// // //         println((let g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
 
-// //         for obj.get<RelatedObjects> do (robj, i) =>
-// //             println("  ", i, ": ", robj.get<Name>)
-// //     })
+// // //         for obj.get<RelatedObjects> do (robj, i) =>
+// // //             println("  ", i, ": ", robj.get<Name>)
+// // //     })
 
-// List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
-def curry(a, b, c) => a + b + c
+// // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
+// def curry(a, b, c) => a + b + c
 
-var zzz  =curry(1)
-var zzz2  =zzz(2)
-println(zzz2(1))
-println(zzz2(2))
-println(zzz(10, 2))
-println(curry(2, 10)(3))
+// let zzz  =curry(1)
+// let zzz2  =zzz(2)
+// println(zzz2(1))
+// println(zzz2(2))
+// println(zzz(10, 2))
+// println(curry(2, 10)(3))
 
-def add(args...) => if len(args) == 2 args[0] + args[1] else {
-    var b = args[1..]
-    args[0] + add(b...)
-}
+// def add(args...) => if len(args) == 2 args[0] + args[1] else {
+//     let b = args[1..]
+//     args[0] + add(b...)
+// }
 
-println(add(1, 2))
-println(add(1, 2, 10))
+// println(add(1, 2))
+// println(add(1, 2, 10))
 
-Meta.set(add, 0, @println(args))
-println(add(1, 2, 10, 90))
+// Meta.set(add, 0, @println(args))
+// println(add(1, 2, 10, 90))
 
-def foo(a,b)=>println(a)
-foo(1, 2)
+// def foo(a,b)=>println(a)
+// foo(1, 2)
 
-Meta.get(foo, 0).arguments = [@b ]
-foo(1, 2)
+// Meta.get(foo, 0).arguments = [@b ]
+// foo(1, 2)
 
-for Meta.body(Debug) do (expr) => 
-    if typeof(expr.varValue) == "core.PLambda" &&
-        typeof(expr.varValue.body[0]) == "library.SEPrint" {
-    Log.info(expr.varValue.body[0].arguments)
-}
+// for Meta.body(Debug) do (expr) => 
+//     if typeof(expr.varValue) == "core.PLambda" &&
+//         typeof(expr.varValue.body[0]) == "library.SEPrint" {
+//     Log.info(expr.varValue.body[0].arguments)
+// }
 
-Log.info("end")
+// Log.info("end")
 
 // def struct complex(r, i) => {
-//     var this.real = r
-//     var this.image = i
+//     let this.real = r
+//     let this.image = i
 
 //     def operator add(left, right) => @ret(complex(left.real, left.image)) {
 //         ret.real += right.real
@@ -60,18 +60,18 @@ Log.info("end")
 //     def operator tostring(this) => str(this.real) + "+" + this.image + "i"
 // }
 
-// var a = complex(0.0, 0.0)
+// let a = complex(0.0, 0.0)
 // for 0..2000 do (i) => 
 //     for 0..2000 do (j) => 
 //         a += complex(i, j)
 
 // Log.info(a)
-exit()
+// exit()
 
 Debug.start()
 // for 0..10000000 do () => {
-// 	var a = 1
-// 	var b = 1.0 / 4.5 + 2 / a * 4 - a
+// 	let a = 1
+// 	let b = 1.0 / 4.5 + 2 / a * 4 - a
 // }
 
 // println(b)
@@ -101,43 +101,43 @@ Debug.start()
 // // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
 
 
-var N = 1600
-var Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
-var invN = 2.0/N
+let N = 160
+let Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
+let invN = 2.0/N
 for 0..N do (i) => { 
 	Cib[i] = invN * i - 1.0
 	Crb[i] = invN * i - 1.5
 } 
 
-var yCt = 0
+let yCt = 0
 def incr() => sync yCt++
 
-var linelen = (N + 7) / 8
-var out = range(N * linelen, 0, 0.0)
+let linelen = (N + 7) / 8
+let out = range(N * linelen, 0, 0.0)
 
 def putLine(y) =>
 	for 0..linelen do (xb) => {
-		var x = xb * 8
-		var res = 0
+		let x = xb * 8
+		let res = 0
         for [0, 2, 4, 6] do (i) => {
-            var Ciby = Cib[y]
-            var Crbx = Crb[x+i]
-            var Crbx1 = Crb[x+i+1]
+            let Ciby = Cib[y]
+            let Crbx = Crb[x+i]
+            let Crbx1 = Crb[x+i+1]
 
-            var Zr1 = Crbx, Zr2 = Crbx1
-            var Zi1 = Zi2 = Ciby
+            let Zr1 = Crbx, Zr2 = Crbx1
+            let Zi1 = Zi2 = Ciby
 
-            var b = 0
-            var j = 50
+            let b = 0
+            let j = 50
 
             enter for j-- > 0 do () => {
-                var nZr1=Zr1*Zr1-Zi1*Zi1+Crbx
-                var nZi1=Zr1*Zi1*2+Ciby
+                let nZr1=Zr1*Zr1-Zi1*Zi1+Crbx
+                let nZi1=Zr1*Zi1*2+Ciby
                 Zr1=nZr1
                 Zi1=nZi1
 
-                var nZr2=Zr2*Zr2-Zi2*Zi2+Crbx1
-                var nZi2=Zr2*Zi2*2+Ciby
+                let nZr2=Zr2*Zr2-Zi2*Zi2+Crbx1
+                let nZi2=Zr2*Zi2*2+Ciby
                 Zr2=nZr2
                 Zi2=nZi2
 
@@ -157,11 +157,11 @@ def putLine(y) =>
 	}
 
 def worker () => {
-	var y = 0
+	let y = 0
 	for (y = incr()) < N do () => putLine(y)
 }
 
-var threads = []
+let threads = []
 for 0..4 do () =>
 	threads <+ worker#()
 

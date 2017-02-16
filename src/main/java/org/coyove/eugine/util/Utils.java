@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PLambda;
+import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.value.*;
@@ -81,9 +82,41 @@ public final class Utils {
         }
     }
 
+    public static void addLetExprToReplacer(SExpression se, CascadeHashMap<String, SExpression> replacer) {
+        if (se instanceof PSet && ((PSet) se).type == PSet.LET) {
+            PVariable v = (PVariable) ((PSet) se).name;
+            v.isShared = true;
+            replacer.put(v.name, v);
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    public static void replaceVariables(SExpression expr, ListEx<String> from, ListEx<SExpression> to) {
+    public static void replaceVariables(SExpression expr,
+                                        CascadeHashMap<String, SExpression> replacer) {
         if (expr == null) {
+            return;
+        }
+
+        if (expr instanceof PSet) {
+            replaceVariables(((PSet) expr).value, replacer);
+
+            SExpression name = ((PSet) expr).name;
+            PSet set = ((PSet) expr);
+
+            if (name instanceof PVariable) {
+                String pname = ((PVariable) name).name;
+                if (set.type == PSet.LET) {
+                    ((PVariable) name).isShared = true;
+                    replacer.put(pname, name);
+                } else if (set.type == PSet.SET) {
+                    if (replacer.containsKey(pname)) {
+                        set.name = replacer.get(pname);
+                    }
+                }
+            } else {
+                replaceVariables(name, replacer);
+            }
+
             return;
         }
 
@@ -95,32 +128,23 @@ public final class Utils {
                     continue;
                 }
 
+                CascadeHashMap<String, SExpression> _replacer = replacer;
                 if (f.getAnnotation(ReplaceableVariable.class) != null) {
                     SExpression se = (SExpression) obj;
                     if (se instanceof PVariable) {
-                        String name = ((PVariable) se).name;
-                        int idx = from.indexOf(name);
-                        if (idx > -1) {
-                            f.set(expr, to.get(idx));
+                        SExpression r = replacer.get(((PVariable) se).name);
+                        if (r != null) {
+                            f.set(expr, r);
                         }
                     } else {
-                        replaceVariables(se, from, to);
+                        replaceVariables(se, replacer);
                     }
                 } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
                     // special case, lambda's arguments may collide with the names in "from"
-                    ListEx<String> _from = from;
-                    ListEx<SExpression> _to = to;
                     if (expr instanceof PLambda) {
-                        _from = (ListEx<String>) from.clone();
-                        _to = (ListEx<SExpression>) to.clone();
+                        _replacer = replacer.clone();
                         for (String la : ((PLambda) expr).argNames) {
-                            for (int i = 0; i < _from.size(); i++) {
-                                if (_from.get(i).equals(la)) {
-                                    _from.remove(i);
-                                    _to.remove(i);
-                                    break;
-                                }
-                            }
+                            _replacer.remove(la);
                         }
                     }
 
@@ -128,22 +152,55 @@ public final class Utils {
                     for (int i = 0; i < ses.size(); i++) {
                         SExpression se = ses.get(i);
                         if (se instanceof PVariable) {
-                            String name = ((PVariable) se).name;
-                            int idx = _from.indexOf(name);
-                            if (idx > -1) {
-                                ses.set(i, _to.get(idx));
+                            SExpression r = _replacer.get(((PVariable) se).name);
+                            if (r != null) {
+                                ses.set(i, r);
                             }
                         } else {
-                            replaceVariables(se, _from, _to);
+                            replaceVariables(se, _replacer);
                             ses.set(i, se);
                         }
                     }
                 } else if (obj instanceof Branch) {
-                    ((Branch) obj).replaceBranch(from, to);
+                    ((Branch) obj).replaceBranch(replacer);
                 } else if (f.getName().equals("branches")) {
                     // special case of switch ... do {}
                     for (Branch b : ((ListEx<Branch>) obj)) {
-                        b.replaceBranch(from, to);
+                        b.replaceBranch(replacer);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // nothing
+            e.printStackTrace();
+        }
+    }
+
+    public static void walk(SExpression expr) {
+        if (expr == null) {
+            return;
+        }
+
+        System.out.print(expr.toString() + ":");
+
+        try {
+            for (Field f : expr.getClass().getDeclaredFields()) {
+                f.setAccessible(true);
+                Object obj = f.get(expr);
+                if (obj == null) {
+                    continue;
+                }
+
+                if (f.getAnnotation(ReplaceableVariable.class) != null) {
+                    SExpression se = (SExpression) obj;
+                    System.out.print(se.toString() + " ");
+                    System.out.println();
+
+                } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
+                    System.out.println();
+                    ListEx<SExpression> ses = (ListEx<SExpression>) obj;
+                    for (SExpression se : ses) {
+                        walk(se);
                     }
                 }
             }

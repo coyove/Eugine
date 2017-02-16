@@ -18,23 +18,12 @@ public class ExecEnvironment extends HashMap<String, SValue> {
 
     public ExecEnvironment parentEnv = null;
 
-    public HashMap<String, Short> cacheReverseLookup = new HashMap<String, Short>();
-
     public ExecEnvironment() {
 
     }
 
     public ExecEnvironment(ExecEnvironment m) {
         super(m);
-    }
-
-    public Short cacheReverseLookupGet(String n) {
-        Short ret = cacheReverseLookup.get(n);
-        if (ret == null && parentEnv != null) {
-            return parentEnv.cacheReverseLookupGet(n);
-        } else {
-            return ret;
-        }
     }
 
     @Override
@@ -109,22 +98,6 @@ public class ExecEnvironment extends HashMap<String, SValue> {
             }
         }
         ret.parentEnv = this.parentEnv;
-        return ret;
-    }
-
-    public ExecEnvironment cloneClosureAndConstOnly() {
-
-        ExecEnvironment ret = new ExecEnvironment();
-        for (String s : super.keySet()) {
-            SValue v = super.get(s);
-            if (v != null) {
-                if (v instanceof SClosure || v.immutable) {
-                    ret.bPut(s, v.clone());
-                }
-            }
-        }
-
-        ret.parentEnv = this;
         return ret;
     }
 }

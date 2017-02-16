@@ -13,15 +13,15 @@ import java.util.HashMap;
  */
 public class PSet extends SExpression {
     @ReplaceableVariable
-    private SExpression varName;
+    public SExpression name;
 
     @ReplaceableVariable
-    private SExpression varValue;
+    public SExpression value;
 
-    private byte type;
+    public byte type;
 
-    public final static byte MUTABLE = 0;
-    public final static byte IMMUTABLE = 1;
+    public final static byte VAR = 0;
+    public final static byte LET = 1;
     public final static byte SET = 2;
 
     public PSet() {
@@ -29,69 +29,40 @@ public class PSet extends SExpression {
 
     public PSet(Atom ha, SExpression name, SExpression value, byte a) {
         atom = ha;
-        varName = name;
-        varValue = value;
+        this.name = name;
+        this.value = value;
         type = a;
+
+        if (a == LET) {
+            if (!(name instanceof PVariable)) {
+                ErrorHandler.print(9881, "'let' is only allowed to define a variable", ha);
+            }
+        }
     }
 
-    @Override
-    public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue n = varName.evaluate(env);
-        SValue v = varValue.evaluate(env);
-        SValue value = v;
+    public static SValue set(SExpression name,
+                             SExpression value,
+                             byte type, Atom atom,
+                             ExecEnvironment env) throws EgException {
+        SValue n = name.evaluate(env);
+        SValue v = value.evaluate(env);
+        SValue ret = v;
 
         if (v instanceof SString) {
-            value = v.clone();
+            ret = v.clone();
         }
 
-//        if (type == MUTABLE && v.immutable) {
-//            /**
-//             * (const b ...) (set a b)
-//             * b is immutable, a should be mutable
-//             * note that "clone" is shallow copy
-//             */
-//            value = v.clone();
-//            value.immutable = false;
-//        }
+        if (name instanceof PVariable) {
+            PVariable var = ((PVariable) name);
+            String sn = var.name;
 
-        if (type == IMMUTABLE) {
-            value.immutable = true;
-        }
-
-        if (varName instanceof PVariable) {
-            String sn = ((PVariable) varName).name;
-            PVariable var = (PVariable) varName;
-
-            if (type == SET) {
-                // TODO: find a more elegant way to deal with immutable variable checking
-//                SValue sv = env.get(sn);
-//                if (sv != null && sv.immutable) {
-//                    throw new EgException(2043, "variable '" + sn + "' is immutable", atom);
-//                }
-
-                env.put(sn, value);
-                if (SConfig.cacheVariables) {
-                    if (var.cacheIndex >= 0) {
-                        SCache.slots[var.cacheIndex] = value;
-                    } else {
-                        Short ci = env.cacheReverseLookupGet(sn);
-                        if (ci != null) {
-                            var.cacheIndex = ci;
-                        } else {
-                            // set a variable who was not declared
-                        }
-                    }
-                }
+            if (var.isShared) {
+                var.shared = ret;
             } else {
-                env.bPut(sn, value);
-                if (SConfig.cacheVariables) {
-                    if (var.cacheIndex >= 0) {
-                        SCache.slots[var.cacheIndex] = value;
-                    } else {
-                        short ci = SCache.put(value, env, sn);
-                        var.cacheIndex = ci;
-                        env.cacheReverseLookup.put(sn, ci);
-                    }
+                if (type == SET) {
+                    env.put(sn, ret);
+                } else {
+                    env.bPut(sn, ret);
                 }
             }
         } else {
@@ -102,29 +73,29 @@ public class PSet extends SExpression {
             }
 
             if (refer instanceof SDict) {
-                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey.toString(), value);
+                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey.toString(), ret);
             } else if (refer instanceof SList) {
-                ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, value);
+                ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, ret);
             } else if (refer instanceof SObject || refer instanceof SMetaExpression) {
                 Object sub = ((SValue) refer).underlying;
-                EgInterop.setField(sub, n.refKey.toString(), value);
+                EgInterop.setField(sub, n.refKey.toString(), ret);
             } else if (refer instanceof SClosure) {
                 if (n.refKey instanceof String) {
                     String k = n.refKey.toString();
-                    if (type == MUTABLE || type == IMMUTABLE) {
-                        ((SClosure) refer).extra.bPut(k, value);
+                    if (type == VAR) {
+                        ((SClosure) refer).extra.bPut(k, ret);
 
-                        if (this.varName instanceof PGet &&
-                                ((PGet) this.varName).subject instanceof PVariable &&
-                                ((PVariable) ((PGet) this.varName).subject).name.equals("this")) {
-                            env.bPut(k, value);
+                        if (name instanceof PGet &&
+                                ((PGet) name).subject instanceof PVariable &&
+                                ((PVariable) ((PGet) name).subject).name.equals("this")) {
+                            env.bPut(k, ret);
                         }
                     } else {
-                        ((SClosure) refer).extra.put(k, value);
+                        ((SClosure) refer).extra.put(k, ret);
                     }
                 } else if (n.refKey instanceof SClosure) {
                     // TODO: avoid new PCall, make it static
-                    (new PCall(atom, (SClosure) n.refKey, ListEx.build(value))).evaluate(env);
+                    (new PCall(atom, (SClosure) n.refKey, ListEx.build(ret))).evaluate(env);
                 } else {
                     throw new EgException(2045, "invalid setter", atom);
                 }
@@ -133,7 +104,12 @@ public class PSet extends SExpression {
             }
         }
 
-        return value;
+        return ret;
+    }
+
+    @Override
+    public SValue evaluate(ExecEnvironment env) throws EgException {
+        return set(name, value, type, atom, env);
     }
 
     @Override
@@ -141,8 +117,8 @@ public class PSet extends SExpression {
         PSet ret = new PSet();
         ret.atom = this.atom;
 
-        ret.varName = this.varName.deepClone();
-        ret.varValue = this.varValue.deepClone();
+        ret.name = this.name.deepClone();
+        ret.value = this.value.deepClone();
         ret.type = this.type;
         return ret;
     }

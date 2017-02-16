@@ -8,11 +8,9 @@ import org.coyove.cli.main;
 import org.coyove.eugine.antlr.EugineImportListener;
 import org.coyove.eugine.antlr.EugineLexer;
 import org.coyove.eugine.antlr.EugineParser;
+import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.util.EgException;
-import org.coyove.eugine.util.ErrorHandler;
-import org.coyove.eugine.util.ExecEnvironment;
-import org.coyove.eugine.util.Utils;
+import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.SString;
 
 import java.io.IOException;
@@ -90,6 +88,7 @@ public class Parser {
                 Utils.print("Execute SExpression", pad + 2);
             }
 
+            Utils.replaceVariables(pc.v, new CascadeHashMap<String, SExpression>());
             SValue ret = pc.v.execute(eil.env);
 
             env.put("__path__", oldPath);
@@ -126,6 +125,7 @@ public class Parser {
         walk.walk(eil, pc);
 
         try {
+            Utils.replaceVariables(pc.v, new CascadeHashMap<String, SExpression>());
             SValue ret = pc.v.execute(eil.env);
 
             env.put("__path__", oldPath);
