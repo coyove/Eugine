@@ -50,15 +50,16 @@ public final class mandelbrot {
         yCt=new AtomicInteger();
         out=new byte[N][(N+7)/8];
 
-        Thread[] pool=new Thread[2*Runtime.getRuntime().availableProcessors()];
-        for (int i=0;i<pool.length;i++)
-            pool[i]=new Thread(){
-                public void run() {
-                    int y; while((y=yCt.getAndIncrement())<out.length) putLine(y,out[y]);
-                }
-            };
-        for (Thread t:pool) t.start();
-        for (Thread t:pool) t.join();
+//        Thread[] pool=new Thread[2*Runtime.getRuntime().availableProcessors()];
+//        for (int i=0;i<pool.length;i++)
+//            pool[i]=new Thread(){
+//                public void run() {
+//                    int y; while((y=yCt.getAndIncrement())<out.length) putLine(y,out[y]);
+//                }
+//            };
+//        for (Thread t:pool) t.start();
+//        for (Thread t:pool) t.join();
+        int y;while((y=yCt.getAndIncrement())<out.length) putLine(y,out[y]);
 
         OutputStream stream = new FileOutputStream("test");
         stream.write(("P4\n"+N+" "+N+"\n").getBytes());

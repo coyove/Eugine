@@ -262,6 +262,8 @@ topExpr returns [SExpression v]
         { $v = ExecEnvironment.False; }
     |   'null'
         { $v = ExecEnvironment.Null; }
+    |   'break'
+        { $v = ExecEnvironment.Break; }
     |   Identifier    
         { $v = new PVariable(new Atom($Identifier), $Identifier.text); }
     |   RawString     

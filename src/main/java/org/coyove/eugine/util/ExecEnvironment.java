@@ -2,6 +2,7 @@ package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.value.SBool;
+import org.coyove.eugine.value.SBreak;
 import org.coyove.eugine.value.SClosure;
 import org.coyove.eugine.value.SNull;
 
@@ -12,9 +13,10 @@ import java.util.Map;
  * Created by coyove on 2016/9/9.
  */
 public class ExecEnvironment extends HashMap<String, SValue> {
-    public static SNull Null = new SNull(true);
-    public static SBool True = new SBool(true, true);
-    public static SBool False = new SBool(false, true);
+    public final static SNull Null = new SNull(true);
+    public final static SBool True = new SBool(true, true);
+    public final static SBool False = new SBool(false, true);
+    public final static SBreak Break = new SBreak();
 
     public ExecEnvironment parentEnv = null;
 

@@ -2,12 +2,12 @@ import util
 // // import ifc
 
 // Log.info("begin")
-// // let model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
+// // var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
 // // Log.info(len(model.objects))
 
 // // // model.walk((obj) => 
 // // //     if Ifc.isRelGroup(obj) {
-// // //         println((let g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
+// // //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
 
 // // //         for obj.get<RelatedObjects> do (robj, i) =>
 // // //             println("  ", i, ": ", robj.get<Name>)
@@ -16,15 +16,15 @@ import util
 // // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
 // def curry(a, b, c) => a + b + c
 
-// let zzz  =curry(1)
-// let zzz2  =zzz(2)
+// var zzz  =curry(1)
+// var zzz2  =zzz(2)
 // println(zzz2(1))
 // println(zzz2(2))
 // println(zzz(10, 2))
 // println(curry(2, 10)(3))
 
 // def add(args...) => if len(args) == 2 args[0] + args[1] else {
-//     let b = args[1..]
+//     var b = args[1..]
 //     args[0] + add(b...)
 // }
 
@@ -49,8 +49,8 @@ import util
 // Log.info("end")
 
 // def struct complex(r, i) => {
-//     let this.real = r
-//     let this.image = i
+//     var this.real = r
+//     var this.image = i
 
 //     def operator add(left, right) => @ret(complex(left.real, left.image)) {
 //         ret.real += right.real
@@ -60,7 +60,7 @@ import util
 //     def operator tostring(this) => str(this.real) + "+" + this.image + "i"
 // }
 
-// let a = complex(0.0, 0.0)
+// var a = complex(0.0, 0.0)
 // for 0..2000 do (i) => 
 //     for 0..2000 do (j) => 
 //         a += complex(i, j)
@@ -70,8 +70,8 @@ import util
 
 Debug.start()
 // for 0..10000000 do () => {
-// 	let a = 1
-// 	let b = 1.0 / 4.5 + 2 / a * 4 - a
+// 	var a = 1
+// 	var b = 1.0 / 4.5 + 2 / a * 4 - a
 // }
 
 // println(b)
@@ -102,14 +102,14 @@ Debug.start()
 
 
 let N = 1600
-let Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
+let Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0) // 79462469 , 4295b0b8 
 let invN = 2.0/N
 for 0..N do (i) => { 
 	Cib[i] = invN * i - 1.0
 	Crb[i] = invN * i - 1.5
 } 
 
-let yCt = 0
+var yCt = 0
 def incr() => sync yCt++
 
 let linelen = (N + 7) / 8
@@ -117,56 +117,56 @@ let out = range(N * linelen, 0, 0.0)
 
 def putLine(y) =>
 	for 0..linelen do (xb) => {
-		let x = xb * 8
-		let res = 0
+		var x = xb * 8
+		var res = 0
         for [0, 2, 4, 6] do (i) => {
-            let Ciby = Cib[y]
-            let Crbx = Crb[x+i]
-            let Crbx1 = Crb[x+i+1]
+            var Ciby = Cib[y]
+            var Crbx = Crb[x+i]
+            var Crbx1 = Crb[x+i+1]
 
-            let Zr1 = Crbx, Zr2 = Crbx1
-            let Zi1 = Ciby, Zi2 = Ciby
+            var Zr1 = Crbx, Zr2 = Crbx1
+            var Zi1 = Zi2 = Ciby
 
-            let b = 0
-            let j = 50
+            var b = 0
 
-            enter for j-- > 0 do () => {
-                let nZr1=Zr1*Zr1-Zi1*Zi1+Crbx
-                let nZi1=Zr1*Zi1*2+Ciby
+            for 0..50 do () => {
+                var nZr1=Zr1*Zr1-Zi1*Zi1+Crbx
+                var nZi1=Zr1*Zi1*2+Ciby
                 Zr1=nZr1
                 Zi1=nZi1
 
-                let nZr2=Zr2*Zr2-Zi2*Zi2+Crbx1
-                let nZi2=Zr2*Zi2*2+Ciby
+                var nZr2=Zr2*Zr2-Zi2*Zi2+Crbx1
+                var nZi2=Zr2*Zi2*2+Ciby
                 Zr2=nZr2
                 Zi2=nZi2
 
                 if Zr1*Zr1+Zi1*Zi1>4 { 
                 	b = Bit.or(b, 2)
-                	if b==3 exit(1)
+                	if b==3 break
                 }
+
                 if Zr2*Zr2+Zi2*Zi2>4 { 
                 	b = Bit.or(b, 1)
-                	if b==3 exit(1)
+                	if b==3 break
                 }
             }
 
             res = res * 4 + b
-
         }
         out[y * linelen + xb] = res
 	}
 
 def worker () => {
-	let y = 0
-	for (y = incr()) < N do () => System.dup(putLine)(y)
+	var y = 0
+	for (y = incr()) < N do () => putLine(y)
 }
 
-let threads = []
+var threads = []
 for 0..4 do () =>
-	threads <+ System.dup(worker)#()
+	threads <+ worker#()
 
 for threads do (t) => wait(t)
+// worker()
 
 Pbm.write("test.pbm", N, N, out)
 

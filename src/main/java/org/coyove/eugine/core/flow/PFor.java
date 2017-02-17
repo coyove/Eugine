@@ -81,6 +81,10 @@ public class PFor extends SExpression {
         for (int i = 0; i < body.body.size(); i++) {
             SExpression se = body.body.get(i);
             ret = se.evaluate(env);
+
+            if (ret == ExecEnvironment.Break) {
+                break;
+            }
         }
 //        }
 

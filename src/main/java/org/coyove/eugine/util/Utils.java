@@ -184,40 +184,6 @@ public final class Utils {
         }
     }
 
-    public static void walk(SExpression expr) {
-        if (expr == null) {
-            return;
-        }
-
-        System.out.print(expr.toString() + ":");
-
-        try {
-            for (Field f : expr.getClass().getDeclaredFields()) {
-                f.setAccessible(true);
-                Object obj = f.get(expr);
-                if (obj == null) {
-                    continue;
-                }
-
-                if (f.getAnnotation(ReplaceableVariable.class) != null) {
-                    SExpression se = (SExpression) obj;
-                    System.out.print(se.toString() + " ");
-                    System.out.println();
-
-                } else if (f.getAnnotation(ReplaceableVariables.class) != null) {
-                    System.out.println();
-                    ListEx<SExpression> ses = (ListEx<SExpression>) obj;
-                    for (SExpression se : ses) {
-                        walk(se);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // nothing
-            e.printStackTrace();
-        }
-    }
-
     private static <T> void quickSort(T[] arr, int left, int right, Comparator<T> comp) {
         int i = left, j = right;
         T tmp;
@@ -260,7 +226,7 @@ public final class Utils {
     }
 
     public static boolean checkExit(SValue v) {
-        if (v == ExecEnvironment.False) {
+        if (v == ExecEnvironment.False || v == ExecEnvironment.Break) {
             return true;
         }
 
