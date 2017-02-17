@@ -101,7 +101,7 @@ Debug.start()
 // // Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
 
 
-let N = 160
+let N = 1600
 let Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0)
 let invN = 2.0/N
 for 0..N do (i) => { 
@@ -125,7 +125,7 @@ def putLine(y) =>
             let Crbx1 = Crb[x+i+1]
 
             let Zr1 = Crbx, Zr2 = Crbx1
-            let Zi1 = Zi2 = Ciby
+            let Zi1 = Ciby, Zi2 = Ciby
 
             let b = 0
             let j = 50
@@ -152,18 +152,19 @@ def putLine(y) =>
             }
 
             res = res * 4 + b
+
         }
         out[y * linelen + xb] = res
 	}
 
 def worker () => {
 	let y = 0
-	for (y = incr()) < N do () => putLine(y)
+	for (y = incr()) < N do () => System.dup(putLine)(y)
 }
 
 let threads = []
 for 0..4 do () =>
-	threads <+ worker#()
+	threads <+ System.dup(worker)#()
 
 for threads do (t) => wait(t)
 

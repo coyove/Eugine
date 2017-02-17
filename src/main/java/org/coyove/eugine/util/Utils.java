@@ -98,7 +98,15 @@ public final class Utils {
         }
 
         if (expr instanceof PSet) {
-            replaceVariables(((PSet) expr).value, replacer);
+            SExpression v = ((PSet) expr).value;
+            if (v instanceof PVariable) {
+                SExpression r = replacer.get(((PVariable) v).name);
+                if (r != null) {
+                    ((PSet) expr).value = r;
+                }
+            } else {
+                replaceVariables(v, replacer);
+            }
 
             SExpression name = ((PSet) expr).name;
             PSet set = ((PSet) expr);

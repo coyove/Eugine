@@ -37,6 +37,11 @@ public class SKeywords {
                         return new SECommand(new Atom(tok), arguments, true);
                     }
                 });
+                put("System.dup", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SEDuplicate(new Atom(tok), arguments);
+                    }
+                });
                 put("print", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEPrint(new Atom(tok), arguments, "");
