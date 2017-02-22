@@ -70,7 +70,7 @@ public class PCall extends SExpression {
 
     private Triple<SClosure, ListEx<SValue>, Byte>
     getContinue(SExpression se, ExecEnvironment env) throws EgException {
-        ListEx<SValue> retArgs = new ListEx<SValue>();
+        ListEx<SValue> retArgs = null;
         SClosure retCls = null;
         Byte ret = CONTINUE;
 
@@ -88,8 +88,10 @@ public class PCall extends SExpression {
             ret = TAIL_CALL;
 
             if (iif.evaluateCondition(env)) {
+                retArgs = new ListEx<SValue>();
                 retCls = new SClosure(env, iif.trueBranch);
             } else if (iif.falseBranch != null) {
+                retArgs = new ListEx<SValue>();
                 retCls = new SClosure(env, iif.falseBranch);
             } else {
                 ret = FALSE_NULL;
@@ -100,6 +102,7 @@ public class PCall extends SExpression {
             boolean flag = false;
 
             ret = TAIL_CALL;
+            retArgs = new ListEx<SValue>();
 
             for (Branch b : cond.branches) {
                 if (b.recv.evaluate(env).equals(tester)) {
@@ -120,6 +123,7 @@ public class PCall extends SExpression {
             PChain chain = (PChain) se;
             if (chain.expressions.size() > 0) {
                 ret = TAIL_CALL;
+                retArgs = new ListEx<SValue>();
                 retCls = new SClosure(env, chain.expressions);
             } else {
                 ret = FALSE_NULL;
@@ -240,7 +244,7 @@ public class PCall extends SExpression {
                 newEnv = closure.outerEnv;
             } else {
                 newEnv = prepareEE(closure, arguments);
-                newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
+//                newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
                 newEnv.put("__atom__", new SObject(atom));
 
                 if ((closure.type & SClosure.OPERATOR) == 0) {
@@ -266,14 +270,70 @@ public class PCall extends SExpression {
 
                     // TCO
                     if (i == closure.body.size() - 1) {
-                        Triple<SClosure, ListEx<SValue>, Byte> tail = getContinue(se, newEnv);
-                        if (tail.getRight() == TAIL_CALL) {
-                            closure = tail.getLeft();
-                            arguments = tail.getMiddle();
+//                        Triple<SClosure, ListEx<SValue>, Byte> tail = getContinue(se, newEnv);
+//                        if (tail.getRight() == TAIL_CALL) {
+//                            closure = tail.getLeft();
+//                            arguments = tail.getMiddle();
+//
+//                            continue Execute_Next_Closure;
+//                        } else if (tail.getRight() == FALSE_NULL) {
+//                            return ExecEnvironment.Null;
+//                        }
+                        if (se instanceof PCall) {
+                            PCall call = (PCall) se;
+                            SValue cls_ = call.called.evaluate(newEnv);
+
+                            if (cls_ instanceof SClosure) {
+                                closure = (SClosure) cls_;
+                                arguments = SExpression.eval(call.arguments, newEnv, atom);
+                                continue Execute_Next_Closure;
+                            }
+                        } else if (se instanceof PIf) {
+                            PIf iif = (PIf) se;
+
+                            if (iif.evaluateCondition(newEnv)) {
+                                arguments = new ListEx<SValue>();
+                                closure = new SClosure(newEnv, iif.trueBranch);
+                                continue Execute_Next_Closure;
+                            } else if (iif.falseBranch != null) {
+                                arguments = new ListEx<SValue>();
+                                closure = new SClosure(newEnv, iif.falseBranch);
+                                continue Execute_Next_Closure;
+                            } else {
+                                return ExecEnvironment.Null;
+                            }
+                        } else if (se instanceof PSwitch) {
+                            PSwitch cond = (PSwitch) se;
+                            SValue tester = cond.condition.evaluate(newEnv);
+                            boolean flag = false;
+                            arguments = new ListEx<SValue>();
+
+                            for (Branch b : cond.branches) {
+                                if (b.recv.evaluate(newEnv).equals(tester)) {
+                                    closure = new SClosure(newEnv, b.body);
+                                    flag = true;
+                                    break;
+                                }
+                            }
+
+                            if (!flag) {
+                                if (cond.defaultBranch != null) {
+                                    closure = new SClosure(newEnv, cond.defaultBranch.body);
+                                } else {
+                                    return ExecEnvironment.Null;
+                                }
+                            }
 
                             continue Execute_Next_Closure;
-                        } else if (tail.getRight() == FALSE_NULL) {
-                            return ExecEnvironment.Null;
+                        } else if (se instanceof PChain) {
+                            PChain chain = (PChain) se;
+                            if (chain.expressions.size() > 0) {
+                                arguments = new ListEx<SValue>();
+                                closure = new SClosure(newEnv, chain.expressions);
+                                continue Execute_Next_Closure;
+                            } else {
+                                return ExecEnvironment.Null;
+                            }
                         }
                     }
 

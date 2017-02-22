@@ -2,7 +2,7 @@ package org.coyove.eugine.base;
 
 import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.core.*;
-import org.coyove.eugine.core.math.PCompare;
+import org.coyove.eugine.core.math.PIntrinsicCompare;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.library.image.SEPbmWriter;
 import org.coyove.eugine.library.json.SEJsonDecoder;
@@ -80,36 +80,6 @@ public class SKeywords {
                 put("Log.level", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SELog(new Atom(tok), arguments, SELog.SET_LEVEL);
-                    }
-                });
-                put("==", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PCompare(new Atom(tok), arguments, "==");
-                    }
-                });
-                put("!=", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PCompare(new Atom(tok), arguments, "!=");
-                    }
-                });
-                put(">", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PCompare(new Atom(tok), arguments, ">");
-                    }
-                });
-                put("<", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PCompare(new Atom(tok), arguments, "<");
-                    }
-                });
-                put("<=", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PCompare(new Atom(tok), arguments, "<=");
-                    }
-                });
-                put(">=", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new PCompare(new Atom(tok), arguments, ">=");
                     }
                 });
                 put("reverse", new CallableKeyword() {

@@ -383,29 +383,9 @@ addExpr returns [SExpression v]
 
 compareExpr returns [SExpression v]
     : Top=addExpr { $v = $Top.v; }
-    | Left=compareExpr Op='<' Right=addExpr
+    | Left=compareExpr Op=('<' | '<=' | '==' | '!=' | '>=' | '>') Right=addExpr
         {
-            $v = new PLess(new Atom($Op), $Left.v, $Right.v);
-        }
-    | Left=compareExpr Op='>' Right=addExpr
-        {
-            $v = new PGreat(new Atom($Op), $Left.v, $Right.v);
-        }
-    | Left=compareExpr Op='<=' Right=addExpr
-        {
-            $v = new PLessEqual(new Atom($Op), $Left.v, $Right.v);
-        }
-    | Left=compareExpr Op='>=' Right=addExpr
-        {
-            $v = new PGreatEqual(new Atom($Op), $Left.v, $Right.v);
-        }
-    | Left=compareExpr Op='==' Right=addExpr
-        {
-            $v = new PEqual(new Atom($Op), $Left.v, $Right.v);
-        }
-    | Left=compareExpr Op='!=' Right=addExpr
-        {
-            $v = new PNotEqual(new Atom($Op), $Left.v, $Right.v);
+            $v = PIntrinsicCompare.get(new Atom($Op), $Left.v, $Op.text, $Right.v);
         }
     ;
 

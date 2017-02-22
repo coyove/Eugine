@@ -1,8 +1,8 @@
-var PI = 3.141592653589793;
-var SOLAR_MASS = PI * PI * 4;
-var DAYS_PER_YEAR = 365.24;
+let PI = 3.141592653589793;
+let SOLAR_MASS = PI * PI * 4;
+let DAYS_PER_YEAR = 365.24;
 
-var bodies = {
+let bodies = {
    jupiter: [
       4.84143144246472090e+00,
       -1.16032004402742839e+00,
@@ -54,9 +54,9 @@ var bodies = {
    ]
 }
 
-var px = 0.0
-var py = 0.0
-var pz = 0.0
+let px = 0.0
+let py = 0.0
+let pz = 0.0
 
 for bodies do (name, body) => {
    px += body[3] * body[6]
@@ -69,19 +69,19 @@ bodies.sun[4] = -py / SOLAR_MASS
 bodies.sun[5] = -pz / SOLAR_MASS
 
 def energy() => {
-   var dx = 0.0
-   var dy = 0.0
-   var dz = 0.0
-   var distance = 0.0
-   var e = 0.0
-   var bb = keys(bodies)
+   let dx = 0.0
+   let dy = 0.0
+   let dz = 0.0
+   let distance = 0.0
+   let e = 0.0
+   let bb = keys(bodies)
 
    for 0..len(bb) do (i) => {
-      var body = bodies[bb[i]]
+      let body = bodies[bb[i]]
       e += 0.5 * body[6] * (body[3] * body[3] + body[4] * body[4] + body[5] * body[5])
 
       for i+1..len(bb) do (j) => {
-         var jBody = bodies[bb[j]]
+         let jBody = bodies[bb[j]]
          dx = body[0] - jBody[0]
          dy = body[1] - jBody[1]
          dz = body[2] - jBody[2]
@@ -94,26 +94,26 @@ def energy() => {
    e
 }
 
-var bb = keys(bodies)
-var lbb = len(bb) 
+let bb = keys(bodies)
+let lbb = len(bb) 
 
 def advance(dt) => {
    for 0..lbb do (i) => {
-      var iBody = bodies[bb[i]]
+      let iBody = bodies[bb[i]]
 
       for i+1..lbb do (j) => {
-         var jBody = bodies[bb[j]]
+         let jBody = bodies[bb[j]]
 
-         var dx = iBody[0] - jBody[0];
-         var dy = iBody[1] - jBody[1];
-         var dz = iBody[2] - jBody[2];
+         let dx = iBody[0] - jBody[0];
+         let dy = iBody[1] - jBody[1];
+         let dz = iBody[2] - jBody[2];
 
-         var dSquared = dx * dx + dy * dy + dz * dz;
-         var distance = Math.sqrt(dSquared);
-         var mag = dt / (dSquared * distance);
+         let dSquared = dx * dx + dy * dy + dz * dz;
+         let distance = Math.sqrt(dSquared);
+         let mag = dt / (dSquared * distance);
 
-         var jmass_mag = jBody[6] * mag
-         var imass_mag = iBody[6] * mag
+         let jmass_mag = jBody[6] * mag
+         let imass_mag = iBody[6] * mag
 
          iBody[3] -= dx * jmass_mag
          iBody[4] -= dy * jmass_mag
@@ -131,14 +131,14 @@ def advance(dt) => {
    }
 }
 
-var _start = Time.unix(0)
+let _start = Time.unix(0)
 println(energy())
-for 0..500000 do () => {
+for 0..50000000 do () => {
    advance(0.01)
 }
 println(energy())
 println(Time.unix(0) - _start)
 
-// var tmp = [1,2,3]
+// let tmp = [1,2,3]
 // tmp[1] += 2
 // println(tmp)

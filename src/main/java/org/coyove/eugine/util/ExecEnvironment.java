@@ -21,7 +21,7 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     public ExecEnvironment parentEnv = null;
 
     public ExecEnvironment() {
-
+        super(16);
     }
 
     public ExecEnvironment(ExecEnvironment m) {
