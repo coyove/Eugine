@@ -9,7 +9,10 @@ import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.pm.Exportable;
-import org.coyove.eugine.value.*;
+import org.coyove.eugine.value.SBool;
+import org.coyove.eugine.value.SInt;
+import org.coyove.eugine.value.SLong;
+import org.coyove.eugine.value.SNull;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -221,8 +224,17 @@ public final class Utils {
                 StringUtils.leftPad("", pad, " ") + text);
     }
 
+    public static void printf(int pad, String text, Object... params) {
+        System.out.println(DateFormatUtils.format(System.currentTimeMillis(), "[hh:mm:ss] ") +
+                StringUtils.leftPad("", pad, " ") +  String.format(text, params));
+    }
+
     public static void print(String text) {
         print(text, 0);
+    }
+
+    public static void printf(String text, Object... params) {
+        print(String.format(text, params), 0);
     }
 
     public static boolean checkExit(SValue v) {

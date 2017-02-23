@@ -44,7 +44,7 @@ public class main {
 
         if (options.source != null) {
             try {
-//                Thread.sleep(10000);
+                // Thread.sleep(10000);
                 Utils.print(Parser.executeFile(args[0], globalStaticEnv).toString());
             } catch (Exception ex) {
                 ex.printStackTrace();

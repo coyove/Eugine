@@ -1,5 +1,6 @@
 package org.coyove.eugine.antlr;
 
+import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +59,12 @@ public class EugineImportListener extends EugineBaseListener {
             if (reload && !reloadablePackages.contains(ppath)) {
                 reloadablePackages.add(ppath);
             }
-            Parser.executeFile(ppath, this.env, pad);
+
+            try {
+                Parser.execute(new ANTLRFileStream(ppath), this.env, ppath, pad);
+            } catch (Exception e) {
+                ErrorHandler.print(9090, "error when opening " + ppath + ": " + e, new Atom(sourceToken));
+            }
         }
     }
 }

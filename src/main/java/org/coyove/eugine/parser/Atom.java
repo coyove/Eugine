@@ -18,7 +18,7 @@ public class Atom {
         token.line = tok.getLine() - 1;
         token.lineIndex = tok.getCharPositionInLine();
         token.source = tok.getTokenSource().getSourceName();
-        token.filename = Utils.getFileName(token.source).replace(".eugine", ".e");
+        token.filename = "@" + Utils.getFileName(token.source).replace(".eugine", "");
         token.value = tok.getText();
     }
 

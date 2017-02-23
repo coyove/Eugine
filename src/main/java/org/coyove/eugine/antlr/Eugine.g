@@ -30,7 +30,7 @@ import org.apache.commons.lang3.ClassUtils;
 }
 
 prog returns [SExpression v]
-    : (block { $v = $block.v; } )+ 
+    : (block { $v = $block.v; } )+
     | EOF    { $v = ExecEnvironment.Null; }
 ;
 
@@ -97,27 +97,19 @@ parametersList returns [
     ListEx<String> v = new ListEx<String>(),
     ListEx<Boolean> passByValue = new ListEx<Boolean>()
     ]
-    :   '(' 
-            LastStyle='&'? LastArg=Identifier
-            (',' InitStyle='&'? InitArg=Identifier { 
-                $v.add($InitArg.text); 
-                $passByValue.add($InitStyle == null);
-            })*
-        ')'
-
+    :   LastStyle='&'? LastArg=Identifier
+        (',' InitStyle='&'? InitArg=Identifier { 
+            $v.add($InitArg.text); 
+            $passByValue.add($InitStyle == null);
+        })*
         {
             $v.add(0, $LastArg.text);
             $passByValue.add(0, $LastStyle == null);
         }
-    |   '(' ')'
     ;
 
 argumentsList returns [ ListEx<SExpression> v = new ListEx<SExpression>() ]
-    :   '(' 
-                 HeadExpr=expr { $v.add($HeadExpr.v); }
-            (',' TailExpr=expr { $v.add($TailExpr.v); } )*
-        ')'
-    |   '(' ')'
+    :   HeadExpr=expr { $v.add($HeadExpr.v); } (',' TailExpr=expr { $v.add($TailExpr.v); } )*
     ;
 
 interopArgumentDeclaration returns [SExpression v, String c]
@@ -142,21 +134,22 @@ interopArgumentsList returns [
     | '(' ')'
     ;
 
-defineStmt returns [SExpression v]
-    locals [ 
-        ListEx<SExpression> body = new ListEx<SExpression>(),
-        ListEx<SExpression> decorators = new ListEx<SExpression>()
-    ]
+defineStmt 
+    returns [SExpression v]
+    locals  [ListEx<SExpression> decorators = new ListEx<SExpression>(), SExpression name]
     :   Def Inline? Coroutine? Struct? Operator? Get='getter'? Set='setter'?
-        ('[' Decorator=expr argumentsList? ']' { 
+        ('[' Decorator=expr ('(' argumentsList? ')')? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
         })*
-        FunctionName=expr Lambda=lambdaStmt
+        (FunctionSubject=Identifier '.')? FunctionName=Identifier
+        Lambda=lambdaStmt
         {
-            Atom a = new Atom($FunctionName.start);
-            SExpression name = $FunctionName.v;
+            Atom a = new Atom($FunctionName);
             SExpression closure = $Lambda.v;
+            $name = $FunctionSubject != null ? 
+                new PGet(a, new PVariable($FunctionSubject.text), new SString($FunctionName.text)) :
+                new PVariable(a, $FunctionName.text);
 
             ((PLambda) closure).inline    = $Inline != null;
             ((PLambda) closure).coroutine = $Coroutine != null;
@@ -164,23 +157,23 @@ defineStmt returns [SExpression v]
 
             if ($Operator != null) {
                 ((PLambda) closure).operator = true;
-                name = new PGet(a, new PVariable("this"), new SString("__" + $FunctionName.text + "__"));
+                $name = new PGet(a, new PVariable("this"), new SString("__" + $FunctionName.text + "__"));
             }
 
-            if ($Get != null) name = new PGet(a, new PVariable("this"), new SString("__get__" + $FunctionName.text));
-            if ($Set != null) name = new PGet(a, new PVariable("this"), new SString("__set__" + $FunctionName.text));
+            if ($Get != null) $name = new PGet(a, new PVariable("this"), new SString("__get__" + $FunctionName.text));
+            if ($Set != null) $name = new PGet(a, new PVariable("this"), new SString("__set__" + $FunctionName.text));
 
             for (SExpression d : $decorators) {
                 closure = new PCall(a, d, ListEx.build(closure));
             }
             
-            $v = new PSet(a, name, closure, PSet.VAR);
+            $v = new PSet(a, $name, closure, PSet.VAR);
         }
     ;
 
 lambdaStmt returns [PLambda v]
     locals [ListEx<SExpression> body = new ListEx<SExpression>(), PVariable ret]
-    :   Parameters=parametersList 
+    :   LambdaStart='(' Parameters=parametersList? ')'
         Description=(RawString | StringLiteral)?
         '=>' 
         ('@' Identifier ('(' InitValue=expr ')')? {
@@ -194,8 +187,10 @@ lambdaStmt returns [PLambda v]
                 $body.add($ret);
             }
 
-            $v = new PLambda(new Atom($Parameters.start), $Parameters.v, $Parameters.passByValue,
-                $body, $Description == null ? "" : $Description.text);
+            ListEx<String> v = $Parameters.ctx == null ? new ListEx<String>() : $Parameters.v;
+            ListEx<Boolean> pbv = $Parameters.ctx == null ? new ListEx<Boolean>() : $Parameters.passByValue;
+
+            $v = new PLambda(new Atom($LambdaStart), v, pbv, $body, $Description == null ? "" : $Description.text);
         }
     ;
 
@@ -305,14 +300,15 @@ postfixExpr returns [SExpression v]
                     PInteropCall.RETURN_TYPE.CAST_TO_SVALUE :
                     PInteropCall.RETURN_TYPE.DIRECT_RETURN);
         }
-    |   Called=postfixExpr Mt='#'? argumentsList
+    |   Called=postfixExpr Mt='#'? '(' argumentsList? ')'
         {
+            ListEx<SExpression> arguments = $argumentsList.ctx == null ? new ListEx<SExpression>() : $argumentsList.v;
             if ($Mt != null) {
-                $v = new PThread(new Atom($Mt), $Called.v, $argumentsList.v);
+                $v = new PThread(new Atom($Mt), $Called.v, arguments);
             } else if (SKeywords.Lookup.containsKey($Called.text)) {
-                $v = SKeywords.Lookup.get($Called.text).call($Called.start, $argumentsList.v); 
+                $v = SKeywords.Lookup.get($Called.text).call($Called.start, arguments); 
             } else {
-                $v = new PCall(new Atom($Called.start), $Called.v, $argumentsList.v);
+                $v = new PCall(new Atom($Called.start), $Called.v, arguments);
             }
         }
     |   Called=postfixExpr '<' Identifier '>'

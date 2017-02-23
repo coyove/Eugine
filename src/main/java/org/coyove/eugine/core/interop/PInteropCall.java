@@ -19,7 +19,7 @@ public class PInteropCall extends SExpression {
 
     private ListEx<String> definition;
 
-    @ReplaceableVariable
+    @ReplaceableVariables
     private ListEx<SExpression> arguments;
 
     private RETURN_TYPE type;

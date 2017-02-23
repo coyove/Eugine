@@ -31,7 +31,10 @@ def map (f, list) => {
 	var totalFailed = 0
 	var startTime = 0
 
-	def this.start() => startTime = Time.unix(0)
+	def this.start() => {
+		Log.info("==== Debug Started ====")
+		startTime = Time.unix(0)
+	}
 
 	def this.assert (result, text) =>
 		if result { 

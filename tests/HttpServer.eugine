@@ -231,13 +231,13 @@ def struct HttpServer(addr, port, timeout) => {
 
             if !bodyLength {
                 var m = String.match(chr(rawBuf), @"(?i)content-length:\s?(\d+)")
-                if len(m) > 0
+                if len(m) > 0 
                     bodyLength = num(String.split(m[0].text, ":")[1]) // we found Content-Length header
             }
 
             if !headerLength {
                 m = String.match(chr(rawBuf), @"(\r\n\r\n)")
-                if len(m) > 0
+                if len(m) > 0 
                     totalLength = (headerLength = m[0].end) + bodyLength // we reach the end of HTTP request headers
             }
 

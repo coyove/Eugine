@@ -91,9 +91,9 @@ public class PIntrinsicCompare extends SExpression {
                 case 3:
                     return Math.abs(d) >= 1e-6 ? ExecEnvironment.True : ExecEnvironment.False;
                 case 4:
-                    return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 5:
                     return d >= 0 ? ExecEnvironment.True : ExecEnvironment.False;
+                case 5:
+                    return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
             }
         }
 
@@ -109,9 +109,9 @@ public class PIntrinsicCompare extends SExpression {
                 case 3:
                     return d != 0 ? ExecEnvironment.True : ExecEnvironment.False;
                 case 4:
-                    return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 5:
                     return d >= 0 ? ExecEnvironment.True : ExecEnvironment.False;
+                case 5:
+                    return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
             }
         }
 
