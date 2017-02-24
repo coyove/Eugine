@@ -89,6 +89,11 @@ public class SConcatString extends SString {
 
     @Override
     public String toString() {
-        return "String = \"" + StringEscapeUtils.escapeJava(underlying.toString()) + "\"";
+        return "string = \"" + StringEscapeUtils.escapeJava(this.<String>get()) + "\"";
+    }
+
+    @Override
+    public String asString() {
+        return this.get();
     }
 }

@@ -13,12 +13,12 @@ import java.util.Set;
  * Created by coyove on 2016/9/9.
  */
 public class SDict extends SValue {
-    public SDict(HashMap<String, SValue> dict) {
-        super(dict);
+    public SDict() {
+        super(new HashMap<String, SValue>());
     }
 
-    public SDict(HashMap<String, SValue> dict, boolean imm) {
-        super(dict, imm);
+    public SDict(HashMap<String, SValue> dict) {
+        super(dict);
     }
 
     @Override
@@ -36,8 +36,28 @@ public class SDict extends SValue {
         return ret;
     }
 
+    public boolean containsKey(String key) {
+        HashMap<String, SValue> dict = this.get();
+        return dict.containsKey(key);
+    }
+
+    public SValue put(String key, SValue v) {
+        HashMap<String, SValue> dict = this.get();
+        return dict.put(key, v);
+    }
+
+    public SValue get(String key) {
+        HashMap<String, SValue> dict = this.get();
+        return dict.get(key);
+    }
+
     @Override
     public String toString() {
+        return "dict = " + asString();
+    }
+
+    @Override
+    public String asString() {
         HashMap<String, SValue> map = this.get();
         Set<String> keySet = map.keySet();
         String[] sets = new String[keySet.size()];
@@ -46,6 +66,6 @@ public class SDict extends SValue {
             sets[i++] = s + ": " + map.get(s).toString();
         }
 
-        return "Dict = {" + StringUtils.join(sets, ", ") + "}";
+        return "{" + StringUtils.join(sets, ", ") + "}";
     }
 }

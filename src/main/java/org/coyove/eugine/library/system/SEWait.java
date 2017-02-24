@@ -25,6 +25,7 @@ public class SEWait extends SExpression {
         if (t instanceof Thread) {
             try {
                 ((Thread) t).join();
+                return ExecEnvironment.True;
             } catch (InterruptedException e) {
                 throw new EgException(7055, "join was interrupted", atom);
             }

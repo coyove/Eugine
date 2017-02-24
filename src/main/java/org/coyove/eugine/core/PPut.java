@@ -1,6 +1,7 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -20,14 +21,15 @@ public class PPut extends SExpression {
     @ReplaceableVariable
     private SExpression value;
 
-    public enum DECLARE {DECLARE, SET}
+    public static final byte VAR = 0;
+    public static final byte SET = 1;
 
-    private DECLARE decl;
+    private byte decl;
 
     public PPut() {
     }
 
-    public PPut(Atom ha, SExpression s, SExpression k, SExpression v, DECLARE d) {
+    public PPut(Atom ha, SExpression s, SExpression k, SExpression v, byte d) {
         atom = ha;
         subject = s;
         key = k;
@@ -36,14 +38,11 @@ public class PPut extends SExpression {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue refer = this.subject.evaluate(env);
         SValue key = this.key.evaluate(env);
         SValue value = this.value.evaluate(env);
-
-        if (refer.immutable && !(refer instanceof SClosure)) {
-            throw new EgException(2044, "subject is immutable", atom);
-        }
 
         if (refer instanceof SDict) {
             String k;
@@ -62,19 +61,20 @@ public class PPut extends SExpression {
         } else if (refer instanceof SClosure) {
             if (key instanceof SString) {
                 String k = key.get();
-                if (decl == DECLARE.DECLARE) {
-                    ((SClosure) refer).extra.bPut(k, value);
+                ExecEnvironment extra = ((SClosure) refer).extra;
+                if (decl == VAR) {
+                    extra.bPut(k, value);
                     env.bPut(k, value);
-                } else {
-                    ((SClosure) refer).extra.put(k, value);
-                    env.put(k, value);
+                } else { // SET
+                    SValue setter = extra.get("__set__" + k);
+                    if (setter instanceof SClosure) {
+                        return PCall.evaluateClosure(atom, ((SClosure) setter), ListEx.build(value), env);
+                    } else {
+                        extra.put(k, value);
+                        env.put(k, value);
+                    }
                 }
             }
-//            else if (key instanceof SClosure) {
-//                (new PCall(atom, (SClosure) n.refKey, ListEx.build(value))).evaluate(env);
-//            } else {
-//                throw new EgException(2045, "invalid setter", atom);
-//            }
         } else {
             throw new EgException(2045, "invalid object: " + refer + ", key: " + key, atom);
         }

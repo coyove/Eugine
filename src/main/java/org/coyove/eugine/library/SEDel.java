@@ -32,9 +32,6 @@ public class SEDel extends SExpression {
         SValue idx = this.index.evaluate(env);
 
         if (idx instanceof SInt && subObj instanceof SList) {
-            if (subObj.immutable)
-                throw new EgException(2006, "list is immutable", atom);
-
             ListEx<SValue> subList = subObj.get();
             int i = ((SInt) idx).val();
             if (i < 0 || i >= subList.size())
@@ -42,11 +39,7 @@ public class SEDel extends SExpression {
 
             return subList.remove(i);
         } else if (idx instanceof SString && subObj instanceof SDict) {
-            if (subObj.immutable)
-                throw new EgException(2008, "dict is immutable", atom);
-
             HashMap<String, SValue> dict = subObj.get();
-
             SValue ret = dict.remove(idx.<String>get());
             return ret == null ? ExecEnvironment.Null : ret;
         } else {

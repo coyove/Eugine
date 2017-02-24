@@ -53,24 +53,14 @@ public class SEPrint extends SExpression {
             }
 
             ret += "{\n" + StringUtils.join(values, "") + StringUtils.leftPad("}", padding - 1);
-        } else if (re instanceof SNull) {
-            ret = "null";
         } else if (re instanceof SString) {
             if (quote) {
                 ret = String.format("\"%1$s\"", StringEscapeUtils.escapeJava(re.<String>get()));
             } else {
                 ret = String.format("%1$s", re.get());
             }
-        } else if (re instanceof SClosure) {
-            ret = re.toString();
-        } else if (re instanceof SLong) {
-            ret = String.format("%d", ((SLong) re).val());
-        } else if (re instanceof SDouble) {
-            ret = String.format("%f", ((SDouble) re).val());
-        } else if (re instanceof SInt) {
-            ret = String.format("%d", ((SInt) re).val());
         } else {
-            ret = String.format("%1$s", re.toString());
+            ret = re.asString();
         }
 
         return ret;

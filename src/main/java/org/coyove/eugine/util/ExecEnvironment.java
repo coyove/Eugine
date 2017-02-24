@@ -13,10 +13,11 @@ import java.util.Map;
  * Created by coyove on 2016/9/9.
  */
 public class ExecEnvironment extends HashMap<String, SValue> {
-    public final static SNull Null = new SNull(true);
-    public final static SBool True = new SBool(true, true);
-    public final static SBool False = new SBool(false, true);
+    public final static SNull Null = new SNull();
+    public final static SBool True = new SBool(true);
+    public final static SBool False = new SBool(false);
     public final static SBreak Break = new SBreak();
+    public static ExecEnvironment globalStaticEnv = null;
 
     public ExecEnvironment parentEnv = null;
 

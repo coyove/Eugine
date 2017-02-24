@@ -13,21 +13,9 @@ public class SDouble extends SValue {
         value = Double.valueOf(v);
     }
 
-    public SDouble(String v, boolean imm) {
-        super();
-        value = Double.valueOf(v);
-        immutable = imm;
-    }
-
     public SDouble(double num) {
         super();
         value = num;
-    }
-
-    public SDouble(Double num, boolean imm) {
-        super(num, imm);
-        value = num;
-        immutable = imm;
     }
 
     @Override
@@ -49,6 +37,11 @@ public class SDouble extends SValue {
 
     @Override
     public String toString() {
-        return "Double = " + value;
+        return "double = " + value;
+    }
+
+    @Override
+    public String asString() {
+        return "" + value;
     }
 }

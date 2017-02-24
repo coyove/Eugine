@@ -86,14 +86,14 @@ public class PAdd extends SExpression {
         if (left instanceof SClosure) {
             SValue adder = ((SClosure) left).extra.get("__add__");
             if (adder != null && adder instanceof SClosure) {
-                return (new PCall(this.atom, adder, ListEx.build(left, right))).evaluate(env);
+                return PCall.evaluateClosure(this.atom, ((SClosure) adder), ListEx.build(left, right), env);
             }
         }
 
         if (right instanceof SClosure) {
             SValue adder = ((SClosure) right).extra.get("__add__");
             if (adder != null && adder instanceof SClosure) {
-                return (new PCall(this.atom, adder, ListEx.build(right, left))).evaluate(env);
+                return PCall.evaluateClosure(this.atom, ((SClosure) adder), ListEx.build(right, left), env);
             }
         }
 

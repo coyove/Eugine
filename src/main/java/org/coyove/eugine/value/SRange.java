@@ -30,6 +30,11 @@ public class SRange extends SValue {
 
     @Override
     public String toString() {
-        return String.format("Range = {%d, %d, %d}", start, interval, end);
+        return String.format("range = {%d, %d, %d}", start, interval, end);
+    }
+
+    @Override
+    public String asString() {
+        return "";
     }
 }

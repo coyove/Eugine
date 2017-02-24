@@ -15,10 +15,6 @@ public class SString extends SValue {
         super(str);
     }
 
-    public SString(String str, boolean imm) {
-        super(str, imm);
-    }
-
     @Override
     public SValue clone()
     {
@@ -29,6 +25,11 @@ public class SString extends SValue {
 
     @Override
     public String toString() {
-        return "String = \"" + StringEscapeUtils.escapeJava(underlying.toString()) + "\"";
+        return "string = \"" + StringEscapeUtils.escapeJava(underlying.toString()) + "\"";
+    }
+
+    @Override
+    public String asString() {
+        return underlying.toString();
     }
 }

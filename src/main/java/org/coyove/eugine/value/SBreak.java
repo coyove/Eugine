@@ -16,6 +16,11 @@ public class SBreak extends SValue {
 
     @Override
     public String toString() {
-        return "Break = Break";
+        return "break = break";
+    }
+
+    @Override
+    public String asString() {
+        return "";
     }
 }

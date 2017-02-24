@@ -26,7 +26,7 @@ def map (f, list) => {
 	var _this_ = this
 })()
 
-(def Debug() => {
+(def debug() => {
 	var totalPassed = 0
 	var totalFailed = 0
 	var startTime = 0
@@ -39,13 +39,13 @@ def map (f, list) => {
 	def this.assert (result, text) =>
 		if result { 
 			totalPassed++
-			println("[  OK  ] ", text)
+			Log.info("[  OK  ] ", text)
 		} else {
 			totalFailed++
-			println("[FAILED] ", text)
+			Log.warn("[FAILED] ", text)
 		}
 
 	def this.summary() => 
-		println("Finish ", totalFailed + totalPassed, " tests in ", Time.unix(0) - startTime ,"ms, ", 
-			totalFailed, " fails")
+		Log.info("Finish", totalFailed + totalPassed, "tests in", Time.unix(0) - startTime ,"ms,", 
+			totalFailed, "fails")
 })()

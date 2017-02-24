@@ -27,6 +27,15 @@ import org.apache.commons.lang3.ClassUtils;
             return null;
         }
     }
+
+    public static SExpression identifySetter(Atom atom, SExpression subject, SExpression value, byte action) {
+        if (subject instanceof PGet) {
+            PGet get = (PGet) subject;
+            return new PPut(atom, get.subject, get.key, value, action == PSet.SET ? PPut.SET : PPut.VAR);
+        } else {
+            return new PSet(atom, subject, value, action);
+        }
+    }
 }
 
 prog returns [SExpression v]
@@ -83,10 +92,10 @@ declareStmt returns [SExpression v]
         }
         Head=unaryExpr '=' HeadValue=expr
         {
-            $multi.add(new PSet(new Atom($Action), $Head.v, $HeadValue.v, $act));
+            $multi.add(identifySetter(new Atom($Action), $Head.v, $HeadValue.v, $act));
         }
         (',' Tail=unaryExpr '=' TailValue=expr {
-            $multi.add(new PSet(new Atom($Action), $Tail.v, $TailValue.v, $act));
+            $multi.add(identifySetter(new Atom($Action), $Tail.v, $TailValue.v, $act));
         })*
         {
             $v = $multi.size() == 1 ? $multi.head() : new PChain($multi);
@@ -136,8 +145,8 @@ interopArgumentsList returns [
 
 defineStmt 
     returns [SExpression v]
-    locals  [ListEx<SExpression> decorators = new ListEx<SExpression>(), SExpression name]
-    :   Def Inline? Coroutine? Struct? Operator? Get='getter'? Set='setter'?
+    locals  [ListEx<SExpression> decorators = new ListEx<SExpression>()]
+    :   Def (Struct | Operator | Get='getter' | Set='setter')?
         ('[' Decorator=expr ('(' argumentsList? ')')? ']' { 
             $decorators.add(new PCall(new Atom($Decorator.start), 
                 $Decorator.v, $argumentsList.ctx == null ? null : $argumentsList.v));
@@ -147,27 +156,34 @@ defineStmt
         {
             Atom a = new Atom($FunctionName);
             SExpression closure = $Lambda.v;
-            $name = $FunctionSubject != null ? 
-                new PGet(a, new PVariable($FunctionSubject.text), new SString($FunctionName.text)) :
-                new PVariable(a, $FunctionName.text);
+            SExpression name = new PVariable($FunctionName.text);
 
-            ((PLambda) closure).inline    = $Inline != null;
-            ((PLambda) closure).coroutine = $Coroutine != null;
-            ((PLambda) closure).struct    = $Struct != null;
-
-            if ($Operator != null) {
+            if ($Struct != null) {
+                ((PLambda) closure).struct = true;
+                $v = new PSet(a, name, closure, PSet.VAR);
+            } else if ($Operator != null) {
                 ((PLambda) closure).operator = true;
-                $name = new PGet(a, new PVariable("this"), new SString("__" + $FunctionName.text + "__"));
-            }
+                $v = new PPut(a, new PVariable($FunctionSubject.text), 
+                    new SString("__" + $FunctionName.text + "__"), closure, PPut.VAR);
+            } else {
+                // getters and setters can have decorators
+                for (SExpression d : $decorators) {
+                    closure = new PCall(a, d, ListEx.build(closure));
+                }
 
-            if ($Get != null) $name = new PGet(a, new PVariable("this"), new SString("__get__" + $FunctionName.text));
-            if ($Set != null) $name = new PGet(a, new PVariable("this"), new SString("__set__" + $FunctionName.text));
-
-            for (SExpression d : $decorators) {
-                closure = new PCall(a, d, ListEx.build(closure));
+                if ($Get != null) {
+                    $v = new PPut(a, new PVariable($FunctionSubject.text), 
+                        new SString("__get__" + $FunctionName.text), closure, PPut.VAR);
+                } else if ($Set != null) {
+                    $v = new PPut(a, new PVariable($FunctionSubject.text), 
+                        new SString("__set__" + $FunctionName.text), closure, PPut.VAR);
+                } else if ($FunctionSubject != null) {
+                    $v = new PPut(a, new PVariable($FunctionSubject.text),
+                        new SString($FunctionName.text), closure, PPut.VAR);
+                } else {
+                    $v = new PSet(a, name, closure, PSet.VAR);
+                }
             }
-            
-            $v = new PSet(a, $name, closure, PSet.VAR);
         }
     ;
 
@@ -421,12 +437,8 @@ assignExpr returns [SExpression v]
         }
     | Subject=assignExpr '=' Value=expr
         {
-            if ($Subject.v instanceof PGet && SConfig.enablePPut) {
-                PGet get = (PGet) $Subject.v;
-                $v = new PPut(new Atom($Subject.start), get.subject, get.key, $Value.v, PPut.DECLARE.SET);
-            } else {
-                $v = new PSet(new Atom($Subject.start), $Subject.v, $Value.v, PSet.SET);
-            }
+            // if ($Subject.v instanceof PGet && SConfig.enablePPut) {
+            $v = identifySetter(new Atom($Subject.start), $Subject.v, $Value.v, PSet.SET);
         }
     ;
 

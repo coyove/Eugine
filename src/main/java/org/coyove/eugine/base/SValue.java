@@ -18,19 +18,12 @@ public abstract class SValue extends SExpression {
     public int refIndex;
 
     public Object underlying;
-    public boolean immutable;
 
     public SValue() {
     }
 
     public SValue(Object underlying) {
         this.underlying = underlying;
-        this.immutable = false;
-    }
-
-    public SValue(Object underlying, boolean imm) {
-        this(underlying);
-        this.immutable = imm;
     }
 
     public <T> T get() {
@@ -42,45 +35,7 @@ public abstract class SValue extends SExpression {
         return this;
     }
 
-//    @Override
-//    public String toString() {
-//        String valType = this.getClass().getSimpleName().substring(1);
-//        if (this instanceof SNull) {
-//            return "Null = Null";
-//        } else if (this instanceof SDict) {
-//            HashMap<String, SValue> map = this.get();
-//            Set<String> keySet = map.keySet();
-//            String[] sets = new String[keySet.size()];
-//            int i = 0;
-//            for (String s : keySet) {
-//                sets[i++] = s + ": " + map.get(s).toString();
-//            }
-//
-//            return "Dict = {" + StringUtils.join(sets, ", ") + "}";
-//        } else if (this instanceof SNativeCall || this instanceof SMetaExpression) {
-//            return this.toString();
-//        } else {
-//            return valType + " = " + underlying.toString();
-//        }
-//    }
-
-    public String asString() {
-        if (this instanceof SConcatString) {
-            return this.get();
-        } else if (underlying == null) {
-            if (this instanceof SLong) {
-                return ((Long) ((SLong) this).val()).toString();
-            } else if (this instanceof SDouble) {
-                return ((Double) ((SDouble) this).val()).toString();
-            } else if (this instanceof SInt) {
-                return ((Integer) ((SInt) this).val()).toString();
-            } else {
-                return "";
-            }
-        } else {
-            return underlying.toString();
-        }
-    }
+    public abstract String asString();
 
     public abstract SValue clone();
 
@@ -91,7 +46,6 @@ public abstract class SValue extends SExpression {
 
     @SuppressWarnings("unchecked")
     public static void copyAttributes(SValue to, SValue from) {
-        to.immutable = from.immutable;
         to.refer = from.refer;
         to.refKey = from.refKey;
         to.refIndex = from.refIndex;

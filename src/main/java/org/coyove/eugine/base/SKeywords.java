@@ -2,7 +2,6 @@ package org.coyove.eugine.base;
 
 import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.core.*;
-import org.coyove.eugine.core.math.PIntrinsicCompare;
 import org.coyove.eugine.library.*;
 import org.coyove.eugine.library.image.SEPbmWriter;
 import org.coyove.eugine.library.json.SEJsonDecoder;
@@ -13,7 +12,10 @@ import org.coyove.eugine.library.meta.SEMeta;
 import org.coyove.eugine.library.string.*;
 import org.coyove.eugine.library.system.*;
 import org.coyove.eugine.parser.Atom;
+import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.ListEx;
+import org.coyove.eugine.value.SClosure;
+import org.coyove.eugine.value.SDict;
 
 import java.util.HashMap;
 
@@ -25,8 +27,38 @@ public class SKeywords {
         SExpression call(Token tok, ListEx<SExpression> arguments);
     }
 
-    public static HashMap<String, CallableKeyword> Lookup =
-            new HashMap<String, CallableKeyword>() {{
+    public static class KeywordMap extends HashMap<String, CallableKeyword> {
+        @Override
+        public CallableKeyword put(String key, CallableKeyword value) {
+            if (key.contains(".")) {
+//                String[] parts = key.split(".");
+//                SValue _top = ExecEnvironment.globalStaticEnv.get(parts[0]);
+//                if (_top == null) {
+//                    _top = new SDict();
+//                    ExecEnvironment.globalStaticEnv.put(parts[0], _top);
+//                }
+//
+//                if (_top instanceof SDict) {
+//                    SDict top = (SDict) _top;
+//                    for (int i = 1; i < parts.length - 1; i++) {
+//                        if (!top.containsKey(parts[i])) {
+//                            top = (SDict) top.put(parts[i], new SDict());
+//                        } else {
+//                            top = (SDict) top.get(parts[i]);
+//                        }
+//                    }
+//
+//                    top.put(parts[parts.length - 1],
+//                            new SClosure(ExecEnvironment.globalStaticEnv,
+//                                    // library function doesn't depend on outer env
+//                            );
+//                }
+            }
+            return super.put(key, value);
+        }
+    }
+
+    public static KeywordMap Lookup = new KeywordMap() {{
                 put("System.exec", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SECommand(new Atom(tok), arguments, false);
@@ -57,36 +89,6 @@ public class SKeywords {
                         return new SEType(new Atom(tok), arguments);
                     }
                 });
-                put("Log.debug", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.DEBUG);
-                    }
-                });
-                put("Log.info", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.INFO);
-                    }
-                });
-                put("Log.warn", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.WARN);
-                    }
-                });
-                put("Log.error", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.ERROR);
-                    }
-                });
-                put("Log.level", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.SET_LEVEL);
-                    }
-                });
-                put("reverse", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEReverse(new Atom(tok), arguments);
-                    }
-                });
                 put("irange", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new PIRange(new Atom(tok), arguments);
@@ -105,11 +107,6 @@ public class SKeywords {
                 put("eval", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEEval(new Atom(tok), arguments);
-                    }
-                });
-                put("String.trim", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SETrim(new Atom(tok), arguments);
                     }
                 });
                 put("len", new CallableKeyword() {
@@ -142,14 +139,54 @@ public class SKeywords {
                         return new SEStr(new Atom(tok), arguments);
                     }
                 });
-                put("keys", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEKeys(new Atom(tok), arguments);
-                    }
-                });
                 put("del", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEDel(new Atom(tok), arguments);
+                    }
+                });
+                put("contains", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SEContains(new Atom(tok), c);
+                    }
+                });
+                put("Log.debug", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.DEBUG);
+                    }
+                });
+                put("Log.info", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.INFO);
+                    }
+                });
+                put("Log.warn", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.WARN);
+                    }
+                });
+                put("Log.error", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.ERROR);
+                    }
+                });
+                put("Log.level", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SELog(new Atom(tok), arguments, SELog.SET_LEVEL);
+                    }
+                });
+                put("reverse", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SEReverse(new Atom(tok), arguments);
+                    }
+                });
+                put("String.trim", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SETrim(new Atom(tok), arguments);
+                    }
+                });
+                put("keys", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SEKeys(new Atom(tok), arguments);
                     }
                 });
                 put("asc", new CallableKeyword() {
@@ -327,12 +364,6 @@ public class SKeywords {
                         return new SEWait(new Atom(tok), c);
                     }
                 });
-                put("contains", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEContains(new Atom(tok), c);
-                    }
-                });
-
                 put("Digest.SHA1", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEDigest(new Atom(tok), c, SEDigest.ALGORITHM.SHA1, SEDigest.RETURN.BYTES);

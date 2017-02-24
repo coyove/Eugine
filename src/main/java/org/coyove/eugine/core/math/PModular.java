@@ -39,7 +39,10 @@ public class PModular extends SExpression {
             if (Math.abs(r) < 1e-6) {
                 throw new EgException(1001, "moded by zero", atom);
             }
-            return new SDouble(((SDouble) left).val() / r);
+
+            double l = ((SDouble) left).val();
+            double f = Math.floor(l / r);
+            return new SDouble(l - f * r);
         }
 
         if (left instanceof SInt) {
@@ -48,13 +51,13 @@ public class PModular extends SExpression {
                 if (r == 0) {
                     throw new EgException(1001, "moded by zero", atom);
                 }
-                return new SInt(((SInt) left).val() / r);
+                return new SInt(Math.floorMod(((SInt) left).val(), r));
             } else {
                 long r = EgCast.toLong(right, atom);
                 if (r == 0) {
                     throw new EgException(1001, "moded by zero", atom);
                 }
-                return new SLong(((SInt) left).val() / r);
+                return new SLong(Math.floorMod(((SInt) left).val(), r));
             }
         }
 
@@ -63,7 +66,7 @@ public class PModular extends SExpression {
             if (r == 0) {
                 throw new EgException(1001, "moded by zero", atom);
             }
-            return new SLong(((SLong) left).val() / r);
+            return new SLong(Math.floorMod(((SLong) left).val(), r));
         }
 
         throw new EgException(7056, left + " is not a number", atom);

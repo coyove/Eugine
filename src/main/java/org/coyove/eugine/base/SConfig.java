@@ -5,6 +5,5 @@ package org.coyove.eugine.base;
  */
 public class SConfig {
     public static boolean strictForLoop = true;
-    public static boolean cacheVariables = false;
     public static boolean enablePPut = false;
 }

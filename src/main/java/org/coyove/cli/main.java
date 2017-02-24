@@ -15,8 +15,6 @@ public class main {
 
     public static OptionsHost.Options options = null;
 
-    public static ExecEnvironment globalStaticEnv = null;
-
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         System.setProperty("file.encoding", "utf-8");
@@ -27,7 +25,7 @@ public class main {
         }
 
         Eugine e = new Eugine();
-        globalStaticEnv = e.environment;
+        ExecEnvironment.globalStaticEnv = e.environment;
 
         for (String cn : options.imports) {
             Utils.loadExportables(cn);
@@ -45,7 +43,7 @@ public class main {
         if (options.source != null) {
             try {
                 // Thread.sleep(10000);
-                Utils.print(Parser.executeFile(args[0], globalStaticEnv).toString());
+                Utils.print(Parser.executeFile(args[0], ExecEnvironment.globalStaticEnv).toString());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

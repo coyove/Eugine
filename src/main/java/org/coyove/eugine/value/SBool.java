@@ -10,10 +10,6 @@ public class SBool extends SValue {
         super(list);
     }
 
-    public SBool(Boolean list, boolean imm) {
-        super(list, imm);
-    }
-
     @Override
     public SValue clone() {
         return this;
@@ -21,6 +17,11 @@ public class SBool extends SValue {
 
     @Override
     public String toString() {
-        return ((Boolean) underlying) ? "Bool = True" : "Bool = False";
+        return ((Boolean) underlying) ? "bool = true" : "bool = false";
+    }
+
+    @Override
+    public String asString() {
+        return ((Boolean) underlying) ? "true" : "false";
     }
 }

@@ -1,104 +1,80 @@
 import util
-// // // import ifc
+// // import ifc
 
-// // Log.info("begin")
-// // // var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
-// // // Log.info(len(model.objects))
+// Log.info("begin")
+// // var model = Ifc.read("C:/Users/coyove/Dropbox/ifc/main.ifc")
+// // Log.info(len(model.objects))
 
-// // // // model.walk((obj) => 
-// // // //     if Ifc.isRelGroup(obj) {
-// // // //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
+// // // model.walk((obj) => 
+// // //     if Ifc.isRelGroup(obj) {
+// // //         println((var g = obj.get<RelatingGroup>).get<Name> + ":", typeof g.nativeObject)
 
-// // // //         for obj.get<RelatedObjects> do (robj, i) =>
-// // // //             println("  ", i, ": ", robj.get<Name>)
-// // // //     })
+// // //         for obj.get<RelatedObjects> do (robj, i) =>
+// // //             println("  ", i, ": ", robj.get<Name>)
+// // //     })
 
-// // // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
-// // def curry(a, b, c) => a + b + c
+// // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
 
-// // var zzz  =curry(1)
-// // var zzz2  =zzz(2)
-// // println(zzz2(1))
-// // println(zzz2(2))
-// // println(zzz(10, 2))
-// // println(curry(2, 10)(3))
+debug.start()
 
-// // def add(args...) => if len(args) == 2 args[0] + args[1] else {
-// //     var b = args[1..]
-// //     args[0] + add(b...)
-// // }
+;;
+(() => {
+    def struct complex(r, i) => {
+        var this.real = r, this.image = i
 
-// // println(add(1, 2))
-// // println(add(1, 2, 10))
+        def operator this.add(lhs, rhs) => complex(lhs.real + rhs.real, lhs.image + rhs.image)
 
-// // Meta.set(add, 0, @println(args))
-// // println(add(1, 2, 10, 90))
+        def operator this.tostring(self) => str(self.real) + " + " + self.image + "i"
+    }
 
-// // def foo(a,b)=>println(a)
-// // foo(1, 2)
+    var c1 = complex(10, 2.0)
+    var c2 = complex(2, 1.0 / 5)
+    debug.assert(str(c1 + c2) == "12 + 2.2i", "Complex Number Test")
+})()
 
-// // Meta.get(foo, 0).arguments = [@b ]
-// // foo(1, 2)
+;;
+(() => {
+    debug.assert(true == true && false == false && true != false &&
+        !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
+        1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
+        -1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1, "Basic Comparisons")
 
-// // for Meta.body(Debug) do (expr) => 
-// //     if typeof(expr.varValue) == "core.PLambda" &&
-// //         typeof(expr.varValue.body[0]) == "library.SEPrint" {
-// //     Log.info(expr.varValue.body[0].arguments)
-// // }
+    debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
+        1 + 2 * 3 == 7 && 1 + 0.1 == 1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
+        10 * 0.2 == 0 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
+        10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
 
-// // Log.info("end")
+    debug.assert(Utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
+        Utils.deepCompareList([1,2, 3], [1,2,3]) && 
+        !Utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
+})()
 
-// // def struct complex(r, i) => {
-// //     var this.real = r
-// //     var this.image = i
+;;
+(() => {
+    def fibonacci (n) =>
+        if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
+    debug.assert(Utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
 
-// //     def operator add(left, right) => @ret(complex(left.real, left.image)) {
-// //         ret.real += right.real
-// //         ret.image += right.image
-// //     }
+    def numSeqSum (n, sum) =>
+        if n == 0 {sum} else numSeqSum(n -1,sum+n)
+    debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
+})()
 
-// //     def operator tostring(this) => str(this.real) + "+" + this.image + "i"
-// // }
+;;
+(() => {
+    var l = [1, 2, 3, ["a", "b"]]
+    l[3][1] = l[2]
+    debug.assert(Utils.deepCompareList(l, [1, 2, 3, ["a", 3]]), "List op 1")
+})()
 
-// // var a = complex(0.0, 0.0)
-// // for 0..2000 do (i) => 
-// //     for 0..2000 do (j) => 
-// //         a += complex(i, j)
-
-// // Log.info(a)
-// // exit()
-
-Debug.start()
+debug.summary()
+exit()
 // for 0..10000000 do () => {
 // 	var a = 1
 // 	var b = 1.0 / 4.5 + 2 / a * 4 - a
 // }
 
 // println(b)
-// Debug.assert(true == true && false == false && true != false &&
-//  !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
-//  1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
-//  -1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1 &&
-//  null == null && 1 != null && "a" == "a" && "abcdef" == "abcdef" &&
-//  "a" != "b" && "" != null && "" != 0 && "" != [] && 0 != [] &&
-//  __integer_max__ == __integer_max__ && __integer_min__ == __integer_min__, "Basic Comparisons")
-
-// Debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
-//  1 + 2 * 3 == 7 && 1 + 0.1 == 1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
-//  10 * 0.2 == 0 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
-//  10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
-
-// Debug.assert(Utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
-//  Utils.deepCompareList([1,2, 3], [1,2,3]) && 
-//  !Utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
-
-// def fibonacci (n) =>
-//  if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
-// Debug.assert(Utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
-
-// def numSeqSum (n, sum) =>
-//  if n == 0 {sum} else numSeqSum(n -1,sum+n)
-// Debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
 
 let N = 1600
 let Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0) // 79462469 , 4295b0b8 
@@ -168,14 +144,5 @@ for threads do (t) => wait(t)
 // worker()
 
 Pbm.write("test.pbm", N, N, out)
-
-// def fib(n) => {
-//     if n < 2
-//         n
-//     else
-//         fib(n - 2) + fib(n - 1)
-// }
-
-// print(fib(35))
 
 Debug.summary()

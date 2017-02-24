@@ -13,21 +13,9 @@ public class SInt extends SValue {
         value = Integer.valueOf(v);
     }
 
-    public SInt(String v, boolean imm) {
-        super();
-        value = Integer.valueOf(v);
-        immutable = imm;
-    }
-
     public SInt(int num) {
         super();
         value = num;
-    }
-
-    public SInt(int num, boolean imm) {
-        super();
-        value = num;
-        immutable = imm;
     }
 
     @Override
@@ -49,6 +37,11 @@ public class SInt extends SValue {
 
     @Override
     public String toString() {
-        return "Int = " + value;
+        return "int = " + value;
+    }
+
+    @Override
+    public String asString() {
+        return "" + value;
     }
 }

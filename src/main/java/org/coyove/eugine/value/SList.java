@@ -13,10 +13,6 @@ public class SList extends SValue {
         super(list);
     }
 
-    public SList(ListEx<SValue> list, boolean imm) {
-        super(list, imm);
-    }
-
     @Override
     public SValue clone() {
         ListEx<SValue> origin = this.get();
@@ -32,7 +28,7 @@ public class SList extends SValue {
     }
 
     @Override
-    public String toString() {
+    public String asString() {
         ListEx<SValue> list = this.get();
         String[] items = new String[list.size()];
         int i = 0;
@@ -40,6 +36,11 @@ public class SList extends SValue {
             items[i++] = s.toString();
         }
 
-        return "List = [" + StringUtils.join(items, ", ") + "]";
+        return "[" + StringUtils.join(items, ", ") + "]";
+    }
+
+    @Override
+    public String toString() {
+        return "list = " + asString();
     }
 }

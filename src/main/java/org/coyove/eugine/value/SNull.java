@@ -11,10 +11,6 @@ public class SNull extends SValue {
         super(null);
     }
 
-    public SNull(boolean imm) {
-        super(null, imm);
-    }
-
     @Override
     public SValue clone() {
         return ExecEnvironment.Null;
@@ -22,6 +18,11 @@ public class SNull extends SValue {
 
     @Override
     public String toString() {
-        return "Null = Null";
+        return "null = null";
+    }
+
+    @Override
+    public String asString() {
+        return "<null>";
     }
 }

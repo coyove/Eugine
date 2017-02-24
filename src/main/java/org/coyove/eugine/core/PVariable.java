@@ -26,6 +26,10 @@ public class PVariable extends SExpression {
     public PVariable(Atom ha, String n) {
         atom = ha;
         name = n;
+
+        if (n == null || n.isEmpty()) {
+            ErrorHandler.print(9091, "invalid variable name", ha);
+        }
     }
 
     @Override
@@ -38,24 +42,12 @@ public class PVariable extends SExpression {
 
     @Override
     public SExpression deepClone() {
-        if (isShared) {
-            SExpression existed = SEDuplicate.sharedPVariables.get(System.identityHashCode(this));
-            if (existed != null) {
-                return existed;
-            }
-        }
-
         PVariable ret = new PVariable();
         ret.atom = this.atom;
         ret.name = this.name;
         ret.isShared = this.isShared;
-
-        if (isShared) {
-            if (this.shared != null) {
-                ret.shared = this.shared.clone();
-            }
-
-            SEDuplicate.sharedPVariables.put(System.identityHashCode(this), ret);
+        if (this.shared != null) {
+            ret.shared = this.shared.clone();
         }
 
         return ret;

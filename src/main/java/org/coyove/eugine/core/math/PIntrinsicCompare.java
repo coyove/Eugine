@@ -52,9 +52,7 @@ public class PIntrinsicCompare extends SExpression {
                 value = EgCast.toLong((SValue) l, ha);
                 subject = r;
                 inv = true;
-            }
-
-            if (r instanceof SInt || r instanceof SLong) {
+            } else if (r instanceof SInt || r instanceof SLong) {
                 value = EgCast.toLong((SValue) r, ha);
                 subject = l;
             }

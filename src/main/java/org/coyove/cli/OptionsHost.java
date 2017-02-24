@@ -2,6 +2,7 @@ package org.coyove.cli;
 
 import org.coyove.eugine.antlr.EugineImportListener;
 import org.coyove.eugine.parser.Parser;
+import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.ListEx;
 import org.coyove.eugine.util.Utils;
 import sun.misc.Signal;
@@ -74,7 +75,7 @@ public class OptionsHost {
                 } else {
                     Utils.print("Reload packages");
                     for (String path : EugineImportListener.reloadablePackages) {
-                        Parser.executeFile(path, main.globalStaticEnv);
+                        Parser.executeFile(path, ExecEnvironment.globalStaticEnv);
                     }
                 }
             }

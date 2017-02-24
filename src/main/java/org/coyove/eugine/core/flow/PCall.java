@@ -21,8 +21,6 @@ public class PCall extends SExpression {
     @ReplaceableVariables
     private ListEx<SExpression> arguments;
 
-    private boolean expanded = false;
-
     private final static byte CONTINUE = 0;
     private final static byte TAIL_CALL = 1;
     private final static byte FALSE_NULL = 2;
@@ -136,14 +134,6 @@ public class PCall extends SExpression {
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        if (expanded) {
-            SValue ret = ExecEnvironment.Null;
-            for (SExpression argument : arguments) {
-                ret = argument.evaluate(env);
-            }
-            return ret;
-        }
-
         SValue _closure = called.evaluate(env);
         if (!(_closure instanceof SClosure)) {
             throw new EgException(7031, "invalid calling closure: " + _closure, atom);
@@ -151,52 +141,21 @@ public class PCall extends SExpression {
 
         SClosure closure = (SClosure) _closure;
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);
+        return evaluateClosure(atom, closure, arguments, env);
+    }
 
-        // Inline: expand the inline code to upper level
-//        if ((closure.type & SClosure.INLINE) > 0 &&
-//                this.arguments.size() >= closure.argNames.size()) {
-//            expanded = true;
-//            ListEx<SExpression> body = ListEx.deepClone(closure.body);
-//            if (closure.argNames.size() > 0) {
-//                if (closure.argNames.last().endsWith("...")) {
-//                    String varargName = closure.argNames.last();
-//                    varargName = varargName.substring(0, varargName.length() - 3);
-//
-//                    ListEx<String> argNames = new ListEx<String>();
-//                    for (int i = 0; i < closure.argNames.size() - 1; i++) {
-//                        argNames.add(closure.argNames.get(i));
-//                    }
-//
-//                    PList vararg = new PList(atom);
-//                    for (int i = closure.argNames.size() - 1; i < this.arguments.size(); i++) {
-//                        vararg.values.add(this.arguments.get(i));
-//                    }
-//
-//                    PSet tmp = new PSet(atom, new SString(varargName), vararg, PSet.VAR);
-//
-//                    for (SExpression b : body) {
-//                        Utils.replaceVariables(b, new Utils.ExprReplacer(argNames, this.arguments));
-//                    }
-//
-//                    body.add(0, tmp);
-//                } else {
-//                    for (SExpression b : body) {
-//                        Utils.replaceVariables(b, closure.argNames, this.arguments);
-//                    }
-//                }
-//            }
-//
-//            this.arguments = body;
-//        }
-
-        SClosure returnAsStruct = null;
-        if ((closure.type & SClosure.STRUCT) > 0) {
-            closure = closure.getCopy();
-            returnAsStruct = closure;
-        }
+    public static SValue evaluateClosure
+            (Atom atom, SClosure closure, ListEx<SValue> arguments, ExecEnvironment env)
+            throws EgException {
 
         Execute_Next_Closure:
         while (true) {
+            SClosure returnAsStruct = null;
+            if ((closure.type & SClosure.STRUCT) > 0) {
+                closure = closure.getCopy();
+                returnAsStruct = closure;
+            }
+
             // Curry
             if (closure.argNames.size() > arguments.size()) {
                 ListEx<String> argNames = closure.argNames.skip(arguments.size());
@@ -260,16 +219,13 @@ public class PCall extends SExpression {
             }
 
             // Execute the closure body
-            if ((closure.type & SClosure.COROUTINE) > 0) {
-                return execCoroutine(closure, newEnv);
-            } else {
-                SValue ret = ExecEnvironment.Null;
+            SValue ret = ExecEnvironment.Null;
 
-                for (int i = 0; i < closure.body.size(); i++) {
-                    SExpression se = closure.body.get(i);
+            for (int i = 0; i < closure.body.size(); i++) {
+                SExpression se = closure.body.get(i);
 
-                    // TCO
-                    if (i == closure.body.size() - 1) {
+                // TCO
+                if (i == closure.body.size() - 1) {
 //                        Triple<SClosure, ListEx<SValue>, Byte> tail = getContinue(se, newEnv);
 //                        if (tail.getRight() == TAIL_CALL) {
 //                            closure = tail.getLeft();
@@ -279,72 +235,71 @@ public class PCall extends SExpression {
 //                        } else if (tail.getRight() == FALSE_NULL) {
 //                            return ExecEnvironment.Null;
 //                        }
-                        if (se instanceof PCall) {
-                            PCall call = (PCall) se;
-                            SValue cls_ = call.called.evaluate(newEnv);
+                    if (se instanceof PCall) {
+                        PCall call = (PCall) se;
+                        SValue cls_ = call.called.evaluate(newEnv);
 
-                            if (cls_ instanceof SClosure) {
-                                closure = (SClosure) cls_;
-                                arguments = SExpression.eval(call.arguments, newEnv, atom);
-                                continue Execute_Next_Closure;
-                            }
-                        } else if (se instanceof PIf) {
-                            PIf iif = (PIf) se;
-
-                            if (iif.evaluateCondition(newEnv)) {
-                                arguments = new ListEx<SValue>();
-                                closure = new SClosure(newEnv, iif.trueBranch);
-                                continue Execute_Next_Closure;
-                            } else if (iif.falseBranch != null) {
-                                arguments = new ListEx<SValue>();
-                                closure = new SClosure(newEnv, iif.falseBranch);
-                                continue Execute_Next_Closure;
-                            } else {
-                                return ExecEnvironment.Null;
-                            }
-                        } else if (se instanceof PSwitch) {
-                            PSwitch cond = (PSwitch) se;
-                            SValue tester = cond.condition.evaluate(newEnv);
-                            boolean flag = false;
-                            arguments = new ListEx<SValue>();
-
-                            for (Branch b : cond.branches) {
-                                if (b.recv.evaluate(newEnv).equals(tester)) {
-                                    closure = new SClosure(newEnv, b.body);
-                                    flag = true;
-                                    break;
-                                }
-                            }
-
-                            if (!flag) {
-                                if (cond.defaultBranch != null) {
-                                    closure = new SClosure(newEnv, cond.defaultBranch.body);
-                                } else {
-                                    return ExecEnvironment.Null;
-                                }
-                            }
-
+                        if (cls_ instanceof SClosure) {
+                            closure = (SClosure) cls_;
+                            arguments = SExpression.eval(call.arguments, newEnv, atom);
                             continue Execute_Next_Closure;
-                        } else if (se instanceof PChain) {
-                            PChain chain = (PChain) se;
-                            if (chain.expressions.size() > 0) {
-                                arguments = new ListEx<SValue>();
-                                closure = new SClosure(newEnv, chain.expressions);
-                                continue Execute_Next_Closure;
+                        }
+                    } else if (se instanceof PIf) {
+                        PIf iif = (PIf) se;
+
+                        if (iif.evaluateCondition(newEnv)) {
+                            arguments = new ListEx<SValue>();
+                            closure = new SClosure(newEnv, iif.trueBranch);
+                            continue Execute_Next_Closure;
+                        } else if (iif.falseBranch != null) {
+                            arguments = new ListEx<SValue>();
+                            closure = new SClosure(newEnv, iif.falseBranch);
+                            continue Execute_Next_Closure;
+                        } else {
+                            return ExecEnvironment.Null;
+                        }
+                    } else if (se instanceof PSwitch) {
+                        PSwitch cond = (PSwitch) se;
+                        SValue tester = cond.condition.evaluate(newEnv);
+                        boolean flag = false;
+                        arguments = new ListEx<SValue>();
+
+                        for (Branch b : cond.branches) {
+                            if (b.recv.evaluate(newEnv).equals(tester)) {
+                                closure = new SClosure(newEnv, b.body);
+                                flag = true;
+                                break;
+                            }
+                        }
+
+                        if (!flag) {
+                            if (cond.defaultBranch != null) {
+                                closure = new SClosure(newEnv, cond.defaultBranch.body);
                             } else {
                                 return ExecEnvironment.Null;
                             }
                         }
+
+                        continue Execute_Next_Closure;
+                    } else if (se instanceof PChain) {
+                        PChain chain = (PChain) se;
+                        if (chain.expressions.size() > 0) {
+                            arguments = new ListEx<SValue>();
+                            closure = new SClosure(newEnv, chain.expressions);
+                            continue Execute_Next_Closure;
+                        } else {
+                            return ExecEnvironment.Null;
+                        }
                     }
-
-                    ret = se.evaluate(newEnv);
                 }
 
-                if (returnAsStruct != null) {
-                    return returnAsStruct;
-                } else {
-                    return ret;
-                }
+                ret = se.evaluate(newEnv);
+            }
+
+            if (returnAsStruct != null) {
+                return returnAsStruct;
+            } else {
+                return ret;
             }
         }
         // End of while
@@ -385,7 +340,6 @@ public class PCall extends SExpression {
         PCall ret = new PCall();
         ret.atom = this.atom;
         ret.arguments = ListEx.deepClone(this.arguments);
-        ret.expanded = this.expanded;
         ret.called = this.called.deepClone();
 
         return ret;

@@ -26,6 +26,11 @@ public class SMetaExpression extends SValue {
 
     @Override
     public String toString() {
-        return "Meta = " + getSimpleName();
+        return "meta = " + getSimpleName();
+    }
+
+    @Override
+    public String asString() {
+        return "";
     }
 }

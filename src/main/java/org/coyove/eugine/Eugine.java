@@ -14,15 +14,15 @@ import java.nio.file.Paths;
  */
 public class Eugine implements Serializable {
     public ExecEnvironment environment = new ExecEnvironment() {{
-        put("__comparator__", new SString("__comparator__", true));
-        put("__doc__", new SString("__doc__", true));
-        put("__version__", new SString(main.VERSION, true));
-        put("__integer_max__", new SInt(Integer.MAX_VALUE, true));
-        put("__integer_min__", new SInt(Integer.MIN_VALUE, true));
-        put("__long_max__", new SLong(Long.MAX_VALUE, true));
-        put("__long_min__", new SLong(Long.MIN_VALUE, true));
-        put("__double_max__", new SDouble(Double.MAX_VALUE, true));
-        put("__double_min__", new SDouble(Double.MIN_VALUE, true));
+        put("__comparator__", new SString("__comparator__"));
+        put("__doc__", new SString("__doc__"));
+        put("__version__", new SString(main.VERSION));
+        put("__integer_max__", new SInt(Integer.MAX_VALUE));
+        put("__integer_min__", new SInt(Integer.MIN_VALUE));
+        put("__long_max__", new SLong(Long.MAX_VALUE));
+        put("__long_min__", new SLong(Long.MIN_VALUE));
+        put("__double_max__", new SDouble(Double.MAX_VALUE));
+        put("__double_min__", new SDouble(Double.MIN_VALUE));
     }};
 
     public Object execute(SExpression sExpr) throws Exception {

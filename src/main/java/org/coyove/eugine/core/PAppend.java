@@ -49,10 +49,6 @@ public class PAppend extends SExpression {
 
         if (left instanceof SList) {
             ListEx<SValue> list = left.get();
-            if (left.immutable) {
-                throw new EgException(2101, "list is immutable", atom);
-            }
-
             list.add(right);
             return left;
         }

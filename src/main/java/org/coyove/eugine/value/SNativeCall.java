@@ -37,6 +37,11 @@ public class SNativeCall extends SClosure {
 
     @Override
     public String toString() {
-        return "Native = " + underlying.toString();
+        return "native = " + underlying.toString();
+    }
+
+    @Override
+    public String asString() {
+        return "";
     }
 }

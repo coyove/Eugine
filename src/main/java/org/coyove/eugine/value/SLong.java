@@ -13,21 +13,9 @@ public class SLong extends SValue {
         value = Long.valueOf(v);
     }
 
-    public SLong(String v, boolean imm) {
-        super();
-        value = Long.valueOf(v);
-        immutable = imm;
-    }
-
     public SLong(long num) {
         super();
         value = num;
-    }
-
-    public SLong(long num, boolean imm) {
-        super();
-        value = num;
-        immutable = imm;
     }
 
     @Override
@@ -49,6 +37,11 @@ public class SLong extends SValue {
 
     @Override
     public String toString() {
-        return "Long = " + value;
+        return "long = " + value;
+    }
+
+    @Override
+    public String asString() {
+        return "" + value;
     }
 }

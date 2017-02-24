@@ -16,4 +16,9 @@ public class SYielded extends SValue {
         SValue.copyAttributes(ret, this);
         return ret;
     }
+
+    @Override
+    public String asString() {
+        return null;
+    }
 }

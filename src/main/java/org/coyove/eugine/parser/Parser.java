@@ -57,6 +57,7 @@ public class Parser {
             parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
             pc = parser.prog();
         } catch (ParseCancellationException e) {
+            Utils.print("Fallback to LL mode", pad + 2);
             parser.reset();
             parser.setErrorHandler(new DefaultErrorStrategy());
             parser.getInterpreter().setPredictionMode(PredictionMode.LL);

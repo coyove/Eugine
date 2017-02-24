@@ -1,7 +1,6 @@
 package org.coyove.ifc;
 
 import org.antlr.v4.runtime.Token;
-import org.coyove.cli.main;
 import org.coyove.eugine.base.NativeCallInterface;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SKeywords;
@@ -40,7 +39,7 @@ public class EgExport implements Exportable {
         final ModelOp Ifc_isRelGroup = new ModelOp();
         Ifc_isRelGroup.op = ModelOp.IS_RELATION_GROUP;
 
-        main.globalStaticEnv.put("Ifc", new SDict(new HashMap<String, SValue>() {{
+        ExecEnvironment.globalStaticEnv.put("Ifc", new SDict(new HashMap<String, SValue>() {{
             put("isRelGroup", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
                         throws EgException {

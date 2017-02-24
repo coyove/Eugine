@@ -113,18 +113,24 @@ public class SClosure extends SValue {
     @Override
     @SuppressWarnings("unchecked")
     public String toString() {
+        return "closure = (" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
+                body.size() + "}";
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public String asString() {
         SValue ts = this.extra.get("__tostring__");
         if (ts instanceof SClosure) {
             try {
-                SValue ret = (new PCall(atom, ts, ListEx.build(this))).evaluate(outerEnv);
-                return ret.toString();
+                SValue ret = PCall.evaluateClosure(atom, ((SClosure) ts), ListEx.build(this), outerEnv);
+                return ret.asString();
             } catch (EgException e) {
                 ErrorHandler.print(e);
                 return null;
             }
         } else {
-            return "Closure = (" + StringUtils.join(argNames.toArray(), ",") + ") => {" +
-                    body.size() + "}";
+            return "";
         }
     }
 }

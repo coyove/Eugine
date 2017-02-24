@@ -40,17 +40,11 @@ public class PGet extends SExpression {
             }
 
             HashMap<String, SValue> d = dict.get();
-
             SValue dk = d.get(k);
             if (dk == null) {
                 d.put(k, ExecEnvironment.Null);
                 dk = new SNull();
-            } else {
-                dk = Utils.denormalize(dk);
             }
-
-            dk.refer = EgCast.to(dict, SDict.class);
-            dk.refKey = k;
 
             return dk;
         } else if (dict instanceof SList) {
@@ -61,12 +55,7 @@ public class PGet extends SExpression {
                 throw new EgException(2021, "index out of range", atom);
             }
 
-            SValue li = Utils.denormalize(l.get(idx));
-
-            li.refer = EgCast.to(dict, SList.class);
-            li.refIndex = idx;
-
-            return li;
+            return l.get(idx);
         } else if (dict instanceof SString) {
             String str = dict.get();
             int idx = EgCast.toInt(sk, atom);
@@ -94,26 +83,16 @@ public class PGet extends SExpression {
                 if (ret == null) {
                     SValue getter = ((SClosure) dict).extra.get("__get__" + k);
                     if (getter == null) {
-//                        SValue indexer = ((SClosure) dict).extra.get("__getindex__");
-//                        if (indexer == null) {
                         ret = new SNull();
-                        ret.refKey = k;
-//                        } else {
-//                            ret = (new PCall(atom, indexer, ListEx.build(sk))).evaluate(env);
-//                            ret.refKey = ((SClosure) dict).extra.get("__setindex__" + k);
-//                        }
                     } else if (getter instanceof SClosure) {
-                        ret = (new PCall(atom, getter, new ListEx<SExpression>())).evaluate(env);
-                        ret.refKey = ((SClosure) dict).extra.get("__set__" + k);
+                        ret = PCall.evaluateClosure(atom, ((SClosure) getter), new ListEx<SValue>(), env);
                     } else {
                         throw new EgException(8456, "invalid getter", atom);
                     }
                 } else {
                     ret = Utils.denormalize(ret);
-                    ret.refKey = k;
                 }
 
-                ret.refer = dict;
                 return ret;
             }
         } else if (dict.underlying instanceof byte[]) {
@@ -124,12 +103,7 @@ public class PGet extends SExpression {
 
             try {
                 Object obj = dict.get();
-
-                SValue n = EgInterop.getField(obj, field);
-                n.refer = dict;
-                n.refKey = field;
-
-                return n;
+                return EgInterop.getField(obj, field);
             } catch (EgException e) {
                 throw e;
             }

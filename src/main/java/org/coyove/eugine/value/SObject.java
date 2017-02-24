@@ -10,10 +10,6 @@ public class SObject extends SValue {
         super(obj);
     }
 
-    public SObject(Object obj, boolean imm) {
-        super(obj, imm);
-    }
-
     @Override
     public SValue clone()
     {
@@ -24,6 +20,11 @@ public class SObject extends SValue {
 
     @Override
     public String toString() {
-        return "Object = " + underlying.toString();
+        return "object = " + underlying.toString();
+    }
+
+    @Override
+    public String asString() {
+        return underlying.toString();
     }
 }
