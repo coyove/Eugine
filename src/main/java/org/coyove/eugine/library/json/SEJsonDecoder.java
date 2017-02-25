@@ -42,11 +42,11 @@ public class SEJsonDecoder extends SExpression {
             }
             return new SList(ret);
         } else if (root instanceof Integer) {
-            return new SInt((Integer) root);
+            return new SNumber((Integer) root);
         } else if (root instanceof Long) {
-            return new SLong((Long) root);
+            return new SNumber((Long) root);
         } else if (root instanceof Double) {
-            return new SDouble((Double) root);
+            return new SNumber((Double) root);
         } else if (root instanceof String) {
             return new SString((String) root);
         } else if (root instanceof Boolean) {

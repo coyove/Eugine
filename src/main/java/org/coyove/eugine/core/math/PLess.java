@@ -28,23 +28,8 @@ public class PLess extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue left = this.left.evaluate(env);
         SValue right = this.right.evaluate(env);
-        boolean ret;
-
-        if (left instanceof SDouble) {
-            ret = ((SDouble) left).val() < EgCast.toDouble(right, atom);
-        } else if (left instanceof SInt) {
-            if (right instanceof SInt) {
-                ret = ((SInt) left).val() < ((SInt) right).val();
-            } else {
-                ret = ((SInt) left).val() < EgCast.toLong(right, atom);
-            }
-        } else if (left instanceof SLong) {
-            ret = ((SLong) left).val() < EgCast.toLong(right, atom);
-        } else {
-            throw new EgException(7056, left + " is not a number", atom);
-        }
-
-        return ret ? ExecEnvironment.True : ExecEnvironment.False;
+        return EgCast.toDouble(left, atom) < EgCast.toDouble(right, atom) ?
+                ExecEnvironment.True : ExecEnvironment.False;
     }
 
     @Override

@@ -57,36 +57,36 @@ public class SEMath extends SExpression {
 
         switch (func) {
             case SIN:
-                return new SDouble(Math.sin(n));
+                return new SNumber(Math.sin(n));
             case COS:
-                return new SDouble(Math.cos(n));
+                return new SNumber(Math.cos(n));
             case TAN:
-                return new SDouble(Math.tan(n));
+                return new SNumber(Math.tan(n));
             case ASIN:
-                return new SDouble(Math.asin(n));
+                return new SNumber(Math.asin(n));
             case ACOS:
-                return new SDouble(Math.acos(n));
+                return new SNumber(Math.acos(n));
             case ATAN:
-                return new SDouble(Math.atan(n));
+                return new SNumber(Math.atan(n));
             case ROUND:
-                return new SLong(Math.round(n));
+                return new SNumber(Math.round(n));
             case FLOOR:
-                return new SLong((long) Math.floor(n));
+                return new SNumber(Math.floor(n));
             case ABS:
-                return new SDouble(Math.abs(n));
+                return new SNumber(Math.abs(n));
             case SGN:
-                return new SLong((long) Math.signum(n));
+                return new SNumber(Math.signum(n));
             case SQRT:
-                return new SDouble(Math.sqrt(n));
+                return new SNumber(Math.sqrt(n));
             case POW:
                 double p = EgCast.toDouble(argument2.evaluate(env), atom);
-                return new SDouble(Math.pow(n, p));
+                return new SNumber(Math.pow(n, p));
             case RANDOM:
                 if (n != 0) {
                     Random rand = new Random((long) n);
-                    return new SDouble(rand.nextDouble());
+                    return new SNumber(rand.nextDouble());
                 } else {
-                    return new SDouble(defaultRandom.nextDouble());
+                    return new SNumber(defaultRandom.nextDouble());
                 }
             default:
                 throw new EgException(3007, "not implemented", atom);

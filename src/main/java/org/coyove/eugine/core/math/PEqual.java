@@ -31,7 +31,7 @@ public class PEqual extends SExpression {
 
         boolean flag;
         if (left instanceof SMetaExpression && right instanceof SMetaExpression) {
-            flag = left.underlying.getClass().equals(right.underlying.getClass());
+            flag = left.get().getClass().equals(right.get().getClass());
         } else {
             flag = left.equals(right);
         }

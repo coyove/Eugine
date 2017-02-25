@@ -35,17 +35,17 @@ public class EgInterop {
         } else if (value instanceof String) {
             return new SString((String) value);
         } else if (value instanceof Double) {
-            return new SDouble((Double) value);
+            return new SNumber((Double) value);
         } else if (value instanceof Long) {
-            return new SLong((Long) value);
+            return new SNumber((Long) value);
         } else if (value instanceof Integer) {
-            return new SInt((Integer) value);
+            return new SNumber((Integer) value);
         } else if (value instanceof Byte) {
-            return new SInt((Byte) value);
+            return new SNumber((Byte) value);
         } else if (value instanceof Character) {
-            return new SInt((Character) value);
+            return new SNumber((Character) value);
         } else if (value instanceof Short) {
-            return new SInt((Short) value);
+            return new SNumber((Short) value);
         } else if (value instanceof Boolean) {
             return (Boolean) value ? ExecEnvironment.True : ExecEnvironment.False;
         } else if (value.getClass().isArray()) {
@@ -79,10 +79,9 @@ public class EgInterop {
     }
 
     public static Object castSValue(SValue obj, Class c) {
-        if (obj instanceof SDouble || obj instanceof SLong) {
-            BigDecimal num = new BigDecimal(obj instanceof SDouble ?
-                    ((SDouble) obj).val() : ((SLong) obj).val()
-            );
+        if (obj instanceof SNumber) {
+            BigDecimal num = new BigDecimal(((SNumber) obj).isInteger() ?
+                    ((SNumber) obj).longValue() : ((SNumber) obj).doubleValue());
 
             if (c == int.class) {
                 return (num.intValue());
@@ -146,16 +145,15 @@ public class EgInterop {
                 if (clsName.isEmpty()) {
                     if (value instanceof SString) {
                         c = ClassUtils.getClass("java.lang.String");
-                    } else if (value instanceof SInt) {
-                        c = ClassUtils.getClass("int");
-                    } else if (value instanceof SLong) {
-                        c = ClassUtils.getClass("long");
-                    } else if (value instanceof SDouble) {
-                        c = ClassUtils.getClass("double");
+                    } else if (value instanceof SNumber) {
+                        if (((SNumber) value).isInteger())
+                            c = ClassUtils.getClass("int");
+                        else
+                            c = ClassUtils.getClass("double");
                     } else if (value instanceof SBool) {
                         c = ClassUtils.getClass("boolean");
                     } else if (value instanceof SObject) {
-                        c = value.underlying.getClass();
+                        c = ((SObject) value).underlying.getClass();
                     } else {
                         throw new EgException("cannot guess the type");
                     }
@@ -228,7 +226,7 @@ public class EgInterop {
                     for (SValue expr : list) {
                         if (SExpression.class.equals(ct)) {
                             if (expr instanceof SMetaExpression) {
-                                exprs.add(expr.underlying);
+                                exprs.add(((SMetaExpression) expr).underlying);
                             } else {
                                 exprs.add(expr);
                             }
@@ -239,7 +237,7 @@ public class EgInterop {
 
                     f.set(obj, exprs);
                 } else if (value instanceof SMetaExpression) {
-                    f.set(obj, value.underlying);
+                    f.set(obj, ((SMetaExpression) value).underlying);
                 } else {
                     f.set(obj, value);
                 }

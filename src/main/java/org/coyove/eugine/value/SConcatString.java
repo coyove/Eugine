@@ -93,8 +93,12 @@ public class SConcatString extends SString {
         SConcatString ret = new SConcatString();
         ret.text = Arrays.copyOf(this.text, length);
         ret.length = this.length;
-        SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public SValue lightClone() {
+        return clone();
     }
 
     @Override

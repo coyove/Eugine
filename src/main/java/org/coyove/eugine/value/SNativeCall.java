@@ -36,6 +36,11 @@ public class SNativeCall extends SClosure {
     }
 
     @Override
+    public SValue lightClone() {
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "native = " + underlying.toString();
     }

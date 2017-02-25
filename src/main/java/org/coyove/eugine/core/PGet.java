@@ -33,7 +33,7 @@ public class PGet extends SExpression {
 
         if (dict instanceof SDict) {
             String k;
-            if (sk instanceof SString || sk instanceof SInt || sk instanceof SLong) {
+            if (sk instanceof SString || sk instanceof SNumber) {
                 k = sk.asString();
             } else {
                 throw new EgException(2019, "invalid key: " + sk, atom);
@@ -43,7 +43,7 @@ public class PGet extends SExpression {
             SValue dk = d.get(k);
             if (dk == null) {
                 d.put(k, ExecEnvironment.Null);
-                dk = new SNull();
+                dk = ExecEnvironment.Null;
             }
 
             return dk;
@@ -83,21 +83,23 @@ public class PGet extends SExpression {
                 if (ret == null) {
                     SValue getter = ((SClosure) dict).extra.get("__get__" + k);
                     if (getter == null) {
-                        ret = new SNull();
+                        ret = ExecEnvironment.Null;
                     } else if (getter instanceof SClosure) {
                         ret = PCall.evaluateClosure(atom, ((SClosure) getter), new ListEx<SValue>(), env);
                     } else {
                         throw new EgException(8456, "invalid getter", atom);
                     }
-                } else {
-                    ret = Utils.denormalize(ret);
+                }
+
+                if (ret instanceof SClosure) {
+                    ((SClosure) ret).refer = dict;
                 }
 
                 return ret;
             }
-        } else if (dict.underlying instanceof byte[]) {
-            byte[] buf = ((byte[]) dict.underlying);
-            return new SInt(buf[EgCast.toInt(sk, atom)]);
+        } else if (dict instanceof SBuffer) {
+            byte[] buf = dict.get();
+            return new SNumber(buf[EgCast.toInt(sk, atom)]);
         } else if (dict instanceof SObject || dict instanceof SMetaExpression) {
             String field = EgCast.toString(sk, atom);
 

@@ -116,35 +116,15 @@ public class SEListOp extends SExpression {
                     return listObj;
                 }
 
-                if (list.head() instanceof SLong) {
-                    ListEx<Long> arr = new ListEx<Long>(list.size());
-                    for (int i = 0; i < list.size(); i++) {
-                        arr.add(list.get(i).evaluate(env).<Long>get());
-                    }
-
-                    Collections.sort(arr);
-                    for (int i = 0; i < list.size(); i++) {
-                        list.set(i, new SLong(arr.get(i)));
-                    }
-                } else if (list.head() instanceof SDouble) {
+                if (list.head() instanceof SNumber) {
                     ListEx<Double> arr = new ListEx<Double>(list.size());
-                    for (int i = 0; i < list.size(); i++) {
-                        arr.add(list.get(i).evaluate(env).<Double>get());
+                    for (SValue aList : list) {
+                        arr.add(EgCast.toDouble(aList, atom));
                     }
 
                     Collections.sort(arr);
                     for (int i = 0; i < list.size(); i++) {
-                        list.set(i, new SDouble(arr.get(i)));
-                    }
-                } else if (list.head() instanceof SInt) {
-                    ListEx<Integer> arr = new ListEx<Integer>(list.size());
-                    for (int i = 0; i < list.size(); i++) {
-                        arr.add(list.get(i).evaluate(env).<Integer>get());
-                    }
-
-                    Collections.sort(arr);
-                    for (int i = 0; i < list.size(); i++) {
-                        list.set(i, new SInt(arr.get(i)));
+                        list.set(i, new SNumber(arr.get(i)));
                     }
                 } else if (list.head() instanceof SClosure) {
                     SClosure[] values = list.toArray(new SClosure[list.size()]);

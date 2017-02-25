@@ -46,14 +46,14 @@ public class SEEval extends SExpression {
         if (text instanceof SString) {
             return Parser.executeCode(text.<String>get(), env);
         } else if (text instanceof SMetaExpression) {
-            return ((SExpression) text.underlying).evaluate(env);
+            return ((SExpression) text.get()).evaluate(env);
         } else {
             if (text instanceof SList) {
                 ListEx<SValue> list = ((SList) text).get();
                 if (list.head() instanceof SMetaExpression) {
                     SValue ret = ExecEnvironment.Null;
                     for (SValue expr : list) {
-                        ret = ((SExpression) expr.underlying).evaluate(env);
+                        ret = ((SExpression) expr.get()).evaluate(env);
                     }
 
                     return ret;

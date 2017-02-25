@@ -21,7 +21,7 @@ public class SEWait extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        Object t = this.subject.evaluate(env).underlying;
+        Object t = this.subject.evaluate(env).get();
         if (t instanceof Thread) {
             try {
                 ((Thread) t).join();

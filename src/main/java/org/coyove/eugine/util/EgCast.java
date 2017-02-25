@@ -27,12 +27,8 @@ public class EgCast {
     }
 
     public static boolean toBoolean(SValue num, Atom headAtom) throws EgException {
-        if (num instanceof SLong) {
-            return ((SLong) num).val() != 0;
-        } else if (num instanceof SInt) {
-            return ((SInt) num).val() != 0;
-        } else if (num instanceof SDouble) {
-            return Math.abs(((SDouble) num).val()) > 1e-6;
+        if (num instanceof SNumber) {
+            return Math.abs(((SNumber) num).doubleValue()) >= 1e-15;
         } else if (num instanceof SBool) {
             return num.get();
         } else if (num instanceof SNull) {
@@ -45,46 +41,34 @@ public class EgCast {
     }
 
     public static double toDouble(SValue num, Atom headAtom) throws EgException {
-        double ret;
-
-        if (num instanceof SLong) {
-            ret = ((SLong) num).val();
-        } else if (num instanceof SDouble) {
-            ret = ((SDouble) num).val();
-        } else if (num instanceof SInt) {
-            ret = ((SInt) num).val();
+        if (num instanceof SNumber) {
+            return ((SNumber) num).doubleValue();
         } else {
-            throw new EgException(4007, num + " is not a double", headAtom);
+            throw new EgException(4007, num + " is not a number", headAtom);
         }
-
-        return ret;
     }
 
     public static long toLong(SValue num, Atom headAtom) throws EgException {
-        long ret;
-
-        if (num instanceof SLong) {
-            ret = ((SLong) num).val();
-        } else if (num instanceof SInt) {
-            ret = ((SInt) num).val();
-        } else if (num instanceof SDouble) {
-            ret = (long) ((SDouble) num).val();
+        if (num instanceof SNumber) {
+            return ((SNumber) num).longValue();
         } else {
-            throw new EgException(4007, num + " is not a long", headAtom);
+            throw new EgException(4007, num + " is not a number", headAtom);
         }
-
-        return ret;
     }
 
     public static int toInt(SValue num, Atom headAtom) throws EgException {
-        if (num instanceof SLong) {
-            return (int) ((SLong) num).val();
-        } else if (num instanceof SDouble) {
-            return (int) ((SDouble) num).val();
-        } else if (num instanceof SInt) {
-            return ((SInt) num).val();
+        if (num instanceof SNumber) {
+            return ((SNumber) num).intValue();
         } else {
-            throw new EgException(4007, num + " is not an integer", headAtom);
+            throw new EgException(4007, num + " is not a number", headAtom);
+        }
+    }
+
+    public static byte toByte(SValue num, Atom headAtom) throws EgException {
+        if (num instanceof SNumber) {
+            return ((SNumber) num).byteValue();
+        } else {
+            throw new EgException(4007, num + " is not a number", headAtom);
         }
     }
 

@@ -144,6 +144,7 @@ public class PCall extends SExpression {
         return evaluateClosure(atom, closure, arguments, env);
     }
 
+    @SuppressWarnings("unchecked")
     public static SValue evaluateClosure
             (Atom atom, SClosure closure, ListEx<SValue> arguments, ExecEnvironment env)
             throws EgException {
@@ -203,12 +204,11 @@ public class PCall extends SExpression {
                 newEnv = closure.outerEnv;
             } else {
                 newEnv = prepareEE(closure, arguments);
-//                newEnv.put("__parent__", new SCascadeDict(closure.outerEnv));
                 newEnv.put("__atom__", new SObject(atom));
 
                 if ((closure.type & SClosure.OPERATOR) == 0) {
                     if (closure.refer instanceof SClosure && (closure.type & SClosure.STRUCT) == 0) {
-                        newEnv.put("this", (SClosure) closure.refer);
+                        newEnv.put("this", closure.refer);
                         newEnv.put("__this__", closure);
                     } else {
                         newEnv.put("this", closure);
@@ -226,15 +226,6 @@ public class PCall extends SExpression {
 
                 // TCO
                 if (i == closure.body.size() - 1) {
-//                        Triple<SClosure, ListEx<SValue>, Byte> tail = getContinue(se, newEnv);
-//                        if (tail.getRight() == TAIL_CALL) {
-//                            closure = tail.getLeft();
-//                            arguments = tail.getMiddle();
-//
-//                            continue Execute_Next_Closure;
-//                        } else if (tail.getRight() == FALSE_NULL) {
-//                            return ExecEnvironment.Null;
-//                        }
                     if (se instanceof PCall) {
                         PCall call = (PCall) se;
                         SValue cls_ = call.called.evaluate(newEnv);
@@ -303,36 +294,6 @@ public class PCall extends SExpression {
             }
         }
         // End of while
-    }
-
-    private SValue execCoroutine(SClosure closure, ExecEnvironment env) throws EgException {
-        if (closure.coroutineState == SClosure.DEAD) {
-            throw new EgException(7062, "coroutine is dead", atom);
-        }
-
-        if (closure.coroutineState == SClosure.RUNNING) {
-
-        }
-
-        // First time
-        if (closure.dummyCoroutine == null) {
-            closure.dummyCoroutine = new PChain();
-            closure.dummyCoroutine.expressions = closure.body;
-        }
-
-        closure.coroutineState = SClosure.RUNNING;
-        SValue ret = closure.dummyCoroutine.evaluate(env);
-        closure.coroutineState = SClosure.SUSPENDED;
-
-        if (ret instanceof SYielded) {
-            return ((SValue) ret.underlying);
-        }
-
-        if (closure.dummyCoroutine.execToEnd) {
-            closure.coroutineState = SClosure.DEAD;
-        }
-
-        return ret;
     }
 
     @Override

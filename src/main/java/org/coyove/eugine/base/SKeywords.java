@@ -12,10 +12,7 @@ import org.coyove.eugine.library.meta.SEMeta;
 import org.coyove.eugine.library.string.*;
 import org.coyove.eugine.library.system.*;
 import org.coyove.eugine.parser.Atom;
-import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.ListEx;
-import org.coyove.eugine.value.SClosure;
-import org.coyove.eugine.value.SDict;
 
 import java.util.HashMap;
 
@@ -59,17 +56,17 @@ public class SKeywords {
     }
 
     public static KeywordMap Lookup = new KeywordMap() {{
-                put("System.exec", new CallableKeyword() {
+                put("sys.exec", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SECommand(new Atom(tok), arguments, false);
                     }
                 });
-                put("System.execa", new CallableKeyword() {
+                put("sys.execa", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SECommand(new Atom(tok), arguments, true);
                     }
                 });
-                put("System.dup", new CallableKeyword() {
+                put("sys.dup", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEDuplicate(new Atom(tok), arguments);
                     }
@@ -116,22 +113,7 @@ public class SKeywords {
                 });
                 put("num", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SENum(new Atom(tok), arguments, SENum.NUM);
-                    }
-                });
-                put("int", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SENum(new Atom(tok), arguments, SENum.INT);
-                    }
-                });
-                put("long", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SENum(new Atom(tok), arguments, SENum.LONG);
-                    }
-                });
-                put("double", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SENum(new Atom(tok), arguments, SENum.DOUBLE);
+                        return new SENum(new Atom(tok), arguments);
                     }
                 });
                 put("str", new CallableKeyword() {
@@ -309,19 +291,19 @@ public class SKeywords {
                         return new SEMath(new Atom(tok), c, SEMath.ROUND);
                     }
                 });
-                put("Math.floor", new CallableKeyword() {
+                put("math.floor", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.FLOOR);
                     }
                 });
-                put("Math.random", new CallableKeyword() {
+                put("math.random", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.RANDOM);
                     }
                 });
                 put("buffer", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEBytesBuffer(new Atom(tok), c);
+                        return new SEBuffer(new Atom(tok), c);
                     }
                 });
                 put("String.match", new CallableKeyword() {

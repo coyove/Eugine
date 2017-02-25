@@ -44,7 +44,7 @@ public class ModelOp extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         switch (op) {
             case GET_PARAM: {
-                Object obj = this.object.evaluate(env).underlying;
+                Object obj = this.object.evaluate(env).get();
                 String key = EgCast.toString(this.key.evaluate(env), this.atom);
                 return Model.getField(obj, key, env);
             }
@@ -52,9 +52,9 @@ public class ModelOp extends SExpression {
                 SValue tester = this.object.evaluate(env);
                 Object object;
                 if (tester instanceof SClosure) {
-                    object = ((SClosure) tester).extra.get("nativeObject").underlying;
+                    object = ((SClosure) tester).extra.get("nativeObject").get();
                 } else {
-                    object = tester.underlying;
+                    object = tester.get();
                 }
 
                 return object instanceof IfcRelAssignsToGroup ? ExecEnvironment.True : ExecEnvironment.False;

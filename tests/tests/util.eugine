@@ -6,7 +6,7 @@ def map (f, list) => {
 	list
 }
 
-(def Utils() => {
+(def utils() => {
 	def this.deepCompareList(list1, list2) =>
 		if len(list1) != len(list2) 
 			false

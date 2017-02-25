@@ -35,13 +35,13 @@ public class SEChar extends SExpression {
                     SString str = EgCast.to(arg, SString.class,
                             new EgException(3001, "invalid argument", atom));
 
-                    return new SInt(str.<String>get().charAt(0));
+                    return new SNumber(str.<String>get().charAt(0));
                 } catch (StringIndexOutOfBoundsException e) {
                     throw new EgException(3002, "string index out of range", atom);
                 }
             case CHR:
-                if (arg.underlying instanceof byte[]) {
-                    byte[] buf = ((byte[]) arg.underlying);
+                if (arg instanceof SBuffer) {
+                    byte[] buf = arg.get();
                     StringBuilder sb = new StringBuilder();
                     for (byte b : buf) {
                         sb.append((char) b);

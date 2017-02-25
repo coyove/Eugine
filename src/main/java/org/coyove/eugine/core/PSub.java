@@ -131,8 +131,8 @@ public class PSub extends SExpression {
             } else {
                 return new SList(subList.<ListEx<SValue>>get().sub(start, end));
             }
-        } else if (subObj.underlying instanceof byte[]) {
-            byte[] buf = (byte[]) subObj.underlying;
+        } else if (subObj instanceof SBuffer) {
+            byte[] buf = subObj.get();
             if (this.end == null) {
                 return new SObject(Arrays.copyOfRange(buf, start, buf.length));
             } else {

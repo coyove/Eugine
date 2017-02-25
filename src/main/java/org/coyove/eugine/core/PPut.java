@@ -38,12 +38,20 @@ public class PPut extends SExpression {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subject = this.subject.evaluate(env);
         SValue key = this.key.evaluate(env);
         SValue value = this.value.evaluate(env);
 
+        return put(atom, subject, key, value, env, decl);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static SValue put(
+            Atom atom,
+            SValue subject, SValue key, SValue value,
+            ExecEnvironment env,
+            byte decl) throws EgException {
         if (subject instanceof SString) {
             char c;
             if (value instanceof SString) {
@@ -55,7 +63,7 @@ public class PPut extends SExpression {
             ((SString) subject).setCharAt(EgCast.toInt(key, atom), c);
         } else if (subject instanceof SDict) {
             String k;
-            if (key instanceof SString || key instanceof SInt || key instanceof SLong) {
+            if (key instanceof SString || key instanceof SNumber) {
                 k = key.asString();
             } else {
                 throw new EgException(2019, "invalid key: " + key, atom);
@@ -65,25 +73,26 @@ public class PPut extends SExpression {
             subject.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value);
         } else if ((subject instanceof SObject || subject instanceof SMetaExpression) &&
                 key instanceof SString) {
-            Object sub = subject.underlying;
-            EgInterop.setField(sub, key.<String>get(), value);
+            EgInterop.setField(subject.get(), key.<String>get(), value);
         } else if (subject instanceof SClosure) {
-            if (key instanceof SString) {
-                String k = key.get();
-                ExecEnvironment extra = ((SClosure) subject).extra;
-                if (decl == VAR) {
-                    extra.bPut(k, value);
-                    env.bPut(k, value);
-                } else { // SET
-                    SValue setter = extra.get("__set__" + k);
-                    if (setter instanceof SClosure) {
-                        return PCall.evaluateClosure(atom, ((SClosure) setter), ListEx.build(value), env);
-                    } else {
-                        extra.put(k, value);
-                        env.put(k, value);
-                    }
+            String k = EgCast.toString(key, atom);
+            ExecEnvironment extra = ((SClosure) subject).extra;
+            if (decl == VAR) {
+                extra.bPut(k, value);
+                env.bPut(k, value);
+            } else { // SET
+                SValue setter = extra.get("__set__" + k);
+                if (setter instanceof SClosure) {
+                    return PCall.evaluateClosure(atom, ((SClosure) setter), ListEx.build(value), env);
+                } else {
+                    extra.put(k, value);
+                    env.put(k, value);
                 }
             }
+        } else if (subject instanceof SBuffer) {
+            int idx = EgCast.toInt(key, atom);
+            byte[] buf = subject.get();
+            buf[idx] = EgCast.toByte(value, atom);
         } else {
             throw new EgException(2045, "invalid object: " + subject + ", key: " + key, atom);
         }

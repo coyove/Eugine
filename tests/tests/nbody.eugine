@@ -98,10 +98,10 @@ let bb = keys(bodies)
 let lbb = len(bb) 
 
 def advance(dt) => {
-   for 0..lbb do (i) => {
+   for 0..lbb do (i) "glass" => {
       let iBody = bodies[bb[i]]
 
-      for i+1..lbb do (j) => {
+      for i+1..lbb do (j) "glass" => {
          let jBody = bodies[bb[j]]
 
          let dx = iBody[0] - jBody[0];
@@ -133,7 +133,7 @@ def advance(dt) => {
 
 let _start = Time.unix(0)
 println(energy())
-for 0..5000000 do () => {
+for 0..50000000 do () => {
    advance(0.01)
 }
 println(energy())

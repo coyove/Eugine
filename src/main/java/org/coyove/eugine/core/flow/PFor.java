@@ -20,36 +20,24 @@ public class PFor extends SExpression {
 
     private SClosure cachedClosure = null;
 
-    private byte direction;
-
-    public final static byte ASC = 0;
-
-    public final static byte DESC = 1;
-
-    private int lastExecPointInForLoop = 0;
-
-    private ExecEnvironment lastExecEnvInForLoop = null;
-
-    private ListEx<SExpression> lastExecForLoop = null;
-
     public PFor() {
     }
 
-    public PFor(Atom ha, SExpression l, SExpression b, byte dir) {
+    public PFor(Atom ha, SExpression l, SExpression b) {
         atom = ha;
         list = l;
         body = b;
-        direction = dir;
     }
 
     private SValue execLoop(SClosure body, ExecEnvironment _env, SValue v, SValue idx) throws EgException {
-        ExecEnvironment env = SConfig.strictForLoop ? new ExecEnvironment() : _env;
+        boolean glass = (body.type & SClosure.GLASS) != 0;
+        ExecEnvironment env = glass ? _env : new ExecEnvironment();
         SValue old1 = null;
         SValue old2 = null;
         String name1 = null;
         String name2 = null;
 
-        if (SConfig.strictForLoop) {
+        if (!glass) {
             if (body.argNames.size() >= 1) {
                 env.put(body.argNames.head(), v);
             }
@@ -74,10 +62,6 @@ public class PFor extends SExpression {
         }
 
         SValue ret = ExecEnvironment.Null;
-
-//        if (SConfig.strictForLoop) {
-
-//        } else {
         for (int i = 0; i < body.body.size(); i++) {
             SExpression se = body.body.get(i);
             ret = se.evaluate(env);
@@ -86,9 +70,8 @@ public class PFor extends SExpression {
                 break;
             }
         }
-//        }
 
-        if (!SConfig.strictForLoop) {
+        if (glass) {
             if (old1 != null) {
                 env.bPut(name1, old1);
             }
@@ -136,23 +119,19 @@ public class PFor extends SExpression {
         } else if (_list instanceof SList) {
             ListEx<SExpression> values = ((SList) _list).get();
 
-            if (direction == ASC) {
-                for (int i = 0; i < values.size(); i++) {
-                    if (Utils.checkExit(execLoop(body, env, values.get(i).evaluate(env), new SInt(i)))) {
-                        break;
-                    }
-                }
-            } else {
-                for (int i = values.size() - 1; i >= 0; i--) {
-                    if (Utils.checkExit(execLoop(body, env, values.get(i).evaluate(env), new SInt(i)))) {
-                        break;
-                    }
+            for (int i = 0; i < values.size(); i++) {
+                SValue idx = body.argNames.size() > 1 ? new SNumber(i) : ExecEnvironment.Null;
+
+                if (Utils.checkExit(execLoop(body, env, values.get(i).evaluate(env), idx))) {
+                    break;
                 }
             }
         } else if (_list instanceof SBool) {
             long i = 0;
             while (Utils.isBooleanTrue(this.list.evaluate(env))) {
-                if (Utils.checkExit(execLoop(body, env, ExecEnvironment.Null, new SLong(i++)))) {
+                SValue idx = body.argNames.size() > 1 ? new SNumber(i++) : ExecEnvironment.Null;
+
+                if (Utils.checkExit(execLoop(body, env, ExecEnvironment.Null, idx))) {
                     break;
                 }
             }
@@ -160,7 +139,8 @@ public class PFor extends SExpression {
             SRange r = (SRange) _list;
             int i = r.start;
             while (i != r.end) {
-                SValue ret = execLoop(body, env, new SInt(i), new SInt(i));
+                SValue idx = new SNumber(i);
+                SValue ret = execLoop(body, env, idx, idx);
                 if (Utils.checkExit(ret)) {
                     break;
                 }
@@ -179,7 +159,6 @@ public class PFor extends SExpression {
         ret.atom = this.atom;
         ret.list = this.list.deepClone();
         ret.body = this.body.deepClone();
-        ret.direction = this.direction;
 
         if (this.cachedClosure != null) {
             ret.cachedClosure = ((SClosure) this.cachedClosure.clone());

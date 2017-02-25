@@ -17,6 +17,8 @@ public class PAdd extends SExpression {
     @ReplaceableVariable
     private SExpression right;
 
+    private boolean assign;
+
     public PAdd() {
     }
 
@@ -26,59 +28,54 @@ public class PAdd extends SExpression {
         right = r;
     }
 
+    public PAdd(Atom ha, SExpression l, SExpression r, boolean a) {
+        this(ha, l, r);
+        assign = a;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-//        if (expanded) {
-//            return MathOpStack.eval(this.stack, env, atom);
-//        }
-
         SValue left = this.left.evaluate(env);
         SValue right = this.right.evaluate(env);
 
         if (left instanceof SConcatString) {
-            if (!(right instanceof SNull)) {
-                SConcatString ret = (SConcatString) left.clone();
+            if (right != ExecEnvironment.Null) {
+                SConcatString ret = (SConcatString) (assign ? left : left.clone());
                 ret.append(right.asString());
-
                 return ret;
             } else {
-                return left.clone();
+                return assign ? left : left.clone();
             }
         }
 
         if (left instanceof SString) {
-            if (!(right instanceof SNull)) {
-                if (right instanceof SConcatString) {
-                    SConcatString ret = new SConcatString(left.underlying.toString());
-                    ret.append(right.<String>get());
-                    return ret;
+            if (right != ExecEnvironment.Null) {
+                if (assign) {
+                    ((SString) left).underlying = ((String) left.get()).concat(right.asString());
+                    return left;
                 } else {
-                    return new SConcatString(left.underlying.toString(), right.asString());
+                    return new SConcatString(left.get().toString(), right.asString());
                 }
             } else {
-                return left.clone();
+                return assign ? left : left.clone();
             }
         }
 
-        if (left instanceof SDouble) {
-            return new SDouble(((SDouble) left).val() + EgCast.toDouble(right, atom));
-        }
-
-        if (left instanceof SInt) {
-            if (right instanceof SInt) {
-                return new SInt(((SInt) left).val() + ((SInt) right).val());
+        if (left instanceof SNumber) {
+            if (assign) {
+                SNumber l = (SNumber) left;
+                l.set(l.doubleValue() + EgCast.toDouble(right, atom));
+                return l;
             } else {
-                return new SLong(((SInt) left).val() + EgCast.toLong(right, atom));
+                return new SNumber(((SNumber) left).doubleValue() + EgCast.toDouble(right, atom));
             }
-        }
-
-        if (left instanceof SLong) {
-            return new SLong(((SLong) left).val() + EgCast.toLong(right, atom));
         }
 
         if (left instanceof SList) {
-            ListEx<SValue> list = (ListEx<SValue>) left.<ListEx<SValue>>get().clone();
+            ListEx<SValue> list = (ListEx<SValue>) (assign ?
+                    left.<ListEx<SValue>>get() :
+                    left.<ListEx<SValue>>get().clone());
             list.add(right);
             return new SList(list);
         }
@@ -106,6 +103,7 @@ public class PAdd extends SExpression {
         ret.atom = this.atom;
         ret.left = this.left.deepClone();
         ret.right = this.right.deepClone();
+        ret.assign = this.assign;
 
         return ret;
     }

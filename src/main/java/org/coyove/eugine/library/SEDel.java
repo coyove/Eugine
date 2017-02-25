@@ -31,9 +31,9 @@ public class SEDel extends SExpression {
         SValue subObj = subject.evaluate(env);
         SValue idx = this.index.evaluate(env);
 
-        if (idx instanceof SInt && subObj instanceof SList) {
+        if (idx instanceof SNumber && subObj instanceof SList) {
             ListEx<SValue> subList = subObj.get();
-            int i = ((SInt) idx).val();
+            int i = EgCast.toInt(idx, atom);
             if (i < 0 || i >= subList.size())
                 throw new EgException(2007, "index out of range", atom);
 

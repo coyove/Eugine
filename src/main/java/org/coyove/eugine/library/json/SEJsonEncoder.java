@@ -52,14 +52,10 @@ public class SEJsonEncoder extends SExpression {
             return String.format("\"%1$s\"", StringEscapeUtils.escapeJava(re.<String>get()));
         } else if (re instanceof SBool) {
             return re.get().toString().toLowerCase();
-        } else if (re instanceof SLong) {
-            return ((Long) ((SLong) re).val()).toString();
-        } else if (re instanceof SInt) {
-            return ((Integer) ((SInt) re).val()).toString();
-        } else if (re instanceof SDouble) {
-            return ((Double) ((SDouble) re).val()).toString();
+        } else if (re instanceof SNumber) {
+            return re.asString();
         } else {
-            return String.format("\"%1$s\"", re.underlying.toString());
+            return String.format("\"%1$s\"", re.get().toString());
         }
     }
 

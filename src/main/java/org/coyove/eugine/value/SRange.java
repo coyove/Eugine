@@ -1,14 +1,12 @@
 package org.coyove.eugine.value;
 
-import org.antlr.v4.runtime.misc.Triple;
-import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.util.*;
+import org.coyove.eugine.base.SComplexValue;
 
 /**
  * Created by coyove on 2016/9/9.
  */
-public class SRange extends SValue {
+public class SRange extends SComplexValue {
     public int start;
     public int end;
     public int interval;
@@ -23,9 +21,12 @@ public class SRange extends SValue {
 
     @Override
     public SValue clone() {
-        SRange ret = new SRange(start, interval, end);
-        SValue.copyAttributes(ret, this);
-        return ret;
+        return new SRange(start, interval, end);
+    }
+
+    @Override
+    public SValue lightClone() {
+        return this;
     }
 
     @Override

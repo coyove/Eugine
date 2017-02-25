@@ -42,8 +42,8 @@ public class SERegexMatch extends SExpression {
 
             while (m.group(i) != null && i < m.groupCount()) {
                 mapMatch.put("text", new SString(m.group(i)));
-                mapMatch.put("start", new SLong(m.start(i)));
-                mapMatch.put("end", new SLong(m.end(i)));
+                mapMatch.put("start", new SNumber(m.start(i)));
+                mapMatch.put("end", new SNumber(m.end(i)));
 
                 i++;
             }

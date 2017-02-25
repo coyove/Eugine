@@ -1,6 +1,7 @@
 package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.PGet;
 import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.core.flow.PCall;
@@ -23,22 +24,57 @@ public class PAssign extends SExpression {
     public PAssign() {
     }
 
-    public PAssign(Atom ha, SExpression l, SExpression r, Class <? extends SExpression> o) {
+    public PAssign(Atom ha, SExpression l, SExpression r, String o) {
         atom = ha;
         subject = l;
 
-        try {
-            Constructor ctor = o.getConstructor(Atom.class, SExpression.class, SExpression.class);
-            op = (SExpression) ctor.newInstance(ha, l, r);
-        } catch (Exception e) {
-            // nothing, shouldn't happen
+        switch (o.charAt(0)) {
+            case '+':
+                op = new PAdd(ha, l, r, true);
+                break;
+            case '-':
+                op = new PSubtract(ha, l, r, true);
+                break;
+            case '*':
+                op = new PMultiply(ha, l, r, true);
+                break;
+            case '/':
+                op = new PDivide(ha, l, r, true);
+                break;
+            case '%':
+                op = new PModular(ha, l, r, true);
+                break;
+        }
+    }
+
+    public PAssign(Atom ha, SExpression s, SExpression k, SExpression v, String o) {
+        atom = ha;
+        subject = s;
+        SExpression g = new PGet(ha, s, k);
+
+        switch (o.charAt(0)) {
+            case '+':
+                op = new PAdd(ha, g, v, true);
+                break;
+            case '-':
+                op = new PSubtract(ha, g, v, true);
+                break;
+            case '*':
+                op = new PMultiply(ha, g, v, true);
+                break;
+            case '/':
+                op = new PDivide(ha, g, v, true);
+                break;
+            case '%':
+                op = new PModular(ha, g, v, true);
+                break;
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        return PSet.set(subject, op.evaluate(env), PSet.SET, atom, env);
+        return op.evaluate(env);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class PLambda extends SExpression {
 
     public boolean inline = false;
 
-    public boolean coroutine = false;
+    public boolean glass = false;
 
     public boolean struct = false;
 
@@ -39,6 +39,7 @@ public class PLambda extends SExpression {
         body = b;
         passByValue = pass;
         description = d;
+        glass = d.equals("glass");
     }
 
     @Override
@@ -47,7 +48,7 @@ public class PLambda extends SExpression {
         cls.atom = this.atom;
         cls.doc = description;
         cls.type |= inline ? SClosure.INLINE : 0;
-        cls.type |= coroutine? SClosure.COROUTINE : 0;
+        cls.type |= glass ? SClosure.GLASS : 0;
         cls.type |= struct ? SClosure.STRUCT : 0;
         cls.type |= operator ? SClosure.OPERATOR : 0;
         return cls;
@@ -62,7 +63,7 @@ public class PLambda extends SExpression {
         ret.argNames = this.argNames;
         ret.inline = this.inline;
         ret.struct = this.struct;
-        ret.coroutine = this.coroutine;
+        ret.glass = this.glass;
         ret.operator = this.operator;
         ret.passByValue = this.passByValue;
         ret.description = this.description;

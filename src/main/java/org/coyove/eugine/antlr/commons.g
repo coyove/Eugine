@@ -1,24 +1,40 @@
 lexer grammar CommonLexerRules;
 
 Var: 'var';
+
 Let: 'let';
+
 Def: 'def';
-Inline: 'inline';
-Coroutine: 'coroutine';
+
 Struct: 'struct';
+
 Operator: 'operator';
-For: ('for' | 'rev');
+
+For: 'for';
+
 If: 'if';
+
 Switch: 'switch';
+
 Else: 'else';
+
 Enter: 'enter';
+
 Catch: 'catch';
+
 Clone: 'clone';
+
 Sync: 'sync';
+
 Yield: 'yield';
+
 New: 'new';
+
 Static: 'static';
+
 Do: 'do';
+
+AssignOp: ('+=' | '-=' | '*=' | '/=' | '%=');
 
 Integer
     :   [0-9]+

@@ -1,14 +1,14 @@
 package org.coyove.eugine.value;
 
 import org.apache.commons.lang3.StringUtils;
-import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.base.SComplexValue;
 import org.coyove.eugine.util.*;
 
 /**
  * Created by coyove on 2016/9/9.
  */
-public class SList extends SValue {
+public class SList extends SComplexValue {
     public SList(ListEx<SValue> list) {
         super(list);
     }
@@ -23,8 +23,12 @@ public class SList extends SValue {
         }
 
         SList ret = new SList(n);
-        SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public SValue lightClone() {
+        return this;
     }
 
     @Override

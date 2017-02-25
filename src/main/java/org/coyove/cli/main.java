@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.lang.System;
 
 import org.coyove.eugine.*;
-import org.coyove.eugine.base.SConfig;
 import org.coyove.eugine.parser.Parser;
 import org.coyove.eugine.util.*;
 
@@ -29,11 +28,6 @@ public class main {
 
         for (String cn : options.imports) {
             Utils.loadExportables(cn);
-        }
-
-        if (options.optimization) {
-            SConfig.strictForLoop = false;
-            SConfig.enablePPut = true;
         }
 
         if (options.delayExec || options.reloadable) {

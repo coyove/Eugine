@@ -17,93 +17,104 @@ import util
 
 debug.start()
 
-;;
-(() => {
-    def struct complex(r, i) => {
-        var this.real = r, this.image = i
+// ;;
+// (() => {
+//     def struct complex(r, i) => {
+//         var this.real = r, this.image = i
 
-        def operator this.add(lhs, rhs) => complex(lhs.real + rhs.real, lhs.image + rhs.image)
+//         def operator this.add(lhs, rhs) => complex(lhs.real + rhs.real, lhs.image + rhs.image)
 
-        def operator this.tostring(self) => str(self.real) + " + " + self.image + "i"
-    }
+//         def operator this.tostring(self) => str(self.real) + " + " + self.image + "i"
 
-    var c1 = complex(10, 2.0)
-    var c2 = complex(2, 1.0 / 5)
-    debug.assert(str(c1 + c2) == "12 + 2.2i", "Complex Number Test")
-})()
+//         def this.eval() => [this.real, this.image]
+//     }
 
-;;
-(() => {
-    debug.assert(true == true && false == false && true != false &&
-        !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
-        1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
-        -1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1, "Basic Comparisons")
+//     var c1 = complex(10, 2.0)
+//     var c2 = complex(2, 1.0 / 5)
+//     debug.assert(str(c1 + c2) == "12 + 2.2i" 
+//         && utils.deepCompareList(c1.eval(), [10, 2.0])
+//         && utils.deepCompareList(c2.eval(), [2, 0.2]), "Complex Number Test")
+// })()
 
-    debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
-        1 + 2 * 3 == 7 && 1 + 0.1 == 1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
-        10 * 0.2 == 0 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
-        10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
+// ;;
+// (() => {
+//     debug.assert(true == true && false == false && true != false &&
+//         !false && true && !null && 1 && !0 && " " && !"" && (true && false || true) &&
+//         1 == 1 && 1 < 2 && 1 <= 1 && 2 > 1 && 2 >= 1 && 2 == 2 &&
+//         -1 == -1 && 0 > -1 && -1 < 0 && -1 >= -2 && -2 <= -1, "Basic Comparisons")
 
-    debug.assert(Utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
-        Utils.deepCompareList([1,2, 3], [1,2,3]) && 
-        !Utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
-})()
+//     debug.assert(1 + 1 == 2 && 1 - 3 == -2 && 1 + 2 -3 + 4 == 4 &&
+//         1 + 2 * 3 == 7 && 1 + 0.1 == 1.1 && 0.1 - 1 == -0.9 && 1.0e6 * 10 == 1.0e7 &&
+//         10 * 0.2 == 02 && 10.0 * 0.2 - 2 < 1.0e-6 && (1 +2)/3==1 && 7 % 2 == 1 &&
+//         10.1 % 3 - 1.1 < 1.0e-6 && null + 1 == null, "Elementary Arithmetic Operations")
 
-;;
-(() => {
-    def fibonacci (n) =>
-        if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
-    debug.assert(Utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
+//     var a = 1
+//     a += 2.2
+//     var c = math.random(0)
+//     var b = [-1, c, [0, 10]]
+//     b[1]++
+//     b[2][1] -= 5
+//     debug.assert(a == 3.2 && utils.deepCompareList(b, [-1, c, [0, 5]]), "Elementary Arithmetic Operations 2")    
 
-    def numSeqSum (n, sum) =>
-        if n == 0 {sum} else numSeqSum(n -1,sum+n)
-    debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
-})()
+//     debug.assert(utils.deepCompareList([1,3,[1,2]], [1,3,[1,2]]) &&
+//         utils.deepCompareList([1,2, 3], [1,2,3]) && 
+//         !utils.deepCompareList([1,2,4,5,6], [1,3,7,8]), "List Deep Comparisons")
+// })()
 
-;;
-(() => {
-    var l = [1, 2, 3, ["a", "b"]]
-    l[3][1] = l[2]
-    debug.assert(Utils.deepCompareList(l, [1, 2, 3, ["a", 3]]), "List op 1")
+// ;;
+// (() => {
+//     def fibonacci (n) =>
+//         if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
+//     debug.assert(utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
 
-    var str = "hello world"
-    str[2] = 32
-    str[3] = "L"
-    debug.assert(str == "he Lo world" && str[2..8] == " Lo wo", "String Manipulation")
-})()
+//     def numSeqSum (n, sum) =>
+//         if n == 0 {sum} else numSeqSum(n -1,sum+n)
+//     debug.assert(numSeqSum(10000, 0) == 50005000, "Sum of Number Sequence 1 ~ 10000")
+// })()
+
+// ;;
+// (() => {
+//     var l = [1, 2, 3, ["a", "b"]]
+//     l[3][1] = l[2]
+//     debug.assert(utils.deepCompareList(l, [1, 2, 3, ["a", 3]]), "List op 1")
+
+//     var str = "hello world"
+//     str[2] = 32
+//     str[3] = "L"
+//     debug.assert(str == "he Lo world" && str[2..8] == " Lo wo", "String Manipulation")
+
+//     // str = "goodbye"
+//     // str += " and "
+//     // str = str + "farewell"
+//     // debug.assert(str == "goodbye and farewell", "String Manipulation 2")
+// })()
 
 // var a = [0, 1, 2]
 // a[1]++
 // println(a)
 
-debug.summary()
-exit()
-// for 0..10000000 do () => {
-// 	var a = 1
-// 	var b = 1.0 / 4.5 + 2 / a * 4 - a
-// }
-
-// println(b)
+// debug.summary()
+// exit()
 
 let N = 1600
-let Crb = range(N + 7, 0, 0.0), Cib = range(N + 7, 0, 0.0) // 79462469 , 4295b0b8 
+let Crb = range(N + 7, 0), Cib = range(N + 7,0) // 79462469 , 4295b0b8 
 let invN = 2.0/N
-for 0..N do (i) => { 
+for 0..N do (i) "glass" => { 
 	Cib[i] = invN * i - 1.0
 	Crb[i] = invN * i - 1.5
-} 
+}
 
 var yCt = 0
 def incr() => sync yCt++
 
-let linelen = (N + 7) / 8
-let out = range(N * linelen, 0, 0.0)
+let linelen = math.floor((N + 7) / 8)
+let out = buffer(N * linelen)
 
 def putLine(y) =>
-	for 0..linelen do (xb) => {
+	for 0..linelen do (xb) "glass" => {
 		var x = xb * 8
 		var res = 0
-        for [0, 2, 4, 6] do (i) => {
+        for [0, 2, 4, 6] do (i) "glass" => {
             var Ciby = Cib[y]
             var Crbx = Crb[x+i]
             var Crbx1 = Crb[x+i+1]
@@ -113,7 +124,7 @@ def putLine(y) =>
 
             var b = 0
 
-            for 0..50 do () => {
+            for 0..50 do () "glass" => {
                 var nZr1=Zr1*Zr1-Zi1*Zi1+Crbx
                 var nZi1=Zr1*Zi1*2+Ciby
                 Zr1=nZr1
@@ -154,4 +165,4 @@ for threads do (t) => wait(t)
 
 Pbm.write("test.pbm", N, N, out)
 
-Debug.summary()
+debug.summary()

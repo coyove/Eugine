@@ -24,7 +24,7 @@ public class SEType extends SExpression {
         SValue v = name.evaluate(env);
 
         if (v instanceof SObject) {
-            return new SString(v.underlying.getClass().getName());
+            return new SString(v.get().getClass().getName());
         } else if (v instanceof SMetaExpression) {
             return new SString(((SMetaExpression) v).getSimpleName());
         } else {

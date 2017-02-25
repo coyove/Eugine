@@ -27,18 +27,18 @@ public class SELen extends SExpression {
 
         SValue obj = subject.evaluate(env);
         if (obj instanceof SConcatString) {
-            return new SInt(((SConcatString) obj).length());
+            return new SNumber(((SConcatString) obj).length());
         } else if (obj instanceof SString) {
-            return new SInt(obj.<String>get().length());
+            return new SNumber(obj.<String>get().length());
         } else if (obj instanceof SList) {
-            return new SInt(obj.<ListEx<SValue>>get().size());
+            return new SNumber(obj.<ListEx<SValue>>get().size());
         } else if (obj instanceof SDict) {
-            return new SInt(obj.<HashMap<String, SValue>>get().size());
-        } else if (obj.get() instanceof byte[]) {
+            return new SNumber(obj.<HashMap<String, SValue>>get().size());
+        } else if (obj instanceof SBuffer) {
             byte[] buf = obj.get();
-            return new SInt(buf.length);
+            return new SNumber(buf.length);
         } else {
-            return new SInt(0);
+            return new SNumber(0);
         }
     }
 

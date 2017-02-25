@@ -36,39 +36,22 @@ public class SEBitOp extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue _left = this.left.evaluate(env);
+        long left = EgCast.toLong(_left, atom);
+
         if (op == NOT) {
-            if (_left instanceof SInt) {
-                return new SInt(~((SInt) _left).val());
-            } else if (_left instanceof SLong) {
-                return new SLong(~((SLong) _left).val());
-            } else {
-                throw new EgException(3006, left + " is not an integer or long", atom);
-            }
+            return new SNumber(~left);
         }
 
         SValue _right = this.right.evaluate(env);
+        long right = EgCast.toLong(_right, atom);
 
-        if (_left instanceof SInt && _right instanceof SInt) {
-            if (op == AND) {
-                return new SInt(((SInt) _left).val() & ((SInt) _right).val());
-            } else if (op == OR) {
-                return new SInt(((SInt) _left).val() | ((SInt) _right).val());
-            } else {
-                return new SInt(((SInt) _left).val() ^ ((SInt) _right).val());
-            }
+        if (op == AND) {
+            return new SNumber(left & right);
+        } else if (op == OR) {
+            return new SNumber(left | right);
+        } else {
+            return new SNumber(left ^ right);
         }
-
-        if (_left instanceof SLong || _right instanceof SLong) {
-            if (op == AND) {
-                return new SLong(EgCast.toLong(_left, atom) & EgCast.toLong(_right, atom));
-            } else if (op == OR) {
-                return new SLong(EgCast.toLong(_left, atom) | EgCast.toLong(_right, atom));
-            } else {
-                return new SLong(EgCast.toLong(_left, atom) ^ EgCast.toLong(_right, atom));
-            }
-        }
-
-        throw new EgException(3006, "invalid number", atom);
     }
 
     @Override

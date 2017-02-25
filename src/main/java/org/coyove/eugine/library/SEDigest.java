@@ -51,10 +51,10 @@ public class SEDigest extends SExpression {
 
             if (v instanceof SString) {
                 result = md.digest(v.<String>get().getBytes("UTF-8"));
-            } else if (v instanceof SObject && v.underlying instanceof byte[]) {
-                result = md.digest(((byte[]) v.underlying));
+            } else if (v instanceof SBuffer) {
+                result = md.digest(((byte[]) v.get()));
             } else {
-                return env.Null;
+                return ExecEnvironment.Null;
             }
 
             if (ret == RETURN.STRING) {

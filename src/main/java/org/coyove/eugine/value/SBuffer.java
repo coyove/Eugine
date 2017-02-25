@@ -6,14 +6,18 @@ import org.coyove.eugine.base.SComplexValue;
 /**
  * Created by coyove on 2016/9/9.
  */
-public class SObject extends SComplexValue {
-    public SObject(Object obj) {
-        super(obj);
+public class SBuffer extends SComplexValue {
+    public SBuffer(byte[] buf) {
+        super(buf);
     }
 
     @Override
     public SValue clone() {
-        return new SObject(underlying);
+        byte[] src = ((byte[]) underlying);
+        byte[] newbuf = new byte[src.length];
+        System.arraycopy(src, 0, newbuf, 0, src.length);
+
+        return new SBuffer(newbuf);
     }
 
     @Override
@@ -23,11 +27,11 @@ public class SObject extends SComplexValue {
 
     @Override
     public String toString() {
-        return "object = " + underlying.toString();
+        return "buffer = " + ((byte[]) underlying).length;
     }
 
     @Override
     public String asString() {
-        return underlying.toString();
+        return "";
     }
 }

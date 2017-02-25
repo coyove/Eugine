@@ -94,7 +94,7 @@ public class SEFile extends SExpression {
                         } else {
                             Files.write(path, data.<String>get().getBytes("utf-8"), oo);
                         }
-                    } else if (data instanceof SObject && data.get() instanceof byte[]) {
+                    } else if (data instanceof SBuffer) {
                         Files.write(path, ((byte[]) data.get()), oo);
                     } else if (data instanceof SList) {
                         StringBuilder sb = new StringBuilder();

@@ -40,16 +40,9 @@ public class PSet extends SExpression {
         }
     }
 
-    public static SValue set(SExpression name,
-                             SExpression value,
-                             byte type, Atom atom,
-                             ExecEnvironment env) throws EgException {
-        SValue v = value.evaluate(env);
-        SValue ret = v;
-
-        if (v instanceof SString) {
-            ret = v.clone();
-        }
+    @Override
+    public SValue evaluate(ExecEnvironment env) throws EgException {
+        SValue ret = value.evaluate(env).lightClone();
 
         if (name instanceof PVariable) {
             PVariable var = ((PVariable) name);
@@ -69,11 +62,6 @@ public class PSet extends SExpression {
         }
 
         return ret;
-    }
-
-    @Override
-    public SValue evaluate(ExecEnvironment env) throws EgException {
-        return set(name, value, type, atom, env);
     }
 
     @Override

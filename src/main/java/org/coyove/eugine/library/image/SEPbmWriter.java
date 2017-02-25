@@ -41,23 +41,29 @@ public class SEPbmWriter extends SExpression {
         Long sizeY = EgCast.toLong(this.sizeY.evaluate(env), atom);
 
         SValue _data = this.data.evaluate(env);
-        if (!(_data instanceof SList)) {
-            throw new EgException(7088, "invalid data", atom);
-        }
 
-        ListEx<SValue> list = _data.get();
+
         try {
             OutputStream stream = new FileOutputStream(filename);
             stream.write(("P4\n" + sizeX + " " + sizeY + "\n").getBytes());
-            for (SValue v : list) {
-                stream.write(((int) EgCast.toLong(v, atom)));
+
+            if (_data instanceof SList) {
+                ListEx<SValue> list = _data.get();
+                for (SValue v : list) {
+                    stream.write(EgCast.toInt(v, atom));
+                }
+            } else if (_data instanceof SBuffer) {
+                stream.write(_data.<byte[]>get());
+            } else {
+                throw new EgException(7088, "invalid data", atom);
             }
+
             stream.close();
         } catch (Exception e) {
             throw new EgException(7088, "failed to write: " + e, atom);
         }
 
-        return env.Null;
+        return ExecEnvironment.Null;
     }
 
     @Override

@@ -32,7 +32,7 @@ public class SEStr extends SExpression {
 
             return new SList(ret);
         } else {
-            if (arg instanceof SObject && arg.get() instanceof byte[]) {
+            if (arg instanceof SBuffer) {
                 byte[] buf = arg.get();
                 return new SString(Utils.bytesToHexString(buf));
             }

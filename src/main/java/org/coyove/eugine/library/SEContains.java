@@ -48,22 +48,22 @@ public class SEContains extends SExpression {
 
             for (int i = start; i < list.size(); i++) {
                 if (list.get(i).equals(key)) {
-                    return new SInt(i);
+                    return new SNumber(i);
                 }
             }
 
-            return new SInt(-1);
+            return new SNumber(-1);
         } else if (sub instanceof SString && key instanceof SString) {
             String text = sub.get();
-            return new SInt(StringUtils.indexOf(text, key.<String>get(), start));
+            return new SNumber(StringUtils.indexOf(text, key.<String>get(), start));
         } else if (sub instanceof SClosure && key instanceof SString) {
             String text = sub.get();
             return ((SClosure) sub).extra.containsKey(text) ? ExecEnvironment.True : ExecEnvironment.False;
-        } else if (sub.underlying instanceof byte[]) {
-            byte[] s = ((byte[]) sub.underlying);
+        } else if (sub instanceof SBuffer) {
+            byte[] s = sub.get();
             byte[] k;
-            if (key.underlying instanceof byte[]) {
-                k = ((byte[]) key.underlying);
+            if (key instanceof SBuffer) {
+                k = key.get();
             } else {
                 k = EgCast.toString(key, atom).getBytes();
             }
@@ -76,13 +76,13 @@ public class SEContains extends SExpression {
                         }
 
                         if (j == i + k.length - 1) {
-                            return new SInt(i);
+                            return new SNumber(i);
                         }
                     }
                 }
             }
 
-            return new SInt(-1);
+            return new SNumber(-1);
         } else {
             // throw new EgException(3010, "invalid subject or key", atom);
             return ExecEnvironment.False;

@@ -41,7 +41,7 @@ public class PAppend extends SExpression {
         if (left instanceof SString) {
             if (!(right instanceof SNull)) {
                 String text = left.get();
-                left.underlying = text + right.asString();
+                ((SString) left).underlying = text + right.asString();
             }
 
             return left;
@@ -53,11 +53,11 @@ public class PAppend extends SExpression {
             return left;
         }
 
-        if (left.underlying instanceof byte[] && right.underlying instanceof byte[]) {
-            byte[] l = (byte[]) left.underlying;
-            byte[] r = (byte[]) right.underlying;
+        if (left instanceof SBuffer && right instanceof SBuffer) {
+            byte[] l = left.get();
+            byte[] r = right.get();
 
-            left.underlying = ArrayUtils.addAll(l, r);
+            ((SBuffer) left).underlying = ArrayUtils.addAll(l, r);
         }
 
         return ExecEnvironment.Null;

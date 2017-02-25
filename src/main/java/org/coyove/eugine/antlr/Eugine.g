@@ -282,26 +282,26 @@ topExpr returns [SExpression v]
     |   StringLiteral 
         { $v = new SConcatString(org.coyove.eugine.util.Utils.unescape($StringLiteral.text)); }
     |   Integer
-        { $v = org.coyove.eugine.util.Utils.tryGuessBits($Integer.text); }
+        { $v = new SNumber($Integer.text); }
     |   Double
-        { $v = new SDouble($Double.text); }
+        { $v = new SNumber($Double.text); }
     ;
 
 postfixExpr returns [SExpression v]
     :   Top=topExpr { $v = $Top.v; }
     |   Left=postfixExpr Op='++' 
         {
-            $v = new PAssign(new Atom($Op), $Left.v, new SInt(1), PAdd.class);
+            $v = new PAssign(new Atom($Op), $Left.v, new SNumber(1), "+=");
         }
     |   Left=postfixExpr Op='--' 
         {
-            $v = new PAssign(new Atom($Op), $Left.v, new SInt(1), PSubtract.class);
+            $v = new PAssign(new Atom($Op), $Left.v, new SNumber(1), "-=");
         }
-    |   Subject=postfixExpr '[' Key=expr ']'
+    |   Subject=postfixExpr '[' Key=assignExpr ']'
         {
             $v = new PGet(new Atom($Subject.start), $Subject.v, $Key.v);
         }
-    |   Subject=postfixExpr '[' Start=expr ('..' | '...') (End=expr)? ']'
+    |   Subject=postfixExpr '[' Start=assignExpr ('..' | '...') (End=assignExpr)? ']'
         {
             $v = new PSub(new Atom($Subject.start), $Subject.v, $Start.v, $End.ctx == null ? null : $End.v);
         }
@@ -327,22 +327,14 @@ postfixExpr returns [SExpression v]
                 $v = new PCall(new Atom($Called.start), $Called.v, arguments);
             }
         }
-    |   Called=postfixExpr '<' Identifier '>'
-        {
-            $v = new PCall(new Atom($Called.start), $Called.v, ListEx.build(new SString($Identifier.text)));
-        }
     ;
 
 unaryExpr returns [SExpression v]
     :   Top=postfixExpr { $v = $Top.v; }
     |   Sub='-' Right=postfixExpr
         {
-            if ($Right.v instanceof SInt) {
-                $v = new SInt(-((SInt) $Right.v).val());
-            } else if ($Right.v instanceof SLong) {
-                $v = new SLong(-((SLong) $Right.v).val());
-            } else if ($Right.v instanceof SDouble) {
-                $v = new SDouble(-((SDouble) $Right.v).val());
+            if ($Right.v instanceof SNumber) {
+                $v = new SNumber(-((SNumber) $Right.v).doubleValue());
             } else {
                 $v = new SEReverse(new Atom($Sub), ListEx.build($Right.v));
             }
@@ -350,14 +342,6 @@ unaryExpr returns [SExpression v]
     |   Not='!' Right=postfixExpr
         {
             $v = new PNot(new Atom($Not), $Right.v);
-        }
-    |   Op='++' Left=unaryExpr
-        {
-            $v = new PSet(new Atom($Op), $Left.v, new PAdd(new Atom($Op), $Left.v, new SInt(1)), PSet.SET);
-        }
-    |   Op='--' Left=unaryExpr
-        {
-            $v = new PSet(new Atom($Op), $Left.v, new PSubtract(new Atom($Op), $Left.v, new SInt(1)), PSet.SET);
         }
     ;
 
@@ -411,34 +395,25 @@ logicExpr returns [SExpression v]
         {
             $v = new PLogic(new Atom($Op), $Left.v, $Right.v, PLogic.OR);
         }
-    // | Left=logicExpr ':' JavaFullName
-    //     {
-    //         $v = new PInteropCast(new Atom($JavaFullName), $Left.v, $JavaFullName.text.replace("/", "."));
-    //     }
     ;
 
 assignExpr returns [SExpression v]
     : Top=logicExpr { $v = $Top.v; }
-    | Left=unaryExpr Op='+=' Right=assignExpr
+    | Identifier Op=AssignOp Right=assignExpr
         {
-            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PAdd.class);
+            $v = new PAssign(new Atom($Op), new PVariable($Identifier.text), $Right.v, $Op.text);
         }
-    | Left=unaryExpr Op='-=' Right=assignExpr
+    | Subject1=postfixExpr '.' Identifier Op=AssignOp Right=assignExpr
         {
-            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PSubtract.class);
+            $v = new PAssign(new Atom($Op), $Subject1.v, new SString($Identifier.text), $Right.v, $Op.text);
         }
-    | Left=unaryExpr Op='*=' Right=assignExpr
+    | Subject2=postfixExpr '[' Key=assignExpr ']' Op=AssignOp Right=assignExpr
         {
-            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PMultiply.class);
+            $v = new PAssign(new Atom($Op), $Subject2.v, $Key.v, $Right.v, $Op.text);
         }
-    | Left=unaryExpr Op='/=' Right=assignExpr
+    | Subject3=assignExpr '=' Value=expr
         {
-            $v = new PAssign(new Atom($Op), $Left.v, $Right.v, PDivide.class);
-        }
-    | Subject=assignExpr '=' Value=expr
-        {
-            // if ($Subject.v instanceof PGet && SConfig.enablePPut) {
-            $v = identifySetter(new Atom($Subject.start), $Subject.v, $Value.v, PSet.SET);
+            $v = identifySetter(new Atom($Subject3.start), $Subject3.v, $Value.v, PSet.SET);
         }
     ;
 
@@ -466,24 +441,20 @@ expr returns [SExpression v]
         { 
             $v = new PSync(new Atom($Sync), $SyncBody.v); 
         }
-    | Yield (Yielded=expr | '(' ')')
-        { 
-            $v = new PYield(new Atom($Yield), $Yielded.start != null ? $Yielded.v : ExecEnvironment.Null); 
-        }
     | For Subject=expr Do Body=expr
         {
-            $v = new PFor(new Atom($For), $Subject.v, $Body.v, $For.text.equals("for") ? PFor.ASC : PFor.DESC); 
+            $v = new PFor(new Atom($For), $Subject.v, $Body.v); 
         }
     | For Start=expr (',' Next=expr)? ('..' | '...') End=expr Do Body=expr
         {
             Atom atom = new Atom($For);
             PIRange r = new PIRange(atom, ListEx.build(
                     $Start.v, 
-                    $Next.ctx == null ? new SInt(1) : new PSubtract(atom, $Next.v, $Start.v), 
+                    $Next.ctx == null ? new SNumber(1) : new PSubtract(atom, $Next.v, $Start.v), 
                     $End.v
                 ));
 
-            $v = new PFor(atom, r, $Body.v, PFor.ASC); 
+            $v = new PFor(atom, r, $Body.v); 
         }
     | If Condition=expr True=code (Else False=code)?
         {

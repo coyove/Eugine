@@ -26,9 +26,8 @@ public class SERange extends SExpression {
         super(ha, args, 2);
 
         if (args.size() == 2) {
-            start = args.get(0);
-            end = args.get(1);
-            interval = new SLong(1);
+            start = args.get(0); // repeat count
+            interval = args.get(1); // item
         } else if (args.size() == 3) {
             start = args.get(0);
             interval = args.get(1);
@@ -40,36 +39,26 @@ public class SERange extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue _start = this.start.evaluate(env);
         SValue _interval = this.interval.evaluate(env);
-        SValue _end = this.end.evaluate(env);
 
-        if (_start instanceof SLong || _start instanceof SInt) {
+        if (end != null) {
+            SValue _end = this.end.evaluate(env);
+
             int interval = EgCast.toInt(_interval, atom);
-
-            if (interval == 0) {
-                int len = EgCast.toInt(_start, atom);
-                SValue[] arr = new SValue[len];
-                Arrays.fill(arr, _end);
-                ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
-                return new SList(ret);
-            }
-
             int start = EgCast.toInt(_start, atom);
             int end = EgCast.toInt(_end, atom);
 
             ListEx<SValue> ret = new ListEx<SValue>(end - start);
             for (int i = start; i < end; i += interval) {
-                ret.add(new SInt(i));
+                ret.add(new SNumber(i));
             }
+
             return new SList(ret);
-        } else if (_start instanceof SDouble && _interval instanceof SDouble && _end instanceof SDouble) {
-            ListEx<SValue> ret = new ListEx<SValue>();
-            for (double i = ((SDouble) _start).val(); i < ((SDouble) _end).val(); i += ((SDouble) _interval).val()) {
-                ret.add(new SDouble(i));
-            }
+        } else {
+            SValue[] arr = new SValue[EgCast.toInt(_start, atom)];
+            Arrays.fill(arr, _interval);
+            ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
             return new SList(ret);
         }
-
-        throw new EgException(3009, "needs integers or doubles", atom);
     }
 
     @Override

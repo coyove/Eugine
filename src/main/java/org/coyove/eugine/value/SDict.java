@@ -1,10 +1,8 @@
 package org.coyove.eugine.value;
 
 import org.apache.commons.lang3.StringUtils;
-import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.util.ErrorHandler;
-import org.coyove.eugine.util.EgException;
+import org.coyove.eugine.base.SComplexValue;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -12,7 +10,7 @@ import java.util.Set;
 /**
  * Created by coyove on 2016/9/9.
  */
-public class SDict extends SValue {
+public class SDict extends SComplexValue {
     public SDict() {
         super(new HashMap<String, SValue>());
     }
@@ -32,8 +30,12 @@ public class SDict extends SValue {
         }
 
         SDict ret = new SDict(n);
-        SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public SValue lightClone() {
+        return this;
     }
 
     public boolean containsKey(String key) {

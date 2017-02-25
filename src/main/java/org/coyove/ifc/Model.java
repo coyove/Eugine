@@ -1,6 +1,7 @@
 package org.coyove.ifc;
 
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.base.SComplexValue;
 import org.coyove.eugine.util.EgInterop;
 import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.ListEx;
@@ -15,13 +16,13 @@ import java.lang.reflect.Array;
  */
 public class Model {
     public static SClosure decorateObject(SValue object, SClosure cls) {
-        Object o = object.underlying;
+        Object o = ((SComplexValue) object).underlying;
 
         cls.extra.put("nativeObject", object);
         cls.extra.put("class", new SString(o.getClass().getSimpleName()));
-        cls.extra.put("id", new SInt(((ClassInterface) o).getStepLineNumber()));
+        cls.extra.put("id", new SNumber(((ClassInterface) o).getStepLineNumber()));
 
-        ((ForEachObjectGetDummy) cls.extra.get("get").underlying).object = o;
+        ((ForEachObjectGetDummy) cls.extra.get("get").get()).object = o;
 
         return cls;
     }

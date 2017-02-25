@@ -8,13 +8,13 @@ import org.coyove.eugine.util.*;
 /**
  * Created by zezhong on 2016/9/10.
  */
-public class SEBytesBuffer extends SExpression {
+public class SEBuffer extends SExpression {
     @ReplaceableVariable
     private SExpression src;
 
-    public SEBytesBuffer() {}
+    public SEBuffer() {}
 
-    public SEBytesBuffer(Atom ha, ListEx<SExpression> args) {
+    public SEBuffer(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
 
         src = args.head();
@@ -24,9 +24,9 @@ public class SEBytesBuffer extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue src = this.src.evaluate(env);
         if (src instanceof SString) {
-            return new SObject(src.<String>get().getBytes());
-        } else if (src instanceof SInt) {
-            return new SObject(new byte[((SInt) src).val()]);
+            return new SBuffer(src.<String>get().getBytes());
+        } else if (src instanceof SNumber) {
+            return new SBuffer(new byte[EgCast.toInt(src, atom)]);
         } else {
             throw new EgException(3031, "failed to convert to bytes buffer", atom);
         }
@@ -34,7 +34,7 @@ public class SEBytesBuffer extends SExpression {
 
     @Override
     public SExpression deepClone() {
-        SEBytesBuffer ret = new SEBytesBuffer();
+        SEBuffer ret = new SEBuffer();
         ret.atom = this.atom;
         ret.src = this.src.deepClone();
         return ret;

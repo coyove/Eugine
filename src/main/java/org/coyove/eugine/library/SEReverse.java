@@ -34,12 +34,8 @@ public class SEReverse extends SExpression {
             ListEx<SValue> ret = new ListEx<SValue>(
                     Arrays.asList(Arrays.copyOf(objs, objs.length, SValue[].class)));
             return new SList(ret);
-        } else if (subject instanceof SLong) {
-            return new SLong(-((SLong) subject).val());
-        } else if (subject instanceof SInt) {
-            return new SInt(-((SInt) subject).val());
-        } else if (subject instanceof SDouble) {
-            return new SDouble(-((SDouble) subject).val());
+        } else if (subject instanceof SNumber) {
+            return new SNumber(-EgCast.toDouble(subject, atom));
         } else if (subject instanceof SBool) {
             return Utils.isBooleanTrue(subject) ? ExecEnvironment.False : ExecEnvironment.True;
         } else {

@@ -3,14 +3,14 @@ package org.coyove.eugine.value;
 import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.base.SComplexValue;
 import org.coyove.eugine.core.flow.PCall;
-import org.coyove.eugine.core.flow.PChain;
 import org.coyove.eugine.util.*;
 
 /**
  * Created by coyove on 2016/9/9.
  */
-public class SClosure extends SValue {
+public class SClosure extends SComplexValue {
     public ExecEnvironment outerEnv;
 
     public ExecEnvironment precastEnv;
@@ -27,21 +27,16 @@ public class SClosure extends SValue {
 
     public String doc = "";
 
+    public SValue refer = null;
+
     // Used by TCO
     public final static byte TRANSPARENT = 1;
     public final static byte INLINE = 2;
-    public final static byte COROUTINE = 4;
+    public final static byte GLASS = 4;
     public final static byte STRUCT = 8;
     public final static byte OPERATOR = 16;
 
     public byte type;
-
-    public volatile byte coroutineState = SUSPENDED;
-    public final static byte SUSPENDED = 0;
-    public final static byte RUNNING = 1;
-    public final static byte DEAD = 2;
-
-    public PChain dummyCoroutine = null;
 
     public static SClosure makeEmptyClosure(ExecEnvironment env) {
         return new SClosure(env, new ListEx<String>(), new ListEx<Boolean>(), new ListEx<SExpression>());
@@ -92,9 +87,14 @@ public class SClosure extends SValue {
         ret.proto = this.proto;
         ret.doc = this.doc;
         ret.type = this.type;
+        ret.refer = this.refer;
 
-        SValue.copyAttributes(ret, this);
         return ret;
+    }
+
+    @Override
+    public SValue lightClone() {
+        return this;
     }
 
     public SClosure getCopy() throws EgException {
@@ -105,8 +105,8 @@ public class SClosure extends SValue {
         ret.proto = this;
         ret.doc = this.doc;
         ret.type = this.type;
+        ret.refer = this.refer;
 
-        SValue.copyAttributes(ret, this);
         return ret;
     }
 

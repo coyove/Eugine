@@ -10,9 +10,6 @@ import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.pm.Exportable;
 import org.coyove.eugine.value.SBool;
-import org.coyove.eugine.value.SInt;
-import org.coyove.eugine.value.SLong;
-import org.coyove.eugine.value.SNull;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -51,18 +48,6 @@ public final class Utils {
             return path.substring(0, path.length() - name.length());
         } catch (Exception e) {
             return "";
-        }
-    }
-
-    public static SValue denormalize(SValue v) {
-        if (v == ExecEnvironment.True) {
-            return new SBool(true);
-        } else if (v == ExecEnvironment.False) {
-            return new SBool(false);
-        } else if (v == ExecEnvironment.Null) {
-            return new SNull();
-        } else {
-            return v;
         }
     }
 
@@ -242,7 +227,7 @@ public final class Utils {
             return true;
         }
 
-        return v instanceof SBool && !((Boolean) v.underlying);
+        return false;
     }
 
     public static boolean isBooleanTrue(SValue v) {
@@ -254,19 +239,6 @@ public final class Utils {
             return false;
         }
 
-        if (v instanceof SBool) {
-            return (Boolean) v.underlying;
-        }
-
         return false;
-    }
-
-    public static SValue tryGuessBits(String text) {
-        long num = Long.parseLong(text);
-        if (num < Integer.MAX_VALUE && num > Integer.MIN_VALUE) {
-            return new SInt((int) num);
-        } else {
-            return new SLong(num);
-        }
     }
 }

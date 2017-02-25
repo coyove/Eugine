@@ -15,13 +15,13 @@ public class PIntrinsicCompare extends SExpression {
     @ReplaceableVariable
     private SExpression subject;
 
-    private long value;
+    private double value;
 
     public PIntrinsicCompare() {
     }
 
     public static SExpression get(Atom atom, SExpression l, String op, SExpression r) {
-        if (l instanceof SInt || l instanceof SLong || r instanceof SInt || r instanceof SLong) {
+        if (l instanceof SNumber || r instanceof SNumber) {
             return new PIntrinsicCompare(atom, l, r, op);
         } else {
             if (op.equals("<"))
@@ -48,12 +48,12 @@ public class PIntrinsicCompare extends SExpression {
         try {
             boolean inv = false;
 
-            if (l instanceof SInt || l instanceof SLong) {
-                value = EgCast.toLong((SValue) l, ha);
+            if (l instanceof SNumber) {
+                value = EgCast.toDouble((SValue) l, ha);
                 subject = r;
                 inv = true;
-            } else if (r instanceof SInt || r instanceof SLong) {
-                value = EgCast.toLong((SValue) r, ha);
+            } else if (r instanceof SNumber) {
+                value = EgCast.toDouble((SValue) r, ha);
                 subject = l;
             }
 
@@ -77,40 +77,21 @@ public class PIntrinsicCompare extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subject = this.subject.evaluate(env);
-        if (subject instanceof SDouble) {
-            double d = ((SDouble) subject).val() - value;
-            switch (action) {
-                case 0:
-                    return d < 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 1:
-                    return d <= 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 2:
-                    return Math.abs(d) < 1e-6 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 3:
-                    return Math.abs(d) >= 1e-6 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 4:
-                    return d >= 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 5:
-                    return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
-            }
-        }
 
-        if (subject instanceof SLong || subject instanceof SInt) {
-            long d = EgCast.toLong(subject, atom) - value;
-            switch (action) {
-                case 0:
-                    return d < 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 1:
-                    return d <= 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 2:
-                    return d == 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 3:
-                    return d != 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 4:
-                    return d >= 0 ? ExecEnvironment.True : ExecEnvironment.False;
-                case 5:
-                    return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
-            }
+        double d = EgCast.toDouble(subject, atom) - value;
+        switch (action) {
+            case 0:
+                return d < 0 ? ExecEnvironment.True : ExecEnvironment.False;
+            case 1:
+                return d <= 0 ? ExecEnvironment.True : ExecEnvironment.False;
+            case 2:
+                return Math.abs(d) < 1e-15 ? ExecEnvironment.True : ExecEnvironment.False;
+            case 3:
+                return Math.abs(d) >= 1e-15 ? ExecEnvironment.True : ExecEnvironment.False;
+            case 4:
+                return d >= 0 ? ExecEnvironment.True : ExecEnvironment.False;
+            case 5:
+                return d > 0 ? ExecEnvironment.True : ExecEnvironment.False;
         }
 
         return ExecEnvironment.Null;

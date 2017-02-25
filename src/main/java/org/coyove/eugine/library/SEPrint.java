@@ -68,14 +68,12 @@ public class SEPrint extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue ret = ExecEnvironment.Null;
         for (SValue v : SExpression.eval(arguments, env, atom)) {
-            ret = v;
             System.out.print(format(v, 2, false));
         }
         System.out.print(delim);
 
-        return ret;
+        return ExecEnvironment.Null;
     }
 
     @Override

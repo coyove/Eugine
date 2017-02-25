@@ -27,13 +27,13 @@ public class SEExit extends SExpression {
             SString msg = EgCast.to(argument.evaluate(env), SString.class);
 
             if (msg == null) {
-                SInt num = EgCast.to(argument.evaluate(env), SInt.class);
+                SNumber num = EgCast.to(argument.evaluate(env), SNumber.class);
                 if (num == null) {
                     throw new EgException(2016, "message must be string or integer", atom);
                 }
 
                 env.bPut("__e__", num);
-                throw new EgException(7001, ((Integer) num.val()).toString(), atom);
+                throw new EgException(7001, "" + num.intValue(), atom);
             } else {
                 env.bPut("__e__", msg);
                 throw new EgException(7000, msg.<String>get(), atom);
