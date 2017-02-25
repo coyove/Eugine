@@ -31,7 +31,7 @@ public class PAssign extends SExpression {
             Constructor ctor = o.getConstructor(Atom.class, SExpression.class, SExpression.class);
             op = (SExpression) ctor.newInstance(ha, l, r);
         } catch (Exception e) {
-            // nothing
+            // nothing, shouldn't happen
         }
     }
 

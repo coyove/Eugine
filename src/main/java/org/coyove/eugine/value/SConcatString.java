@@ -72,6 +72,16 @@ public class SConcatString extends SString {
     }
 
     @Override
+    public void setCharAt(int index, char c) {
+        if (index < 0)
+            throw new StringIndexOutOfBoundsException(index);
+        if (index > length)
+            throw new StringIndexOutOfBoundsException(index);
+
+        text[index] = c;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <T> T get() {
         return (T)(new String(text, 0, length));

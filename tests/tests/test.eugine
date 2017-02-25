@@ -65,7 +65,16 @@ debug.start()
     var l = [1, 2, 3, ["a", "b"]]
     l[3][1] = l[2]
     debug.assert(Utils.deepCompareList(l, [1, 2, 3, ["a", 3]]), "List op 1")
+
+    var str = "hello world"
+    str[2] = 32
+    str[3] = "L"
+    debug.assert(str == "he Lo world" && str[2..8] == " Lo wo", "String Manipulation")
 })()
+
+// var a = [0, 1, 2]
+// a[1]++
+// println(a)
 
 debug.summary()
 exit()

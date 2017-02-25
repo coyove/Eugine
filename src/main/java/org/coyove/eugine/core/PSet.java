@@ -44,7 +44,6 @@ public class PSet extends SExpression {
                              SExpression value,
                              byte type, Atom atom,
                              ExecEnvironment env) throws EgException {
-        SValue n = name.evaluate(env);
         SValue v = value.evaluate(env);
         SValue ret = v;
 
@@ -66,38 +65,6 @@ public class PSet extends SExpression {
                 }
             }
         } else {
-//            Object refer = n.refer;
-//
-//            if (refer instanceof SDict) {
-//                ((SDict) refer).<HashMap<String, SValue>>get().put(n.refKey.toString(), ret);
-//            } else if (refer instanceof SList) {
-//                ((SList) refer).<ListEx<SValue>>get().set(n.refIndex, ret);
-//            } else if (refer instanceof SObject || refer instanceof SMetaExpression) {
-//                Object sub = ((SValue) refer).underlying;
-//                EgInterop.setField(sub, n.refKey.toString(), ret);
-//            } else if (refer instanceof SClosure) {
-//                if (n.refKey instanceof String) {
-//                    String k = n.refKey.toString();
-//                    if (type == VAR) {
-//                        ((SClosure) refer).extra.bPut(k, ret);
-//
-//                        if (name instanceof PGet &&
-//                                ((PGet) name).subject instanceof PVariable &&
-//                                ((PVariable) ((PGet) name).subject).name.equals("this")) {
-//                            env.bPut(k, ret);
-//                        }
-//                    } else {
-//                        ((SClosure) refer).extra.put(k, ret);
-//                    }
-//                } else if (n.refKey instanceof SClosure) {
-//                    // TODO: avoid new PCall, make it static
-//                    (new PCall(atom, (SClosure) n.refKey, ListEx.build(ret))).evaluate(env);
-//                } else {
-//                    throw new EgException(2045, "invalid setter", atom);
-//                }
-//            } else {
-//                throw new EgException(2045, "failed to set, invalid referred object: " + refer, atom);
-//            }
             throw new EgException(2045, "failed to set, invalid subject", atom);
         }
 

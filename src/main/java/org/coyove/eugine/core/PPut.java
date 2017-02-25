@@ -40,28 +40,37 @@ public class PPut extends SExpression {
     @Override
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue refer = this.subject.evaluate(env);
+        SValue subject = this.subject.evaluate(env);
         SValue key = this.key.evaluate(env);
         SValue value = this.value.evaluate(env);
 
-        if (refer instanceof SDict) {
+        if (subject instanceof SString) {
+            char c;
+            if (value instanceof SString) {
+                c = value.<String>get().charAt(0);
+            } else {
+                c = (char) EgCast.toInt(value, atom);
+            }
+
+            ((SString) subject).setCharAt(EgCast.toInt(key, atom), c);
+        } else if (subject instanceof SDict) {
             String k;
             if (key instanceof SString || key instanceof SInt || key instanceof SLong) {
                 k = key.asString();
             } else {
                 throw new EgException(2019, "invalid key: " + key, atom);
             }
-            refer.<HashMap<String, SValue>>get().put(k, value);
-        } else if (refer instanceof SList) {
-            refer.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value);
-        } else if ((refer instanceof SObject || refer instanceof SMetaExpression) &&
+            subject.<HashMap<String, SValue>>get().put(k, value);
+        } else if (subject instanceof SList) {
+            subject.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value);
+        } else if ((subject instanceof SObject || subject instanceof SMetaExpression) &&
                 key instanceof SString) {
-            Object sub = refer.underlying;
+            Object sub = subject.underlying;
             EgInterop.setField(sub, key.<String>get(), value);
-        } else if (refer instanceof SClosure) {
+        } else if (subject instanceof SClosure) {
             if (key instanceof SString) {
                 String k = key.get();
-                ExecEnvironment extra = ((SClosure) refer).extra;
+                ExecEnvironment extra = ((SClosure) subject).extra;
                 if (decl == VAR) {
                     extra.bPut(k, value);
                     env.bPut(k, value);
@@ -76,7 +85,7 @@ public class PPut extends SExpression {
                 }
             }
         } else {
-            throw new EgException(2045, "invalid object: " + refer + ", key: " + key, atom);
+            throw new EgException(2045, "invalid object: " + subject + ", key: " + key, atom);
         }
 
         return value;

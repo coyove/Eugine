@@ -15,6 +15,12 @@ public class SString extends SValue {
         super(str);
     }
 
+    public void setCharAt(int index, char c) {
+        StringBuilder sb = new StringBuilder(((String) underlying));
+        sb.setCharAt(index, c);
+        underlying = sb.toString();
+    }
+
     @Override
     public SValue clone()
     {
