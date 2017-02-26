@@ -21,17 +21,6 @@ import java.util.Formatter;
  * Created by coyove on 2016/9/10.
  */
 public final class Utils {
-    @SuppressWarnings("unchecked")
-    public static void loadExportables(String classname) {
-        try {
-            Class<? extends Exportable> cls = (Class<? extends Exportable>)
-                    ClassUtils.getClass(classname + ".EgExport");
-            cls.newInstance().export(SKeywords.Lookup);
-        } catch (Exception e) {
-            ErrorHandler.print(9987, "error when importing " + classname + ": " + e, null);
-        }
-    }
-
     public static String getFileName(String path) {
         try {
             Path p = Paths.get(path);

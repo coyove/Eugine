@@ -27,7 +27,7 @@ public class main {
         ExecEnvironment.globalStaticEnv = e.environment;
 
         for (String cn : options.imports) {
-            Utils.loadExportables(cn);
+            // Utils.loadExportables(cn);
         }
 
         if (options.delayExec || options.reloadable) {

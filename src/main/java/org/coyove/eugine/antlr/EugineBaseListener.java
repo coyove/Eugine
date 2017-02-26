@@ -1,4 +1,4 @@
-// Generated from Eugine.g by ANTLR 4.6
+// Generated from Eugine.g by ANTLR 4.5.3
 
 package org.coyove.eugine.antlr;
 
@@ -9,7 +9,7 @@ import org.coyove.eugine.core.*;
 import org.coyove.eugine.core.interop.*;
 import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
-import org.coyove.eugine.library.*;
+import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
 import org.apache.commons.lang3.ClassUtils;
@@ -325,6 +325,18 @@ public class EugineBaseListener implements EugineListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCompareExpr(EugineParser.CompareExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBitExpr(EugineParser.BitExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBitExpr(EugineParser.BitExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

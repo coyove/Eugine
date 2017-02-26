@@ -31,6 +31,7 @@ public abstract class SValue extends SExpression {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean equals(Object right) {
         if (!(right instanceof SValue)) {
             return false;

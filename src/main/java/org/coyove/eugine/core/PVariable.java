@@ -1,11 +1,8 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.library.system.SEDuplicate;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
-
-import static org.coyove.eugine.library.system.SEDuplicate.sharedPVariables;
 
 /**
  * Created by coyove on 2016/9/9.

@@ -12,7 +12,7 @@ import org.coyove.eugine.core.*;
 import org.coyove.eugine.core.interop.*;
 import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
-import org.coyove.eugine.library.*;
+import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
 import org.apache.commons.lang3.ClassUtils;
@@ -68,7 +68,7 @@ stmt returns [SExpression v]
     ;
 
 importStmt 
-    : ('import' | 'reload') (Identifier ('.' Identifier)*)
+    : ('import' | 'reload' | 'include') (Identifier ('.' Identifier)*)
     ;
 
 enterStmt returns [SExpression v]
@@ -316,12 +316,11 @@ postfixExpr returns [SExpression v]
                     PInteropCall.RETURN_TYPE.CAST_TO_SVALUE :
                     PInteropCall.RETURN_TYPE.DIRECT_RETURN);
         }
-    |   Called=postfixExpr Mt='#'? '(' argumentsList? ')'
+    |   Called=postfixExpr '(' argumentsList? ')'
         {
-            ListEx<SExpression> arguments = $argumentsList.ctx == null ? new ListEx<SExpression>() : $argumentsList.v;
-            if ($Mt != null) {
-                $v = new PThread(new Atom($Mt), $Called.v, arguments);
-            } else if (SKeywords.Lookup.containsKey($Called.text)) {
+            ListEx<SExpression> arguments = $argumentsList.ctx == null ? 
+                new ListEx<SExpression>() : $argumentsList.v;
+            if (SKeywords.Lookup.containsKey($Called.text)) {
                 $v = SKeywords.Lookup.get($Called.text).call($Called.start, arguments); 
             } else {
                 $v = new PCall(new Atom($Called.start), $Called.v, arguments);
@@ -342,6 +341,10 @@ unaryExpr returns [SExpression v]
     |   Not='!' Right=postfixExpr
         {
             $v = new PNot(new Atom($Not), $Right.v);
+        }
+    |   BitNot='~' Right=postfixExpr
+        {
+            $v = new PBitNot(new Atom($BitNot), $Right.v);
         }
     ;
 
@@ -385,15 +388,27 @@ compareExpr returns [SExpression v]
         }
     ;
 
-logicExpr returns [SExpression v]
-    : Top=compareExpr { $v = $Top.v; }
-    | Left=logicExpr Op='&&' Right=compareExpr
+bitExpr returns [SExpression v]
+    :   Top=compareExpr { $v = $Top.v; }
+    |   Left=bitExpr Op='|' Right=compareExpr
         {
-            $v = new PLogic(new Atom($Op), $Left.v, $Right.v, PLogic.AND);
+            $v = new PBitOr(new Atom($Op), $Left.v, $Right.v);
         }
-    | Left=logicExpr Op='||' Right=compareExpr
+    |   Left=bitExpr Op='&' Right=compareExpr
         {
-            $v = new PLogic(new Atom($Op), $Left.v, $Right.v, PLogic.OR);
+            $v = new PBitAnd(new Atom($Op), $Left.v, $Right.v);
+        }
+    |   Left=bitExpr Op='^' Right=compareExpr
+        {
+            $v = new PBitXor(new Atom($Op), $Left.v, $Right.v);
+        }
+    ;
+
+logicExpr returns [SExpression v]
+    : Top=bitExpr { $v = $Top.v; }
+    | Left=logicExpr Op=('&&' | '||') Right=bitExpr
+        {
+            $v = new PLogic(new Atom($Op), $Left.v, $Right.v, $Op.text.equals("||") ? PLogic.OR : PLogic.AND);
         }
     ;
 

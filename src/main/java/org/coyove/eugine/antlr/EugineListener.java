@@ -1,4 +1,4 @@
-// Generated from Eugine.g by ANTLR 4.6
+// Generated from Eugine.g by ANTLR 4.5.3
 
 package org.coyove.eugine.antlr;
 
@@ -9,7 +9,7 @@ import org.coyove.eugine.core.*;
 import org.coyove.eugine.core.interop.*;
 import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
-import org.coyove.eugine.library.*;
+import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
 import org.apache.commons.lang3.ClassUtils;
@@ -271,6 +271,16 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompareExpr(EugineParser.CompareExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link EugineParser#bitExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBitExpr(EugineParser.BitExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link EugineParser#bitExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBitExpr(EugineParser.BitExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#logicExpr}.
 	 * @param ctx the parse tree

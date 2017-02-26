@@ -1,4 +1,7 @@
-import util
+include util
+
+import thread
+import image.pbm
 // // import ifc
 
 // Log.info("begin")
@@ -107,6 +110,8 @@ for 0..N do (i) "glass" => {
 var yCt = 0
 def incr() => sync yCt++
 
+log.info(typeof.__doc__)
+
 let linelen = math.floor((N + 7) / 8)
 let out = buffer(N * linelen)
 
@@ -136,12 +141,12 @@ def putLine(y) =>
                 Zi2=nZi2
 
                 if Zr1*Zr1+Zi1*Zi1>4 { 
-                	b = Bit.or(b, 2)
+                	b |= 2
                 	if b==3 break
                 }
 
                 if Zr2*Zr2+Zi2*Zi2>4 { 
-                	b = Bit.or(b, 1)
+                	b |= 1
                 	if b==3 break
                 }
             }
@@ -158,11 +163,11 @@ def worker () => {
 
 var threads = []
 for 0..4 do () =>
-	threads <+ worker#()
+	threads <+ thread.start(worker)
 
-for threads do (t) => wait(t)
+for threads do (t) => thread.wait(t)
 // worker()
 
-Pbm.write("test.pbm", N, N, out)
+pbm.write("test.pbm", N, N, out)
 
 debug.summary()

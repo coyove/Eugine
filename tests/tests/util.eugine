@@ -32,20 +32,20 @@ def map (f, list) => {
 	var startTime = 0
 
 	def this.start() => {
-		Log.info("==== Debug Started ====")
+		log.info("==== Debug Started ====")
 		startTime = Time.unix(0)
 	}
 
 	def this.assert (result, text) =>
 		if result { 
 			totalPassed++
-			Log.info("[  OK  ] ", text)
+			log.info("[  OK  ] ", text)
 		} else {
 			totalFailed++
-			Log.warn("[FAILED] ", text)
+			log.warn("[FAILED] ", text)
 		}
 
 	def this.summary() => 
-		Log.info("Finish", totalFailed + totalPassed, "tests in", Time.unix(0) - startTime ,"ms,", 
+		log.info("Finish", totalFailed + totalPassed, "tests in", Time.unix(0) - startTime ,"ms,", 
 			totalFailed, "fails")
 })()

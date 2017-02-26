@@ -27,7 +27,10 @@ public class PAssign extends SExpression {
     public PAssign(Atom ha, SExpression l, SExpression r, String o) {
         atom = ha;
         subject = l;
+        build(ha, l, r, o);
+    }
 
+    private void build(Atom ha, SExpression l, SExpression r, String o) {
         switch (o.charAt(0)) {
             case '+':
                 op = new PAdd(ha, l, r, true);
@@ -44,31 +47,22 @@ public class PAssign extends SExpression {
             case '%':
                 op = new PModular(ha, l, r, true);
                 break;
+            case '&':
+                op = new PBitAnd(ha, l, r, true);
+                break;
+            case '|':
+                op = new PBitOr(ha, l, r, true);
+                break;
+            case '^':
+                op = new PBitXor(ha, l, r, true);
+                break;
         }
     }
 
     public PAssign(Atom ha, SExpression s, SExpression k, SExpression v, String o) {
         atom = ha;
         subject = s;
-        SExpression g = new PGet(ha, s, k);
-
-        switch (o.charAt(0)) {
-            case '+':
-                op = new PAdd(ha, g, v, true);
-                break;
-            case '-':
-                op = new PSubtract(ha, g, v, true);
-                break;
-            case '*':
-                op = new PMultiply(ha, g, v, true);
-                break;
-            case '/':
-                op = new PDivide(ha, g, v, true);
-                break;
-            case '%':
-                op = new PModular(ha, g, v, true);
-                break;
-        }
+        build(ha, new PGet(ha, s, k), v, o);
     }
 
     @Override
