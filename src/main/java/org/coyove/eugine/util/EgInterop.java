@@ -66,7 +66,7 @@ public class EgInterop {
             Map map = (Map) value;
             HashMap<String, SValue> ret = new HashMap<String, SValue>(map.size());
             for (Object o : map.keySet()) {
-                ret.put(o, castJavaType(map.get(o)));
+                ret.put(o.toString(), castJavaType(map.get(o)));
             }
 
             return new SDict(ret);

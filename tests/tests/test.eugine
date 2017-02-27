@@ -3,7 +3,7 @@ import image.pbm
 import log
 import java
 
-java.new("java.lang.String")
+println(java.new("java.lang.String", buffer("zzz"), 0, 1))
 exit()
 
 eval("util.eugine")
