@@ -34,7 +34,7 @@ public class SEStr extends SExpression {
         } else {
             if (arg instanceof SBuffer) {
                 byte[] buf = arg.get();
-                return new SString(Utils.bytesToHexString(buf));
+                return new SString(new String(buf));
             }
 
             return new SString(arg.asString());

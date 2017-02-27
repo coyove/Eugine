@@ -1,10 +1,7 @@
 package org.coyove.eugine.core.flow;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.coyove.eugine.base.ReplaceableVariable;
-import org.coyove.eugine.base.ReplaceableVariables;
-import org.coyove.eugine.base.SExpression;
-import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PList;
 import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.parser.Atom;
@@ -161,41 +158,41 @@ public class PCall extends SExpression {
             if (closure.argNames.size() > arguments.size()) {
                 ListEx<String> argNames = closure.argNames.skip(arguments.size());
                 ListEx<Boolean> passByValue = closure.passByValue.skip(arguments.size());
-//                ListEx<SExpression> newArgs = new ListEx<SExpression>();
-//
-//                for (SValue v : arguments) {
-//                    newArgs.add(v);
-//                }
-//
-//                for (String a : argNames) {
-//                    newArgs.add(new PVariable(atom, a));
-//                }
-//
-//                PCall newBody = new PCall(atom, closure, newArgs);
-//                ListEx<SExpression> body = new ListEx<SExpression>();
-//                body.add(newBody);
 
-                SClosure curry = new SClosure(env, argNames, passByValue,
-                        (ListEx<SExpression>) closure.body.clone());
-                if (closure.precastEnv == null) {
-                    curry.precastEnv = new ExecEnvironment();
+                if (closure instanceof SNativeCall) {
+                    SNativeCall cls = (SNativeCall) closure;
+                    SNativeCall curry = new SNativeCall((NativeCallInterface) cls.underlying, 0);
+                    curry.argNames = argNames;
+                    curry.passByValue = passByValue;
+                    curry.precastArguments = arguments;
+                    return curry;
                 } else {
-                    curry.precastEnv = new ExecEnvironment(closure.precastEnv);
-                }
-
-                for (int i = 0; i < arguments.size(); i++) {
-                    if (closure.passByValue.get(i)) {
-                        curry.precastEnv.put(closure.argNames.get(i), arguments.get(i).clone());
+                    SClosure curry = new SClosure(env, argNames, passByValue,
+                            (ListEx<SExpression>) closure.body.clone());
+                    if (closure.precastEnv == null) {
+                        curry.precastEnv = new ExecEnvironment();
                     } else {
-                        curry.precastEnv.put(closure.argNames.get(i), arguments.get(i));
+                        curry.precastEnv = new ExecEnvironment(closure.precastEnv);
                     }
-                }
 
-                return curry;
+                    for (int i = 0; i < arguments.size(); i++) {
+                        if (closure.passByValue.get(i)) {
+                            curry.precastEnv.put(closure.argNames.get(i), arguments.get(i).clone());
+                        } else {
+                            curry.precastEnv.put(closure.argNames.get(i), arguments.get(i));
+                        }
+                    }
+
+                    return curry;
+                }
             }
 
             if (closure instanceof SNativeCall) {
-                return ((SNativeCall) closure).call(atom, env, arguments);
+                SNativeCall nc = ((SNativeCall) closure);
+                if (nc.precastArguments != null)
+                    arguments.addAll(0, nc.precastArguments);
+
+                return nc.call(atom, env, arguments);
             }
 
             // Prepare the environment

@@ -5,7 +5,7 @@
     }
 
     def this.get(cookie) => {
-        var parts = String.split(str(cookie), "&")
+        var parts = str(cookie).split("&")
         if len(parts) != 2
             null
         else if Util.hashString(parts[0]) == parts[1]

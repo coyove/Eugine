@@ -65,10 +65,10 @@
     }
 
     def tState(t) => @ret("") {
-        if Bit.and(t.state, ThreadState.LOCKED)
+        if t.state & ThreadState.LOCKED
             ret <+ "<div class='locked'>该串已被锁定</div>"
 
-        if Bit.and(t.state, ThreadState.SAGED)
+        if t.state & ThreadState.SAGED
             ret <+ "<div class='saged'>该串已被sage</div>"
     }
 
@@ -102,7 +102,7 @@
 
     def this.thread(t) => {
         var ret = header("No." + t.main.id)
-        if !Bit.and(t.main.state, ThreadState.LOCKED)
+        if !(t.main.state & ThreadState.LOCKED)
             ret <+ postReply("reply", "/new/" + t.main.id, "回复")
 
         ret <+ "<hr>"

@@ -1,3 +1,5 @@
+import time
+
 def map (f, list) => {
 	for list do (elem, i) =>{
 		list[i] = f(elem)
@@ -14,8 +16,8 @@ def map (f, list) => {
 			var ret = true
 
 			for list1 do (elem, i) => {
-				if typeof(elem) == "List" && typeof(list2[i]) == "List"
-					ret = _this_.deepCompareList(elem, list2[i])
+				if typeof(elem) == "list" && typeof(list2[i]) == "list"
+					ret = deepCompareList(elem, list2[i])
 				else
 					ret = elem == list2[i]
 			}
@@ -23,7 +25,6 @@ def map (f, list) => {
 			ret
 		} 
 
-	var _this_ = this
 })()
 
 (def debug() => {
@@ -33,7 +34,7 @@ def map (f, list) => {
 
 	def this.start() => {
 		log.info("==== Debug Started ====")
-		startTime = Time.unix(0)
+		startTime = time.currenttimestamp()
 	}
 
 	def this.assert (result, text) =>
@@ -46,6 +47,6 @@ def map (f, list) => {
 		}
 
 	def this.summary() => 
-		log.info("Finish", totalFailed + totalPassed, "tests in", Time.unix(0) - startTime ,"ms,", 
+		log.info("Finish", totalFailed + totalPassed, "tests in", time.currenttimestamp() - startTime ,"ms,", 
 			totalFailed, "fails")
 })()

@@ -26,8 +26,8 @@ public class PList extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         ListEx<SValue> ret = new ListEx<SValue>();
-        for (int i = 0; i < values.size(); i++) {
-            ret.add(values.get(i).evaluate(env));
+        for (SExpression value : values) {
+            ret.add(value.evaluate(env).lightClone());
         }
         return new SList(ret);
     }

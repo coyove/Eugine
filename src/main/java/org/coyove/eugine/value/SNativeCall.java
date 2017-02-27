@@ -11,6 +11,7 @@ import org.coyove.eugine.util.ListEx;
  * Created by zezhong on 2016/12/19.
  */
 public class SNativeCall extends SClosure {
+    public ListEx<SValue> precastArguments;
 
     public SNativeCall(NativeCallInterface nci, int a) {
         underlying = nci;

@@ -1,5 +1,7 @@
 lexer grammar CommonLexerRules;
 
+Import: 'import';
+
 Var: 'var';
 
 Let: 'let';
@@ -22,15 +24,7 @@ Enter: 'enter';
 
 Catch: 'catch';
 
-Clone: 'clone';
-
 Sync: 'sync';
-
-Yield: 'yield';
-
-New: 'new';
-
-Static: 'static';
 
 Do: 'do';
 

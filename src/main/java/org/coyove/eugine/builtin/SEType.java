@@ -28,7 +28,7 @@ public class SEType extends SExpression {
         } else if (v instanceof SMetaExpression) {
             return new SString(((SMetaExpression) v).getSimpleName());
         } else {
-            return new SString(v.getClass().getSimpleName().substring(1));
+            return new SString(v.getClass().getSimpleName().substring(1).toLowerCase());
         }
     }
 

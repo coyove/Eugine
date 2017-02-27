@@ -32,7 +32,7 @@ public class Parser {
     }
 
     public static SValue executeCode(String source, ExecEnvironment env) {
-        return execute(new ANTLRInputStream(source), env, "<vm>", 0);
+        return execute(new ANTLRInputStream(source), env, "", 0);
     }
 
     public static SValue execute(ANTLRInputStream stream, ExecEnvironment env, String source, int pad) {

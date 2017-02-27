@@ -62,13 +62,14 @@ public class EgInterop {
             }
 
             return new SList(ret);
-        } else if (value instanceof HashMap) {
-            HashMap map = (HashMap) value;
+        } else if (value instanceof Map) {
+            Map map = (Map) value;
+            HashMap<String, SValue> ret = new HashMap<String, SValue>(map.size());
             for (Object o : map.keySet()) {
-                map.put(o, castJavaType(map.get(o)));
+                ret.put(o, castJavaType(map.get(o)));
             }
 
-            return new SDict(map);
+            return new SDict(ret);
         } else if (value instanceof SValue) {
             return ((SValue) value);
         } else if (value instanceof SExpression) {
@@ -98,7 +99,7 @@ public class EgInterop {
             } else if (c == char.class) {
                 return ((char) num.intValue());
             } else {
-                return obj.get();
+                return c.cast(obj.get());
             }
         } else if (obj instanceof SList) {
             ListEx<SValue> list = obj.get();
@@ -111,7 +112,7 @@ public class EgInterop {
         } else if (obj instanceof SClosure) {
             return obj;
         } else {
-            return obj.get();
+            return c.cast(obj.get());
         }
     }
 

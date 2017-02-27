@@ -4,8 +4,6 @@ import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.builtin.SEMath;
 import org.coyove.eugine.builtin.meta.SEMeta;
-import org.coyove.eugine.builtin.string.*;
-import org.coyove.eugine.builtin.system.*;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.ListEx;
@@ -121,50 +119,9 @@ public class SKeywords {
                         return new SEBuffer(new Atom(tok), c);
                     }
                 });
-                iput("reverse", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEReverse(new Atom(tok), arguments);
-                    }
-                });
-                iput("keys", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEKeys(new Atom(tok), arguments);
-                    }
-                });
-                iput("asc", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEChar(new Atom(tok), arguments, SEChar.CONVERT.ASC);
-                    }
-                });
-                iput("chr", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEChar(new Atom(tok), arguments, SEChar.CONVERT.CHR);
-                    }
-                });
-
-                iput("log.debug", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.DEBUG);
-                    }
-                });
-                iput("log.info", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.INFO);
-                    }
-                });
-                iput("log.warn", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.WARN);
-                    }
-                });
-                iput("log.error", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.ERROR);
-                    }
-                });
-                iput("log.level", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SELog(new Atom(tok), arguments, SELog.SET_LEVEL);
+                iput("copy", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> c) {
+                        return new SECopy(new Atom(tok), c);
                     }
                 });
                 iput("sys.exec", new CallableKeyword() {
@@ -177,47 +134,7 @@ public class SKeywords {
                         return new SECommand(new Atom(tok), arguments, true);
                     }
                 });
-                iput("File.read", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_TEXT);
-                    }
-                });
-                iput("File.readLines", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_LINES);
-                    }
-                });
-                iput("File.readBinary", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.OPEN_BINARY);
-                    }
-                });
-                iput("File.write", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.WRITE);
-                    }
-                });
-                iput("File.writeBinary", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.WRITE_BINARY);
-                    }
-                });
-                iput("File.delete", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.DELETE);
-                    }
-                });
-                iput("File.append", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.APPEND);
-                    }
-                });
-                iput("File.exists", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SEFile(new Atom(tok), arguments, SEFile.OPERATION.EXISTS);
-                    }
-                });
-                iput("Math.sin", new CallableKeyword() {
+                iput("math.sin", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.SIN);
                     }
@@ -267,22 +184,7 @@ public class SKeywords {
                         return new SEMath(new Atom(tok), c, SEMath.POW);
                     }
                 });
-                iput("Time.unix", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SETime(new Atom(tok), c, SETime.OPERATION.TIME);
-                    }
-                });
-                iput("Time.format", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SETime(new Atom(tok), c, SETime.OPERATION.FORMAT_TIME);
-                    }
-                });
-                iput("Time.utcFormat", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SETime(new Atom(tok), c, SETime.OPERATION.UTC_TIME);
-                    }
-                });
-                iput("Math.round", new CallableKeyword() {
+                iput("math.round", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.ROUND);
                     }
@@ -297,94 +199,9 @@ public class SKeywords {
                         return new SEMath(new Atom(tok), c, SEMath.RANDOM);
                     }
                 });
-                iput("str.trim", new CallableKeyword() {
+                iput("chr", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SETrim(new Atom(tok), arguments);
-                    }
-                });
-                iput("str.match", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SERegexMatch(new Atom(tok), c);
-                    }
-                });
-                iput("str.split", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SESplit(new Atom(tok), c, true);
-                    }
-                });
-                iput("str.join", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEJoin(new Atom(tok), c);
-                    }
-                });
-                iput("str.replace", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEReplace(new Atom(tok), c, SEReplace.OPERATION.NORMAL);
-                    }
-                });
-                iput("str.rsplit", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SESplit(new Atom(tok), c, false);
-                    }
-                });
-                iput("str.rreplace", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEReplace(new Atom(tok), c, SEReplace.OPERATION.REGEX);
-                    }
-                });
-//                iput("thread.start", new CallableKeyword() {
-//                    public SExpression call(Token tok, ListEx<SExpression> c) {
-//                        return new SEThread(new Atom(tok), c);
-//                    }
-//                });
-//                iput("thread.sleep", new CallableKeyword() {
-//                    public SExpression call(Token tok, ListEx<SExpression> c) {
-//                        return new SESleep(new Atom(tok), c);
-//                    }
-//                });
-//                iput("thread.wait", new CallableKeyword() {
-//                    public SExpression call(Token tok, ListEx<SExpression> c) {
-//                        return new SEWait(new Atom(tok), c);
-//                    }
-//                });
-                iput("list.head", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.HEAD);
-                    }
-                });
-                iput("list.tail", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.TAIL);
-                    }
-                });
-                iput("list.init", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.INIT);
-                    }
-                });
-                iput("list.last", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.LAST);
-                    }
-                });
-                iput("list.sort", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.SORT);
-                    }
-                });
-                iput("list.insert", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.INSERT);
-                    }
-                });
-                iput("list.concat", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.CONCAT);
-                    }
-                });
-                iput("list.filter", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEListOp(new Atom(tok), c, SEListOp.FILTER);
+                        return new SEChar(new Atom(tok), arguments);
                     }
                 });
                 iput("meta.add", new CallableKeyword() {

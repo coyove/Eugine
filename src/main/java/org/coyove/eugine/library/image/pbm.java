@@ -3,7 +3,7 @@ package org.coyove.eugine.library.image;
 import org.coyove.eugine.base.NativeCallInterface;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.parser.Atom;
-import org.coyove.eugine.pm.Exportable;
+import org.coyove.eugine.library.Exportable;
 import org.coyove.eugine.util.EgCast;
 import org.coyove.eugine.util.EgException;
 import org.coyove.eugine.util.ExecEnvironment;

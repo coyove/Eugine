@@ -19,7 +19,6 @@ def struct HttpServer(addr, port, timeout) => {
 
     def struct this.HttpContext (socket) => {
         var responseSocket = socket
-        var responseStream = socket::getOutputStream()
 
         var this.headers = {}
 
@@ -29,51 +28,50 @@ def struct HttpServer(addr, port, timeout) => {
             var boundary = "--" + parts.boundary
 
             var curBoundaryPos = 0
-            enter for true do () => {
+            for true do () => {
                 var nextBoundary = contains(this.rawData, boundary, curBoundaryPos)
-                if nextBoundary == -1 exit(0)
+                if nextBoundary == -1 break
 
                 var pos = curBoundaryPos + len(boundary) + 2 // 2 = \r\n
                 var bod = contains(this.rawData, "\r\n\r\n", pos)
-                if bod == -1 exit(0)
+                if bod == -1 break
 
-                var lines = String.splitRaw(chr(this.rawData[pos..bod]), "\r\n")
+                var lines = chr(this.rawData[pos,bod]).split("\r\n")
                 var tmp = parsePairs(lines[0], ";")
-                var key = tmp.name[1..len(tmp.name)-1]
+                var key = tmp.name[1,len(tmp.name)-1]
 
                 bod += 4
                 var eod = contains(this.rawData, "\r\n" + boundary, pos)
-                if eod == -1 exit(0)
+                if eod == -1 break
                 
-                lines = List.tailOf(lines)
+                lines = lines.tail
 
                 if lines != null for lines do (line) => {
-                    if Util.startsWith(line, "Content-Type") {
-                        var ctype = String.trim(line[13..])::toLowerCase()
-                        Log.info(ctype)
+                    if line.startswith("Content-Type") {
+                        var ctype = line[13,].timmed.lowered
+                        log.info(ctype)
+
                         if contains(mimeMapper, ctype) {
                             this.postParams[key] = {
                                 type: ctype,
                                 values: tmp,
-                                payload: this.rawData[bod..eod],
+                                payload: this.rawData[bod,eod],
                             }
                         }
                     }
                 }
 
                 if !contains(this.postParams, key)
-                    this.postParams[key] = new java/lang/String(this.rawData[bod..eod]: byte[])
+                    this.postParams[key] = str(this.rawData[bod,eod])
                 
                 curBoundaryPos = eod
-            } catch(e) {
-                //     Log.warn(e)
             }
         }
 
         def this.parsePostBody () => {
             var this.postParams = parsePairs(this.data, "&")
             if this.route != null {
-                var parts = String.split(this.route, "\\?")
+                var parts = this.route.split("?")
 
                 if len(parts) == 2 {
                     var tmp = parsePairs(parts[1], "&")
@@ -89,13 +87,13 @@ def struct HttpServer(addr, port, timeout) => {
             var this.cookies = parsePairs(if (this.rawCookie) this.rawCookie else "", ";")
 
         def parsePairs (text, delim) => {
-            var pairs = String.split(text, delim)
+            var pairs = text.split(delim)
             var ret = {}
             for pairs do (pair) => {
-                var kv = String.split(pair, "=")
-                var key = String.trim(kv[0])
+                var kv = pair.split("=")
+                var key = kv[0].trimmed
                 if len(kv) == 2 {
-                    ret[key] = Util.decodeURI(String.trim(kv[1]))
+                    ret[key] = Util.decodeURI(kv[1].trimmed)
                 } else if len(kv) == 1 && key != "" {
                     ret[key] = ""
                 }
@@ -132,7 +130,7 @@ def struct HttpServer(addr, port, timeout) => {
             for options do (k, v) =>
                 switch k do {
                     "Expires" => {
-                        payload += "; Expires=" + Time.utcFormat(Time.unix(0) + v * 1000)
+                        payload += "; Expires=" + time.format(time.currenttimestamp + v * 1000, time.utc)
                         payload += "; Max-Age=" + v
                     }
                     "HttpOnly" => {
@@ -171,9 +169,9 @@ def struct HttpServer(addr, port, timeout) => {
         }
 
         def this.serveFile(path) => {
-            path = String.replace(path, "..", "")
+            path = path.replace("..", "")
 
-            if File.exists(path) {
+            if file.exists(path) {
                 var _ = Util.endsWith(path)
                 switch true do {
                     _(".html") => this.writeCommon(200, "html")
@@ -187,10 +185,10 @@ def struct HttpServer(addr, port, timeout) => {
 
                 if _(".raw.html") {
                     this.write(Template.header(""))
-                    this.write(File.read(path))
+                    this.write(file.read(path))
                     this.write(Template.footer())
                 } else {
-                    this.writeBytes(File.readBinary(path))
+                    this.writeBytes(file.read(path, "b"))
                 }
             } else 
                 this.notFound()
@@ -200,19 +198,16 @@ def struct HttpServer(addr, port, timeout) => {
             this.writeBytes(buffer("\r\n"))
 
         def this.writeBytes(bytes) =>
-            if !responseSocket::isClosed()
-                responseStream:>write(bytes : byte[])
+            responseSocket.write(bytes)
 
         def this.close() => {
-            responseStream:>close()
-            responseSocket:>close()
+            responseSocket.close()
         }
     }
 
     def handle (client) => {
-        client::setSoTimeout(readTimeout)
-        var is = client::getInputStream()
-        var context = _HttpServer.HttpContext(client)
+        client.settimeout(readTimeout)
+        var context = HttpContext(client)
 
         enter {
         var buf    = buffer(1024 * 128), 
@@ -224,29 +219,30 @@ def struct HttpServer(addr, port, timeout) => {
             headerLength = 0,
             totalLength  = 0
 
-        enter for read != -1 do () => {
-            totalRead += (read = is::read(buf : byte[]))
-            rawBuf <+ buf[0..read]
-            // rawRequest <+ chr(buf)
+        for read != -1 do () => {
+            var tmp = client.read(buf)
+            if tmp == null break
+
+            totalRead += (read = tmp)
+            rawBuf <+ buf[0,read]
 
             if !bodyLength {
-                var m = String.match(chr(rawBuf), @"(?i)content-length:\s?(\d+)")
+                var m = chr(rawBuf).match(@"(?i)content-length:\s?(\d+)")
                 if len(m) > 0 
-                    bodyLength = num(String.split(m[0].text, ":")[1]) // we found Content-Length header
+                    bodyLength = num(m[0].text.split(":")[1]) // we found Content-Length header
             }
 
             if !headerLength {
-                m = String.match(chr(rawBuf), @"(\r\n\r\n)")
+                m = chr(rawBuf).match(@"(\r\n\r\n)")
                 if len(m) > 0 
                     totalLength = (headerLength = m[0].end) + bodyLength // we reach the end of HTTP request headers
             }
 
-            totalLength != totalRead // || Util.isEndOfStream(rawRequest))
-        } catch (e)
-            Log.warn("Timeout:", e)
+            if totalLength == totalRead break
+        }
 
         // var requests = String.split(rawRequest[0..headerLength], "\r\n")
-        var requests = rawBuf[0..headerLength]
+        var requests = rawBuf[0,headerLength]
         // for requests do (request) => {
         var eol = 0
         for true do () => {
@@ -255,13 +251,13 @@ def struct HttpServer(addr, port, timeout) => {
             if nextEOL == -1 {
                 false
             } else {
-                var request = chr(requests[eol..nextEOL])
-                var parts = String.split(request, " ")
+                var request = chr(requests[eol,nextEOL])
+                var parts = request.split(" ")
                 eol = nextEOL + 2
 
                 var p = null
                 if len(parts) > 1
-                    switch p = parts[0]::toLowerCase() do {
+                    switch p = parts[0].lowered do {
                         "get" =>
                             var context.route = parts[1], context.method = "get"
 
@@ -269,12 +265,12 @@ def struct HttpServer(addr, port, timeout) => {
                             var context.route = parts[1], context.method = "post"   
 
                         "cookie:" =>
-                            var context.rawCookie = request[7..]
+                            var context.rawCookie = request[7,]
 
                         _ => {
-                            var key = String.replace(p, ":", "")
+                            var key = p.replace(":", "")
                             if !contains(context.headers, key)
-                                context.headers[key] = String.trim(request[len(parts[0])..])
+                                context.headers[key] = request[len(parts[0]),].trimmed
                         }
                     }
             }
@@ -284,7 +280,7 @@ def struct HttpServer(addr, port, timeout) => {
             exit("invalid request (" + chr(rawBuf) + ")")
 
         // var context.data = rawRequest[headerLength..]
-        var context.rawData = rawBuf[headerLength..]
+        var context.rawData = rawBuf[headerLength,]
         if context.method == "post" {
             var ctype = context.headers["content-type"]
             if ctype == "application/x-www-form-urlencoded" {
@@ -319,10 +315,10 @@ def struct HttpServer(addr, port, timeout) => {
             found = true
         } else {
             for rref do (route, router) => {
-                if Util.startsWith(tester, route) {
+                if tester.startswith(route) {
                     found = true
                     router(context)
-                    false
+                    break
                 }
             }
         }
@@ -341,7 +337,6 @@ def struct HttpServer(addr, port, timeout) => {
         } catch(e) {
             Log.error(__e__, e)
         } do {
-            is:>close()
             context.close()
         }
     }
@@ -355,18 +350,16 @@ def struct HttpServer(addr, port, timeout) => {
     }
 
     def this.start() => {
-        var ss = new java/net/ServerSocket()
-        ss:>bind(new java/net/InetSocketAddress(listenAddress, listenPort): java/net/SocketAddress)
+        var ss = network.socket.new()
+        ss.bind(listenAddress, listenPort)
 
         for true do () => {
-            var client = ss::accept()
-            handle#(client)
+            var client = ss.accept()
+            thread.start(handle, client)
 
             /* DO NOT write "handle#(ss::accept())" because it
                will continously create new thread without being blocked and cause GC overhead eventually
             */
         }
     }
-
-    var _HttpServer = this
 }

@@ -68,15 +68,17 @@ public class PPut extends SExpression {
             } else {
                 throw new EgException(2019, "invalid key: " + key, atom);
             }
-            subject.<HashMap<String, SValue>>get().put(k, value);
+            subject.<HashMap<String, SValue>>get().put(k, value.lightClone());
         } else if (subject instanceof SList) {
-            subject.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value);
+            subject.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value.lightClone());
         } else if ((subject instanceof SObject || subject instanceof SMetaExpression) &&
                 key instanceof SString) {
             EgInterop.setField(subject.get(), key.<String>get(), value);
         } else if (subject instanceof SClosure) {
             String k = EgCast.toString(key, atom);
             ExecEnvironment extra = ((SClosure) subject).extra;
+            value = value.lightClone();
+
             if (decl == VAR) {
                 extra.bPut(k, value);
                 env.bPut(k, value);

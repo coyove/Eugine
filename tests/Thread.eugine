@@ -1,75 +1,75 @@
 (def ThreadManager() => {
     def this.getNextPostId() => sync {
-        var id = int(File.read(counterPath))
-        File.write(counterPath, str(id++))
+        var id = num(File.read(counterPath))
+        file.write(counterPath, str(id++))
         id
     }
 
     def this.delete(id) => sync if id {
-        var path = dataPath + id / 1000 + "/" + id
-        if File.exists(path) {
+        var path = dataPath + math.floor(id / 1000) + "/" + id
+        if file.exists(path) {
             var t = Reply(id)
-            var raw = File.readLines(path)
+            var raw = file.read(path, "l")
             t.from(raw[0])
-            t.state = Bit.or(t.state, ThreadState.DELETED)
+            t.state |= ThreadState.DELETED
             raw[0] = t.toString2()
 
             if t.reserved != "x" {
                 var fn = t.reserved
                 t.reserved = "x"
-                File.delete(imagesPath + fn)
-                File.delete(thumbsPath + fn)
+                file.delete(imagesPath + fn)
+                file.delete(thumbsPath + fn)
             }
 
-            File.write(path, raw)
-            File.delete(path + ".html")
+            file.write(path, raw)
+            file.delete(path + ".html")
 
             if t.parent != 0 {
-                path = dataPath + t.parent / 1000 + "/" + t.parent
-                raw = File.readLines(path)
+                path = dataPath + math.floor(t.parent / 1000) + "/" + t.parent
+                raw = file.read(path, "l")
 
                 for raw do (line, idx) => {
-                    var parts = String.split(line, " ")
+                    var parts = line.split(" ")
                     if parts[0] == str(t.id) {
                         del(raw, idx)
-                        false
+                        break
                     }
                 }
 
-                File.write(path, raw)
-                File.delete(path + ".html")
+                file.write(path, raw)
+                file.delete(path + ".html")
             }
         }
     }
 
     def this.invertState(id, state) => sync if id {
-        var path = dataPath + id / 1000 + "/" + id
-        if File.exists(path) {
+        var path = dataPath + math.floor(id / 1000) + "/" + id
+        if file.exists(path) {
             var t = Reply(id)
-            var raw = File.readLines(path)
+            var raw = file.read(path, "l")
             t.from(raw[0])
-            t.state = Bit.xor(t.state, state)
+            t.state |= state
             raw[0] = t.toString2()
-            File.write(path, raw)
-            File.delete(path + ".html")
+            file.write(path, raw)
+            file.delete(path + ".html")
         }
     }
 
     def this.deleteImage(id, uid) => sync if id {
-        var path = dataPath + id / 1000 + "/" + id
+        var path = dataPath + math.floor(id / 1000) + "/" + id
         if File.exists(path) {
             var t = Reply(id)
-            var raw = File.readLines(path)
+            var raw = file.read(path, "l")
             t.from(raw[0])
 
             if t.uid == uid && t.reserved != "x" {
                 var fn = t.reserved
                 t.reserved = "x"
                 raw[0] = t.toString2()
-                File.write(path, raw)
-                File.delete(path + ".html")
-                File.delete(imagesPath + fn)
-                File.delete(thumbsPath + fn)
+                file.write(path, raw)
+                file.delete(path + ".html")
+                file.delete(imagesPath + fn)
+                file.delete(thumbsPath + fn)
             }
         }
     }
@@ -84,14 +84,14 @@
 })()
 
 def struct Thread(raw) => {
-    var lines = String.split(raw, "\n")
+    var lines = raw.split("\n")
     if len(lines) == 0 exit(9902)
 
     var this.main = Reply(0)
     this.main.from(lines[0])
 
     var this.replies = []
-    for List.tailOf(lines) do (line) => {
+    for lines.tail do (line) => {
         this.replies <+ Reply(0).from(line)
 
     }
@@ -108,11 +108,11 @@ def struct ThreadInTimeline(lines) => {
     var this.omitted = 0
 
     if len(lines) < Config.repliesDisplayedInTimeline {
-        for List.tailOf(lines) do (line) => 
+        for lines.tail do (line) => 
             this.replies <+ Reply(0).from(line)
     } else {
         this.omitted = len(lines) - Config.repliesDisplayedInTimeline
-        for (this.omitted)..len(lines) do (i) =>
+        for (this.omitted),len(lines) do (i) =>
             this.replies <+ Reply(0).from(lines[i])
     }
 }
@@ -131,20 +131,20 @@ def struct Reply(id) => {
     var this.reserved = "x" // this column has been changed to holding the image path
 
     def this.from (text) => {
-        var parts = String.split(text, " ")
+        var parts = text.split(" ")
         // id, parent, name, subject, comment, uid, state, ts, ip, children, reserved
         if len(parts) < 11 exit(9901)
 
-        var this.id       = int(parts[0])
-        var this.parent   = int(parts[1])
+        var this.id       = num(parts[0])
+        var this.parent   = num(parts[1])
         var this.subject  = Util.decodeURI(parts[2])
         var this.name     = Util.decodeURI(parts[3])
         var this.comment  = Util.decodeURI(parts[4])
         var this.uid      = parts[5]
-        var this.state    = int(parts[6])
-        var this.ts       = long(parts[7])
+        var this.state    = num(parts[6])
+        var this.ts       = num(parts[7])
         var this.ip       = parts[8]
-        var this.children = int(parts[9])
+        var this.children = num(parts[9])
         var this.reserved = parts[10]
 
         this

@@ -6,6 +6,7 @@ import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by zezhong on 2016/9/10.
@@ -23,9 +24,11 @@ public class SERange extends SExpression {
     public SERange() {}
 
     public SERange(Atom ha, ListEx<SExpression> args) {
-        super(ha, args, 2);
+        super(ha, args, 1);
 
-        if (args.size() == 2) {
+        if (args.size() == 1) {
+            start = args.get(0);
+        } else if (args.size() == 2) {
             start = args.get(0); // repeat count
             interval = args.get(1); // item
         } else if (args.size() == 3) {
@@ -36,11 +39,12 @@ public class SERange extends SExpression {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue _start = this.start.evaluate(env);
-        SValue _interval = this.interval.evaluate(env);
 
         if (end != null) {
+            SValue _interval = this.interval.evaluate(env);
             SValue _end = this.end.evaluate(env);
 
             int interval = EgCast.toInt(_interval, atom);
@@ -53,22 +57,47 @@ public class SERange extends SExpression {
             }
 
             return new SList(ret);
-        } else {
+        } else if (interval != null) {
+            SValue value = this.interval.evaluate(env);
             SValue[] arr = new SValue[EgCast.toInt(_start, atom)];
-            Arrays.fill(arr, _interval);
+            Arrays.fill(arr, value);
             ListEx<SValue> ret = new ListEx<SValue>(Arrays.asList(arr));
             return new SList(ret);
+        } else {
+            if (_start instanceof SList) {
+                int len = _start.<ListEx<SValue>>get().size();
+                ListEx<SValue> ret = new ListEx<SValue>(len);
+                for (int i = 0; i < len; i++)
+                    ret.add(new SNumber(i));
+
+                return new SList(ret);
+            } else if (_start instanceof SDict || _start instanceof SClosure) {
+                HashMap<String, SValue> map = (HashMap<String, SValue>) (_start instanceof SDict ?
+                        _start.get() : ((SClosure) _start).extra);
+                ListEx<SValue> ret = new ListEx<SValue>(map.size());
+
+                for (String s : map.keySet()) {
+                    ret.add(new SString(s));
+                }
+
+                return new SList(ret);
+            }
         }
+
+        return ExecEnvironment.Null;
     }
 
     @Override
     public SExpression deepClone() {
         SERange ret = new SERange();
         ret.atom = this.atom;
-
         ret.start = this.start.deepClone();
-        ret.interval = this.interval.deepClone();
-        ret.end = this.end.deepClone();
+
+        if (this.interval != null)
+            ret.interval = this.interval.deepClone();
+
+        if (this.end != null)
+            ret.end = this.end.deepClone();
 
         return ret;
     }

@@ -1,4 +1,4 @@
-package org.coyove.eugine.builtin.string;
+package org.coyove.eugine.builtin;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;

@@ -49,35 +49,51 @@ public class PGet extends SExpression {
             return dk;
         } else if (dict instanceof SList) {
             ListEx<SValue> l = dict.get();
-            int idx = EgCast.toInt(sk, atom);
+            if (sk instanceof SNumber) {
+                int idx = ((SNumber) sk).intValue();
+                if (idx >= l.size() || idx < 0) {
+                    throw new EgException(2021, "index out of range", atom);
+                }
+                return l.get(idx);
+            } else {
+                PseudoCallInterface pc = SList.pseudoCalls.get(EgCast.toString(sk, atom));
+                if (pc == null)
+                    throw new EgException(2024, "pseudo call not found", atom);
 
-            if (idx >= l.size() || idx < 0) {
-                throw new EgException(2021, "index out of range", atom);
+                return pc.call(dict);
             }
-
-            return l.get(idx);
         } else if (dict instanceof SString) {
             String str = dict.get();
-            int idx = EgCast.toInt(sk, atom);
+            if (sk instanceof SNumber) {
+                int idx = ((SNumber) sk).intValue();
 
-            if (idx >= str.length()) {
-                throw new EgException(2023, "index out of range", atom);
+                if (idx >= str.length())
+                    throw new EgException(2023, "index out of range", atom);
+
+                return new SString(String.valueOf(str.charAt(idx)));
+            } else {
+                PseudoCallInterface pc = SString.pseudoCalls.get(EgCast.toString(sk, atom));
+                if (pc == null)
+                    throw new EgException(2024, "pseudo call not found", atom);
+
+                return pc.call(dict);
             }
-
-            return new SString(String.valueOf(str.charAt(idx)));
-
         } else if (dict instanceof SClosure) {
             String k = EgCast.toString(sk, atom);
 
-            if (k.equals("__extra__")) {
-                HashMap<String, SValue> ret = new HashMap<String, SValue>();
-                for (String s : ((SClosure) dict).extra.keySet()) {
-                    ret.put(s, ((SClosure) dict).extra.get(s));
-                }
+            if (k.startsWith("__")) {
+                if (k.equals("__extra__")) {
+                    HashMap<String, SValue> ret = new HashMap<String, SValue>();
+                    for (String s : ((SClosure) dict).extra.keySet()) {
+                        ret.put(s, ((SClosure) dict).extra.get(s));
+                    }
 
-                return new SDict(ret);
-            } else if (k.equals("__doc__")) {
-                return new SString(((SClosure) dict).doc);
+                    return new SDict(ret);
+                } else if (k.equals("__doc__")) {
+                    return new SString(((SClosure) dict).doc);
+                } else {
+                    return ExecEnvironment.Null;
+                }
             } else {
                 SValue ret = ((SClosure) dict).extra.get(k);
                 if (ret == null) {

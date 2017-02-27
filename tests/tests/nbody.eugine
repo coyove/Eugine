@@ -1,3 +1,6 @@
+import time
+import log
+
 let PI = 3.141592653589793;
 let SOLAR_MASS = PI * PI * 4;
 let DAYS_PER_YEAR = 365.24;
@@ -74,19 +77,19 @@ def energy() => {
    let dz = 0.0
    let distance = 0.0
    let e = 0.0
-   let bb = keys(bodies)
+   let bb = range(bodies)
 
-   for 0..len(bb) do (i) => {
+   for 0,len(bb) do (i) => {
       let body = bodies[bb[i]]
       e += 0.5 * body[6] * (body[3] * body[3] + body[4] * body[4] + body[5] * body[5])
 
-      for i+1..len(bb) do (j) => {
+      for i+1,len(bb) do (j) => {
          let jBody = bodies[bb[j]]
          dx = body[0] - jBody[0]
          dy = body[1] - jBody[1]
          dz = body[2] - jBody[2]
 
-         distance = Math.sqrt(dx*dx + dy*dy + dz*dz)
+         distance = math.sqrt(dx*dx + dy*dy + dz*dz)
          e -= ((body[6] * jBody[6]) / distance)
       }
    }
@@ -94,14 +97,14 @@ def energy() => {
    e
 }
 
-let bb = keys(bodies)
+let bb = range(bodies)
 let lbb = len(bb) 
 
 def advance(dt) => {
-   for 0..lbb do (i) "glass" => {
+   for 0,lbb do (i) "glass" => {
       let iBody = bodies[bb[i]]
 
-      for i+1..lbb do (j) "glass" => {
+      for i+1,lbb do (j) "glass" => {
          let jBody = bodies[bb[j]]
 
          let dx = iBody[0] - jBody[0];
@@ -109,7 +112,7 @@ def advance(dt) => {
          let dz = iBody[2] - jBody[2];
 
          let dSquared = dx * dx + dy * dy + dz * dz;
-         let distance = Math.sqrt(dSquared);
+         let distance = math.sqrt(dSquared);
          let mag = dt / (dSquared * distance);
 
          let jmass_mag = jBody[6] * mag
@@ -131,13 +134,13 @@ def advance(dt) => {
    }
 }
 
-let _start = Time.unix(0)
+let _start = time.currenttimestamp()
 println(energy())
-for 0..50000000 do () => {
+for 0,5000000 do () => {
    advance(0.01)
 }
 println(energy())
-println(Time.unix(0) - _start)
+println(time.currenttimestamp() - _start)
 
 // let tmp = [1,2,3]
 // tmp[1] += 2

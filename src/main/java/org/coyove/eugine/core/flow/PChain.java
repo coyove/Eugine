@@ -11,8 +11,6 @@ public class PChain extends SExpression {
     @ReplaceableVariables
     public ListEx<SExpression> expressions;
 
-    private int lastExecPoint = 0;
-
     public PChain() {
         expressions = new ListEx<SExpression>();
     }
@@ -25,7 +23,7 @@ public class PChain extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue ret = ExecEnvironment.Null;
 
-        for (int i = lastExecPoint; i < expressions.size(); i++) {
+        for (int i = 0; i < expressions.size(); i++) {
             SExpression se = expressions.get(i);
             ret = se.evaluate(env);
 

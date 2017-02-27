@@ -31,7 +31,7 @@ public class PDict extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         HashMap<String, SValue> dict = new HashMap<String, SValue>();
         for (int i = 0; i < keys.size(); i++) {
-            dict.put(keys.get(i), values.get(i).evaluate(env));
+            dict.put(keys.get(i), values.get(i).evaluate(env).lightClone());
         }
         return new SDict(dict);
     }

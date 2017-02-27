@@ -49,7 +49,7 @@ public class PAppend extends SExpression {
 
         if (left instanceof SList) {
             ListEx<SValue> list = left.get();
-            list.add(right);
+            list.add(right.lightClone());
             return left;
         }
 

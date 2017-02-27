@@ -68,7 +68,7 @@ stmt returns [SExpression v]
     ;
 
 importStmt 
-    : ('import' | 'reload' | 'include') (Identifier ('.' Identifier)*)
+    : Import (Identifier ('.' Identifier)*)
     ;
 
 enterStmt returns [SExpression v]
@@ -119,28 +119,6 @@ parametersList returns [
 
 argumentsList returns [ ListEx<SExpression> v = new ListEx<SExpression>() ]
     :   HeadExpr=expr { $v.add($HeadExpr.v); } (',' TailExpr=expr { $v.add($TailExpr.v); } )*
-    ;
-
-interopArgumentDeclaration returns [SExpression v, String c]
-    :   InitExpr=expr (':' InitDef=(JavaFullName | Identifier))?
-        {
-            $v = $InitExpr.v;
-            $c = $InitDef.text == null ? "" : $InitDef.text.replace("/", ".");
-        } 
-    ;
-
-interopArgumentsList returns [ 
-        ListEx<SExpression> args = new ListEx<SExpression>(),
-        ListEx<String> defs = new ListEx<String>() ]
-    : '(' 
-        (InitExpr=interopArgumentDeclaration ',' { $args.add($InitExpr.v); $defs.add($InitExpr.c); })* 
-        LastExpr=interopArgumentDeclaration
-    ')'
-        {
-            $args.add($LastExpr.v);
-            $defs.add($LastExpr.c);
-        }
-    | '(' ')'
     ;
 
 defineStmt 
@@ -301,20 +279,13 @@ postfixExpr returns [SExpression v]
         {
             $v = new PGet(new Atom($Subject.start), $Subject.v, $Key.v);
         }
-    |   Subject=postfixExpr '[' Start=assignExpr ('..' | '...') (End=assignExpr)? ']'
+    |   Subject=postfixExpr '[' Start=assignExpr ',' (End=assignExpr)? ']'
         {
             $v = new PSub(new Atom($Subject.start), $Subject.v, $Start.v, $End.ctx == null ? null : $End.v);
         }
     |   Subject=postfixExpr '.' Identifier
         {
             $v = new PGet(new Atom($Identifier), $Subject.v, new SString($Identifier.text));
-        }
-    |   Called=postfixExpr Op=('::' | ':>') Method=Identifier Ial=interopArgumentsList 
-        {
-            $v = new PInteropCall(new Atom($Called.start), $Called.v, $Method.text, $Ial.defs, $Ial.args, 
-                $Op.text.equals("::") ? 
-                    PInteropCall.RETURN_TYPE.CAST_TO_SVALUE :
-                    PInteropCall.RETURN_TYPE.DIRECT_RETURN);
         }
     |   Called=postfixExpr '(' argumentsList? ')'
         {
@@ -335,7 +306,7 @@ unaryExpr returns [SExpression v]
             if ($Right.v instanceof SNumber) {
                 $v = new SNumber(-((SNumber) $Right.v).doubleValue());
             } else {
-                $v = new SEReverse(new Atom($Sub), ListEx.build($Right.v));
+                $v = new PInverse(new Atom($Sub), ListEx.build($Right.v));
             }
         }
     |   Not='!' Right=postfixExpr
@@ -438,20 +409,6 @@ expr returns [SExpression v]
         {
             $v = new PMeta(new Atom($MetaExpression.start), $MetaExpression.v);
         }
-    | New JavaFullName interopArgumentsList
-        {
-            String classname = $JavaFullName.text.replace("/", ".");
-            $v = new PInteropNew(new Atom($New), getClassByName(classname, $New),
-                $interopArgumentsList.defs, $interopArgumentsList.args);
-        }
-    | Static JavaFullName
-        { 
-            $v = getClassByName($JavaFullName.text.replace("/", "."), $Static); 
-        }
-    | Clone Subject=expr
-        { 
-            $v = new PClone(new Atom($Clone), $Subject.v); 
-        }
     | Sync SyncBody=code 
         { 
             $v = new PSync(new Atom($Sync), $SyncBody.v); 
@@ -460,15 +417,10 @@ expr returns [SExpression v]
         {
             $v = new PFor(new Atom($For), $Subject.v, $Body.v); 
         }
-    | For Start=expr (',' Next=expr)? ('..' | '...') End=expr Do Body=expr
+    | For Start=expr (',' I=expr)? ',' End=expr Do Body=expr
         {
             Atom atom = new Atom($For);
-            PIRange r = new PIRange(atom, ListEx.build(
-                    $Start.v, 
-                    $Next.ctx == null ? new SNumber(1) : new PSubtract(atom, $Next.v, $Start.v), 
-                    $End.v
-                ));
-
+            PIRange r = new PIRange(atom, ListEx.build($Start.v, $I.ctx == null ? new SNumber(1) : $I.v, $End.v));
             $v = new PFor(atom, r, $Body.v); 
         }
     | If Condition=expr True=code (Else False=code)?

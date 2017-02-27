@@ -1,4 +1,4 @@
-package org.coyove.eugine.builtin;
+package org.coyove.eugine.core;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.coyove.eugine.base.*;
@@ -11,13 +11,13 @@ import java.util.Arrays;
 /**
  * Created by zezhong on 2016/9/10.
  */
-public class SEReverse extends SExpression {
+public class PInverse extends SExpression {
     @ReplaceableVariable
     private SExpression subject;
 
-    public SEReverse() {}
+    public PInverse() {}
 
-    public SEReverse(Atom ha, ListEx<SExpression> args) {
+    public PInverse(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 1);
         subject = args.head();
     }
@@ -45,7 +45,7 @@ public class SEReverse extends SExpression {
 
     @Override
     public SExpression deepClone() {
-        SEReverse ret = new SEReverse();
+        PInverse ret = new PInverse();
         ret.atom = this.atom;
         ret.subject = this.subject.deepClone();
         return ret;
