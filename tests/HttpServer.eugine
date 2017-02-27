@@ -45,10 +45,9 @@ def struct HttpServer(addr, port, timeout) => {
                 if eod == -1 break
                 
                 lines = lines.tail
-
-                if lines != null for lines do (line) => {
+                for lines do (line) => {
                     if line.startswith("Content-Type") {
-                        var ctype = line[13,].timmed.lowered
+                        var ctype = line[13,].trimmed.lowered
                         log.info(ctype)
 
                         if contains(mimeMapper, ctype) {
@@ -130,7 +129,7 @@ def struct HttpServer(addr, port, timeout) => {
             for options do (k, v) =>
                 switch k do {
                     "Expires" => {
-                        payload += "; Expires=" + time.format(time.currenttimestamp + v * 1000, time.utc)
+                        payload += "; Expires=" + time.format(time.currenttimestamp() + v * 1000, time.utc)
                         payload += "; Max-Age=" + v
                     }
                     "HttpOnly" => {
@@ -197,8 +196,9 @@ def struct HttpServer(addr, port, timeout) => {
         def this.eoh() =>
             this.writeBytes(buffer("\r\n"))
 
-        def this.writeBytes(bytes) =>
+        def this.writeBytes(bytes) => {
             responseSocket.write(bytes)
+        }
 
         def this.close() => {
             responseSocket.close()
@@ -221,7 +221,7 @@ def struct HttpServer(addr, port, timeout) => {
 
         for read != -1 do () => {
             var tmp = client.read(buf)
-            if tmp == null break
+            if tmp == null || tmp == 0 break
 
             totalRead += (read = tmp)
             rawBuf <+ buf[0,read]
@@ -241,7 +241,6 @@ def struct HttpServer(addr, port, timeout) => {
             if totalLength == totalRead break
         }
 
-        // var requests = String.split(rawRequest[0..headerLength], "\r\n")
         var requests = rawBuf[0,headerLength]
         // for requests do (request) => {
         var eol = 0
@@ -304,10 +303,6 @@ def struct HttpServer(addr, port, timeout) => {
             _ => exit(1)
         }
 
-        // if context.method == "post" && false { // context.headers["content-type"] != "" {
-        //     context.writeCommon(403, "plain")
-        //     context.write("\r\n")
-        // } else {
         var found = false
         var tester = context.route
         if contains(rref, "_" + tester) {
@@ -335,14 +330,14 @@ def struct HttpServer(addr, port, timeout) => {
 
         // end of enter
         } catch(e) {
-            Log.error(__e__, e)
+            log.error(__e__, e)
         } do {
             context.close()
         }
     }
 
     def this.addRouter(method, route, router) => {
-        switch method::toLowerCase() do {
+        switch method.lowered do {
             "get" => routerGET[route] = router
             "post" => routerPOST[route] = router
             "404" => router404 = router
@@ -353,13 +348,6 @@ def struct HttpServer(addr, port, timeout) => {
         var ss = network.socket.new()
         ss.bind(listenAddress, listenPort)
 
-        for true do () => {
-            var client = ss.accept()
-            thread.start(handle, client)
-
-            /* DO NOT write "handle#(ss::accept())" because it
-               will continously create new thread without being blocked and cause GC overhead eventually
-            */
-        }
+        for true do () => thread.start(handle, ss.accept())
     }
 }

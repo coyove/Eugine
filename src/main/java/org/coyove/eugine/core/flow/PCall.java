@@ -2,11 +2,14 @@ package org.coyove.eugine.core.flow;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.coyove.eugine.base.*;
+import org.coyove.eugine.core.PGet;
 import org.coyove.eugine.core.PList;
 import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -29,6 +32,9 @@ public class PCall extends SExpression {
         atom = ha;
         called = cls;
         arguments = args == null ? new ListEx<SExpression>() : args;
+
+        if (cls instanceof PGet)
+            ((PGet) cls).asCalled = true;
     }
 
     private static ExecEnvironment prepareEE(SClosure cls, ListEx<SValue> arguments) throws EgException {
@@ -61,71 +67,6 @@ public class PCall extends SExpression {
         }
 
         return newEnv;
-    }
-
-    private Triple<SClosure, ListEx<SValue>, Byte>
-    getContinue(SExpression se, ExecEnvironment env) throws EgException {
-        ListEx<SValue> retArgs = null;
-        SClosure retCls = null;
-        Byte ret = CONTINUE;
-
-        if (se instanceof PCall) {
-            PCall call = (PCall) se;
-            SValue cls_ = call.called.evaluate(env);
-
-            if (cls_ instanceof SClosure) {
-                retCls = (SClosure) cls_;
-                retArgs = SExpression.eval(call.arguments, env, atom);
-                ret = TAIL_CALL;
-            }
-        } else if (se instanceof PIf) {
-            PIf iif = (PIf) se;
-            ret = TAIL_CALL;
-
-            if (iif.evaluateCondition(env)) {
-                retArgs = new ListEx<SValue>();
-                retCls = new SClosure(env, iif.trueBranch);
-            } else if (iif.falseBranch != null) {
-                retArgs = new ListEx<SValue>();
-                retCls = new SClosure(env, iif.falseBranch);
-            } else {
-                ret = FALSE_NULL;
-            }
-        } else if (se instanceof PSwitch) {
-            PSwitch cond = (PSwitch) se;
-            SValue tester = cond.condition.evaluate(env);
-            boolean flag = false;
-
-            ret = TAIL_CALL;
-            retArgs = new ListEx<SValue>();
-
-            for (Branch b : cond.branches) {
-                if (b.recv.evaluate(env).equals(tester)) {
-                    retCls = new SClosure(env, b.body);
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (!flag) {
-                if (cond.defaultBranch != null) {
-                    retCls = new SClosure(env, cond.defaultBranch.body);
-                } else {
-                    ret = FALSE_NULL;
-                }
-            }
-        } else if (se instanceof PChain) {
-            PChain chain = (PChain) se;
-            if (chain.expressions.size() > 0) {
-                ret = TAIL_CALL;
-                retArgs = new ListEx<SValue>();
-                retCls = new SClosure(env, chain.expressions);
-            } else {
-                ret = FALSE_NULL;
-            }
-        }
-
-        return Triple.of(retCls, retArgs, ret);
     }
 
     @Override
@@ -222,7 +163,7 @@ public class PCall extends SExpression {
                 SExpression se = closure.body.get(i);
 
                 // TCO
-                if (i == closure.body.size() - 1) {
+                if (returnAsStruct == null && i == closure.body.size() - 1) {
                     if (se instanceof PCall) {
                         PCall call = (PCall) se;
                         SValue cls_ = call.called.evaluate(newEnv);

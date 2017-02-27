@@ -134,9 +134,9 @@ public class PSub extends SExpression {
         } else if (subObj instanceof SBuffer) {
             byte[] buf = subObj.get();
             if (this.end == null) {
-                return new SObject(Arrays.copyOfRange(buf, start, buf.length));
+                return new SBuffer(Arrays.copyOfRange(buf, start, buf.length));
             } else {
-                return new SObject(Arrays.copyOfRange(buf, start, end));
+                return new SBuffer(Arrays.copyOfRange(buf, start, end));
             }
         } else {
             throw new EgException(3014, "invalid subject", atom);

@@ -2,6 +2,8 @@ import io.file
 import time
 import network.socket
 import thread
+import log
+import io.system
 
 eval("Utils.eugine")
 eval("HttpServer.eugine")
@@ -43,7 +45,7 @@ def pageHandler(ctx, p) => {
     } else {
         if !file.exists((var page = dataPath + p + ".html"))
             sync file.write(page, Util.rebuildPage(p, "all", timelinePath))
-
+        
         ctx.serveFile(page)
     }
 }
@@ -77,12 +79,12 @@ server.addRouter("GET", "/thread/", (context) => {
         errorHandler(context, Config.i18n.INVALID_THREAD_ID)
     } else {
         var threadPath = dataPath + math.floor(tid / 1000) + "/" + tid
-        if !File.exists(threadPath) {
+        if !file.exists(threadPath) {
             context.notFound()            
         } else if file.exists((var cache = threadPath + ".html")) {
             context.serveFile(cache)
         } else {
-            var thread = Thread(File.read(threadPath))
+            var thread = Thread(file.read(threadPath))
             if thread.main.parent != 0 {
                 context.redirect302("/thread/" + thread.main.parent + "#thread-" + tid)
             } else if thread.main.state & ThreadState.DELETED {
@@ -105,7 +107,7 @@ server.addRouter("GET", "/api/", (context) => {
     var tid = num(context.route[5,])
     if tid != null {
         var threadPath = dataPath + math.floor(tid / 1000) + "/" + tid
-        if File.exists(threadPath) {
+        if file.exists(threadPath) {
             var thread = Thread(file.read(threadPath))
             if !(thread.main.state & ThreadState.DELETED) {
                 context.write(Template.apiThread(thread.main))
@@ -239,7 +241,7 @@ server.addRouter("POST", "/new/", (context) => enter {
     if len(comment) > 2048 exit(31)
     if (var size = len(context.postParams.image.payload)) > 1024 * 5120 exit(80)
     if size > 0 {
-        var fn = time.currenttimestamp
+        var fn = time.currenttimestamp()
         var dir = str(math.floor(fn / 86400000)) + "/"
         fn = dir + size + "." + fn + 
             (if contains(server.mimeMapper, context.postParams.image.type)
@@ -253,7 +255,7 @@ server.addRouter("POST", "/new/", (context) => enter {
         file.write(thumbsPath + fn, context.postParams.image.payload)
         var cmd = "convert " + imagesPath + fn + "[0] -quality 90 -thumbnail '200x200>' " + thumbsPath + fn
         // Log.info(cmd)
-        // System.exec(cmd)
+        sys.exec(cmd)
     }
 
     sync {
@@ -323,7 +325,6 @@ server.addRouter("POST", "/new/", (context) => enter {
 
             var redirectTo = "/thread/" + rid
         }
-
         file.write(timelinePath, timeline)
         Util.deleteAllCache()
     }
@@ -352,7 +353,7 @@ server.addRouter("POST", "/new/", (context) => enter {
         81 => errorHandler(context, "无效图片")
         90 => errorHandler(context, "无效权限")
         91 => errorHandler(context, "无效串Id")
-        _ => Log.error(e)
+        _ => log.error(e)
     }
 })
 

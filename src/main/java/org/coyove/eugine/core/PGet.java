@@ -18,17 +18,20 @@ public class PGet extends SExpression {
     @ReplaceableVariable
     public SExpression key;
 
+    public boolean asCalled;
+
     public PGet() {}
 
     public PGet(Atom ha, SExpression d, SExpression k) {
         atom = ha;
         subject = d;
         key = k;
+        asCalled = false;
     }
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        SValue dict = this.subject.evaluate(env);
+        final SValue dict = this.subject.evaluate(env);
         SValue sk = this.key.evaluate(env);
 
         if (dict instanceof SDict) {
@@ -117,13 +120,17 @@ public class PGet extends SExpression {
             byte[] buf = dict.get();
             return new SNumber(buf[EgCast.toInt(sk, atom)]);
         } else if (dict instanceof SObject || dict instanceof SMetaExpression) {
-            String field = EgCast.toString(sk, atom);
+            final String name = EgCast.toString(sk, atom);
 
-            try {
-                Object obj = dict.get();
-                return EgInterop.getField(obj, field);
-            } catch (EgException e) {
-                throw e;
+            if (asCalled) {
+                return new SNativeCall(new NativeCallInterface() {
+                    public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
+                            throws EgException {
+                        return EgInterop.callMostPossibleMethod(atom, dict.get(), name, arguments);
+                    }
+                }, 0);
+            } else {
+                return EgInterop.getField(dict.get(), name);
             }
         } else {
             throw new EgException(7029, "failed to get", atom);
@@ -137,6 +144,7 @@ public class PGet extends SExpression {
 
         ret.subject = this.subject.deepClone();
         ret.key = this.key.deepClone();
+        ret.asCalled = this.asCalled;
 
         return ret;
     }

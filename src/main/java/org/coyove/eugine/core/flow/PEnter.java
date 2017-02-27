@@ -35,7 +35,7 @@ public class PEnter extends SExpression {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
-            env.bPut(exName == null ? "__ex__" : exName, new SString(ex.toString()));
+            env.bPut(exName == null ? "__ex__" : exName, new SObject(ex));
             if (this.catchBody != null) {
                 this.catchBody.evaluate(env);
             }
@@ -43,7 +43,7 @@ public class PEnter extends SExpression {
             if (this.finallyBody != null) {
                 return this.finallyBody.evaluate(env);
             } else {
-                return env.Null;
+                return ExecEnvironment.Null;
             }
         }
     }

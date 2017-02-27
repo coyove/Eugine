@@ -124,16 +124,6 @@ public class SKeywords {
                         return new SECopy(new Atom(tok), c);
                     }
                 });
-                iput("sys.exec", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SECommand(new Atom(tok), arguments, false);
-                    }
-                });
-                iput("sys.execa", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
-                        return new SECommand(new Atom(tok), arguments, true);
-                    }
-                });
                 iput("math.sin", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> c) {
                         return new SEMath(new Atom(tok), c, SEMath.SIN);

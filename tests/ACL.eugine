@@ -1,13 +1,13 @@
 var ipMap = {}
 
 def accessControl(ip, rate) => {
-    var now = Time.unix(0)
+    var now = time.currenttimestamp()
     if contains(ipMap, ip) {
         if now - ipMap[ip].ts > rate {
             del(ipMap, ip)
             true
         } else {
-            Log.warn("Frequent access found:", ip)
+            log.warn("Frequent access found:", ip)
             false
         }
     } else {
@@ -16,8 +16,8 @@ def accessControl(ip, rate) => {
     }
 }
 
-(() => {
-    var now = Time.unix(0)
+thread.start(() => {
+    var now = time.currenttimestamp()
     for ipMap do (ip, data) => if now - data.ts > data.rate del(ipMap, ip)
-    sleep(10000)
-})#()
+    thread.sleep(10000)
+})

@@ -43,15 +43,6 @@ public class PPut extends SExpression {
         SValue key = this.key.evaluate(env);
         SValue value = this.value.evaluate(env);
 
-        return put(atom, subject, key, value, env, decl);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static SValue put(
-            Atom atom,
-            SValue subject, SValue key, SValue value,
-            ExecEnvironment env,
-            byte decl) throws EgException {
         if (subject instanceof SString) {
             char c;
             if (value instanceof SString) {
@@ -81,14 +72,17 @@ public class PPut extends SExpression {
 
             if (decl == VAR) {
                 extra.bPut(k, value);
-                env.bPut(k, value);
+
+                if (this.subject instanceof PVariable && ((PVariable) this.subject).name.equals("this"))
+                    env.bPut(k, value);
             } else { // SET
                 SValue setter = extra.get("__set__" + k);
                 if (setter instanceof SClosure) {
                     return PCall.evaluateClosure(atom, ((SClosure) setter), ListEx.build(value), env);
                 } else {
                     extra.put(k, value);
-                    env.put(k, value);
+                    if (this.subject instanceof PVariable && ((PVariable) this.subject).name.equals("this"))
+                        env.put(k, value);
                 }
             }
         } else if (subject instanceof SBuffer) {

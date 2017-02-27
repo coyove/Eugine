@@ -3,9 +3,6 @@ import image.pbm
 import log
 import java
 
-println(java.new("java.lang.String", buffer("zzz"), 0, 1))
-exit()
-
 eval("util.eugine")
 // // import ifc
 
@@ -22,7 +19,6 @@ eval("util.eugine")
 // // //     })
 
 // // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
-
 debug.start()
 
 // ;;
@@ -120,8 +116,11 @@ debug.start()
 //         && "".join([3, 4, 5]) == "345", "List Pseudo Operations 2")
 // })()
 
-// debug.summary()
-// exit()
+debug.assert(java.class("java.net.URLEncoder").encode("!@#$%^&() abc 中文") == 
+    "%21%40%23%24%25%5E%26%28%29+abc+%E4%B8%AD%E6%96%87", "Java Interoperability")
+
+debug.summary()
+exit()
 
 let N = 1600
 let Crb = range(N + 7, 0), Cib = range(N + 7,0) // 79462469 , 4295b0b8 

@@ -100,6 +100,7 @@ public class socket implements Exportable {
                                                                    ListEx<SValue> arguments)
                                                         throws EgException {
                                                     try {
+                                                        os.flush();
                                                         os.close();
                                                         is.close();
                                                         socket.close();
@@ -108,7 +109,8 @@ public class socket implements Exportable {
                                                         return ExecEnvironment.Null;
                                                     }
                                                 }
-                                            }, 1));
+                                            }, 0
+                                            ));
                                     return ret;
                                 } catch (Exception e) {
                                     return ExecEnvironment.Null;

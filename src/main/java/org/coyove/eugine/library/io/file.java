@@ -54,8 +54,13 @@ public class file implements Exportable {
                     try {
                         switch (opt) {
                             case 'l':
-                                List<String> lines = Files.readAllLines(Paths.get(path));
-                                ListEx<SValue> ret = new ListEx<SValue>(lines.size());
+                                String text = new String(Files.readAllBytes(Paths.get(path)));
+                                if (text.isEmpty())
+                                    return new SList(new ListEx<SValue>());
+
+                                String[] lines = text.split("\\n");
+
+                                ListEx<SValue> ret = new ListEx<SValue>(lines.length);
                                 for (String line : lines)
                                     ret.add(new SString(line));
 
@@ -100,11 +105,13 @@ public class file implements Exportable {
                             Files.write(Paths.get(path), ((byte[]) data.get()), oo);
                         } else if (data instanceof SList) {
                             StringBuilder sb = new StringBuilder();
-                            for (SExpression v : data.<ListEx<SExpression>>get()) {
-                                SValue value = v.evaluate(env);
+                            ListEx<SValue> list = data.get();
+
+                            for (int i = 0; i < list.size(); i++) {
+                                SValue value = list.get(i);
 
                                 if (value instanceof SString) {
-                                    sb.append(value.<String>get() + "\n");
+                                    sb.append(value.<String>get()).append(i != list.size() - 1 ? "\n" : "");
                                 }
                             }
                             Files.write(Paths.get(path), sb.toString().getBytes("utf-8"), oo);

@@ -1,4 +1,4 @@
-// Generated from Eugine.g by ANTLR 4.6
+// Generated from Eugine.g by ANTLR 4.5.3
 
 package org.coyove.eugine.antlr;
 
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class EugineParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.6", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -172,7 +172,6 @@ public class EugineParser extends Parser {
 		int _la;
 		try {
 			setState(63);
-			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__0:
 			case T__3:
@@ -327,7 +326,7 @@ public class EugineParser extends Parser {
 	}
 
 	public static class BlockContext extends ParserRuleContext {
-		public PChain v = new PChain();
+		public PChain v =  new PChain();
 		public StmtContext stmt;
 		public List<StmtContext> stmt() {
 			return getRuleContexts(StmtContext.class);
@@ -431,7 +430,6 @@ public class EugineParser extends Parser {
 		enterRule(_localctx, 6, RULE_stmt);
 		try {
 			setState(103);
-			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Import:
 				enterOuterAlt(_localctx, 1);
@@ -719,7 +717,7 @@ public class EugineParser extends Parser {
 
 	public static class DeclareStmtContext extends ParserRuleContext {
 		public SExpression v;
-		public ListEx<SExpression> multi = new ListEx<SExpression>();
+		public ListEx<SExpression> multi =  new ListEx<SExpression>();
 		public byte act;
 		public Token Action;
 		public UnaryExprContext Head;
@@ -767,10 +765,7 @@ public class EugineParser extends Parser {
 			_la = _input.LA(1);
 			if ( !(_la==Var || _la==Let) ) {
 				((DeclareStmtContext)_localctx).Action = (Token)_errHandler.recoverInline(this);
-			}
-			else {
-				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-				_errHandler.reportMatch(this);
+			} else {
 				consume();
 			}
 
@@ -827,8 +822,8 @@ public class EugineParser extends Parser {
 	}
 
 	public static class ParametersListContext extends ParserRuleContext {
-		public ListEx<String> v = new ListEx<String>();
-		public ListEx<Boolean> passByValue = new ListEx<Boolean>();
+		public ListEx<String> v =  new ListEx<String>();
+		public ListEx<Boolean> passByValue =  new ListEx<Boolean>();
 		public Token LastStyle;
 		public Token LastArg;
 		public Token InitStyle;
@@ -859,7 +854,6 @@ public class EugineParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(153);
-			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__7) {
 				{
@@ -879,7 +873,6 @@ public class EugineParser extends Parser {
 				setState(156);
 				match(T__6);
 				setState(158);
-				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==T__7) {
 					{
@@ -918,7 +911,7 @@ public class EugineParser extends Parser {
 	}
 
 	public static class ArgumentsListContext extends ParserRuleContext {
-		public ListEx<SExpression> v = new ListEx<SExpression>();
+		public ListEx<SExpression> v =  new ListEx<SExpression>();
 		public ExprContext HeadExpr;
 		public ExprContext TailExpr;
 		public List<ExprContext> expr() {
@@ -983,7 +976,7 @@ public class EugineParser extends Parser {
 
 	public static class DefineStmtContext extends ParserRuleContext {
 		public SExpression v;
-		public ListEx<SExpression> decorators = new ListEx<SExpression>();
+		public ListEx<SExpression> decorators =  new ListEx<SExpression>();
 		public Token Struct;
 		public Token Operator;
 		public Token Get;
@@ -1039,7 +1032,6 @@ public class EugineParser extends Parser {
 			setState(180);
 			match(Def);
 			setState(185);
-			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Struct:
 				{
@@ -1082,14 +1074,12 @@ public class EugineParser extends Parser {
 				setState(188);
 				((DefineStmtContext)_localctx).Decorator = expr();
 				setState(194);
-				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==T__3) {
 					{
 					setState(189);
 					match(T__3);
 					setState(191);
-					_errHandler.sync(this);
 					_la = _input.LA(1);
 					if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__3) | (1L << T__10) | (1L << T__13) | (1L << T__15) | (1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << For) | (1L << If) | (1L << Switch) | (1L << Sync) | (1L << Integer) | (1L << Double) | (1L << Identifier))) != 0) || _la==RawString || _la==StringLiteral) {
 						{
@@ -1178,7 +1168,7 @@ public class EugineParser extends Parser {
 
 	public static class LambdaStmtContext extends ParserRuleContext {
 		public PLambda v;
-		public ListEx<SExpression> body = new ListEx<SExpression>();
+		public ListEx<SExpression> body =  new ListEx<SExpression>();
 		public PVariable ret;
 		public Token LambdaStart;
 		public ParametersListContext Parameters;
@@ -1225,7 +1215,6 @@ public class EugineParser extends Parser {
 			setState(212);
 			((LambdaStmtContext)_localctx).LambdaStart = match(T__3);
 			setState(214);
-			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__7 || _la==Identifier) {
 				{
@@ -1237,7 +1226,6 @@ public class EugineParser extends Parser {
 			setState(216);
 			match(T__4);
 			setState(218);
-			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==RawString || _la==StringLiteral) {
 				{
@@ -1246,10 +1234,7 @@ public class EugineParser extends Parser {
 				_la = _input.LA(1);
 				if ( !(_la==RawString || _la==StringLiteral) ) {
 					((LambdaStmtContext)_localctx).Description = (Token)_errHandler.recoverInline(this);
-				}
-				else {
-					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-					_errHandler.reportMatch(this);
+				} else {
 					consume();
 				}
 				}
@@ -1347,8 +1332,8 @@ public class EugineParser extends Parser {
 
 	public static class SwitchStmtContext extends ParserRuleContext {
 		public SExpression v;
-		public ListEx<Branch> branches = new ListEx<Branch>();
-		public Branch db = null;
+		public ListEx<Branch> branches =  new ListEx<Branch>();
+		public Branch db =  null;
 		public Token Switch;
 		public ExprContext Condition;
 		public ExprContext Tester;
@@ -1445,7 +1430,7 @@ public class EugineParser extends Parser {
 	}
 
 	public static class DictContext extends ParserRuleContext {
-		public PDict v = new PDict();
+		public PDict v =  new PDict();
 		public PairContext pair;
 		public List<PairContext> pair() {
 			return getRuleContexts(PairContext.class);
@@ -1504,7 +1489,6 @@ public class EugineParser extends Parser {
 					_alt = getInterpreter().adaptivePredict(_input,26,_ctx);
 				}
 				setState(279);
-				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==T__6) {
 					{
@@ -1570,7 +1554,6 @@ public class EugineParser extends Parser {
 		int _la;
 		try {
 			setState(297);
-			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case RawString:
 			case StringLiteral:
@@ -1581,10 +1564,7 @@ public class EugineParser extends Parser {
 				_la = _input.LA(1);
 				if ( !(_la==RawString || _la==StringLiteral) ) {
 					((PairContext)_localctx).Key = (Token)_errHandler.recoverInline(this);
-				}
-				else {
-					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-					_errHandler.reportMatch(this);
+				} else {
 					consume();
 				}
 				setState(288);
@@ -1622,7 +1602,7 @@ public class EugineParser extends Parser {
 	}
 
 	public static class ListContext extends ParserRuleContext {
-		public PList v = new PList();
+		public PList v =  new PList();
 		public ValueContext value;
 		public List<ValueContext> value() {
 			return getRuleContexts(ValueContext.class);
@@ -1683,7 +1663,6 @@ public class EugineParser extends Parser {
 					_alt = getInterpreter().adaptivePredict(_input,30,_ctx);
 				}
 				setState(313);
-				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==T__6) {
 					{
@@ -2075,7 +2054,6 @@ public class EugineParser extends Parser {
 						setState(379);
 						match(T__6);
 						setState(381);
-						_errHandler.sync(this);
 						_la = _input.LA(1);
 						if (((((_la - 4)) & ~0x3f) == 0 && ((1L << (_la - 4)) & ((1L << (T__3 - 4)) | (1L << (T__15 - 4)) | (1L << (T__16 - 4)) | (1L << (T__17 - 4)) | (1L << (T__18 - 4)) | (1L << (T__21 - 4)) | (1L << (T__22 - 4)) | (1L << (T__23 - 4)) | (1L << (Integer - 4)) | (1L << (Double - 4)) | (1L << (Identifier - 4)) | (1L << (RawString - 4)) | (1L << (StringLiteral - 4)))) != 0)) {
 							{
@@ -2119,7 +2097,6 @@ public class EugineParser extends Parser {
 						setState(391);
 						match(T__3);
 						setState(393);
-						_errHandler.sync(this);
 						_la = _input.LA(1);
 						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__3) | (1L << T__10) | (1L << T__13) | (1L << T__15) | (1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << For) | (1L << If) | (1L << Switch) | (1L << Sync) | (1L << Integer) | (1L << Double) | (1L << Identifier))) != 0) || _la==RawString || _la==StringLiteral) {
 							{
@@ -2190,7 +2167,6 @@ public class EugineParser extends Parser {
 		enterRule(_localctx, 38, RULE_unaryExpr);
 		try {
 			setState(417);
-			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__3:
 			case T__15:
@@ -2591,10 +2567,7 @@ public class EugineParser extends Parser {
 					_la = _input.LA(1);
 					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__29) | (1L << T__30) | (1L << T__31) | (1L << T__32) | (1L << T__33) | (1L << T__34))) != 0)) ) {
 						((CompareExprContext)_localctx).Op = (Token)_errHandler.recoverInline(this);
-					}
-					else {
-						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-						_errHandler.reportMatch(this);
+					} else {
 						consume();
 					}
 					setState(473);
@@ -2819,10 +2792,7 @@ public class EugineParser extends Parser {
 					_la = _input.LA(1);
 					if ( !(_la==T__37 || _la==T__38) ) {
 						((LogicExprContext)_localctx).Op = (Token)_errHandler.recoverInline(this);
-					}
-					else {
-						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-						_errHandler.reportMatch(this);
+					} else {
 						consume();
 					}
 					setState(511);

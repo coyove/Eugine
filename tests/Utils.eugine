@@ -1,34 +1,27 @@
-import Cookie
+import java
+import encode.digest
+
+eval("Cookie.eugine")
 
 (def Util() => {
-    var javaURLDecoder = static java/net/URLDecoder
-    var javaURLEncoder = static java/net/URLEncoder
-    var thisUtil = this
+    var seu = java.class("org.apache.commons.lang3.StringEscapeUtils")
 
-    def this.struct1 (f, args...) => {       
-        f(args...)
-        clone f
-    }     
+    def this.encodeURI (text) => java.class("java.net.URLEncoder").encode(text, "utf-8")
 
-    def this.encodeURI (text) => 
-        javaURLEncoder::encode(text : String, "utf-8" : String)
+    def this.decodeURI (text) => java.class("java.net.URLDecoder").decode(text, "utf-8")
 
-    def this.decodeURI (text) => 
-        javaURLDecoder::decode(text : String, "utf-8" : String)
-
-    def this.filterString (text) => 
-        encodeURI((static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text))
+    def this.filterString (text) => encodeURI(seu.escapeHtml3(text))
 
     def this.filterName (name) => {
-        name = (static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(String.replace(name, "!", "_"))
+        name = seu.escapeHtml3(name.replace("!", "_"))
 
         if contains(name, "#") > -1 {
-            var names = String.split(name, "#")
+            var names = name.split("#")
 
             if Config.mods[names[0]] == names[1] {
                 name = "<span mod>" + names[0] + "</span>"
             } else {
-                name = names[0] + "<span tripcode>!" + Util.hashString2(names[1])[0..4] + "</span>"
+                name = names[0] + "<span tripcode>!" + Util.hashString2(names[1])[0,4] + "</span>"
             }
         }
 
@@ -36,21 +29,21 @@ import Cookie
     }
 
     def this.filterComment (text) => @ret("") {
-        text = (static org/apache/commons/lang3/StringEscapeUtils)::escapeHtml3(text)
+        text = seu.escapeHtml3(text)
 
-        var lines = String.split(text, "\n")
+        var lines = text.split("\n")
         var codeFlag = false
         def replacer (t) => {
-            t = String.regexReplace(t, @"(https?:\/\/\S+)", "<a class='link' href='$1' target='_blank'>$1</a>")
-            t = String.regexReplace(t, @"&gt;&gt;No\.(\d+)",
-"<a class='aref' onmouseover='openref($1, this)' onmouseout='closeref($1, this)' href='javascript:open($1)'>&gt;&gt;No.$1</a>")
-            String.regexReplace(t, @"^&gt;(.+)", "<span quote>&gt;$1</span>")
+            t = t.replace(@"(https?:\/\/\S+)", "<a class='link' href='$1' target='_blank'>$1</a>", "r")
+            t = t.replace(@"&gt;&gt;No\.(\d+)",
+"<a class='aref' onmouseover='openref($1, this)' onmouseout='closeref($1, this)' href='javascript:open($1)'>&gt;&gt;No.$1</a>", "r")
+            t.replace(@"^&gt;(.+)", "<span quote>&gt;$1</span>", "r")
         }
 
         var tooManyLines = false
         for lines do (line, i) => {
 
-            if String.trim(line) == "```" { 
+            if line.trimmed == "```" { 
                 codeFlag = !codeFlag
 
                 if codeFlag
@@ -80,18 +73,17 @@ import Cookie
     }
 
     def this.makeDir (path) => {
-        var p = (static java/nio/file/Paths)::get(path, []: java/lang/String...)
+        var p = java.class("java.nio.file.Paths").get(path)
         
-        if !File.exists(path) {
-            (static java/nio/file/Files):>createDirectories(p: java/nio/file/Path, 
-                []: java/nio/file/attribute/FileAttribute...)
+        if !file.exists(path) {
+            java.class("java.nio.file.Files").createDirectories(p)
         }
 
         path
     }
 
     def this.makeFile (path, initData) => {
-        if !File.exists(path) File.write(path, initData)
+        if !file.exists(path) file.write(path, initData)
         path
     }
 
@@ -99,28 +91,26 @@ import Cookie
         if len(text) < len(prefix)
             false
         else 
-            text[0..len(prefix)] == prefix
+            text[0,len(prefix)] == prefix
 
     def this.endsWith (text, suffix) =>
         if (var tl = len(text)) < (var sl = len(suffix))
             false
         else 
-            text[(tl-sl)..tl] == suffix
+            text[(tl-sl),tl] == suffix
 
     def this.randomString(length) => {
         var table = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
         var ret = ""
-        for 0..length do () => 
-            ret += table[Math.floor(Math.random(0) * 58)]
+        for 0,length do () => 
+            ret += table[math.floor(math.random(0) * 58)]
 
         ret
     }
 
-    def this.hashString(text) =>
-        Digest.hexSHA1(Digest.SHA256(text + Config.salt))
+    def this.hashString(text) => digest.sha1(digest.sha256(text + Config.salt), "hex")
 
-    def this.hashString2(text) =>
-        Digest.hexSHA1(Digest.SHA256(Digest.SHA256(text + Config.salt)))
+    def this.hashString2(text) => digest.sha1(digest.sha256(digest.sha256(text + Config.salt)), "hex")
 
     def this.isEndOfStream (stream) => {
         var length = len(stream);
@@ -129,65 +119,37 @@ import Cookie
         (stream[length - 2] == "\r" && stream[length - 4] == "\r")
     }
 
-    def this.getRss (url) => {
-        var now = Time.unix(1)
-        var ret = ""
-        
-        enter if contains(rssCache, url) && (now - rssCache[url].updated < 2000) {
-            println("cache hit: ", url)
-            ret = rssCache[url].rss
-        } else {
-            var obj = new java/net/URL(url : String)
-            var conn = obj::openConnection()
-
-            // error when url is invalid
-            var br = new java/io/BufferedReader(
-                new java/io/InputStreamReader(conn:>getInputStream(): java/io/InputStream): java/io/Reader)
-
-            var inputLine = "", response = new java/lang/StringBuffer()
-
-            for (inputLine = br::readLine()) != null do () =>
-                response:>append(inputLine : String)
-
-            br:>close()
-            var rss = response::toString()
-
-            rssCache[url] = { updated: Time.unix(1), rss : rss }
-            ret = rss
-        } do ret
-    }
-
     def this.trimIP(ip) => {
         if contains(ip, ":") > -1 {
-            var parts = String.split(ip, ":") // buggy, abbreviation is not considered
-            String.join(parts[0..len(parts)/2], ".")
+            var parts = ip.split(":") // buggy, abbreviation is not considered
+            ".".join(parts[0,len(parts)/2])
         } else {
-            var parts = String.splitRaw(ip, ".")
-            String.join(List.initOf(parts), ".")
+            var parts = ip.split(".")
+            ".".join(parts.init)
         }
     }
 
-    def this.rebuildPage(page, title, source) => enter {
+    def this.rebuildPage(page, title, source) => {
         var threads = []
 
         if page == 1 {
-            var sticky = File.readLines(stickyPath)
+            var sticky = file.read(stickyPath, "l")
             for sticky do (id) => {
-                var path = dataPath + int(id) / 1000 + "/" + id
+                var path = dataPath + math.floor(num(id) / 1000) + "/" + id
 
-                if File.exists(path) {
-                    var thread = ThreadInTimeline(File.readLines(path))
+                if file.exists(path) {
+                    var thread = ThreadInTimeline(file.read(path, "l"))
                     thread.main.isSticky = true
                     threads <+ thread
                 }
             }
         }
 
-        var timeline = File.readLines(source)
+        var timeline = file.read(source, "l")
         
         if len(timeline) > 500 {
-            timeline = timeline[0..500]
-            File.write(source, timeline)
+            timeline = timeline[0,500]
+            file.write(source, timeline)
         }
 
         var total = len(timeline)
@@ -195,29 +157,28 @@ import Cookie
         var end = page * Config.threadsPerPage
         var html = ""
 
-        if total <= start exit(0)
-        if total < end end = total
+        if total > start {
+            if total < end end = total
 
-        for start..end do (i) => {
-            var id = int(timeline[i])
-            var path = dataPath + id / 1000 + "/" + id
+            for start,end do (i) => {
+                var id = num(timeline[i])
+                var path = dataPath + math.floor(id / 1000) + "/" + id
 
-            if File.exists(path) {
-                var data = File.readLines(path)
-                // var tit = 
-                threads <+ ThreadInTimeline(data)
+                if file.exists(path) {
+                    var data = file.read(path, "l")
+                    threads <+ ThreadInTimeline(data)
+                }
             }
         }
-    } catch(e) {
 
-    } do {
+
         Template.renderTimeline(page, title, threads)
     }
 
     def this.deleteAllCache() => {
-        for 1..21 do (i) => {
-            File.delete(dataPath + i + ".html")
-            File.delete(dataPath + i + ".report.html")
+        for 1,21 do (i) => {
+            file.delete(dataPath + i + ".html")
+            file.delete(dataPath + i + ".report.html")
         }
     }
 })()

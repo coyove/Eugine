@@ -214,7 +214,7 @@
             var nextPage = curPage + 1
 
         ret <+ "<hr><div class='pager'>"
-        for 1..11 do (i) =>
+        for 1,11 do (i) =>
             if i == curPage
                 ret <+ "<b>[ " <+ i <+ " ]</b>"
             else

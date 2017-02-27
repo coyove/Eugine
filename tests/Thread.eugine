@@ -1,6 +1,6 @@
 (def ThreadManager() => {
     def this.getNextPostId() => sync {
-        var id = num(File.read(counterPath))
+        var id = num(file.read(counterPath))
         file.write(counterPath, str(id++))
         id
     }
@@ -57,7 +57,7 @@
 
     def this.deleteImage(id, uid) => sync if id {
         var path = dataPath + math.floor(id / 1000) + "/" + id
-        if File.exists(path) {
+        if file.exists(path) {
             var t = Reply(id)
             var raw = file.read(path, "l")
             t.from(raw[0])
@@ -125,7 +125,7 @@ def struct Reply(id) => {
     var this.comment = ""
     var this.uid = ""
     var this.state = ThreadState.NORMAL
-    var this.ts = Time.unix(0)
+    var this.ts = time.currenttimestamp()
     var this.ip = ""
     var this.children = 0 
     var this.reserved = "x" // this column has been changed to holding the image path
