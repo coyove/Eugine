@@ -28,7 +28,7 @@ public class SEBuffer extends SExpression {
         } else if (src instanceof SNumber) {
             return new SBuffer(new byte[EgCast.toInt(src, atom)]);
         } else {
-            throw new EgException(3031, "failed to convert to bytes buffer", atom);
+            throw EgException.INVALID_SUBJECT.raise(atom, src);
         }
     }
 

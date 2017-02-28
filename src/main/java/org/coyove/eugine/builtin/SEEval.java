@@ -33,15 +33,18 @@ public class SEEval extends SExpression {
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue text = this.subject.evaluate(env);
         if (this.env != null) {
-            SDict e = EgCast.to(this.env.evaluate(env), SDict.class);
-            if (e == null)
-                throw new EgException(2015, "environment must be a dict", atom);
+            SValue e = this.env.evaluate(env);
+            if (e instanceof SDict) {
+                env = new ExecEnvironment();
+                HashMap<String, SValue> custom = e.get();
 
-            env = new ExecEnvironment();
-            HashMap<String, SValue> custom = e.get();
-
-            for (String k : custom.keySet()) {
-                env.put(k, custom.get(k));
+                for (String k : custom.keySet()) {
+                    env.put(k, custom.get(k));
+                }
+            } else if (e.get() instanceof ExecEnvironment) {
+                env = e.get();
+            } else {
+                throw EgException.INVALID_FIELD.raise(atom);
             }
         }
 
@@ -73,7 +76,7 @@ public class SEEval extends SExpression {
                 }
             }
 
-            throw new EgException(2014, "invalid object to eval", atom);
+            throw EgException.INVALID_SUBJECT.raise(atom);
         }
     }
 

@@ -14,9 +14,8 @@ public abstract class SExpression implements java.io.Serializable {
     public SExpression(Atom ha, ListEx<SExpression> args, int count) {
         atom = ha;
 
-        if (args.size() < count) {
-            ErrorHandler.print(2000, "not enough arguments", ha);
-        }
+        if (args.size() < count)
+            EgException.NOT_ENOUGH_ARGUMENTS.raise(atom, count).exit();
     }
 
     public SExpression() {
@@ -52,10 +51,6 @@ public abstract class SExpression implements java.io.Serializable {
         }
 
         return ret;
-    }
-
-    public SValue execute(ExecEnvironment env) throws EgException {
-        return this.evaluate(env);
     }
 
     public abstract SValue evaluate(ExecEnvironment env) throws EgException;

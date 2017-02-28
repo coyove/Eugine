@@ -2,7 +2,7 @@ package org.coyove.eugine.library;
 
 import org.coyove.eugine.base.NativeCallInterface;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.core.flow.PCall;
+import org.coyove.eugine.core.PCall;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.SClosure;
@@ -24,7 +24,7 @@ public class thread implements Exportable{
             try {
                 PCall.evaluateClosure(atom, closure, arguments, env);
             } catch (EgException ex) {
-                ErrorHandler.print(ex);
+                ex.exit();
             }
         }
     }
@@ -36,7 +36,7 @@ public class thread implements Exportable{
                     ThreadTask tt = new ThreadTask();
                     tt.closure = EgCast.to(arguments.head(), SClosure.class);
                     if (tt.closure == null)
-                        throw new EgException(1003, "must start a closure", atom);
+                        throw EgException.INVALID_FUNCTION.raise(atom);
 
                     tt.env = env;
                     tt.arguments = arguments.skip(1);

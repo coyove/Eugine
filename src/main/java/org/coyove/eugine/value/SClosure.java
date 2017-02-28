@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.coyove.eugine.base.SExpression;
 import org.coyove.eugine.base.SValue;
 import org.coyove.eugine.base.SComplexValue;
-import org.coyove.eugine.core.flow.PCall;
+import org.coyove.eugine.core.PCall;
 import org.coyove.eugine.util.*;
 
 /**
@@ -126,7 +126,7 @@ public class SClosure extends SComplexValue {
                 SValue ret = PCall.evaluateClosure(atom, ((SClosure) ts), ListEx.build(this), outerEnv);
                 return ret.asString();
             } catch (EgException e) {
-                ErrorHandler.print(e);
+                e.exit();
                 return null;
             }
         } else {

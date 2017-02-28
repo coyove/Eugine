@@ -1,7 +1,6 @@
-package org.coyove.eugine.core.flow;
+package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.PLambda;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -95,7 +94,7 @@ public class PFor extends SExpression {
         } else {
             _body = this.body.evaluate(env);
             if (!(_body instanceof SClosure)) {
-                throw new EgException(2017, "invalid loop body", atom);
+                throw EgException.INVALID_FUNCTION.raise(atom, "for loop body");
             }
 
             if (this.body instanceof PLambda) {
@@ -127,7 +126,7 @@ public class PFor extends SExpression {
                 }
             }
         } else if (_list instanceof SBool) {
-            long i = 0;
+            double i = 0;
             while (Utils.isBooleanTrue(this.list.evaluate(env))) {
                 SValue idx = body.argNames.size() > 1 ? new SNumber(i++) : ExecEnvironment.Null;
 
@@ -137,7 +136,7 @@ public class PFor extends SExpression {
             }
         } else if (_list instanceof SRange) {
             SRange r = (SRange) _list;
-            int i = r.start;
+            double i = r.start;
             while (i != r.end) {
                 SValue idx = new SNumber(i);
                 SValue ret = execLoop(body, env, idx, idx);
@@ -147,7 +146,7 @@ public class PFor extends SExpression {
                 i += r.interval;
             }
         } else {
-            throw new EgException(2018, "invalid loop condition", atom);
+            throw EgException.INVALID_FUNCTION.raise(atom, "for loop exit condition");
         }
 
         return ExecEnvironment.Null;

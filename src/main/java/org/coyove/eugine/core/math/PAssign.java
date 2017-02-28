@@ -2,14 +2,8 @@ package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PGet;
-import org.coyove.eugine.core.PSet;
-import org.coyove.eugine.core.PVariable;
-import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
-
-import java.lang.reflect.Constructor;
 
 /**
  * Created by coyove on 2016/9/10.

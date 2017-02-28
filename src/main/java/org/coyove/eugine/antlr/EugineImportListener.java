@@ -16,7 +16,6 @@ import java.util.Set;
  */
 public class EugineImportListener extends EugineBaseListener {
     public ExecEnvironment env;
-    public int pad;
 
     public static Set<String> reloadablePackages = new HashSet<String>();
 
@@ -38,9 +37,9 @@ public class EugineImportListener extends EugineBaseListener {
         try {
             Class<? extends Exportable> cls = (Class<? extends Exportable>)
                     ClassUtils.getClass("org.coyove.eugine.library." + className);
-            cls.newInstance().export(ExecEnvironment.globalStaticEnv);
+            cls.newInstance().export(this.env);
         } catch (Exception e) {
-            ErrorHandler.print(9090, className + " error: " + e, new Atom(sourceToken));
+            EgException.CANNOT_IMPORT_LIBRARY.raise(new Atom(sourceToken), className, e).exit();
         }
     }
 }

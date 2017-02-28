@@ -40,9 +40,8 @@ public class PModular extends SExpression {
         SValue right = this.right.evaluate(env);
 
         double r = EgCast.toDouble(right, atom);
-        if (Math.abs(r) < 1e-15) {
-            throw new EgException(1001, "moded by zero", atom);
-        }
+        if (Math.abs(r) < 1e-15)
+            throw EgException.DIVIDED_BY_ZERO.raise(atom);
 
         double l = EgCast.toDouble(left, atom);
         double f = Math.floor(l / r);

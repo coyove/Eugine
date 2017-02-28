@@ -10,7 +10,6 @@ import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
 import org.coyove.eugine.core.math.*;
-import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
@@ -78,10 +77,10 @@ declareStmt returns [SExpression v]
         }
         Head=unaryExpr '=' HeadValue=expr
         {
-            $multi.add(identifySetter(new Atom($Action), $Head.v, $HeadValue.v, $act));
+            $multi.add(identifySetter(new Atom($Head.start), $Head.v, $HeadValue.v, $act));
         }
         (',' Tail=unaryExpr '=' TailValue=expr {
-            $multi.add(identifySetter(new Atom($Action), $Tail.v, $TailValue.v, $act));
+            $multi.add(identifySetter(new Atom($Tail.start), $Tail.v, $TailValue.v, $act));
         })*
         {
             $v = $multi.size() == 1 ? $multi.head() : new PChain($multi);
@@ -406,7 +405,7 @@ expr returns [SExpression v]
     | For Start=expr (',' I=expr)? ',' End=expr Do Body=expr
         {
             Atom atom = new Atom($For);
-            PIRange r = new PIRange(atom, ListEx.build($Start.v, $I.ctx == null ? new SNumber(1) : $I.v, $End.v));
+            PRange r = new PRange(atom, ListEx.build($Start.v, $I.ctx == null ? new SNumber(1) : $I.v, $End.v));
             $v = new PFor(atom, r, $Body.v); 
         }
     | If Condition=expr True=code (Else False=code)?

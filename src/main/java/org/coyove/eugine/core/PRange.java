@@ -8,7 +8,7 @@ import org.coyove.eugine.util.*;
 /**
  * Created by zezhong on 2016/9/10.
  */
-public class PIRange extends SExpression {
+public class PRange extends SExpression {
     @ReplaceableVariable
     private SExpression start;
 
@@ -18,9 +18,9 @@ public class PIRange extends SExpression {
     @ReplaceableVariable
     private SExpression end;
 
-    public PIRange() {}
+    public PRange() {}
 
-    public PIRange(Atom ha, ListEx<SExpression> args) {
+    public PRange(Atom ha, ListEx<SExpression> args) {
         super(ha, args, 3);
 
         start = args.get(0);
@@ -30,16 +30,16 @@ public class PIRange extends SExpression {
 
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
-        int start = EgCast.toInt(this.start.evaluate(env), atom);
-        int interval = EgCast.toInt(this.interval.evaluate(env), atom);
-        int end = EgCast.toInt(this.end.evaluate(env), atom);
+        double start = EgCast.toDouble(this.start.evaluate(env), atom);
+        double interval = EgCast.toDouble(this.interval.evaluate(env), atom);
+        double end = EgCast.toDouble(this.end.evaluate(env), atom);
 
         return new SRange(start, interval, end);
     }
 
     @Override
     public SExpression deepClone() {
-        PIRange ret = new PIRange();
+        PRange ret = new PRange();
         ret.atom = this.atom;
 
         ret.start = this.start.deepClone();

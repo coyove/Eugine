@@ -1,7 +1,6 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -39,7 +38,7 @@ public class PGet extends SExpression {
             if (sk instanceof SString || sk instanceof SNumber) {
                 k = sk.asString();
             } else {
-                throw new EgException(2019, "invalid key: " + sk, atom);
+                throw EgException.INVALID_FIELD.raise(atom, sk);
             }
 
             HashMap<String, SValue> d = dict.get();
@@ -55,13 +54,13 @@ public class PGet extends SExpression {
             if (sk instanceof SNumber) {
                 int idx = ((SNumber) sk).intValue();
                 if (idx >= l.size() || idx < 0) {
-                    throw new EgException(2021, "index out of range", atom);
+                    throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
                 }
                 return l.get(idx);
             } else {
                 PseudoCallInterface pc = SList.pseudoCalls.get(EgCast.toString(sk, atom));
                 if (pc == null)
-                    throw new EgException(2024, "pseudo call not found", atom);
+                    throw EgException.INVALID_FIELD.raise(atom, EgCast.toString(sk, atom));
 
                 return pc.call(dict);
             }
@@ -70,14 +69,14 @@ public class PGet extends SExpression {
             if (sk instanceof SNumber) {
                 int idx = ((SNumber) sk).intValue();
 
-                if (idx >= str.length())
-                    throw new EgException(2023, "index out of range", atom);
+                if (idx >= str.length() || idx < 0)
+                    throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
 
                 return new SString(String.valueOf(str.charAt(idx)));
             } else {
                 PseudoCallInterface pc = SString.pseudoCalls.get(EgCast.toString(sk, atom));
                 if (pc == null)
-                    throw new EgException(2024, "pseudo call not found", atom);
+                    throw EgException.INVALID_FIELD.raise(atom, EgCast.toString(sk, atom));
 
                 return pc.call(dict);
             }
@@ -106,7 +105,7 @@ public class PGet extends SExpression {
                     } else if (getter instanceof SClosure) {
                         ret = PCall.evaluateClosure(atom, ((SClosure) getter), new ListEx<SValue>(), env);
                     } else {
-                        throw new EgException(8456, "invalid getter", atom);
+                        throw EgException.INVALID_FUNCTION.raise(atom, "getter");
                     }
                 }
 
@@ -132,8 +131,17 @@ public class PGet extends SExpression {
             } else {
                 return EgInterop.getField(dict.get(), name);
             }
+        } else if (dict instanceof SError) {
+            String name = EgCast.toString(sk, atom);
+            if (name.equals("code")) {
+                return new SNumber(((SError) dict).errorCode);
+            } else if (name.equals("message")) {
+                return new SString(((SError) dict).message);
+            } else {
+                throw EgException.INVALID_FIELD.raise(atom, name);
+            }
         } else {
-            throw new EgException(7029, "failed to get", atom);
+            throw EgException.INVALID_FIELD.raise(atom);
         }
     }
 

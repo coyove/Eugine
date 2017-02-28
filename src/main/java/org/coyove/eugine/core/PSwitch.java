@@ -1,4 +1,4 @@
-package org.coyove.eugine.core.flow;
+package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
@@ -23,16 +23,6 @@ public class PSwitch extends SExpression {
         this.condition = condition;
         this.branches = branches;
         this.defaultBranch = db;
-    }
-
-    public static boolean compare(Object left, Object right) {
-        if (left == null && right == null) {
-            return true;
-        } else if (left == null || right == null) {
-            return false;
-        } else {
-            return left.equals(right);
-        }
     }
 
     @Override

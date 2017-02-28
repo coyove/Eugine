@@ -44,7 +44,7 @@ public class EgCast {
         if (num instanceof SNumber) {
             return ((SNumber) num).doubleValue();
         } else {
-            throw new EgException(4007, num + " is not a number", headAtom);
+            throw EgException.INVALID_NUMBER.raise(headAtom, num);
         }
     }
 
@@ -52,7 +52,7 @@ public class EgCast {
         if (num instanceof SNumber) {
             return ((SNumber) num).longValue();
         } else {
-            throw new EgException(4007, num + " is not a number", headAtom);
+            throw EgException.INVALID_NUMBER.raise(headAtom, num);
         }
     }
 
@@ -60,7 +60,7 @@ public class EgCast {
         if (num instanceof SNumber) {
             return ((SNumber) num).intValue();
         } else {
-            throw new EgException(4007, num + " is not a number", headAtom);
+            throw EgException.INVALID_NUMBER.raise(headAtom, num);
         }
     }
 
@@ -68,7 +68,7 @@ public class EgCast {
         if (num instanceof SNumber) {
             return ((SNumber) num).byteValue();
         } else {
-            throw new EgException(4007, num + " is not a number", headAtom);
+            throw EgException.INVALID_NUMBER.raise(headAtom, num);
         }
     }
 

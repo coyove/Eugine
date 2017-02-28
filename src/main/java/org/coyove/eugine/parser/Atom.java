@@ -2,33 +2,30 @@ package org.coyove.eugine.parser;
 
 import org.coyove.eugine.util.Utils;
 
+import java.io.Serializable;
+
 /**
  * Created by coyove on 2016/9/9.
  */
-public class Atom {
-    public Token token;
-
-    public Atom(Token tok)
-    {
-        token = tok;
-    }
+public class Atom implements Serializable {
+    public Object value;
+    public int line;
+    public int lineIndex;
+    public String source;
+    public String filename;
 
     public Atom(org.antlr.v4.runtime.Token tok) {
-        token = new Token();
-        token.line = tok.getLine() - 1;
-        token.lineIndex = tok.getCharPositionInLine();
-        token.source = tok.getTokenSource().getSourceName();
-        token.filename = "@" + Utils.getFileName(token.source).replace(".eugine", "");
-        token.value = tok.getText();
+        line = tok.getLine() - 1;
+        lineIndex = tok.getCharPositionInLine();
+        source = tok.getTokenSource().getSourceName();
+        filename = "@" + Utils.getFileName(source).replace(".eugine", "");
+        value = tok.getText();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof Atom) {
-            Atom a = (Atom) o;
-            return (a.token.type == this.token.type) && (a.token.value.equals(this.token.value));
-        } else {
-            return false;
-        }
+    public Atom() {
+        StackTraceElement elem = Thread.currentThread().getStackTrace()[4];
+        line = elem.getLineNumber() - 1;
+        lineIndex = 0;
+        filename = "@" + elem.getFileName();
     }
 }

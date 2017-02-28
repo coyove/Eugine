@@ -20,20 +20,44 @@ import org.coyove.eugine.value.SNumber;
  * Created by zezhong on 2017/2/26.
  */
 public class log implements Exportable {
-    private final static byte DEBUG = 0;
-    private final static byte INFO = 1;
-    private final static byte WARN = 2;
-    private final static byte ERROR = 3;
-    private static byte logLevel = 0;
 
-    static class Logger {
-        private static long _start = System.currentTimeMillis();
+    // A very simple logger, missing some functionality.
+    public static class Logger {
+        public final static byte DEBUG = 0;
+        public final static byte INFO = 1;
+        public final static byte WARN = 2;
+        public final static byte ERROR = 3;
+        public static byte logLevel = 1;
 
-        public static synchronized SValue log(byte level, Atom atom, ListEx<SValue> values) throws EgException {
-            SValue ret = ExecEnvironment.Null;
-            if (level < logLevel) {
-                return ret;
+        private final static long _start = System.currentTimeMillis();
+
+        private static void log(byte level, String text) {
+            try {
+                log(level, new Atom(), text);
+            } catch (Exception e) {
+                // never happen
             }
+        }
+
+        public static void debug(String text) {
+            log(DEBUG, text);
+        }
+
+        public static void info(String text) {
+            log(INFO, text);
+        }
+
+        public static void warn(String text) {
+            log(WARN, text);
+        }
+
+        public static void error(String text) {
+            log(ERROR, text);
+        }
+
+        @SuppressWarnings("unchecked")
+        public static synchronized void log(byte level, Atom atom, Object values) throws EgException {
+            if (level < logLevel) return;
 
             StringBuilder sb = new StringBuilder();
             long diff = System.currentTimeMillis() - _start;
@@ -52,16 +76,22 @@ public class log implements Exportable {
                     sb.append("E");
                     break;
             }
-            sb.append(DateFormatUtils.format(System.currentTimeMillis(), "MMdd hh:mm:ss"));
-            sb.append(String.format("-%09.3f %s ", diff / 1000.0, Thread.currentThread().getName()));
-            sb.append(atom.token.filename).append(":").append(atom.token.line + 1).append("] ");
+
+            long millis = System.currentTimeMillis();
+            sb.append(DateFormatUtils.format(millis, "MMdd hh:mm:ss"));
+            sb.append(String.format(".%03d %s ", millis - millis / 1000 * 1000,
+                    Thread.currentThread().getName()));
+            sb.append(atom.filename).append(":").append(atom.line + 1).append("] ");
             System.out.print(sb.toString());
-            for (SValue v : values) {
-                ret = v;
-                System.out.print(v.asString() + " ");
+
+            if (values instanceof ListEx){
+                for (SValue v : (ListEx<SValue>) values)
+                    System.out.print(v.asString() + " ");
+            } else {
+                System.out.print(values);
             }
+
             System.out.print("\n");
-            return ret;
         }
 
     }
@@ -77,32 +107,36 @@ public class log implements Exportable {
 
             put("debug", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
-                    return Logger.log(DEBUG, atom, arguments);
+                    Logger.log(Logger.DEBUG, atom, arguments);
+                    return ExecEnvironment.Null;
                 }
             }, 1));
 
             put("info", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
-                    return Logger.log(INFO, atom, arguments);
+                    Logger.log(Logger.INFO, atom, arguments);
+                    return ExecEnvironment.Null;
                 }
             }, 1));
 
             put("warn", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
-                    return Logger.log(WARN, atom, arguments);
+                    Logger.log(Logger.WARN, atom, arguments);
+                    return ExecEnvironment.Null;
                 }
             }, 1));
 
             put("error", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
-                    return Logger.log(ERROR, atom, arguments);
+                    Logger.log(Logger.ERROR, atom, arguments);
+                    return ExecEnvironment.Null;
                 }
             }, 1));
 
             put("setlevel", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
-                    logLevel = (byte) EgCast.toInt(arguments.head(), atom);
-                    return ExecEnvironment.True;
+                    Logger.logLevel = (byte) EgCast.toInt(arguments.head(), atom);
+                    return arguments.head();
                 }
             }, 1));
 

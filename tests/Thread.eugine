@@ -91,9 +91,8 @@ def struct Thread(raw) => {
     this.main.from(lines[0])
 
     var this.replies = []
-    for lines.tail do (line) => {
+    for lines.tail do (line) => if len(line) > 1 {
         this.replies <+ Reply(0).from(line)
-
     }
 
     this.main.children = len(this.replies)

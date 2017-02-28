@@ -1,7 +1,6 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
@@ -38,6 +37,7 @@ public class PPut extends SExpression {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue subject = this.subject.evaluate(env);
         SValue key = this.key.evaluate(env);
@@ -57,7 +57,7 @@ public class PPut extends SExpression {
             if (key instanceof SString || key instanceof SNumber) {
                 k = key.asString();
             } else {
-                throw new EgException(2019, "invalid key: " + key, atom);
+                throw EgException.INVALID_FIELD.raise(atom, key);
             }
             subject.<HashMap<String, SValue>>get().put(k, value.lightClone());
         } else if (subject instanceof SList) {
@@ -90,7 +90,7 @@ public class PPut extends SExpression {
             byte[] buf = subject.get();
             buf[idx] = EgCast.toByte(value, atom);
         } else {
-            throw new EgException(2045, "invalid object: " + subject + ", key: " + key, atom);
+            throw EgException.INVALID_FIELD.raise(atom, key);
         }
 
         return value;

@@ -1,6 +1,6 @@
 package org.coyove.eugine.base;
 
-import org.coyove.eugine.core.flow.PCall;
+import org.coyove.eugine.core.PCall;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
@@ -52,7 +52,7 @@ public abstract class SValue extends SExpression {
 
         if (this instanceof SClosure) {
             SValue eq = ((SClosure) this).extra.get("__equals__");
-            if (eq != null && eq instanceof SClosure) {
+            if (eq instanceof SClosure) {
                 try {
                     Atom atom = ((SClosure) eq).atom;
                     SValue ret = PCall.evaluateClosure(atom, ((SClosure) eq), ListEx.build(right),
@@ -60,10 +60,10 @@ public abstract class SValue extends SExpression {
                     if (ret instanceof SBool) {
                         return (Boolean) ((SBool) ret).underlying;
                     } else {
-                        throw new EgException(8082, "invalid __equals__ function", atom);
+                        throw EgException.INVALID_FUNCTION.raise(atom, "operator equals");
                     }
                 } catch (EgException e) {
-                    ErrorHandler.print(e);
+                    e.exit();
                     return false;
                 }
             }

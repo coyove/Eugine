@@ -96,52 +96,44 @@ public class PSub extends SExpression {
         SValue subObj = subject.evaluate(env);
 
         int start = EgCast.toInt(this.start.evaluate(env), atom);
-        if (start < 0) {
-            throw new EgException(3015, "start cannot be negative", atom);
-        }
-
         int end = this.end != null ? EgCast.toInt(this.end.evaluate(env), atom) : 0;
 
-        if (subObj instanceof SConcatString) {
-            if (this.end == null) {
-                end = ((SConcatString) subObj).length();
-            }
-            try {
-                return new SString(((SConcatString) subObj).substring(start, end));
-            } catch (StringIndexOutOfBoundsException se) {
-                throw new EgException(3013, "string index out of range", atom);
-            }
-        } else if (subObj instanceof SString) {
-            String subStr = EgCast.toString(subObj, atom);
+        try {
+            if (subObj instanceof SConcatString) {
+                if (this.end == null)
+                    end = ((SConcatString) subObj).length();
 
-            try {
+                return new SString(((SConcatString) subObj).substring(start, end));
+            } else if (subObj instanceof SString) {
+                String subStr = EgCast.toString(subObj, atom);
+
                 if (this.end == null) {
                     return new SString(subStr.substring(start));
                 } else {
                     return new SString(subStr.substring(start, end));
                 }
-            } catch (StringIndexOutOfBoundsException se) {
-                throw new EgException(3013, "string index out of range", atom);
+            } else if (subObj instanceof SList) {
+
+                SList subList = (SList) subObj;
+                if (this.end == null) {
+                    return new SList(subList.<ListEx<SValue>>get().sub(start));
+                } else {
+                    return new SList(subList.<ListEx<SValue>>get().sub(start, end));
+                }
+            } else if (subObj instanceof SBuffer) {
+                byte[] buf = subObj.get();
+                if (this.end == null) {
+                    return new SBuffer(Arrays.copyOfRange(buf, start, buf.length));
+                } else {
+                    return new SBuffer(Arrays.copyOfRange(buf, start, end));
+                }
             }
 
-        } else if (subObj instanceof SList) {
-            SList subList = (SList) subObj;
-            if (this.end == null) {
-                return new SList(subList.<ListEx<SValue>>get().sub(start));
-            } else {
-                return new SList(subList.<ListEx<SValue>>get().sub(start, end));
-            }
-        } else if (subObj instanceof SBuffer) {
-            byte[] buf = subObj.get();
-            if (this.end == null) {
-                return new SBuffer(Arrays.copyOfRange(buf, start, buf.length));
-            } else {
-                return new SBuffer(Arrays.copyOfRange(buf, start, end));
-            }
-        } else {
-            throw new EgException(3014, "invalid subject", atom);
+        } catch (IndexOutOfBoundsException se) {
+            throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
         }
 
+        throw EgException.INVALID_SUBJECT.raise(atom);
     }
 
     @Override

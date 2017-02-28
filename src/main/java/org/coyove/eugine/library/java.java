@@ -27,12 +27,6 @@ public class java implements Exportable {
                         double max = 0;
                         for (Constructor ctor : clazz.getConstructors()) {
                             double s = EgInterop.getMatchingScore(ctor.getParameterTypes(), arguments);
-//                            System.out.print(" ");
-//
-//                            for (Parameter param : ctor.getParameters()) {
-//                                System.out.print(param.getType().getName() + ",");
-//                            }
-//                            System.out.println();
                             if (s != 0 && s > max) {
                                 max = s;
                                 desiredCtor = ctor;

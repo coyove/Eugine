@@ -24,9 +24,8 @@ public class PVariable extends SExpression {
         atom = ha;
         name = n;
 
-        if (n == null || n.isEmpty()) {
-            ErrorHandler.print(9091, "invalid variable name", ha);
-        }
+        if (n == null || n.isEmpty())
+            EgException.INVALID_VARIABLE_NAME.raise(atom).exit();
     }
 
     @Override

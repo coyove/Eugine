@@ -34,8 +34,8 @@ public class meta implements Exportable {
     }
 
     public void export(ExecEnvironment env) {
-        env.put("meta", new SDict(){{
-            put("get", new SNativeCall(new NativeCallInterface() {
+        SDict meta = Exportable.Utils.buildTopRoute(env, "meta");
+        meta.put("get", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     SClosure closure = getClosure(atom, arguments.head());
 
@@ -48,7 +48,7 @@ public class meta implements Exportable {
                 }
             }, 2));
 
-            put("remove", new SNativeCall(new NativeCallInterface() {
+        meta.put("remove", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     SClosure closure = getClosure(atom, arguments.head());
 
@@ -62,7 +62,7 @@ public class meta implements Exportable {
                 }
             }, 2));
 
-            put("body", new SNativeCall(new NativeCallInterface() {
+        meta.put("body", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     SClosure closure = getClosure(atom, arguments.head());
 
@@ -75,7 +75,7 @@ public class meta implements Exportable {
                 }
             }, 1));
 
-            put("add", new SNativeCall(new NativeCallInterface() {
+        meta.put("add", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     SClosure closure = getClosure(atom, arguments.head());
                     if (arguments.get(1) instanceof SNumber) {
@@ -96,7 +96,7 @@ public class meta implements Exportable {
                 }
             }, 2));
 
-            put("set", new SNativeCall(new NativeCallInterface() {
+        meta.put("set", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     SClosure closure = getClosure(atom, arguments.head());
                     int idx = EgCast.toInt(arguments.get(1), atom);
@@ -111,6 +111,5 @@ public class meta implements Exportable {
                     return ExecEnvironment.Null;
                 }
             }, 3));
-        }});
     }
 }

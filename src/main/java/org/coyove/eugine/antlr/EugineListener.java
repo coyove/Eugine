@@ -7,7 +7,6 @@ import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
 import org.coyove.eugine.core.math.*;
-import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.parser.Atom;
 import java.util.HashMap;
@@ -80,16 +79,6 @@ public interface EugineListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEnterStmt(EugineParser.EnterStmtContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link EugineParser#syncStmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterSyncStmt(EugineParser.SyncStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link EugineParser#syncStmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitSyncStmt(EugineParser.SyncStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link EugineParser#declareStmt}.
 	 * @param ctx the parse tree

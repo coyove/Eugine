@@ -24,22 +24,25 @@ public class SEExit extends SExpression {
     @Override
     public SValue evaluate(ExecEnvironment env) throws EgException {
         if (argument != null) {
-            SString msg = EgCast.to(argument.evaluate(env), SString.class);
+            SValue arg = argument.evaluate(env);
+            SString msg = EgCast.to(arg, SString.class);
 
             if (msg == null) {
-                SNumber num = EgCast.to(argument.evaluate(env), SNumber.class);
-                if (num == null) {
-                    throw new EgException(2016, "message must be string or integer", atom);
-                }
+                SNumber num = EgCast.to(arg, SNumber.class);
+                if (num == null)
+                    throw EgException.INVALID_SUBJECT.raise(atom, arg);
+
+                if (num.intValue() == 0)
+                    System.exit(0);
 
                 env.bPut("__e__", num);
-                throw new EgException(7001, "" + num.intValue(), atom);
+                throw new EgException(9001, "" + num.intValue(), atom);
             } else {
                 env.bPut("__e__", msg);
-                throw new EgException(7000, msg.<String>get(), atom);
+                throw new EgException(9000, msg.<String>get(), atom);
             }
         } else {
-            throw new EgException(7000, "", atom);
+            throw new EgException(9000, "", atom);
         }
     }
 

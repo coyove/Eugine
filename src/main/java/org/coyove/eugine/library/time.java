@@ -21,22 +21,21 @@ import java.util.Locale;
  */
 public class time implements Exportable {
     public void export(ExecEnvironment env) {
-        env.put("time", new SDict(){{
-            put("utc", new SString("EEE, dd MMM yyyy HH:mm:ss zzz"));
+        SDict time = Exportable.Utils.buildTopRoute(env, "time");
+        time.put("utc", new SString("EEE, dd MMM yyyy HH:mm:ss zzz"));
 
-            put("currenttimestamp", new SNativeCall(new NativeCallInterface() {
+        time.put("currenttimestamp", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     return new SNumber(new Date().getTime());
                 }
             }, 0));
 
-            put("format", new SNativeCall(new NativeCallInterface() {
+        time.put("format", new SNativeCall(new NativeCallInterface() {
                 public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments) throws EgException {
                     return new SString(DateFormatUtils.formatUTC(
                             EgCast.toLong(arguments.head(), atom),
                             EgCast.toString(arguments.get(1), atom), new Locale("us")));
                 }
             }, 2));
-        }});
     }
 }

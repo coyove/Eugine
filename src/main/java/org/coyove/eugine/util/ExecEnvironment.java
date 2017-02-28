@@ -1,6 +1,7 @@
 package org.coyove.eugine.util;
 
 import org.coyove.eugine.base.SValue;
+import org.coyove.eugine.library.log;
 import org.coyove.eugine.value.SBool;
 import org.coyove.eugine.value.SBreak;
 import org.coyove.eugine.value.SClosure;
@@ -52,7 +53,7 @@ public class ExecEnvironment extends HashMap<String, SValue> {
     @Override
     public SValue put(String key, SValue value) {
         if (value == null) {
-            Utils.print("trying to put a null value");
+            log.Logger.warn("trying to put a null value");
             System.exit(1);
             return null;
         }

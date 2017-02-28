@@ -1,4 +1,4 @@
-package org.coyove.eugine.core.flow;
+package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;

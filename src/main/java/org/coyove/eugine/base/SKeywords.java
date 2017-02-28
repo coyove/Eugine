@@ -68,6 +68,11 @@ public class SKeywords {
                         return new SEPrint(new Atom(tok), arguments, "\n");
                     }
                 });
+                iput("readline", new CallableKeyword() {
+                    public SExpression call(Token tok, ListEx<SExpression> arguments) {
+                        return new SERead(new Atom(tok), arguments);
+                    }
+                });
                 iput("typeof", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEType(new Atom(tok), arguments);

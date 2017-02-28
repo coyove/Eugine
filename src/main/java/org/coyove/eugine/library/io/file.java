@@ -58,7 +58,7 @@ public class file implements Exportable {
                                 if (text.isEmpty())
                                     return new SList(new ListEx<SValue>());
 
-                                String[] lines = text.split("\\n");
+                                String[] lines = text.split("\\r?\\n");
 
                                 ListEx<SValue> ret = new ListEx<SValue>(lines.length);
                                 for (int i = 0; i < lines.length; i++) {

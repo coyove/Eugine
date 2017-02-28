@@ -7,11 +7,11 @@ import org.coyove.eugine.base.SComplexValue;
  * Created by coyove on 2016/9/9.
  */
 public class SRange extends SComplexValue {
-    public int start;
-    public int end;
-    public int interval;
+    public double start;
+    public double end;
+    public double interval;
 
-    public SRange(int start, int interval, int end) {
+    public SRange(double start, double interval, double end) {
         super();
 
         this.start = start;

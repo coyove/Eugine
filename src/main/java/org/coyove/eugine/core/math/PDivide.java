@@ -41,9 +41,8 @@ public class PDivide extends SExpression {
 
         if (left instanceof SNumber) {
             double r = EgCast.toDouble(right, atom);
-            if (Math.abs(r) < 1e-15) {
-                throw new EgException(1001, "divided by zero", atom);
-            }
+            if (Math.abs(r) < 1e-15)
+                throw EgException.DIVIDED_BY_ZERO.raise(atom);
 
             if (assign) {
                 SNumber l = (SNumber) left;
@@ -54,7 +53,7 @@ public class PDivide extends SExpression {
             }
         }
 
-        throw new EgException(7056, left + " is not a number", atom);
+        throw EgException.INVALID_NUMBER.raise(atom, left);
     }
 
     @Override

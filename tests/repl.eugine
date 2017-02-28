@@ -1,0 +1,78 @@
+import java
+import internal
+
+/*
+ * this eugine script realizes a very simple Read-Eval-Print Loop
+ * code runs in the same thread, so if you want to interrupt the running code because it 
+ * goes into dead loop or else, there is nothing you can do but Ctrl-C or Ctrl-Z to quit
+ */
+
+var lineno = 0, indicator = "", flag = false, code = "", fullcode = "", lastline = ""
+var env = internal.newenv()
+var robot = java.new("java.awt.Robot")
+
+println("+------------------+")
+println("| Eugine REPL beta |")
+println("+------------------+")
+println("type '\\q' to quit, '\\c' to abandon the code and start a new line")
+
+if robot == null
+    println("note: java.awt.Robot is not found")
+
+def get_leading_spaces(s) => @ret("") {
+    for 0,len(s) do (i) => {
+        if s[i] == " " {
+            ret <+ " "
+        } else if s[i] == "\t" {
+            ret <+ "\t"
+        } else {
+            break
+        }
+    }
+}
+
+def fake_input(s) => {
+    for 0,len(s) do (i) => {
+        if s[i] == " " {
+            robot.keyPress(32);
+            robot.keyRelease(32);
+        } else if s[i] == "\t" {
+            robot.keyPress(9);
+            robot.keyRelease(9);
+        } else {
+            break;
+        }
+    }
+}
+
+for true do () => {
+    if (flag) {
+        var sp = get_leading_spaces(lastline)
+        print(java.class("java.lang.String").format("%" + (len(indicator) - 2) + "s| ", " "))
+        if robot != null fake_input(sp);
+        lastline = readline()
+        code += "\n" + lastline
+    } else {
+        indicator = "" + (lineno++) + " > "
+        print(indicator)
+        lastline = readline()
+        code = lastline
+        flag = true
+    }
+
+    if code.endswith("\\q") exit(0)
+
+    if code.endswith(";") {
+        code = code[0, len(code) - 1]
+        println(eval(code, env))
+
+        flag = false
+        fullcode += code + "\n"
+        code = ""
+    }
+
+    if code.endswith("\\c") {
+        flag = false
+        code = ""
+    }
+}

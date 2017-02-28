@@ -183,8 +183,8 @@ public class SList extends SComplexValue {
 
                                                 ret = EgCast.toInt(v, atom);
                                             }
-                                        } catch (Exception e) {
-                                            ErrorHandler.print(8777, "comparator error: " + e, atom);
+                                        } catch (EgException e) {
+                                            e.exit();
                                         }
 
                                         return ret;

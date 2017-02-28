@@ -89,7 +89,8 @@ public class SEMath extends SExpression {
                     return new SNumber(defaultRandom.nextDouble());
                 }
             default:
-                throw new EgException(3007, "not implemented", atom);
+                // never happen
+                return null;
         }
     }
 

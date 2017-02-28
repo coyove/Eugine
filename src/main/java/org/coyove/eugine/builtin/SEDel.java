@@ -35,7 +35,7 @@ public class SEDel extends SExpression {
             ListEx<SValue> subList = subObj.get();
             int i = EgCast.toInt(idx, atom);
             if (i < 0 || i >= subList.size())
-                throw new EgException(2007, "index out of range", atom);
+                throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
 
             return subList.remove(i);
         } else if (idx instanceof SString && subObj instanceof SDict) {
@@ -43,7 +43,7 @@ public class SEDel extends SExpression {
             SValue ret = dict.remove(idx.<String>get());
             return ret == null ? ExecEnvironment.Null : ret;
         } else {
-            throw new EgException(2009, "mismatch types", atom);
+            throw EgException.INVALID_SUBJECT.raise(atom);
         }
     }
 

@@ -1,4 +1,4 @@
-package org.coyove.eugine.core.flow;
+package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.parser.*;
@@ -35,7 +35,12 @@ public class PEnter extends SExpression {
         try {
             this.mainBody.evaluate(env);
         } catch (Exception ex) {
-            env.bPut(exName == null ? "__ex__" : exName, new SObject(ex));
+            SValue e = new SObject(ex);
+            if (ex instanceof EgException)
+                e = new SError(((EgException) ex).errorCode, ex.getMessage());
+
+            env.bPut(exName == null ? "__ex__" : exName, e);
+
             if (this.catchBody != null) {
                 this.catchBody.evaluate(env);
             }

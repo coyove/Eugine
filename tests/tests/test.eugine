@@ -22,24 +22,29 @@ eval("util.eugine")
 // // List.filter(model.objects, Ifc.isRelGroup && Ifc.its<RelatingGroup>.isSystem)
 debug.start()
 
-// ;;
-// (() => {
-//     def struct complex(r, i) => {
-//         var this.real = r, this.image = i
+;;
+(() => {
+    def struct complex(r, i) => {
+        var this.real = r, this.image = i
 
-//         def operator this.add(lhs, rhs) => complex(lhs.real + rhs.real, lhs.image + rhs.image)
+        def operator this.add(lhs, rhs) => complex(this.real + rhs.real, this.image + rhs.image)
 
-//         def operator this.tostring(self) => str(self.real) + " + " + self.image + "i"
+        def operator this.equals(rhs) => this.real == rhs.real && this.image == rhs.image
 
-//         def this.eval() => [this.real, this.image]
-//     }
+        def operator this.tostring() => str(this.real) + " + " + this.image + "i"
 
-//     var c1 = complex(10, 2.0)
-//     var c2 = complex(2, 1.0 / 5)
-//     debug.assert(str(c1 + c2) == "12 + 2.2i" 
-//         && utils.deepCompareList(c1.eval(), [10, 2.0])
-//         && utils.deepCompareList(c2.eval(), [2, 0.2]), "Complex Number Test")
-// })()
+        def this.eval() => [this.real, this.image]
+    }
+
+    var c1 = complex(10, 2.0)
+    var c2 = complex(2, 1.0 / 5)
+    var c3 = complex(10, 2.0)
+    debug.assert(str(c1 + c2) == "12 + 2.2i" 
+        && utils.deepCompareList(c1.eval(), [10, 2.0])
+        && utils.deepCompareList(c2.eval(), [2, 0.2]), "Complex Number Test")
+
+    println(c1 == c3)
+})()
 
 // ;;
 // (() => {
@@ -117,21 +122,21 @@ debug.start()
 //         && "".join([3, 4, 5]) == "345", "List Pseudo Operations 2")
 // })()
 
-debug.assert(java.class("java.net.URLEncoder").encode("!@#$%^&() abc 中文") == 
-    "%21%40%23%24%25%5E%26%28%29+abc+%E4%B8%AD%E6%96%87", "Java Interoperability")
+// debug.assert(java.class("java.net.URLEncoder").encode("!@#$%^&() abc 中文") == 
+//     "%21%40%23%24%25%5E%26%28%29+abc+%E4%B8%AD%E6%96%87", "Java Interoperability")
 
-def foo() => {
-    var a = 1
-    var b = 2
-    a
-}
+// def foo() => {
+//     var a = 1
+//     var b = 2
+//     a
+// }
 
-var foo_dup = copy(foo)
-meta.set(foo_dup, 2, @b + 1)
-debug.assert(foo() == 1 && foo_dup() == 3, "Meta Expressions")
+// var foo_dup = copy(foo)
+// meta.set(foo_dup, 2, @b + 1)
+// debug.assert(foo() == 1 && foo_dup() == 3, "Meta Expressions")
 
-debug.summary()
-exit()
+// debug.summary()
+// exit()
 
 let N = 1600
 let Crb = range(N + 7, 0), Cib = range(N + 7,0) // 79462469 , 4295b0b8 

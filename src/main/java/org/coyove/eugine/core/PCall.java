@@ -1,15 +1,9 @@
-package org.coyove.eugine.core.flow;
+package org.coyove.eugine.core;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.PGet;
-import org.coyove.eugine.core.PList;
-import org.coyove.eugine.core.PSet;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.*;
-
-import java.lang.reflect.Method;
 
 /**
  * Created by coyove on 2016/9/9.
@@ -20,10 +14,6 @@ public class PCall extends SExpression {
 
     @ReplaceableVariables
     private ListEx<SExpression> arguments;
-
-    private final static byte CONTINUE = 0;
-    private final static byte TAIL_CALL = 1;
-    private final static byte FALSE_NULL = 2;
 
     public PCall() {
     }
@@ -73,9 +63,8 @@ public class PCall extends SExpression {
     @SuppressWarnings("unchecked")
     public SValue evaluate(ExecEnvironment env) throws EgException {
         SValue _closure = called.evaluate(env);
-        if (!(_closure instanceof SClosure)) {
-            throw new EgException(7031, "invalid calling closure: " + _closure, atom);
-        }
+        if (!(_closure instanceof SClosure))
+            throw EgException.INVALID_FUNCTION.raise(atom);
 
         SClosure closure = (SClosure) _closure;
         ListEx<SValue> arguments = SExpression.eval(this.arguments, env, atom);

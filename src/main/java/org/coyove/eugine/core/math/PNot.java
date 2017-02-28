@@ -1,7 +1,7 @@
 package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.flow.PCall;
+import org.coyove.eugine.core.PCall;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
 import org.coyove.eugine.value.SClosure;

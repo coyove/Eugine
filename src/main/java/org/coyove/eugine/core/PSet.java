@@ -1,12 +1,8 @@
 package org.coyove.eugine.core;
 
 import org.coyove.eugine.base.*;
-import org.coyove.eugine.core.flow.PCall;
 import org.coyove.eugine.parser.*;
-import org.coyove.eugine.value.*;
 import org.coyove.eugine.util.*;
-
-import java.util.HashMap;
 
 /**
  * Created by zezhong on 2016/9/9.
@@ -34,9 +30,7 @@ public class PSet extends SExpression {
         type = a;
 
         if (a == LET) {
-            if (!(name instanceof PVariable)) {
-                ErrorHandler.print(9881, "'let' is only allowed to define a variable", ha);
-            }
+            if (!(name instanceof PVariable)) EgException.INVALID_LET_EXPR.raise(atom).exit();
         }
     }
 
@@ -58,7 +52,7 @@ public class PSet extends SExpression {
                 }
             }
         } else {
-            throw new EgException(2045, "failed to set, invalid subject", atom);
+            throw EgException.INVALID_SUBJECT.raise(atom);
         }
 
         return ret;
