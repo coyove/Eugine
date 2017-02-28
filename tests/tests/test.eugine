@@ -2,6 +2,7 @@ import thread
 import image.pbm
 import log
 import java
+import meta
 
 eval("util.eugine")
 // // import ifc
@@ -118,6 +119,16 @@ debug.start()
 
 debug.assert(java.class("java.net.URLEncoder").encode("!@#$%^&() abc 中文") == 
     "%21%40%23%24%25%5E%26%28%29+abc+%E4%B8%AD%E6%96%87", "Java Interoperability")
+
+def foo() => {
+    var a = 1
+    var b = 2
+    a
+}
+
+var foo_dup = copy(foo)
+meta.set(foo_dup, 2, @b + 1)
+debug.assert(foo() == 1 && foo_dup() == 3, "Meta Expressions")
 
 debug.summary()
 exit()

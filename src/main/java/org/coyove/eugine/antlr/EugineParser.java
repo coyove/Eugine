@@ -6,7 +6,6 @@ import org.coyove.eugine.util.*;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
-import org.coyove.eugine.core.interop.*;
 import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.builtin.*;
@@ -119,15 +118,6 @@ public class EugineParser extends Parser {
 	@Override
 	public ATN getATN() { return _ATN; }
 
-
-	    public static SObject getClassByName(String classname, Token tok) {
-	        try {
-	            return new SObject(ClassUtils.getClass(classname));
-	        } catch(Exception e) {
-	            ErrorHandler.print(4056, "cannot initiate " + classname, new Atom(tok));
-	            return null;
-	        }
-	    }
 
 	    public static SExpression identifySetter(Atom atom, SExpression subject, SExpression value, byte action) {
 	        if (subject instanceof PGet) {
@@ -3065,7 +3055,7 @@ public class EugineParser extends Parser {
 				setState(559);
 				((ExprContext)_localctx).MetaExpression = expr();
 
-				            ((ExprContext)_localctx).v =  new PMeta(new Atom((((ExprContext)_localctx).MetaExpression!=null?(((ExprContext)_localctx).MetaExpression.start):null)), ((ExprContext)_localctx).MetaExpression.v);
+				            ((ExprContext)_localctx).v =  new SMetaExpression(((ExprContext)_localctx).MetaExpression.v);
 				        
 				}
 				break;

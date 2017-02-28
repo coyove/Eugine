@@ -61,8 +61,13 @@ public class file implements Exportable {
                                 String[] lines = text.split("\\n");
 
                                 ListEx<SValue> ret = new ListEx<SValue>(lines.length);
-                                for (String line : lines)
+                                for (int i = 0; i < lines.length; i++) {
+                                    String line = lines[i];
+                                    if (i == lines.length - 1 && line.isEmpty()) break;
+
                                     ret.add(new SString(line));
+                                }
+
 
                                 return new SList(ret);
                             case 'b':

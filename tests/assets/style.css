@@ -209,6 +209,7 @@ pre, code {
     background: #dad4cc;
     padding: 4px;
     border-bottom: solid 1px #aaa;
+    margin: 0 -10px;
 }
 
 #container {
@@ -219,6 +220,8 @@ pre, code {
 
 #footer {
     text-align: center;
+    padding: 4px;
+    margin: 0 -10px;
 }
 
 div.pager {
@@ -430,5 +433,9 @@ span.hider:after {
 @media screen and (max-width: 480px) {
     body {
         padding: 0;
+    }
+
+    #header, #footer {
+        margin: 0;
     }
 }

@@ -2,7 +2,6 @@ package org.coyove.eugine.library.encode;
 
 import org.coyove.eugine.base.NativeCallInterface;
 import org.coyove.eugine.base.SValue;
-import org.coyove.eugine.builtin.SEDigest;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.library.Exportable;
 import org.coyove.eugine.util.*;

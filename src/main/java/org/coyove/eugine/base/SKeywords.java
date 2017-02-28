@@ -3,7 +3,6 @@ package org.coyove.eugine.base;
 import org.antlr.v4.runtime.Token;
 import org.coyove.eugine.builtin.*;
 import org.coyove.eugine.builtin.SEMath;
-import org.coyove.eugine.builtin.meta.SEMeta;
 import org.coyove.eugine.parser.Atom;
 import org.coyove.eugine.util.ExecEnvironment;
 import org.coyove.eugine.util.ListEx;
@@ -192,31 +191,6 @@ public class SKeywords {
                 iput("chr", new CallableKeyword() {
                     public SExpression call(Token tok, ListEx<SExpression> arguments) {
                         return new SEChar(new Atom(tok), arguments);
-                    }
-                });
-                iput("meta.add", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMeta(new Atom(tok), c, SEMeta.ADD);
-                    }
-                });
-                iput("meta.set", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMeta(new Atom(tok), c, SEMeta.SET);
-                    }
-                });
-                iput("meta.remove", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMeta(new Atom(tok), c, SEMeta.REMOVE);
-                    }
-                });
-                iput("meta.get", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMeta(new Atom(tok), c, SEMeta.GET);
-                    }
-                });
-                iput("meta.body", new CallableKeyword() {
-                    public SExpression call(Token tok, ListEx<SExpression> c) {
-                        return new SEMeta(new Atom(tok), c, SEMeta.BODY);
                     }
                 });
             }};

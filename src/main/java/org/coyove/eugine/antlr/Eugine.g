@@ -9,7 +9,6 @@ import org.coyove.eugine.util.*;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
-import org.coyove.eugine.core.interop.*;
 import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.builtin.*;
@@ -19,15 +18,6 @@ import org.apache.commons.lang3.ClassUtils;
 }
 
 @parser::members {
-    public static SObject getClassByName(String classname, Token tok) {
-        try {
-            return new SObject(ClassUtils.getClass(classname));
-        } catch(Exception e) {
-            ErrorHandler.print(4056, "cannot initiate " + classname, new Atom(tok));
-            return null;
-        }
-    }
-
     public static SExpression identifySetter(Atom atom, SExpression subject, SExpression value, byte action) {
         if (subject instanceof PGet) {
             PGet get = (PGet) subject;
@@ -78,10 +68,6 @@ enterStmt returns [SExpression v]
                 $Catch == null ? null : $CatchBody.v, 
                 $Do == null ? null : $DoBody.v, $Identifier.text);
         }
-    ;
-
-syncStmt returns [SExpression v]
-    : Sync Body=code { $v = new PSync(new Atom($Sync), $Body.v); }
     ;
 
 declareStmt returns [SExpression v]
@@ -407,7 +393,7 @@ expr returns [SExpression v]
     : assignExpr { $v = $assignExpr.v; }
     | '@' MetaExpression=expr
         {
-            $v = new PMeta(new Atom($MetaExpression.start), $MetaExpression.v);
+            $v = new SMetaExpression($MetaExpression.v);
         }
     | Sync SyncBody=code 
         { 

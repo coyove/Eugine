@@ -6,7 +6,6 @@ import org.coyove.eugine.util.*;
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.value.*;
 import org.coyove.eugine.core.*;
-import org.coyove.eugine.core.interop.*;
 import org.coyove.eugine.core.math.*;
 import org.coyove.eugine.core.flow.*;
 import org.coyove.eugine.builtin.*;
