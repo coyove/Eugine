@@ -33,20 +33,19 @@ public abstract class SExpression implements java.io.Serializable {
                     varName = varName.substring(0, varName.length() - 3);
 
                     SValue v = env.get(varName);
-                    if (v == null) {
-                        throw new EgException(9997, "invalid vararg", atom);
-                    }
+                    if (v == null)
+                        throw EgException.INVALID_VARARG.raise(atom);
 
                     if (v instanceof SList) {
                         ret.addAll(v.<ListEx<SValue>>get());
                     } else {
-                        throw new EgException(9998, "wrong vararg list", atom);
+                        throw EgException.INVALID_VARARG.raise(atom, v);
                     }
                 } else {
                     ret.add(e.evaluate(env));
                 }
             } else {
-                throw new EgException(9998, "found null", atom);
+                throw EgException.INTERNAL_ERROR.raise(atom, "null");
             }
         }
 

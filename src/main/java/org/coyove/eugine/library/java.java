@@ -34,14 +34,14 @@ public class java implements Exportable {
                         }
 
                         if (desiredCtor == null)
-                            throw new EgException(7823, "cannot find proper constructor", atom);
+                            throw new EgException(9001, "cannot find proper constructor", atom);
 
                         Object obj = desiredCtor.newInstance(
                                 EgInterop.convertSValues(atom, arguments, desiredCtor.getParameterTypes()));
 
                         return EgInterop.castJavaType(obj);
                     } catch (Exception e) {
-                        throw new EgException(7824, "constructor: " + e, atom);
+                        throw new EgException(9003, "constructor: " + e.getMessage(), atom);
                     }
                 }
             }, 1));
@@ -54,7 +54,7 @@ public class java implements Exportable {
                         Class clazz = ClassUtils.getClass(className);
                         return new SObject(clazz);
                     } catch (Exception e) {
-                        throw new EgException(7824, "cannot find class: " + className, atom);
+                        throw new EgException(9002, "cannot find class: " + className, atom);
                     }
                 }
             }, 1));

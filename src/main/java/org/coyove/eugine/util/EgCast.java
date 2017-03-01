@@ -36,7 +36,7 @@ public class EgCast {
         } else if (num instanceof SString) {
             return !num.<String>get().isEmpty();
         } else {
-            throw new EgException(4008, num + " is not a boolean", headAtom);
+            throw EgException.INVALID_BOOLEAN.raise(headAtom, num);
         }
     }
 
@@ -76,7 +76,7 @@ public class EgCast {
         if (num instanceof SString) {
             return num.get();
         } else {
-            throw new EgException(4007, num + " is not a string", headAtom);
+            throw EgException.INVALID_STRING.raise(headAtom, num);
         }
     }
 

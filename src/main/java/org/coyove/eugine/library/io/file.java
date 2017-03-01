@@ -38,7 +38,7 @@ public class file implements Exportable {
                         return Files.deleteIfExists(Paths.get(path)) ?
                                 ExecEnvironment.True : ExecEnvironment.False;
                     } catch (Exception e) {
-                        throw new EgException(6767, "error when deleting: " + path, atom);
+                        throw new EgException(9001, "error when deleting: " + path, atom);
                     }
                 }
             }, 1));
@@ -76,7 +76,7 @@ public class file implements Exportable {
                                 return new SString(new String(Files.readAllBytes(Paths.get(path))));
                         }
                     } catch (Exception e) {
-                        throw new EgException(6767, "error when reading: " + path, atom);
+                        throw new EgException(9002, "error when reading: " + path, atom);
                     }
                 }
             }, 1));
@@ -124,7 +124,7 @@ public class file implements Exportable {
                             throw new IOException();
                         }
                     } catch (Exception e) {
-                        throw new EgException(6767, "error when writing: " + path, atom);
+                        throw new EgException(9003, "error when writing: " + path, atom);
                     }
 
                     return ExecEnvironment.Null;

@@ -64,6 +64,15 @@ public class EgException extends Exception {
         EgException raise(Atom atom, Object... ex);
     }
 
+    public static final EgExceptionHandler INTERNAL_ERROR = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            if (ex[0] instanceof Exception)
+                return new EgException(1101, "internal error: " + ((Exception) ex[0]).getMessage(), atom);
+            else
+                return new EgException(1101, "internal error: " + ex[0], atom);
+        }
+    };
+
     public static final EgExceptionHandler CANNOT_IMPORT_LIBRARY = new EgExceptionHandler() {
         public EgException raise(Atom atom, Object... ex) {
             return new EgException(1101,
@@ -131,6 +140,33 @@ public class EgException extends Exception {
         }
     };
 
+    public static final EgExceptionHandler INVALID_BOOLEAN = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            if (ex.length >= 1)
+                return new EgException(1209, "invalid boolean '" + ex[0] + "'", atom);
+            else
+                return new EgException(1209, "invalid boolean", atom);
+        }
+    };
+
+    public static final EgExceptionHandler INVALID_STRING = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            if (ex.length >= 1)
+                return new EgException(1210, "invalid string '" + ex[0] + "'", atom);
+            else
+                return new EgException(1210, "invalid string", atom);
+        }
+    };
+
+    public static final EgExceptionHandler INVALID_VARARG = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            if (ex.length >= 1)
+                return new EgException(1211, "invalid vararg '" + ex[0] + "'", atom);
+            else
+                return new EgException(1211, "invalid vararg", atom);
+        }
+    };
+
     public static final EgExceptionHandler INDEX_OUT_OF_RANGE = new EgExceptionHandler() {
         public EgException raise(Atom atom, Object... ex) {
             return new EgException(2001, "index out of range", atom);
@@ -140,6 +176,30 @@ public class EgException extends Exception {
     public static final EgExceptionHandler DIVIDED_BY_ZERO = new EgExceptionHandler() {
         public EgException raise(Atom atom, Object... ex) {
             return new EgException(2002, "divided by zero", atom);
+        }
+    };
+
+    public static final EgExceptionHandler FAILED_TO_SET = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            if (ex.length >= 2)
+                return new EgException(2003,
+                        "failed to set '" + ex[0] + "', " + ((Exception) ex[1]).getMessage(), atom);
+            else if (ex.length >= 1)
+                return new EgException(2003, "failed to set '" + ex[0] + "'", atom);
+            else
+                return new EgException(2003, "failed to set", atom);
+        }
+    };
+
+    public static final EgExceptionHandler NO_MATCHING_METHOD = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            return new EgException(3101, "no matching method found", atom);
+        }
+    };
+
+    public static final EgExceptionHandler METHOD_INVOCATION_ERROR = new EgExceptionHandler() {
+        public EgException raise(Atom atom, Object... ex) {
+            return new EgException(3102, "method invocation error: " + ((Exception) ex[0]).getCause(), atom);
         }
     };
 }

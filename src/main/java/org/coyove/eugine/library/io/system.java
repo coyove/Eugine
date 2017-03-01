@@ -43,7 +43,7 @@ public class system implements Exportable {
 
                         return new SString(sb.toString());
                     } catch(Exception e) {
-                        throw new EgException(8084, "error when executing '" + cmd + "': " + e, atom);
+                        throw new EgException(9001, "error when executing '" + cmd + "': " + e, atom);
                     }
                 }
             }, 1));

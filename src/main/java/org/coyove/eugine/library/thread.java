@@ -54,7 +54,7 @@ public class thread implements Exportable{
                     try {
                         Thread.sleep(time);
                     } catch (InterruptedException ex) {
-                        throw new EgException(3099, "sleep was interrupted", atom);
+                        throw new EgException(9001, "sleep was interrupted", atom);
                     }
 
                     return ExecEnvironment.Null;
@@ -69,7 +69,7 @@ public class thread implements Exportable{
                             ((Thread) t).join();
                             return ExecEnvironment.True;
                         } catch (InterruptedException e) {
-                            throw new EgException(7055, "join was interrupted", atom);
+                            throw new EgException(9002, "join was interrupted", atom);
                         }
                     }
 

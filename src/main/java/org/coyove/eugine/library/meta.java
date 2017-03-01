@@ -17,7 +17,7 @@ public class meta implements Exportable {
     private static SClosure getClosure(Atom atom, SValue arg) throws EgException {
         SClosure closure = EgCast.to(arg, SClosure.class);
         if (closure == null)
-            throw new EgException(6791, "invalid closure", atom);
+            throw EgException.INVALID_SUBJECT.raise(atom, arg);
 
         return closure;
     }
@@ -25,7 +25,7 @@ public class meta implements Exportable {
     @SuppressWarnings("unchecked")
     private static ListEx<SExpression> getMetaExpression(Atom atom, SValue expr) throws EgException {
         if (!(expr instanceof SClosure) && !(expr instanceof SMetaExpression)) {
-            throw new EgException(6791, "invalid meta expression", atom);
+            throw new EgException(9001, "invalid meta expression", atom);
         }
 
         return expr instanceof SClosure ?
@@ -42,8 +42,8 @@ public class meta implements Exportable {
                     int idx = EgCast.toInt(arguments.get(1), atom);
                     try {
                         return new SMetaExpression(closure.body.get(idx));
-                    } catch (Exception e) {
-                        throw new EgException(6792, e.toString(), atom);
+                    } catch (IndexOutOfBoundsException e) {
+                        throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
                     }
                 }
             }, 2));
@@ -56,8 +56,8 @@ public class meta implements Exportable {
                     try {
                         closure.body.remove(idx);
                         return ExecEnvironment.True;
-                    } catch (Exception e) {
-                        throw new EgException(6792, e.toString(), atom);
+                    } catch (IndexOutOfBoundsException e) {
+                        throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
                     }
                 }
             }, 2));
@@ -81,12 +81,12 @@ public class meta implements Exportable {
                     if (arguments.get(1) instanceof SNumber) {
                         int idx = EgCast.toInt(arguments.get(1), atom);
                         if (arguments.size() < 3)
-                            throw new EgException(6793, "not enough arguments", atom);
+                            throw EgException.NOT_ENOUGH_ARGUMENTS.raise(atom, 3);
 
                         try {
                             closure.body.addAll(idx, getMetaExpression(atom, arguments.get(2)));
-                        } catch (Exception e) {
-                            throw new EgException(6792, e.toString(), atom);
+                        } catch (IndexOutOfBoundsException e) {
+                            throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
                         }
                     } else {
                         closure.body.addAll(getMetaExpression(atom, arguments.get(1)));
@@ -104,8 +104,8 @@ public class meta implements Exportable {
                     try {
                         closure.body.remove(idx);
                         closure.body.addAll(idx, getMetaExpression(atom, arguments.get(2)));
-                    } catch (Exception e) {
-                        throw new EgException(6792, e.toString(), atom);
+                    } catch (IndexOutOfBoundsException e) {
+                        throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
                     }
 
                     return ExecEnvironment.Null;

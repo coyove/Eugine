@@ -61,9 +61,8 @@ public class SList extends SComplexValue {
                             public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
                                     throws EgException {
                                 SList list2 = EgCast.to(arguments.head(), SList.class);
-                                if (list2 == null) {
-                                    throw new EgException(3106, "must concat a list", atom);
-                                }
+                                if (list2 == null)
+                                    throw EgException.INVALID_SUBJECT.raise(atom);
 
                                 list.addAll(list2.<ListEx<SValue>>get());
                                 return in;
@@ -94,7 +93,7 @@ public class SList extends SComplexValue {
                                     throws EgException {
                                 SClosure pred = EgCast.to(arguments.head(), SClosure.class);
                                 if (pred == null || pred.argNames.size() < 1) {
-                                    throw new EgException(3107, "invalid predicate function", atom);
+                                    throw EgException.INVALID_FUNCTION.raise(atom, "predicate");
                                 }
 
                                 ListEx<SValue> list = in.get();
@@ -140,7 +139,7 @@ public class SList extends SComplexValue {
                                 if (arguments.size() > 0) {
                                     comparator = EgCast.to(arguments.head(), SClosure.class);
                                     if (comparator == null || comparator.argNames.size() < 2) {
-                                        throw new EgException(3107, "invalid comparator", atom);
+                                        throw EgException.INVALID_FUNCTION.raise(atom, "comparator");
                                     }
                                 }
 

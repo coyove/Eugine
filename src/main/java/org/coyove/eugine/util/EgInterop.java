@@ -123,17 +123,17 @@ public class EgInterop {
         }
     }
 
-    public static SValue getField(Object obj, String field) throws EgException {
+    public static SValue getField(Atom atom, Object obj, String field) throws EgException {
         try {
             Field f = (obj instanceof Class ? (Class) obj : obj.getClass()).getDeclaredField(field);
             f.setAccessible(true);
             return EgInterop.castJavaType(f.get(obj));
         } catch (Exception e) {
-            throw new EgException(4005, "failed to get '" + field + "': " + e);
+            throw EgException.INVALID_FIELD.raise(atom, field);
         }
     }
 
-    public static SValue setField(Object obj, String field, SValue value) throws EgException {
+    public static SValue setField(Atom atom, Object obj, String field, SValue value) throws EgException {
         try {
             Field f = obj.getClass().getDeclaredField(field);
             f.setAccessible(true);
@@ -169,7 +169,7 @@ public class EgInterop {
 
             return value;
         } catch (Exception e) {
-            throw new EgException(4006, "failed to set '" + field + "': " + e);
+            throw EgException.FAILED_TO_SET.raise(atom, field, e);
         }
     }
 
@@ -321,12 +321,12 @@ public class EgInterop {
                         Array.newInstance(params[params.length - 1].getComponentType(), 0);
                 return ret;
             } else {
-                throw new EgException(6565, "wrong parameter, shouldn't happen", atom);
+                throw EgException.INTERNAL_ERROR.raise(atom, "wrong parameter to convert");
             }
         }
 
         if (params.length > args.size())
-            throw new EgException(6565, "wrong parameter, shouldn't happen", atom);
+            throw EgException.INTERNAL_ERROR.raise(atom, "wrong parameter to convert");
 
         if (params.length < args.size()) {
             if (params[params.length - 1].isArray()) {
@@ -344,7 +344,7 @@ public class EgInterop {
 
                 return ret;
             } else {
-                throw new EgException(6565, "wrong parameter, shouldn't happen", atom);
+                throw EgException.INTERNAL_ERROR.raise(atom, "wrong parameter to convert");
             }
         }
 
@@ -385,7 +385,7 @@ public class EgInterop {
             }
 
             if (desiredMethod == null)
-                throw new EgException(7823, "cannot find proper method", atom);
+                throw EgException.NO_MATCHING_METHOD.raise(atom);
 
             Object obj = desiredMethod.invoke(receiver,
                     convertSValues(atom, arguments, desiredMethod.getParameterTypes()));
@@ -393,9 +393,9 @@ public class EgInterop {
             return castJavaType(obj);
         } catch (Exception e) {
             if (e instanceof InvocationTargetException)
-                throw new EgException(7823, "method invocation: " + e.getCause().toString(), atom);
+                throw EgException.METHOD_INVOCATION_ERROR.raise(atom, e);
 
-            throw new EgException(7824, "method: " + e, atom);
+            throw EgException.INTERNAL_ERROR.raise(atom, e);
         }
     }
 

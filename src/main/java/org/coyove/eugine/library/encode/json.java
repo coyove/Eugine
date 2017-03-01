@@ -83,7 +83,7 @@ public class json implements Exportable {
         } else if (root instanceof Boolean) {
             return ((Boolean) root) ? ExecEnvironment.True : ExecEnvironment.False;
         } else {
-            throw new EgException(8099, "invalid json node: " + root, atom);
+            throw new EgException(9001, "invalid json node: " + root, atom);
         }
     }
 

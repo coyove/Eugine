@@ -38,13 +38,13 @@ public class digest implements Exportable {
                         if (opt.equals("hex")) {
                             return new SString(bytesToHexString(result));
                         } else {
-                            throw new EgException(7029, "invalid option", atom);
+                            throw new EgException(9001, "invalid option", atom);
                         }
                     } else {
                         return new SBuffer(result);
                     }
                 } catch (Exception ex) {
-                    throw new EgException(7029, "algorithm not implemented: " + ex, atom);
+                    throw new EgException(9002, "algorithm not implemented: " + ex, atom);
                 }
             }
         };

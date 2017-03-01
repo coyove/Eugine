@@ -2,8 +2,15 @@ package org.coyove.eugine.core.math;
 
 import org.coyove.eugine.base.*;
 import org.coyove.eugine.core.PGet;
+import org.coyove.eugine.core.PPut;
+import org.coyove.eugine.core.PVariable;
 import org.coyove.eugine.parser.*;
 import org.coyove.eugine.util.*;
+import org.coyove.eugine.value.SNumber;
+
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by coyove on 2016/9/10.
@@ -15,6 +22,18 @@ public class PAssign extends SExpression {
     @ReplaceableVariable
     public SExpression op;
 
+    private Map<String, Class<? extends SExpression>> builderMap =
+            new HashMap<String, Class<? extends SExpression>>() {{
+                put("+=", PAdd.class);
+                put("-=", PSubtract.class);
+                put("*=", PMultiply.class);
+                put("/=", PDivide.class);
+                put("%=", PModular.class);
+                put("&=", PBitAnd.class);
+                put("|=", PBitOr.class);
+                put("^=", PBitXor.class);
+            }};
+
     public PAssign() {
     }
 
@@ -25,31 +44,13 @@ public class PAssign extends SExpression {
     }
 
     private void build(Atom ha, SExpression l, SExpression r, String o) {
-        switch (o.charAt(0)) {
-            case '+':
-                op = new PAdd(ha, l, r, true);
-                break;
-            case '-':
-                op = new PSubtract(ha, l, r, true);
-                break;
-            case '*':
-                op = new PMultiply(ha, l, r, true);
-                break;
-            case '/':
-                op = new PDivide(ha, l, r, true);
-                break;
-            case '%':
-                op = new PModular(ha, l, r, true);
-                break;
-            case '&':
-                op = new PBitAnd(ha, l, r, true);
-                break;
-            case '|':
-                op = new PBitOr(ha, l, r, true);
-                break;
-            case '^':
-                op = new PBitXor(ha, l, r, true);
-                break;
+        Class<? extends SExpression> cls = builderMap.get(o);
+        try {
+            Constructor ctor =
+                    cls.getConstructor(Atom.class, SExpression.class, SExpression.class, boolean.class);
+            op = (SExpression) ctor.newInstance(ha, l, r, true);
+        } catch (Exception e) {
+            EgException.INTERNAL_ERROR.raise(atom, e).exit();
         }
     }
 

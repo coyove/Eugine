@@ -1,4 +1,4 @@
-// Generated from Eugine.g by ANTLR 4.5.3
+// Generated from Eugine.g by ANTLR 4.6
 
 package org.coyove.eugine.antlr;
 
@@ -23,7 +23,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class EugineLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.6", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =

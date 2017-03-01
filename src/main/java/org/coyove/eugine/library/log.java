@@ -147,7 +147,7 @@ public class log implements Exportable {
                         File file = new File(path);
                         System.setOut(new PrintStream(file));
                     } catch (Exception e) {
-                        throw new EgException(8979, path + " is invalid", atom);
+                        throw new EgException(9001, path + " is invalid", atom);
                     }
                     return ExecEnvironment.True;
                 }

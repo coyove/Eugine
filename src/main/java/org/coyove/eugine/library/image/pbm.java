@@ -42,12 +42,12 @@ public class pbm implements Exportable {
                         } else if (_data instanceof SBuffer) {
                             stream.write(_data.<byte[]>get());
                         } else {
-                            throw new EgException(7088, "invalid data", atom);
+                            throw new EgException(9001, "invalid pbm data", atom);
                         }
 
                         stream.close();
                     } catch (Exception e) {
-                        throw new EgException(7088, "failed to write: " + e, atom);
+                        throw new EgException(9002, "failed to write: " + e, atom);
                     }
 
                     return ExecEnvironment.Null;

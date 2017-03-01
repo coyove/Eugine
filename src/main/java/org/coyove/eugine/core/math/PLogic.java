@@ -59,7 +59,7 @@ public class PLogic extends SExpression {
                 comp.atom = atom;
                 return comp;
             } else {
-                throw new EgException(7823, "invalid closure to concat", atom);
+                throw EgException.INVALID_FUNCTION.raise(atom, right);
             }
         }
 

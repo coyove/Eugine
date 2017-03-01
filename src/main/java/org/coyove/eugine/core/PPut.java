@@ -64,7 +64,7 @@ public class PPut extends SExpression {
             subject.<ListEx<SValue>>get().set(EgCast.toInt(key, atom), value.lightClone());
         } else if ((subject instanceof SObject || subject instanceof SMetaExpression) &&
                 key instanceof SString) {
-            EgInterop.setField(subject.get(), key.<String>get(), value);
+            EgInterop.setField(atom, subject.get(), key.<String>get(), value);
         } else if (subject instanceof SClosure) {
             String k = EgCast.toString(key, atom);
             ExecEnvironment extra = ((SClosure) subject).extra;

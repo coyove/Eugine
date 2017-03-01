@@ -129,7 +129,7 @@ public class PGet extends SExpression {
                     }
                 }, 0);
             } else {
-                return EgInterop.getField(dict.get(), name);
+                return EgInterop.getField(atom, dict.get(), name);
             }
         } else if (dict instanceof SError) {
             String name = EgCast.toString(sk, atom);
