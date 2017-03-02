@@ -199,15 +199,15 @@ public class PCall extends SExpression {
                         }
 
                         continue Execute_Next_Closure;
-                    } else if (se instanceof PChain) {
-                        PChain chain = (PChain) se;
-                        if (chain.expressions.size() > 0) {
-                            arguments = new ListEx<SValue>();
-                            closure = new SClosure(newEnv, chain.expressions);
-                            continue Execute_Next_Closure;
-                        } else {
-                            return ExecEnvironment.Null;
-                        }
+//                    } else if (se instanceof PChain) {
+//                        PChain chain = (PChain) se;
+//                        if (chain.expressions.size() > 0) {
+//                            arguments = new ListEx<SValue>();
+//                            closure = new SClosure(newEnv, chain.expressions);
+//                            continue Execute_Next_Closure;
+//                        } else {
+//                            return ExecEnvironment.Null;
+//                        }
                     }
                 }
 

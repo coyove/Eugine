@@ -73,9 +73,11 @@ debug.start()
 
 // ;;
 // (() => {
-//     def fibonacci (n) =>
-//         if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
-//     debug.assert(utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
+    def fibonacci (n) =>
+        if n < 2 {1} else fibonacci(n - 1) + fibonacci(n - 2)
+    debug.assert(utils.deepCompareList(map(fibonacci, range(0,1,10)), [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]), "Fibonacci")
+
+    println(fibonacci(34))
 
 //     def numSeqSum (n, sum) =>
 //         if n == 0 {sum} else numSeqSum(n -1,sum+n)
