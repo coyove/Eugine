@@ -48,16 +48,11 @@ block returns [PChain v = new PChain()]
 ;
 
 stmt returns [SExpression v]
-    : importStmt        { $v = ExecEnvironment.Null; }
-    | enterStmt         { $v = $enterStmt.v; }
+    : enterStmt         { $v = $enterStmt.v; }
     | declareStmt       { $v = $declareStmt.v; }
     | defineStmt        { $v = $defineStmt.v; }
     | expr              { $v = $expr.v; }
     | Semi              { $v = ExecEnvironment.Null; }
-    ;
-
-importStmt 
-    : Import (Identifier ('.' Identifier)*)
     ;
 
 enterStmt returns [SExpression v]

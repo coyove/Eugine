@@ -54,6 +54,23 @@ public class SList extends SComplexValue {
                     }
                 });
 
+                put("remove", new PseudoCallInterface() {
+                    public SValue call(final SValue in) {
+                        final ListEx<SValue> list = in.get();
+                        return new SNativeCall(new NativeCallInterface() {
+                            public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
+                                    throws EgException {
+                                try {
+                                    list.remove(EgCast.toInt(arguments.head(), atom));
+                                    return in;
+                                } catch (IndexOutOfBoundsException e) {
+                                    throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
+                                }
+                            }
+                        }, 1);
+                    }
+                });
+
                 put("concat", new PseudoCallInterface() {
                     public SValue call(final SValue in) {
                         final ListEx<SValue> list = in.get();
@@ -77,9 +94,13 @@ public class SList extends SComplexValue {
                         return new SNativeCall(new NativeCallInterface() {
                             public SValue call(Atom atom, ExecEnvironment env, ListEx<SValue> arguments)
                                     throws EgException {
-                                list.add(EgCast.toInt(arguments.head(), atom),
-                                        arguments.get(1).evaluate(env));
-                                return in;
+                                try {
+                                    list.add(EgCast.toInt(arguments.head(), atom),
+                                            arguments.get(1).evaluate(env));
+                                    return in;
+                                } catch (IndexOutOfBoundsException e) {
+                                    throw EgException.INDEX_OUT_OF_RANGE.raise(atom);
+                                }
                             }
                         }, 2);
                     }

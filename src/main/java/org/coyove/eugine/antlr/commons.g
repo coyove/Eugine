@@ -1,7 +1,5 @@
 lexer grammar CommonLexerRules;
 
-Import: 'import';
-
 Var: 'var';
 
 Let: 'let';
@@ -51,10 +49,6 @@ Semi
     
 Identifier 
     :   (Letter | '_')(Letter | '_' | [0-9])* '...'?
-    ;
-
-JavaFullName
-    :   Identifier ('/' Identifier)* '[]'? '...'?
     ;
 
 Letter

@@ -1,10 +1,6 @@
-import thread
-import image.pbm
-import log
-import java
-import meta
+import("thread", "image.pbm", "log", "java", "meta")
 
-eval("util.eugine")
+eval("util.eu")
 // // import ifc
 
 // Log.info("begin")
@@ -150,8 +146,6 @@ for 0,N do (i) "glass" => {
 
 var yCt = 0
 def incr() => sync yCt++
-
-log.info(typeof.__doc__)
 
 let linelen = math.floor((N + 7) / 8)
 let out = buffer(N * linelen)

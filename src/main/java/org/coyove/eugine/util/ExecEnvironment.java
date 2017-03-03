@@ -15,10 +15,12 @@ import java.util.Map;
  */
 public class ExecEnvironment extends HashMap<String, SValue> {
     public final static SNull Null = new SNull();
+
     public final static SBool True = new SBool(true);
+
     public final static SBool False = new SBool(false);
+
     public final static SBreak Break = new SBreak();
-    public static ExecEnvironment globalStaticEnv = null;
 
     public ExecEnvironment parentEnv = null;
 

@@ -67,9 +67,9 @@ public class EgException extends Exception {
     public static final EgExceptionHandler INTERNAL_ERROR = new EgExceptionHandler() {
         public EgException raise(Atom atom, Object... ex) {
             if (ex[0] instanceof Exception)
-                return new EgException(1101, "internal error: " + ((Exception) ex[0]).getMessage(), atom);
+                return new EgException(1001, "internal error: " + ((Exception) ex[0]).getMessage(), atom);
             else
-                return new EgException(1101, "internal error: " + ex[0], atom);
+                return new EgException(1001, "internal error: " + ex[0], atom);
         }
     };
 

@@ -10,9 +10,11 @@ public class ArgumentsParser {
     public static class Options {
         public String source = null;
 
+        public String outputBinaries = "";
+
         public boolean repl = false;
 
-        public boolean noRobot = false;
+        public boolean binary = false;
     }
 
     public static Options read(String[] args) {
@@ -24,13 +26,16 @@ public class ArgumentsParser {
                 if (args[i].equals("--repl") || args[i].equals("-r")) {
                     ret.repl = true;
                     i++;
-                } else if (args[i].equals("--no-robot")) {
-                    ret.noRobot = true;
+                } else if (args[i].equals("--binary") || args[i].equals("-b")) {
+                    ret.binary = true;
                     i++;
+                } else if (args[i].equals("--binary-output") || args[i].equals("-bo")) {
+                    ret.outputBinaries = args[i + 1];
+                    i += 2;
                 } else if (args[i].equals("--version")) {
-                    System.out.println("Eugine " + main.VERSION);
+                    System.out.println("eugine " + main.VERSION);
                     System.exit(0);
-                } else if (args[i].equals("--verbose")) {
+                } else if (args[i].equals("--verbose") || args[i].equals("-v")) {
                     if (args[i + 1].equals("debug"))
                         log.Logger.logLevel = log.Logger.DEBUG;
                     else if (args[i + 1].equals("info"))
